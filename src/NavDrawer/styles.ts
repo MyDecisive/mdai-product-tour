@@ -2,7 +2,9 @@ import { css } from "@emotion/react";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 
 export const NavDrawerStyles = css({
-  backgroundColor: "#ECECEC",
+  "& .MuiDrawer-paper": {
+    backgroundColor: "#ECECEC",
+  },
 });
 
 export const NavDrawerHeaderStyles = css({

@@ -6,17 +6,17 @@ import type { View } from "../types";
 import { getViewTitle } from "./content";
 import { NavDrawerHeaderStyles, NavDrawerStyles } from "./styles";
 
-type NavDrawerHeaderProps = {
+type HeaderProps = {
   view?: View;
   onBack: () => void;
 };
 
-export function NavDrawerHeader({ view, onBack }: NavDrawerHeaderProps) {
+export function Header({ view, onBack }: HeaderProps) {
   return (
     <Toolbar sx={css([NavDrawerStyles, NavDrawerHeaderStyles])}>
       {view && (
         <IconButton onClick={onBack}>
-          <ArrowBackIosIcon />
+          <ArrowBackIosIcon sx={{ color: "#3A3A3A" }} />
         </IconButton>
       )}
 

@@ -2,11 +2,11 @@ import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import { useState } from "react";
 
-import { NavDrawerHeader } from "./NavDrawerHeader";
+import { Header } from "./Header";
 
 import { css } from "@emotion/react";
 import type { View } from "../types";
-import { NavDrawerBody } from "./NavDrawerBody";
+import { Body } from "./Body";
 import { NavDrawerStyles } from "./styles";
 
 const drawerWidth = 400;
@@ -30,12 +30,9 @@ export function NavDrawer() {
       variant="permanent"
       anchor="left"
     >
-      <NavDrawerHeader view={view} onBack={() => setView(undefined)} />
+      <Header view={view} onBack={() => setView(undefined)} />
       <Divider />
-      <NavDrawerBody
-        view={view}
-        onClickNavItem={(view: View, step?: string) => setView(view)}
-      />
+      <Body view={view} setView={setView} />
     </Drawer>
   );
 }

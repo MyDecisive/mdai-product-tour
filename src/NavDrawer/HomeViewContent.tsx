@@ -66,7 +66,7 @@ export function HomeViewContent({ onStartTour }: HomeViewContentProps) {
   ].map(({ itemId, label, content, comingSoon }) => (
     <Fragment key={itemId}>
       <TreeItem sx={css([NavTreeItemStyles])} itemId={itemId} label={label}>
-        <div>{content}</div>
+        {content}
       </TreeItem>
       {comingSoon && (
         <Typography sx={css([ComingSoonStyles])}>Coming soon</Typography>

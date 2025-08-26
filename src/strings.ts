@@ -1,5 +1,5 @@
-import { Home, Logs, PII, Traces } from "../constants";
-import type { View } from "../types";
+import { Home, Logs, PII, Traces } from "./constants";
+import type { View } from "./types";
 
 const homeTitle = "MyDecisive.ai Demo";
 const viewTitles: Record<View, string> = {

@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { useCurrentView } from "../NavigationContext";
 import { Home } from "../constants";
-import { getViewTitle } from "./strings";
+import { getViewTitle } from "../strings";
 
 const viewStyles = css({
   height: "48px",

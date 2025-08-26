@@ -2,8 +2,8 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components";
 import { Logs, PII, Traces } from "../../constants";
-import { getViewTitle } from "../../NavDrawer/strings";
 import { useCurrentView } from "../../NavigationContext";
+import { getViewTitle } from "../../strings";
 import type { ViewTreeItemProps } from "../../types";
 
 function DynamicLogFiltrationContent() {

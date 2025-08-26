@@ -34,7 +34,7 @@ export function NavDrawer() {
     >
       <Header view={view} onBack={() => setView(undefined)} />
       <Divider />
-      <Body view={view} setView={setView} />
+      <Body />
       <Footer />
     </Drawer>
   );

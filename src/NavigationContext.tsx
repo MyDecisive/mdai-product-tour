@@ -1,8 +1,9 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
+import { Home } from "./constants";
 import type { View } from "./types";
 
 export interface NavigationState {
-  view?: View;
+  view: View;
   step?: string;
   substep?: string;
 }
@@ -24,7 +25,7 @@ interface NavigationProviderProps {
 
 export function NavigationProvider({
   children,
-  initialState = {},
+  initialState = { view: Home },
 }: NavigationProviderProps) {
   const [navigation, setNavigation] = useState<NavigationState>(initialState);
 

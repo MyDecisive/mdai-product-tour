@@ -1,9 +1,9 @@
-import { DLF, DTF, PII } from "../constants";
+import { Logs, PII, Traces } from "../constants";
 import type { View } from "../types";
 
 const viewTitles: Record<View, string> = {
-  [DLF]: "Dynamic Log Filtering",
-  [DTF]: "Dynamic Traces Filtering",
+  [Logs]: "Dynamic Log Filtering",
+  [Traces]: "Dynamic Traces Filtering",
   [PII]: "PII Redaction",
 };
 

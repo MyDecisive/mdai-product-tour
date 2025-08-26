@@ -3,13 +3,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import type { View } from "../types";
+import { useCurrentView } from "../NavigationContext";
+import { Home } from "../constants";
 import { getViewTitle } from "./strings";
-
-type HeaderProps = {
-  view?: View;
-  onBack: () => void;
-};
 
 const viewStyles = css({
   height: "48px",
@@ -39,15 +35,18 @@ const backButtonStyles = css({
   flexShrink: 1,
 });
 
-export function Header({ view, onBack }: HeaderProps) {
+export function Header() {
+  const { view, setView } = useCurrentView();
+
+  const notHome = view !== Home;
   return (
-    <Toolbar sx={view ? viewStyles : undefined}>
-      {view && (
-        <IconButton sx={backButtonStyles} onClick={onBack}>
+    <Toolbar sx={notHome ? viewStyles : undefined}>
+      {notHome && (
+        <IconButton sx={backButtonStyles} onClick={() => setView(Home)}>
           <ArrowBackIcon />
         </IconButton>
       )}
-      <Typography sx={view ? viewTextStyles : homeTextStyles}>
+      <Typography sx={notHome ? viewTextStyles : homeTextStyles}>
         {getViewTitle(view)}
       </Typography>
     </Toolbar>

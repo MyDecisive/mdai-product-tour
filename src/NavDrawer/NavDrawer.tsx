@@ -7,7 +7,7 @@ import { Header } from "./Header";
 import { css } from "@emotion/react";
 import type { View } from "../types";
 import { Body } from "./Body";
-import { NavDrawerStyles } from "./styles";
+import { Footer } from "./Footer";
 
 const drawerWidth = 400;
 
@@ -17,13 +17,15 @@ export function NavDrawer() {
   return (
     <Drawer
       sx={css([
-        NavDrawerStyles,
         {
           width: drawerWidth,
+          height: "100%",
           flexShrink: 0,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
+            height: "100%",
             boxSizing: "border-box",
+            position: "relative",
           },
         },
       ])}
@@ -33,6 +35,7 @@ export function NavDrawer() {
       <Header view={view} onBack={() => setView(undefined)} />
       <Divider />
       <Body view={view} setView={setView} />
+      <Footer />
     </Drawer>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./App.css";
 import reactLogo from "./assets/react.svg";
 import { NavDrawer } from "./NavDrawer/NavDrawer";
+// import { WelcomeModal } from "./WelcomeModal/WelcomeModal";
 import viteLogo from "/vite.svg";
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh", width: "100vw" }}>
+      {/* <WelcomeModal /> */}
       <NavDrawer />
       <Box
         component="main"

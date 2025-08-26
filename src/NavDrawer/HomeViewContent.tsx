@@ -1,76 +1,42 @@
-import { css } from "@emotion/react";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import { TreeItem } from "@mui/x-tree-view/TreeItem";
-import { Fragment } from "react/jsx-runtime";
-
+import { TreeItem } from "../components";
 import { DLF, DTF, PII } from "../constants";
-import type { View } from "../types";
-import { getViewTitle } from "./content";
-import { InfoBox } from "./InfoBox";
-import {
-  ComingSoonStyles,
-  NavTreeItemStyles,
-  PrimaryCTAButtonStyles,
-} from "./styles";
+import { DynamicLogFiltrationContent } from "../views/Home/content";
+import { getViewTitle } from "./strings";
 
-type HomeViewContentProps = {
-  onStartTour: (view: View) => void;
-};
-
-export function HomeViewContent({ onStartTour }: HomeViewContentProps) {
+export function HomeViewContent() {
   return [
     {
       itemId: DLF,
       label: getViewTitle(DLF),
-      content: (
-        <InfoBox>
-          <Typography>
-            MDAI offers multiple solutions. Let’s explore{" "}
-            <Typography
-              component="span"
-              sx={{ textDecoration: "underline", display: "inline" }}
-            >
-              Dynamic Log Filtering
-            </Typography>{" "}
-            now!
-          </Typography>
-          <br />
-          <Typography>You can learn about it in 3 steps</Typography>
-          <br />
-          <div
-            style={{ display: "flex", width: "100%", justifyContent: "center" }}
-          >
-            <Button
-              sx={css([PrimaryCTAButtonStyles])}
-              onClick={() => onStartTour(DLF)}
-            >
-              Start the Demo
-            </Button>
-          </div>
-        </InfoBox>
-      ),
+      content: <DynamicLogFiltrationContent />,
     },
     {
       itemId: DTF,
       label: getViewTitle(DTF),
+      subLabel: "Coming soon",
       content: "",
-      comingSoon: true,
     },
     {
       itemId: PII,
       label: getViewTitle(PII),
+      subLabel: "Coming soon",
       content: "",
-      comingSoon: true,
     },
-  ].map(({ itemId, label, content, comingSoon }) => (
-    <Fragment key={itemId}>
-      <TreeItem sx={css([NavTreeItemStyles])} itemId={itemId} label={label}>
-        {content}
-      </TreeItem>
-      {comingSoon && (
-        <Typography sx={css([ComingSoonStyles])}>Coming soon</Typography>
-      )}
-    </Fragment>
+  ].map(({ itemId, label, content, subLabel }) => (
+    <TreeItem
+      key={itemId}
+      topLevel
+      itemId={itemId}
+      label={label}
+      slotProps={{
+        label: {
+          style: { textTransform: "uppercase" },
+          // @ts-expect-error: Custom subLabel prop not in MUI types
+          subLabel,
+        },
+      }}
+    >
+      {content}
+    </TreeItem>
   ));
 }

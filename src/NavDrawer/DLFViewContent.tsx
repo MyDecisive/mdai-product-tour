@@ -1,15 +1,9 @@
 import { css } from "@emotion/react";
 import Button from "@mui/material/Button";
-import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { Fragment } from "react/jsx-runtime";
 
-import { InfoBox } from "./InfoBox";
-import {
-  NavTreeItemStyles,
-  NavTreeItemTourStyles,
-  NavTreeSubStepStyles,
-  PrimaryCTAButtonStyles,
-} from "./styles";
+import { InfoBox, TreeItem } from "../components";
+import { NavTreeSubStepStyles, PrimaryCTAButtonStyles } from "./styles";
 
 type DLFViewContentProps = {};
 
@@ -17,15 +11,14 @@ export function DLFViewContent({}: DLFViewContentProps) {
   return [
     {
       itemId: "introduction",
-      label: "INTRODUCTION",
+      label: "Introduction",
       subSteps: [
         {
           itemId: "what",
           label: "What is Dynamic log Filtering",
           content: (
             <Fragment>
-              <InfoBox highlight>Filtering log data to improve signal</InfoBox>
-              <InfoBox>
+              <InfoBox title={"Filtering log data to improve signal"}>
                 Stop paying for data you’ll never use. Take control of your
                 observability budget by controlling the data stream, while it is
                 still inside your network. Send just what you need with the
@@ -39,8 +32,7 @@ export function DLFViewContent({}: DLFViewContentProps) {
           label: "Unified View For Easier Understanding",
           content: (
             <Fragment>
-              <InfoBox highlight>Consolidated tools</InfoBox>
-              <InfoBox>
+              <InfoBox title="Consolidated tools">
                 Multiple tools, consolidated into a unified view to make it easy
                 for you to see how MyDecisive works
                 <ol style={{ paddingLeft: "24px" }}>
@@ -71,15 +63,14 @@ export function DLFViewContent({}: DLFViewContentProps) {
     },
     {
       itemId: "step1",
-      label: "STEP 1: GET DATA FLOWING",
+      label: "Step 1: Get the data flowing",
       subSteps: [
         {
           itemId: "data",
           label: "Data Starts to Flow",
           content: (
             <Fragment>
-              <InfoBox highlight>Use our built-in log stream generator</InfoBox>
-              <InfoBox>
+              <InfoBox title="Use our built-in log stream generator">
                 Run this <span style={{ color: "#B062C2" }}>{`<Command>`}</span>{" "}
                 to get the data flowing. <br />
                 <br /> You can see the SmartHub running now in the{" "}
@@ -101,15 +92,14 @@ export function DLFViewContent({}: DLFViewContentProps) {
     },
     {
       itemId: "step2",
-      label: "STEP 2: DROP UNWANTED DATA",
+      label: "Step 2: Drop unwanted data",
       subSteps: [
         {
           itemId: "configure",
           label: "Configure static filters",
           content: (
             <Fragment>
-              <InfoBox highlight>We use OpenTelemetry static filters</InfoBox>
-              <InfoBox>
+              <InfoBox title="We use OpenTelemetry static filters">
                 Control your data with open standards that decouple you from
                 your vendors. Free, forever. No added cloud vendors or vendor
                 costs.
@@ -122,8 +112,7 @@ export function DLFViewContent({}: DLFViewContentProps) {
           label: "Take Note",
           content: (
             <Fragment>
-              <InfoBox highlight>We prepare the data for you</InfoBox>
-              <InfoBox>
+              <InfoBox title="We prepare the data for you">
                 <ol style={{ paddingLeft: "24px" }}>
                   <li>
                     “mdai_service” is set for you in the data filtration
@@ -143,8 +132,7 @@ export function DLFViewContent({}: DLFViewContentProps) {
           label: "Explore the running system",
           content: (
             <Fragment>
-              <InfoBox highlight>OTEL is now running</InfoBox>
-              <InfoBox>
+              <InfoBox title="OTEL is now running">
                 The OTEL collector your configured is now running inside our
                 SmartHub.
                 <br />
@@ -159,8 +147,7 @@ export function DLFViewContent({}: DLFViewContentProps) {
           label: "Visualize The Results",
           content: (
             <Fragment>
-              <InfoBox highlight>Saving Money but...</InfoBox>
-              <InfoBox>
+              <InfoBox title="Saving Money but...">
                 You can see from our dashboards that data is filtered
                 effectively. But now Service1234 and 4321 are missing from your
                 vendors. Let’s do better.
@@ -172,15 +159,14 @@ export function DLFViewContent({}: DLFViewContentProps) {
     },
     {
       itemId: "step3",
-      label: "STEP 3: LET THE SYSTEM HELP YOU",
+      label: "Step 3: Let the system help you",
       subSteps: [
         {
           itemId: "add",
           label: "Add a variable",
           content: (
             <Fragment>
-              <InfoBox highlight>Variables make data streams smart</InfoBox>
-              <InfoBox>
+              <InfoBox title="Variables make data streams smart">
                 Click the{" "}
                 <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to add a
                 variable
@@ -193,8 +179,7 @@ export function DLFViewContent({}: DLFViewContentProps) {
           label: "Take Note",
           content: (
             <Fragment>
-              <InfoBox highlight>Label</InfoBox>
-              <InfoBox>
+              <InfoBox title="Label">
                 <ol style={{ paddingLeft: "24px" }}>
                   <li>
                     “top loggers” are services that log more than your budget
@@ -221,20 +206,11 @@ export function DLFViewContent({}: DLFViewContentProps) {
       ],
     },
   ].map(({ itemId, label, subSteps }) => (
-    <TreeItem
-      key={itemId}
-      sx={css([NavTreeItemStyles, NavTreeItemTourStyles])}
-      itemId={itemId}
-      label={label}
-    >
+    <TreeItem key={itemId} itemId={itemId} label={label} topLevel>
       {subSteps.map(({ itemId: id, label, content }) => (
         <TreeItem
           key={`${itemId}-${id}`}
-          sx={css([
-            NavTreeItemStyles,
-            NavTreeItemTourStyles,
-            NavTreeSubStepStyles,
-          ])}
+          sx={css([NavTreeSubStepStyles])}
           itemId={`${itemId}-${id}`}
           label={label}
         >

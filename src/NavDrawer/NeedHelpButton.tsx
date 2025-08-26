@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
@@ -18,12 +19,25 @@ const styles = css({
   },
 });
 
+const textStyles = css({
+  fontWeight: 600,
+});
+
+const rowStyles = css({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "16px",
+  marginBottom: "40px",
+  paddingTop: "8px",
+});
+
 // TODO: click handler to open modal
 export function NeedHelpButton() {
   return (
-    <Button sx={css(styles)}>
-      <Typography sx={{ fontWeight: 600 }}>NEED HELP?</Typography>
-      <Typography>Contact us now</Typography>
-    </Button>
+    <Box sx={rowStyles}>
+      <Typography sx={textStyles}>Need help?</Typography>
+      <Button color="secondary">Contact us now</Button>
+    </Box>
   );
 }

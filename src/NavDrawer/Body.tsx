@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 
 import { css } from "@emotion/react";
+import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useMemo } from "react";
 import { TreeItem } from "../components";
 import { Home, Logs } from "../constants";
@@ -11,7 +12,6 @@ import { useCurrentView } from "../NavigationContext";
 import type { View } from "../types";
 import { HomeViewTreeItems } from "../views/Home/drawerContent";
 import { LogsViewTreeItems } from "../views/Logs/drawerContent";
-import { NavTreeSubStepStyles } from "./styles";
 
 const NavDrawerBodyStyles = css({
   padding: "8px 0",
@@ -20,6 +20,14 @@ const NavDrawerBodyStyles = css({
   justifyContent: "space-between",
   marginTop: "24px",
   marginBottom: "24px",
+});
+
+const NavTreeSubStepStyles = css({
+  [`& .${treeItemClasses.groupTransition}`]: {
+    marginTop: "8px",
+    borderLeft: `1px solid rgba(111, 111, 111, 0.50)`,
+    padding: "8px 16px 0 16px",
+  },
 });
 
 const HEADER_HEIGHT = 65;
@@ -72,7 +80,7 @@ export function Body() {
                     }) => (
                       <TreeItem
                         key={`${itemId}-${id}`}
-                        sx={css([NavTreeSubStepStyles])}
+                        sx={NavTreeSubStepStyles}
                         itemId={`${itemId}-${id}`}
                         label={substepLabel}
                       >

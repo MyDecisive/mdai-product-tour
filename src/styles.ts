@@ -50,6 +50,9 @@ export const theme = createTheme({
           borderRadius: "12px",
           padding: "12px 36px",
         },
+        contained: {
+          color: "#FFFFFF",
+        },
       },
     },
     MuiTreeItem: {
@@ -74,6 +77,14 @@ export const theme = createTheme({
           ["@media (min-width: 600px)"]: {
             minHeight: "initial",
           },
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: "12px",
+          padding: "20px 28px 20px 18px",
         },
       },
     },

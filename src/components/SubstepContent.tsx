@@ -1,17 +1,21 @@
 import { css } from "@emotion/react";
 import Box from "@mui/material/Box";
-import { Fragment, type ReactNode } from "react";
+import Typography from "@mui/material/Typography";
+import { type ReactNode } from "react";
 
 const SubstepStyles = css({
   borderRadius: "4px",
-  padding: "16px",
-  fontWeight: 400,
+  padding: "8px 16px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "16px",
 });
 
 const SubstepTitleStyles = css({
-  padding: "6px 12px",
-  fontWeight: 500,
+  fontWeight: 700,
 });
+
+const SubstepBodyStyles = css({});
 
 type SubstepProps = {
   children: ReactNode;
@@ -20,11 +24,15 @@ type SubstepProps = {
 
 export function SubstepContent({ children, title }: SubstepProps) {
   return (
-    <Fragment>
+    <Box sx={SubstepStyles}>
       {title && (
-        <Box sx={css([SubstepStyles, SubstepTitleStyles])}>{title}</Box>
+        <Typography component="span" sx={SubstepTitleStyles}>
+          {title}
+        </Typography>
       )}
-      <Box sx={css([SubstepStyles])}>{children}</Box>
-    </Fragment>
+      <Typography component="span" sx={SubstepBodyStyles}>
+        {children}
+      </Typography>
+    </Box>
   );
 }

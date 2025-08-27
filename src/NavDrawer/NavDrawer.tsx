@@ -7,7 +7,7 @@ import { css } from "@emotion/react";
 import { Body } from "./Body";
 import { Footer } from "./Footer";
 
-const drawerWidth = 400;
+export const drawerWidth = 400;
 
 export function NavDrawer() {
   return (

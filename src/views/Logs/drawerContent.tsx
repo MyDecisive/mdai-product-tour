@@ -2,10 +2,15 @@ import { css } from "@emotion/react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
-import type { NavigationState } from "../../utils/NavigationContext";
-import { SubstepContent } from "../../components";
+import { SubstepContent } from "../../components/SubstepContent";
 import { Logs } from "../../utils/constants";
-import type { ViewTreeItemProps } from "../../utils/types";
+import type {
+  NavigationState,
+  StepItemMap,
+  ViewStepOrder,
+  ViewTreeItemProps,
+} from "../../utils/types";
+import { hydrateViewTreeitems, ITEM_IDS } from "../common";
 
 function WhatIs() {
   return (
@@ -164,90 +169,101 @@ function TakeNote2() {
   );
 }
 
-export const LogsViewTreeItems: ViewTreeItemProps[] = [
-  {
-    itemId: "introduction",
+export const stepItemsMap: StepItemMap = {
+  [ITEM_IDS.introduction]: {
     label: "Introduction",
-    subSteps: [
-      {
-        itemId: "what",
-        label: "What is Dynamic log Filtering",
-        content: <WhatIs />,
-      },
-      {
-        itemId: "unified",
-        label: "Unified View For Easier Understanding",
-        content: <UnifiedView />,
-      },
-    ],
   },
-  {
-    itemId: "step1",
+  [ITEM_IDS.step1]: {
     label: "Step 1: Get the data flowing",
-    subSteps: [
-      {
-        itemId: "data",
-        label: "Data Starts to Flow",
-        content: <DataStarts />,
-      },
-      {
-        itemId: "visualize",
-        label: "Visualize The Results",
-        content: <VisualizeThe />,
-      },
-    ],
   },
-  {
-    itemId: "step2",
+  [ITEM_IDS.step2]: {
     label: "Step 2: Drop unwanted data",
-    subSteps: [
-      {
-        itemId: "configure",
-        label: "Configure static filters",
-        content: <ConfigureStatus />,
-      },
-      {
-        itemId: "take",
-        label: "Take Note",
-        content: <TakeNote />,
-      },
-      {
-        itemId: "explore",
-        label: "Explore the running system",
-        content: <ExploreThe />,
-      },
-      {
-        itemId: "visualize",
-        label: "Visualize The Results",
-        content: <VisualizeThe2 />,
-      },
+  },
+  [ITEM_IDS.step3]: {
+    label: "Step 3: Let the system help you",
+  },
+
+  [ITEM_IDS.introduction_what]: {
+    label: "What is Dynamic log Filtering",
+    content: <WhatIs />,
+  },
+  [ITEM_IDS.introduction_unified]: {
+    label: "Unified View For Easier Understanding",
+    content: <UnifiedView />,
+  },
+  [ITEM_IDS.step1_data]: {
+    label: "Data Starts to Flow",
+    content: <DataStarts />,
+  },
+  [ITEM_IDS.step1_visualize]: {
+    label: "Visualize The Results",
+    content: <VisualizeThe />,
+  },
+  [ITEM_IDS.step2_configure]: {
+    label: "Configure static filters",
+    content: <ConfigureStatus />,
+  },
+  [ITEM_IDS.step2_take]: {
+    label: "Take Note",
+    content: <TakeNote />,
+  },
+  [ITEM_IDS.step2_explore]: {
+    label: "Explore the running system",
+    content: <ExploreThe />,
+  },
+  [ITEM_IDS.step2_visualize]: {
+    label: "Visualize The Results",
+    content: <VisualizeThe2 />,
+  },
+  [ITEM_IDS.step3_add]: {
+    label: "Add a variable",
+    content: <AddA />,
+  },
+  [ITEM_IDS.step3_take]: {
+    label: "Take Note",
+    content: <TakeNote2 />,
+  },
+  [ITEM_IDS.step3_vizualize]: {
+    label: "Vizualize The Results",
+    content: <div></div>,
+  },
+};
+
+export const STEP_ORDER: ViewStepOrder = [
+  {
+    stepId: ITEM_IDS.introduction,
+    subStepIds: [ITEM_IDS.introduction_what, ITEM_IDS.introduction_unified],
+  },
+  {
+    stepId: ITEM_IDS.step1,
+    subStepIds: [ITEM_IDS.step1_data, ITEM_IDS.step1_visualize],
+  },
+  {
+    stepId: ITEM_IDS.step2,
+    subStepIds: [
+      ITEM_IDS.step2_configure,
+      ITEM_IDS.step2_take,
+      ITEM_IDS.step2_explore,
+      ITEM_IDS.step2_visualize,
     ],
   },
   {
-    itemId: "step3",
-    label: "Step 3: Let the system help you",
-    subSteps: [
-      {
-        itemId: "add",
-        label: "Add a variable",
-        content: <AddA />,
-      },
-      {
-        itemId: "take",
-        label: "Take Note",
-        content: <TakeNote2 />,
-      },
-      {
-        itemId: "vizualize",
-        label: "Vizualize The Results",
-        content: <div></div>,
-      },
+    stepId: ITEM_IDS.step3,
+    subStepIds: [
+      ITEM_IDS.step3_add,
+      ITEM_IDS.step3_take,
+      ITEM_IDS.step3_vizualize,
     ],
   },
 ];
 
+export const viewTreeitems: ViewTreeItemProps[] = hydrateViewTreeitems(
+  stepItemsMap,
+  STEP_ORDER
+);
+
 export const logs_default_steps: NavigationState = {
   view: Logs,
   step: "introduction",
-  substep: "introduction-what",
+  substep: "introduction_what",
 };

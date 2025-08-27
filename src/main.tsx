@@ -1,11 +1,11 @@
 import { ThemeProvider } from "@mui/material/styles";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import { NavigationProvider } from "./utils/NavigationContext.tsx";
-import { Home } from "./utils/constants.ts";
+import App from "./App";
 import "./index.css";
-import { theme } from "./utils/styles.ts";
+import { NavigationProvider } from "./NavigationProvider";
+import { Home } from "./utils/constants";
+import { theme } from "./utils/styles";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

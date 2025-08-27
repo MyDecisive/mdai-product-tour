@@ -2,16 +2,15 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
-
 import { css } from "@emotion/react";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useMemo } from "react";
-import { TreeItem } from "../components";
-import { Home, Logs } from "../constants";
-import { useCurrentView } from "../NavigationContext";
-import type { View } from "../types";
-import { HomeViewTreeItems } from "../views/Home/drawerContent";
-import { LogsViewTreeItems } from "../views/Logs/drawerContent";
+import { TreeItem } from "../../components/TreeItem";
+import { Home, Logs } from "../../utils/constants";
+import { useCurrentView } from "../../utils/NavigationContext";
+import type { View } from "../../utils/types";
+import { HomeViewTreeItems } from "../../views/Home/drawerContent";
+import { LogsViewTreeItems } from "../../views/Logs/drawerContent";
 
 const NavDrawerBodyStyles = css({
   padding: "8px 0",

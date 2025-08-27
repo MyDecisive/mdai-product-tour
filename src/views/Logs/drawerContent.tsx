@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { SubstepContent } from "../../components";
-import type { ViewTreeItemProps } from "../../types";
+import type { ViewTreeItemProps } from "../../utils/types";
 
 function WhatIs() {
   return (

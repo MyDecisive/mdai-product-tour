@@ -1,11 +1,12 @@
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components";
-import { Logs, PII, Traces } from "../../constants";
-import { useCurrentView } from "../../NavigationContext";
-import { getViewTitle } from "../../strings";
-import type { ViewTreeItemProps } from "../../types";
+import { Logs, PII, Traces } from "../../utils/constants";
+import { useCurrentView } from "../../utils/NavigationContext";
+import { getViewTitle } from "../../utils/strings";
+import type { ViewTreeItemProps } from "../../utils/types";
 
+// eslint-disable-next-line react-refresh/only-export-components
 function DynamicLogFiltrationContent() {
   const { setView } = useCurrentView();
 

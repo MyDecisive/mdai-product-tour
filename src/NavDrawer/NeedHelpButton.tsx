@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
+// @ts-ignore
 const styles = css({
   border: "1px solid #3A3A3A",
   borderRadius: "4px",

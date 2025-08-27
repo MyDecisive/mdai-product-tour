@@ -2,13 +2,14 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components";
 import { Logs, PII, Traces } from "../../utils/constants";
-import { useCurrentView } from "../../utils/NavigationContext";
+import { useNavigation } from "../../utils/NavigationContext";
 import { getViewTitle } from "../../utils/strings";
 import type { ViewTreeItemProps } from "../../utils/types";
+import { logs_default_steps } from "../Logs/drawerContent";
 
 // eslint-disable-next-line react-refresh/only-export-components
 function DynamicLogFiltrationContent() {
-  const { setView } = useCurrentView();
+  const { setNavigation } = useNavigation();
 
   return (
     <InfoBox>
@@ -26,7 +27,7 @@ function DynamicLogFiltrationContent() {
       <Typography>You can learn about it in 3 steps</Typography>
       <br />
       <div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
-        <Button size="medium" onClick={() => setView(Logs)}>
+        <Button size="medium" onClick={() => setNavigation(logs_default_steps)}>
           Start the Demo
         </Button>
       </div>

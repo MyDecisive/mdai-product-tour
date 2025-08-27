@@ -1,15 +1,12 @@
 import { Box, Typography} from "@mui/material";
-// import { useState } from "react";
 import "./App.css";
-import { NavDrawer, Banner } from "./components";
-// import { WelcomeModal } from "./components/WelcomeModal/WelcomeModal";
+import { NavDrawer, Banner, WelcomeModal} from "./components";
 
 function App() {
-  // const [count, setCount] = useState(0);
 
   return (
     <Box sx={{ display: "flex", height: "100vh", width: "100vw" }}>
-      {/* <WelcomeModal /> */}
+      <WelcomeModal />
       <NavDrawer />
       <Box sx={{height: "100vh", width: "100vw" }}>
         <Banner />

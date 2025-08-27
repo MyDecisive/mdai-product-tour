@@ -1,5 +1,10 @@
-/* eslint-disable react-refresh/only-export-components */
+import { css } from "@emotion/react";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import Typography from "@mui/material/Typography";
+import type { NavigationState } from "../../utils/NavigationContext";
 import { SubstepContent } from "../../components";
+import { Logs } from "../../utils/constants";
 import type { ViewTreeItemProps } from "../../utils/types";
 
 function WhatIs() {
@@ -12,36 +17,63 @@ function WhatIs() {
   );
 }
 
+const ListItemStyles = css({
+  padding: 0,
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
+});
+
+const BulletStyle = css({
+  fontWeight: 700,
+  paddingLeft: "4px",
+  paddingRight: "4px",
+});
+
 function UnifiedView() {
   return (
     <SubstepContent title="Consolidated tools">
-      Multiple tools, consolidated into a unified view to make it easy for you
-      to see how MyDecisive works
-      <ol style={{ paddingLeft: "24px" }}>
-        <li style={{ fontWeight: 600 }}>
-          <span style={{ fontWeight: 600 }}>IDE Simulator:</span> Configure,
-          control the SmartHub thru its config files.
-        </li>
-        <li style={{ fontWeight: 600 }}>
-          <span style={{ fontWeight: 600 }}>Terminal Simulator:</span> Deploy
-          changes to the SmartHub
-        </li>
-        <li style={{ fontWeight: 600 }}>
-          <span style={{ fontWeight: 600 }}>Status Simulator:</span> the running
-          SmartHub processes
-        </li>
-        <li style={{ fontWeight: 600 }}>
-          <span style={{ fontWeight: 600 }}>Tail logs Simulator:</span> SmartHub
-          logs
-        </li>
-      </ol>
+      <Typography>
+        Multiple tools, consolidated into a unified view to make it easy for you
+        to see how MyDecisive works
+      </Typography>
+      <List>
+        <ListItem sx={ListItemStyles}>
+          <Typography sx={BulletStyle}>1.</Typography>
+          <Typography>
+            <span style={{ fontWeight: 700 }}>IDE Simulator:</span> Configure,
+            control the SmartHub through its config files.
+          </Typography>
+        </ListItem>
+        <ListItem sx={ListItemStyles}>
+          <Typography sx={BulletStyle}>2.</Typography>
+          <Typography>
+            <span style={{ fontWeight: 700 }}>Terminal Simulator:</span> Deploy
+            changes to the SmartHub
+          </Typography>
+        </ListItem>
+        <ListItem sx={ListItemStyles}>
+          <Typography sx={BulletStyle}>3.</Typography>
+          <Typography>
+            <span style={{ fontWeight: 700 }}>Status Simulator:</span> the
+            running SmartHub processes
+          </Typography>
+        </ListItem>
+        <ListItem sx={ListItemStyles}>
+          <Typography sx={BulletStyle}>4.</Typography>
+          <Typography>
+            <span style={{ fontWeight: 700 }}>Tail logs Simulator:</span>{" "}
+            SmartHub logs
+          </Typography>
+        </ListItem>
+      </List>
     </SubstepContent>
   );
 }
 
 function DataStarts() {
   return (
-    <SubstepContent title="Use our built-in log stream generator">
+    <SubstepContent title="Simulate incoming logs">
       Run this <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to get
       the data flowing. <br />
       <br /> You can see the SmartHub running now in the{" "}
@@ -49,6 +81,14 @@ function DataStarts() {
       <br />
       Click <span style={{ color: "#B062C2" }}>See Results</span> to see what
       has changed.
+    </SubstepContent>
+  );
+}
+
+function VisualizeThe() {
+  return (
+    <SubstepContent title="What are you seeing">
+      Some copy explaining what you would normally expect to see
     </SubstepContent>
   );
 }
@@ -85,7 +125,7 @@ function ExploreThe() {
   );
 }
 
-function VisualizeThe() {
+function VisualizeThe2() {
   return (
     <SubstepContent title="Saving Money but...">
       You can see from our dashboards that data is filtered effectively. But now
@@ -150,6 +190,11 @@ export const LogsViewTreeItems: ViewTreeItemProps[] = [
         label: "Data Starts to Flow",
         content: <DataStarts />,
       },
+      {
+        itemId: "visualize",
+        label: "Visualize The Results",
+        content: <VisualizeThe />,
+      },
     ],
   },
   {
@@ -174,7 +219,7 @@ export const LogsViewTreeItems: ViewTreeItemProps[] = [
       {
         itemId: "visualize",
         label: "Visualize The Results",
-        content: <VisualizeThe />,
+        content: <VisualizeThe2 />,
       },
     ],
   },
@@ -200,3 +245,9 @@ export const LogsViewTreeItems: ViewTreeItemProps[] = [
     ],
   },
 ];
+
+export const logs_default_steps: NavigationState = {
+  view: Logs,
+  step: "introduction",
+  substep: "introduction-what",
+};

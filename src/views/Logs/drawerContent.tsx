@@ -2,10 +2,10 @@ import { css } from "@emotion/react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
-import type { NavigationState } from "../../NavigationContext";
+import type { NavigationState } from "../../utils/NavigationContext";
 import { SubstepContent } from "../../components";
-import { Logs } from "../../constants";
-import type { ViewTreeItemProps } from "../../types";
+import { Logs } from "../../utils/constants";
+import type { ViewTreeItemProps } from "../../utils/types";
 
 function WhatIs() {
   return (

@@ -3,9 +3,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useCurrentView } from "../NavigationContext";
-import { Home } from "../constants";
-import { getViewTitle } from "../strings";
+import { useCurrentView } from "../../utils/NavigationContext";
+import { Home } from "../../utils/constants";
+import { getViewTitle } from "../../utils/strings";
 
 const viewStyles = css({
   height: "48px",

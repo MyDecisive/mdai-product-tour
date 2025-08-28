@@ -1,10 +1,10 @@
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components";
-import { Logs, PII, Traces } from "../../constants";
-import { useNavigation } from "../../NavigationContext";
-import { getViewTitle } from "../../strings";
-import type { ViewTreeItemProps } from "../../types";
+import { Logs, PII, Traces } from "../../utils/constants";
+import { useNavigation } from "../../utils/NavigationContext";
+import { getViewTitle } from "../../utils/strings";
+import type { ViewTreeItemProps } from "../../utils/types";
 import { logs_default_steps } from "../Logs/drawerContent";
 
 function DynamicLogFiltrationContent() {

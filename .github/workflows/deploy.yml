@@ -32,3 +32,28 @@ jobs:
         run: |
           echo "PROD? THERE IS NO PROD HERE."
           exit 1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 23
+          cache: "npm"
+      - name: Build decisive app
+        env:
+          VITE_GOOGLE_ANALYTICS_KEY: ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.GTAG_PROD || vars.GTAG_STAGING }}
+        run: npm install && npm run build
+      - name: Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+      - name: Deploy app build to S3 bucket
+        run: aws s3 sync ./dist/ s3://${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.S3_BUCKET_PROD || vars.S3_BUCKET_STAGING }} --delete
+      - name: Invalidate CloudFront
+        run: aws cloudfront create-invalidation --distribution-id ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && secrets.DISTRIBUTION_ID_PROD || secrets.DISTRIBUTION_ID_STAGING }} --paths '/*'
+
+  notify-on-failure:
+    needs: build
+    if: failure() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    uses: DecisiveAI/ci/.github/workflows/slack-notify.yml@main
+    secrets:
+      SLACK_NOTIFY_URL: ${{ secrets.SLACK_NOTIFY_URL }}

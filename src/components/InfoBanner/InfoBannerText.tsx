@@ -6,7 +6,7 @@ type infoBannerTextProps = {
   styles?: object;
 };
 
-export function textComponent ({title, description, styles}: infoBannerTextProps) {
+export function InfoBannerText ({title, description, styles}: infoBannerTextProps) {
     return (
       <>
         <Typography

@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid";
-import { Typography, Box, Link } from "@mui/material";
+import { Box } from "@mui/material";
 import { SimulatorBox } from "./SimulatorBox";
 
 export function Simulators() {
@@ -17,7 +17,7 @@ export function Simulators() {
             link="View Config in GitHub →"
             href="#"
             innerStyles={{
-              border: "2px solid #B062C2 !important",
+              border: "2px solid #B062C2",
             }}
           />
         </Grid>

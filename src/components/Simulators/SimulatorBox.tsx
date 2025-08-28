@@ -28,9 +28,11 @@ export function SimulatorBox({
         }}
       >
         <Typography variant="subtitle1">{title}</Typography>
-        <Link href={href} variant="body2" underline="hover">
-          {link}
-        </Link>
+        {link && href && (
+          <Link href={href} variant="body2" underline="hover">
+            {link}
+          </Link>
+        )}
       </Box>
       <Box
         sx={{

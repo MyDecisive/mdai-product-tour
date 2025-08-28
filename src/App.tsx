@@ -1,6 +1,6 @@
 import { Box, Typography} from "@mui/material";
 import "./App.css";
-import { NavDrawer, Banner, WelcomeModal} from "./components";
+import { NavDrawer, Banner, WelcomeModal, Simulators} from "./components";
 
 function App() {
 
@@ -12,7 +12,7 @@ function App() {
         <Banner />
           <Box>
             <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
-              Additional Information
+              <Simulators />
             </Typography>
           </Box>
       </Box>

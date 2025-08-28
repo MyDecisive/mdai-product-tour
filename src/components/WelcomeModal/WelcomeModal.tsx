@@ -8,7 +8,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { drawerWidth } from "../NavDrawer/NavDrawer";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 const DialogStyles = css({
   marginLeft: `${drawerWidth}px`,

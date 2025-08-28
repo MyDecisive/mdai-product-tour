@@ -1,16 +1,11 @@
+import { css } from "@emotion/react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
-import { css } from "@emotion/react";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
-import { useMemo } from "react";
-import { TreeItem } from "../../components/TreeItem";
-import { Home, Logs } from "../../utils/constants";
-import { useNavigation, type NavigationState } from "../../utils/NavigationContext";
-import type { View, ViewTreeItemProps } from "../../utils/types";
-import { HomeViewTreeItems } from "../../views/Home/drawerContent";
-import { LogsViewTreeItems } from "../../views/Logs/drawerContent";
+import { useGetViewContent } from "../../hooks/useGetViewContent";
+import { TreeItem } from "../TreeItem";
 import { StepNavButtons } from "./StepNavButtons";
 
 const NavDrawerBodyStyles = css({
@@ -41,113 +36,14 @@ const BodyScrollContainer = css({
   overflowY: "auto",
 });
 
-const viewItemsMap = {
-  [Home]: HomeViewTreeItems,
-  [Logs]: LogsViewTreeItems,
-};
-
-function getViewTreeItems(view: View) {
-  return viewItemsMap[view] || [];
-}
-
-function createSubstepTreeItemId(stepId: string, substepId: string) {
-  return `${stepId}-${substepId}`;
-}
-
-function deriveNextStepNavState(
-  view: View,
-  subSteps: Omit<ViewTreeItemProps, "subSteps">[],
-  subStepIdx: number,
-  steps: ViewTreeItemProps[],
-  stepIdx: number
-): NavigationState {
-  if (subStepIdx < subSteps.length - 1) {
-    const thisStepId = steps[stepIdx].itemId;
-    const nextSubStepId = subSteps[subStepIdx + 1].itemId;
-    return {
-      view,
-      step: thisStepId,
-      substep: createSubstepTreeItemId(thisStepId, nextSubStepId),
-    };
-  }
-
-  if (stepIdx < steps.length - 1) {
-    const { itemId, subSteps } = steps[stepIdx + 1];
-
-    return {
-      view,
-      step: itemId,
-      ...(subSteps &&
-        subSteps.length && {
-          substep: createSubstepTreeItemId(itemId, subSteps[0].itemId),
-        }),
-    };
-  }
-
-  return {
-    view: Home,
-  };
-}
-
-function derivePrevStepNavState(
-  view: View,
-  subSteps: Omit<ViewTreeItemProps, "subSteps">[],
-  subStepIdx: number,
-  steps: ViewTreeItemProps[],
-  stepIdx: number
-): NavigationState {
-  if (subStepIdx === 0) {
-    if (stepIdx === 0) {
-      return {
-        view: Home,
-      };
-    }
-    const { itemId, subSteps: prevStepSubsteps } = steps[stepIdx - 1];
-
-    return {
-      view,
-      step: itemId,
-      ...(prevStepSubsteps &&
-        prevStepSubsteps.length && {
-          substep: createSubstepTreeItemId(
-            itemId,
-            prevStepSubsteps[prevStepSubsteps.length - 1].itemId
-          ),
-        }),
-    };
-  }
-
-  const thisStepId = steps[stepIdx].itemId;
-
-  return {
-    view,
-    step: thisStepId,
-    substep: createSubstepTreeItemId(
-      thisStepId,
-      subSteps[subStepIdx - 1].itemId
-    ),
-  };
-}
-
 export function Body() {
   const {
-    navigation: { view, step, substep },
-    updateNavigation,
-    setNavigation,
-  } = useNavigation();
-
-  const treeItems = useMemo(() => {
-    return getViewTreeItems(view);
-  }, [view]);
-
-  const expandedItems = [] as string[];
-
-  if (step) {
-    expandedItems.push(step);
-    if (substep) {
-      expandedItems.push(substep);
-    }
-  }
+    drawerItems,
+    handleDrawerItemClick,
+    expandedDrawerItems,
+    handleNextButtonClick,
+    handlePrevButtonClick,
+  } = useGetViewContent();
 
   return (
     <Box sx={css([BodyScrollContainer])}>
@@ -157,19 +53,11 @@ export function Body() {
             expandIcon: ArrowRightIcon,
             collapseIcon: ArrowDropDownIcon,
           }}
-          expandedItems={expandedItems}
-          onItemClick={(_, itemId: string) => {
-            if (treeItems.find((item) => item.itemId === itemId)) {
-              updateNavigation({ step: step === itemId ? undefined : itemId });
-            } else {
-              updateNavigation({
-                substep: substep === itemId ? undefined : itemId,
-              });
-            }
-          }}
+          expandedItems={expandedDrawerItems}
+          onItemClick={handleDrawerItemClick}
         >
-          {treeItems.map(
-            ({ itemId, label, content, slotProps, subSteps }, idx) => (
+          {drawerItems.map(
+            ({ itemId, label, content, slotProps, subSteps }) => (
               <TreeItem
                 key={itemId}
                 topLevel
@@ -179,44 +67,21 @@ export function Body() {
               >
                 {subSteps
                   ? subSteps.map(
-                      (
-                        {
-                          itemId: id,
-                          label: substepLabel,
-                          content: substepContent,
-                        },
-                        index
-                      ) => (
+                      ({
+                        itemId: id,
+                        label: substepLabel,
+                        content: substepContent,
+                      }) => (
                         <TreeItem
-                          key={createSubstepTreeItemId(itemId, id)}
+                          key={id}
                           sx={NavTreeSubStepStyles}
-                          itemId={`${itemId}-${id}`}
+                          itemId={id}
                           label={substepLabel}
                         >
                           {substepContent}
                           <StepNavButtons
-                            onNext={() =>
-                              setNavigation(
-                                deriveNextStepNavState(
-                                  view,
-                                  subSteps,
-                                  index,
-                                  treeItems,
-                                  idx
-                                )
-                              )
-                            }
-                            onPrev={() =>
-                              setNavigation(
-                                derivePrevStepNavState(
-                                  view,
-                                  subSteps,
-                                  index,
-                                  treeItems,
-                                  idx
-                                )
-                              )
-                            }
+                            onNext={handleNextButtonClick}
+                            onPrev={handlePrevButtonClick}
                           />
                         </TreeItem>
                       )

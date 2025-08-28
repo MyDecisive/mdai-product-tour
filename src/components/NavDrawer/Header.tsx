@@ -3,9 +3,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useCurrentView } from "../../utils/NavigationContext";
-import { Home } from "../../utils/constants";
-import { getViewTitle } from "../../utils/strings";
+
+import { useGetViewContent } from "../../hooks/useGetViewContent";
 
 const viewStyles = css({
   height: "48px",
@@ -36,18 +35,18 @@ const backButtonStyles = css({
 });
 
 export function Header() {
-  const { view, setView } = useCurrentView();
+  const { inTour, drawerHeaderText, handleBackButtonClick } =
+    useGetViewContent();
 
-  const notHome = view !== Home;
   return (
-    <Toolbar sx={notHome ? viewStyles : undefined}>
-      {notHome && (
-        <IconButton sx={backButtonStyles} onClick={() => setView(Home)}>
+    <Toolbar sx={inTour ? viewStyles : undefined}>
+      {inTour && (
+        <IconButton sx={backButtonStyles} onClick={handleBackButtonClick}>
           <ArrowBackIcon />
         </IconButton>
       )}
-      <Typography sx={notHome ? viewTextStyles : homeTextStyles}>
-        {getViewTitle(view)}
+      <Typography sx={inTour ? viewTextStyles : homeTextStyles}>
+        {drawerHeaderText}
       </Typography>
     </Toolbar>
   );

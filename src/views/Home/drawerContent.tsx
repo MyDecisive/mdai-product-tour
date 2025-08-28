@@ -1,11 +1,16 @@
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { InfoBox } from "../../components";
+import { InfoBox } from "../../components/InfoBox";
+import { useNavigation } from "../../hooks/useNavigation";
 import { Logs, PII, Traces } from "../../utils/constants";
-import { useNavigation } from "../../utils/NavigationContext";
 import { getViewTitle } from "../../utils/strings";
-import type { ViewTreeItemProps } from "../../utils/types";
+import type {
+  StepItemMap,
+  ViewStepOrder,
+  ViewTreeItemProps,
+} from "../../utils/types";
 import { logs_default_steps } from "../Logs/drawerContent";
+import { hydrateViewTreeitems, ITEM_IDS } from "../common";
 
 function DynamicLogFiltrationContent() {
   const { setNavigation } = useNavigation();
@@ -34,9 +39,8 @@ function DynamicLogFiltrationContent() {
   );
 }
 
-export const HomeViewTreeItems: ViewTreeItemProps[] = [
-  {
-    itemId: Logs,
+export const stepItemsMap: StepItemMap = {
+  [ITEM_IDS.Logs]: {
     label: getViewTitle(Logs),
     content: <DynamicLogFiltrationContent />,
     slotProps: {
@@ -45,8 +49,7 @@ export const HomeViewTreeItems: ViewTreeItemProps[] = [
       },
     },
   },
-  {
-    itemId: Traces,
+  [ITEM_IDS.Traces]: {
     label: getViewTitle(Traces),
     content: null,
     slotProps: {
@@ -56,8 +59,7 @@ export const HomeViewTreeItems: ViewTreeItemProps[] = [
       },
     },
   },
-  {
-    itemId: PII,
+  [ITEM_IDS.PII]: {
     label: getViewTitle(PII),
     content: null,
     slotProps: {
@@ -67,4 +69,21 @@ export const HomeViewTreeItems: ViewTreeItemProps[] = [
       },
     },
   },
+};
+
+export const STEP_ORDER: ViewStepOrder = [
+  {
+    stepId: ITEM_IDS.Logs,
+  },
+  {
+    stepId: ITEM_IDS.Traces,
+  },
+  {
+    stepId: ITEM_IDS.PII,
+  },
 ];
+
+export const viewTreeItems: ViewTreeItemProps[] = hydrateViewTreeitems(
+  stepItemsMap,
+  STEP_ORDER
+);

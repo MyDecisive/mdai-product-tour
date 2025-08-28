@@ -1,5 +1,9 @@
-import { Logs, PII, Traces } from "../constants";
-import type { StepItemMap, ViewStepOrder, ViewTreeItemProps } from "../types";
+import { Logs, PII, Traces } from "../utils/constants";
+import type {
+  StepItemMap,
+  ViewStepOrder,
+  ViewTreeItemProps,
+} from "../utils/types";
 
 export const ITEM_IDS = {
   introduction: "introduction",

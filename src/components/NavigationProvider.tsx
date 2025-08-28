@@ -1,10 +1,10 @@
 import { type ReactNode, useState } from "react";
-import { Home } from "./constants";
 import {
   NavigationContext,
   type NavigationContextValue,
-} from "./contexts/navigation";
-import type { NavigationState } from "./types";
+} from "../contexts/navigation";
+import { Home } from "../utils/constants";
+import type { NavigationState } from "../utils/types";
 
 interface NavigationProviderProps {
   children: ReactNode;

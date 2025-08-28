@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { NavigationState } from "../types";
+import type { NavigationState } from "../utils/types";
 
 export interface NavigationContextValue {
   navigation: NavigationState;

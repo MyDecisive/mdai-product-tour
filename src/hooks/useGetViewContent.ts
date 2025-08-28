@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
-import { Home, Logs } from "../constants";
-import { getViewTitle } from "../strings";
-import type { NavigationState, StepItemId, View } from "../types";
+import { Home, Logs } from "../utils/constants";
+import { getViewTitle } from "../utils/strings";
+import type { NavigationState, StepItemId, View } from "../utils/types";
 import * as HomeContent from "../views/Home/drawerContent";
 import * as LogsContent from "../views/Logs/drawerContent";
 import { useNavigation } from "./useNavigation";
@@ -41,7 +41,7 @@ export function useGetViewContent() {
 
   const handleBackButtonClick = useCallback(
     () => setNavigation({ view: Home }),
-    []
+    [setNavigation]
   );
 
   const handleDrawerItemClick: DrawerItemClick = (_, itemId: StepItemId) => {
@@ -72,12 +72,12 @@ export function useGetViewContent() {
   const handleNextButtonClick = useCallback(() => {
     const nextNavState = deriveNextStepNavState(view, step, substep);
     setNavigation(nextNavState);
-  }, [view, step, substep]);
+  }, [view, step, substep, setNavigation]);
 
   const handlePrevButtonClick = useCallback(() => {
     const prevNavState = derivePrevStepNavState(view, step, substep);
     setNavigation(prevNavState);
-  }, [view, step, substep]);
+  }, [view, step, substep, setNavigation]);
 
   return {
     drawerItems,

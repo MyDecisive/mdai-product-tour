@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import Box from "@mui/material/Box";
-
 import Divider from "@mui/material/Divider";
+
 import { NeedHelpButton } from "./NeedHelpButton";
 
 const footerContainerStyles = css({

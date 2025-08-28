@@ -1,6 +1,6 @@
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { InfoBox } from "../../components";
+import { InfoBox } from "../../components/InfoBox";
 import { useNavigation } from "../../hooks/useNavigation";
 import { Logs, PII, Traces } from "../../utils/constants";
 import { getViewTitle } from "../../utils/strings";

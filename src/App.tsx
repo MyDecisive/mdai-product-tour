@@ -8,12 +8,10 @@ function App() {
     <Box sx={{ display: "flex", height: "100vh", width: "100vw" }}>
       <WelcomeModal />
       <NavDrawer />
-      <Box sx={{height: "100vh", width: "100vw" }}>
+      <Box sx={{ flexGrow: 1 }}>
         <Banner />
           <Box>
-            <Typography variant="body2" component="div" sx={{ flexGrow: 1 }}>
-              <Simulators />
-            </Typography>
+            <Simulators />
           </Box>
       </Box>
     </Box>

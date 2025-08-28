@@ -7,7 +7,6 @@ import { getViewTitle } from "../../utils/strings";
 import type { ViewTreeItemProps } from "../../utils/types";
 import { logs_default_steps } from "../Logs/drawerContent";
 
-// eslint-disable-next-line react-refresh/only-export-components
 function DynamicLogFiltrationContent() {
   const { setNavigation } = useNavigation();
 

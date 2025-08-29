@@ -6,6 +6,11 @@ import Typography from "@mui/material/Typography";
 
 import { useGetViewContent } from "../../hooks/useGetViewContent";
 
+const homeStyles = css({
+  height: "62px",
+  padding: "4px",
+});
+
 const viewStyles = css({
   height: "48px",
   padding: "4px",
@@ -39,7 +44,7 @@ export function Header() {
     useGetViewContent();
 
   return (
-    <Toolbar sx={inTour ? viewStyles : undefined}>
+    <Toolbar sx={inTour ? viewStyles : homeStyles}>
       {inTour && (
         <IconButton sx={backButtonStyles} onClick={handleBackButtonClick}>
           <ArrowBackIcon />

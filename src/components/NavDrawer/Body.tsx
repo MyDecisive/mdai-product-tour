@@ -4,6 +4,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
+import { useEffect } from "react";
 import { useGetViewContent } from "../../hooks/useGetViewContent";
 import { TreeItem } from "../TreeItem";
 import { StepNavButtons } from "./StepNavButtons";
@@ -43,7 +44,27 @@ export function Body() {
     expandedDrawerItems,
     handleNextButtonClick,
     handlePrevButtonClick,
+    inTour,
   } = useGetViewContent();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      if (inTour) {
+        if (e.key === "ArrowRight") {
+          handleNextButtonClick();
+        } else if (e.key === "ArrowLeft") {
+          handlePrevButtonClick();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleNextButtonClick, handlePrevButtonClick, inTour]);
 
   return (
     <Box sx={css([BodyScrollContainer])}>

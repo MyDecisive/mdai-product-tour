@@ -53,6 +53,9 @@ export const theme = createTheme({
         contained: {
           color: "#FFFFFF",
         },
+        outlined: {
+          borderWidth: "2px",
+        },
       },
     },
     MuiTreeItem: {
@@ -85,6 +88,54 @@ export const theme = createTheme({
         paper: {
           borderRadius: "12px",
           padding: "20px 28px 20px 18px",
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: "4px",
+          color: "#FFFFFF",
+        },
+        input: {
+          borderRadius: "4px",
+          backgroundColor: "#1E1E1E",
+        },
+        notchedOutline: {
+          border: "2px solid #3A3A3A",
+          borderRadius: "4px",
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: "#3A3A3A",
+          position: "relative",
+          "& svg": {
+            backgroundColor: "#1E1E1E",
+            boxShadow:
+              "inset 4px 4px 0 0 #333333ff, inset -4px -4px 0 0 #333333ff", // Blend of #background color + shadow effects
+          },
+          "&:hover svg": {
+            // TODO: This is _slightly_ too dark, but maybe no one will notice?
+            boxShadow: "inset 4px 4px 0 0 #3E3542, inset -4px -4px 0 0 #3E3542", // Blend of #333333 + hover tint
+          },
+        },
+      },
+    },
+    MuiFilledInput: {
+      styleOverrides: {
+        root: {
+          color: "#FFFFFF",
+          backgroundColor: "#3A3A3A",
+          padding: "16px 18px",
+          borderRadius: "4px",
+          [`&::before`]: {
+            border: "1px solid #FFFFFF",
+            top: 0,
+            borderRadius: "4px",
+          },
         },
       },
     },

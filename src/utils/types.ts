@@ -1,10 +1,16 @@
 import type { TreeItemSlotProps } from "@mui/x-tree-view";
 import type { JSX } from "react";
 
-import { ITEM_IDS } from "./views/common";
+import { ITEM_IDS } from "../views/common";
 
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
+
+export type FullScreenModalType = "contact" | "finished";
+
+export type FullScreenModalContentProps = {
+  handleClose: () => void;
+};
 
 export interface ViewTreeItem {
   label: string;
@@ -27,4 +33,5 @@ export interface NavigationState {
   view: View;
   step?: StepItemId;
   substep?: StepItemId;
+  fullScreenModal?: FullScreenModalType;
 }

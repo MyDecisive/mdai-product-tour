@@ -2,8 +2,8 @@ import { css } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
-import { ContactModal } from "../ContactModal/ContactModal";
+import { useCallback } from "react";
+import { useNavigation } from "../../hooks/useNavigation";
 
 const textStyles = css({
   fontWeight: 600,
@@ -19,14 +19,18 @@ const rowStyles = css({
 });
 
 export function NeedHelpButton() {
-  const [open, setOpen] = useState<boolean>(false);
+  const { setNavigation } = useNavigation();
+
+  const openContactModal = useCallback(() => {
+    setNavigation((navState) => ({ ...navState, fullScreenModal: "contact" }));
+  }, []);
+
   return (
     <Box sx={rowStyles}>
       <Typography sx={textStyles}>Need help?</Typography>
-      <Button color="secondary" onClick={() => setOpen(true)}>
+      <Button color="secondary" onClick={openContactModal}>
         Contact us now
       </Button>
-      <ContactModal open={open} handleClose={() => setOpen(false)} />
     </Box>
   );
 }

@@ -11,10 +11,7 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-
-type ContactFormProps = {
-  handleClose: () => void;
-};
+import type { FullScreenModalContentProps } from "../../utils/types";
 
 const textFieldStyles = css({
   marginBottom: "16px",
@@ -28,7 +25,7 @@ const buttonStyles = css({
   borderRadius: "4px",
 });
 
-export function ContactForm({ handleClose }: ContactFormProps) {
+export function ContactForm({ handleClose }: FullScreenModalContentProps) {
   const [email, setEmail] = useState<string>();
   const [name, setName] = useState<string>();
   const [phone, setPhone] = useState<string>();
@@ -39,8 +36,7 @@ export function ContactForm({ handleClose }: ContactFormProps) {
     <Paper
       sx={{
         paddingX: "48px",
-        paddingTop: "40px",
-        paddingBottom: "12px",
+        paddingY: "40px",
         backgroundColor: "#272727",
         color: "#FFFFFF",
         display: "flex",

@@ -6,12 +6,7 @@ import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { ContactForm } from "./ContactForm";
-
-type ContactModalProps = {
-  open: boolean;
-  handleClose: () => void;
-};
+import { useGetFullScreenModalPresentationLayer } from "./content";
 
 const toolbarStyles = css({
   height: "60px",
@@ -27,7 +22,12 @@ const toolbarStyles = css({
   },
 });
 
-export function ContactModal({ open, handleClose }: ContactModalProps) {
+export function FullScreenModal() {
+  const { title, ContentComponent, handleClose } =
+    useGetFullScreenModalPresentationLayer();
+
+  const open = title !== null && ContentComponent !== null;
+
   return (
     <Dialog
       fullScreen
@@ -45,7 +45,7 @@ export function ContactModal({ open, handleClose }: ContactModalProps) {
       <AppBar sx={{ position: "relative" }}>
         <Toolbar sx={toolbarStyles}>
           <Typography sx={{ fontWeight: 700, fontSize: "24px" }}>
-            Contact Us
+            {title || ""}
           </Typography>
           <IconButton
             edge="start"
@@ -61,16 +61,17 @@ export function ContactModal({ open, handleClose }: ContactModalProps) {
         sx={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "space-evenly",
+          justifyContent: "center",
+          alignItems: "center",
           gap: "12px",
           marginTop: "48px",
           marginBottom: "54px",
           marginX: "80px",
+          height: "100%",
         }}
       >
-        <Box sx={{ flex: "1" }}>left</Box>
-        <Box sx={{ flex: "1" }}>
-          <ContactForm handleClose={handleClose} />
+        <Box sx={{ width: "50%" }}>
+          {ContentComponent && <ContentComponent handleClose={handleClose} />}
         </Box>
       </Box>
     </Dialog>

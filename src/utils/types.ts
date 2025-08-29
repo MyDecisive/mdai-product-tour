@@ -1,7 +1,6 @@
 import type { TreeItemSlotProps } from "@mui/x-tree-view";
 import type { JSX } from "react";
-
-import { ITEM_IDS } from "./views/common";
+import { ITEM_IDS } from "../views/common";
 
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
@@ -28,3 +27,13 @@ export interface NavigationState {
   step?: StepItemId;
   substep?: StepItemId;
 }
+
+export type SimulatorBoxProps = {
+  title: string;
+  link?: string;
+  href?: string;
+  children?: React.ReactNode;
+  styles?: object;
+  innerStyles?: object;
+  step?: number;
+};

@@ -2,6 +2,8 @@ import { css } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { ContactModal } from "../ContactModal/ContactModal";
 
 const textStyles = css({
   fontWeight: 600,
@@ -16,12 +18,15 @@ const rowStyles = css({
   paddingTop: "8px",
 });
 
-// TODO: click handler to open modal
 export function NeedHelpButton() {
+  const [open, setOpen] = useState<boolean>(false);
   return (
     <Box sx={rowStyles}>
       <Typography sx={textStyles}>Need help?</Typography>
-      <Button color="secondary">Contact us now</Button>
+      <Button color="secondary" onClick={() => setOpen(true)}>
+        Contact us now
+      </Button>
+      <ContactModal open={open} handleClose={() => setOpen(false)} />
     </Box>
   );
 }

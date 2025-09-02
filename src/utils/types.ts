@@ -5,6 +5,12 @@ import { ITEM_IDS } from "../views/common";
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
 
+export type FullScreenModalType = "contact" | "finished";
+
+export type FullScreenModalContentProps = {
+  handleClose: () => void;
+};
+
 export interface ViewTreeItem {
   label: string;
   content?: JSX.Element | null;
@@ -26,14 +32,5 @@ export interface NavigationState {
   view: View;
   step?: StepItemId;
   substep?: StepItemId;
+  fullScreenModal?: FullScreenModalType;
 }
-
-export type SimulatorBoxProps = {
-  title: string;
-  link?: string;
-  href?: string;
-  children?: React.ReactNode;
-  styles?: object;
-  innerStyles?: object;
-  step?: number;
-};

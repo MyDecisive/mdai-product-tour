@@ -9,22 +9,27 @@ type Range = {
 type ConfigTextProps = { 
     text?: string; 
     activeRange?: Range 
+    view: string
 };
 
 export function ConfigText({
   text,
   activeRange,
+  view
 }: ConfigTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lines = useMemo(() => (text ?? "").split("\n"), [text]);
 
   useEffect(() => {
-    if (!activeRange) return;
+    if (!activeRange) {
+      containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     const el = containerRef.current?.querySelector<HTMLDivElement>(
       `[data-line="${activeRange.start}"]`
     );
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeRange]);
+  }, [activeRange, view]);
 
   return (
     <Box

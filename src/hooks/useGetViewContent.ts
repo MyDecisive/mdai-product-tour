@@ -129,6 +129,7 @@ function deriveNextStepNavState(
 
   return {
     view: Home,
+    fullScreenModal: "finished",
   };
 }
 

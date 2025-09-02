@@ -2,6 +2,8 @@ import { css } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { useCallback } from "react";
+import { useNavigation } from "../../hooks/useNavigation";
 
 const textStyles = css({
   fontWeight: 600,
@@ -16,12 +18,19 @@ const rowStyles = css({
   paddingTop: "8px",
 });
 
-// TODO: click handler to open modal
 export function NeedHelpButton() {
+  const { setNavigation } = useNavigation();
+
+  const openContactModal = useCallback(() => {
+    setNavigation((navState) => ({ ...navState, fullScreenModal: "contact" }));
+  }, []);
+
   return (
     <Box sx={rowStyles}>
       <Typography sx={textStyles}>Need help?</Typography>
-      <Button color="secondary">Contact us now</Button>
+      <Button color="secondary" onClick={openContactModal}>
+        Contact us now
+      </Button>
     </Box>
   );
 }

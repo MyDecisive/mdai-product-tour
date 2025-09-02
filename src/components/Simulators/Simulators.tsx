@@ -1,23 +1,34 @@
 import { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
-import { Box } from "@mui/material";
 import { SimulatorBox } from "./SimulatorBox";
+import { Box } from "@mui/material";
 import { useNavigation } from "../../hooks/useNavigation";
 import { ConfigText } from "./Config";
-import configSample from "./data/configSample.yaml?raw";
+import mdaiHubSample from "./configSamples/mdaiHubSample.yaml?raw";
+import otelSample from "./configSamples/otelSample.yaml?raw";
+
+type ActiveViewSim = {
+  configFile: typeof mdaiHubSample;
+  start?: number;
+  end?: number;
+};
 
 export function Simulators() {
-  const [activeRange, setActiveRange] = useState<{ start: number; end: number } | undefined>(undefined);
+  const [activeSims, setActiveSims] = useState<ActiveViewSim | undefined>(undefined);
   const navigation = useNavigation();
   console.log(navigation);
 
   useEffect(() => {
-    if (navigation.substep === "step2_configure") {
-      setActiveRange({ start: 80, end: 92 });
+    if (navigation.view === "Logs" && navigation.substep === "step1_configure") {
+       setActiveSims({ configFile: otelSample });
+       return;
+    } else if (navigation.view === "Logs" && navigation.substep === "step2_configure") {
+      setActiveSims({ configFile: mdaiHubSample, start: 80, end: 92 });
+      return;
     } else {
-      setActiveRange(undefined);
+      setActiveSims(undefined);
     }
-  }, [navigation.substep]);
+  }, [navigation.view, navigation.substep]);
 
   return (
     <Box sx={{ width: "100%", p: 3, display: navigation.view === "Home" ? "none" : "block" }}>
@@ -35,7 +46,7 @@ export function Simulators() {
             innerStyles={{
               border: "2px solid #B062C2",
             }}
-            children={<ConfigText text={configSample} activeRange={activeRange} />}
+            children={<ConfigText text={activeSims?.configFile} activeRange={activeSims?.start !== undefined && activeSims?.end !== undefined ? { start: activeSims.start, end: activeSims.end } : undefined} view={navigation.view} />}
           />
         </Grid>
         <Grid size={6.5}>

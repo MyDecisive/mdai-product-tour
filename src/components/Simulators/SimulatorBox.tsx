@@ -1,4 +1,4 @@
-import { Typography, Link, Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import type { SimulatorBoxProps } from "../../utils/types";
 
 export function SimulatorBox({
@@ -7,7 +7,7 @@ export function SimulatorBox({
   href,
   children,
   styles,
-  innerStyles
+  innerStyles,
 }: SimulatorBoxProps) {
   return (
     <>
@@ -16,12 +16,18 @@ export function SimulatorBox({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          ...styles
+          ...styles,
         }}
       >
         <Typography variant="subtitle1">{title}</Typography>
         {link && href && (
-          <Link href={href} variant="body2" underline="hover" target="_blank" rel="noopener">
+          <Link
+            href={href}
+            variant="body2"
+            underline="hover"
+            target="_blank"
+            rel="noopener"
+          >
             {link}
           </Link>
         )}

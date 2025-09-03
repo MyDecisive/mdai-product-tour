@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import "./App.css";
 import { Banner, NavDrawer, Simulators, WelcomeModal } from "./components";
-import { FullScreenModal } from "./components/FullScreenModal/FullScreenModal";
+import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
           <Simulators />
         </Box>
       </Box>
-      <FullScreenModal />
+      <BigContentModal />
     </Box>
   );
 }

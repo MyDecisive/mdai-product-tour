@@ -11,7 +11,7 @@ import {
 import { LOGS_SIMS } from "../../views/Logs/simsContent";
 import { ConfigText } from "./Config";
 import { SimulatorBox } from "./SimulatorBox";
-import { Terminal } from "./TerminalSimulator";
+import { Terminal } from "./Terminal";
 
 export function Simulators() {
   const navigation = useNavigation();
@@ -73,18 +73,16 @@ export function Simulators() {
         </Grid>
 
         <Grid size={5}>
-          <Grid size={5}>
-            <SimulatorBox
-              title="Terminal"
-              innerStyles={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-              }}
-            >
-              <Terminal typedOptions={[]} />
-            </SimulatorBox>
-          </Grid>
+          <SimulatorBox
+            title="Terminal"
+            innerStyles={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Terminal />
+          </SimulatorBox>
         </Grid>
 
         <Grid size={6.5}>

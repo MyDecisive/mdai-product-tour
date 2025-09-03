@@ -88,6 +88,7 @@ export const theme = createTheme({
         paper: {
           borderRadius: "12px",
           padding: "20px 28px 20px 18px",
+          maxWidth: "unset",
         },
       },
     },

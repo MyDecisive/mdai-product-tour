@@ -1,12 +1,12 @@
 import { css } from "@emotion/react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import AppBar from "@mui/material/AppBar";
+import { Paper } from "@mui/material";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useGetFullScreenModalPresentationLayer } from "./content";
+import { useGetBigContentModalPresentationLayer } from "./content";
 
 const toolbarStyles = css({
   height: "60px",
@@ -22,15 +22,14 @@ const toolbarStyles = css({
   },
 });
 
-export function FullScreenModal() {
+export function BigContentModal() {
   const { title, ContentComponent, handleClose } =
-    useGetFullScreenModalPresentationLayer();
+    useGetBigContentModalPresentationLayer();
 
   const open = title !== null && ContentComponent !== null;
 
   return (
     <Dialog
-      fullScreen
       open={open}
       onClose={handleClose}
       slotProps={{
@@ -42,7 +41,7 @@ export function FullScreenModal() {
         },
       }}
     >
-      <AppBar sx={{ position: "relative" }}>
+      <Box>
         <Toolbar sx={toolbarStyles}>
           <Typography sx={{ fontWeight: 700, fontSize: "24px" }}>
             {title || ""}
@@ -56,22 +55,26 @@ export function FullScreenModal() {
             <CloseRoundedIcon sx={{ width: "1.5em", height: "1.5em" }} />
           </IconButton>
         </Toolbar>
-      </AppBar>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "12px",
-          marginTop: "48px",
-          marginBottom: "54px",
-          marginX: "80px",
-          height: "100%",
-        }}
-      >
-        <Box sx={{ width: "50%" }}>
-          {ContentComponent && <ContentComponent handleClose={handleClose} />}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "12px",
+            height: "100%",
+          }}
+        >
+          <Paper
+            sx={{
+              paddingX: "48px",
+              paddingY: "40px",
+              backgroundColor: "#272727",
+              color: "#FFFFFF",
+            }}
+          >
+            {ContentComponent && <ContentComponent handleClose={handleClose} />}
+          </Paper>
         </Box>
       </Box>
     </Dialog>

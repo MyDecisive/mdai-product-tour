@@ -20,7 +20,7 @@ const MODAL_CONTENT: Record<
   finished: TourFinished,
 };
 
-export function useGetFullScreenModalPresentationLayer() {
+export function useGetBigContentModalPresentationLayer() {
   const { fullScreenModal, setNavigation } = useNavigation();
   const handleClose = useCallback(() => {
     setNavigation((navState) => ({ ...navState, fullScreenModal: undefined }));

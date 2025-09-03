@@ -1,17 +1,21 @@
-import { css } from "@emotion/react";
+import { css, type CSSObject } from "@emotion/react";
 import {
+  Box,
+  Button,
   Checkbox,
   FilledInput,
   FormControl,
   FormControlLabel,
   OutlinedInput,
   Stack,
+  Typography,
 } from "@mui/material";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import type { FullScreenModalContentProps } from "../../utils/types";
+
+type ContactFormProps = {
+  handleClose: () => void;
+  styles?: CSSObject;
+};
 
 const textFieldStyles = css({
   marginBottom: "16px",
@@ -25,7 +29,7 @@ const buttonStyles = css({
   borderRadius: "4px",
 });
 
-export function ContactForm({ handleClose }: FullScreenModalContentProps) {
+export function ContactForm({ handleClose, styles }: ContactFormProps) {
   const [email, setEmail] = useState<string>();
   const [name, setName] = useState<string>();
   const [phone, setPhone] = useState<string>();
@@ -33,16 +37,16 @@ export function ContactForm({ handleClose }: FullScreenModalContentProps) {
   const [help, setHelp] = useState<boolean>(false);
   const [questions, setQuestions] = useState<string>();
   return (
-    <Paper
-      sx={{
-        paddingX: "48px",
-        paddingY: "40px",
-        backgroundColor: "#272727",
-        color: "#FFFFFF",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-      }}
+    <Box
+      sx={css([
+        {
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          minWidth: "520px",
+        },
+        styles,
+      ])}
     >
       <Typography sx={{ fontWeight: 700, fontSize: "24px", mb: "24px" }}>
         Have questions or feedback?
@@ -132,6 +136,6 @@ export function ContactForm({ handleClose }: FullScreenModalContentProps) {
       >
         Join our Slack
       </Button>
-    </Paper>
+    </Box>
   );
 }

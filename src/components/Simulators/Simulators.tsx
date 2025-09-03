@@ -82,7 +82,7 @@ export function Simulators() {
                 justifyContent: "flex-end",
               }}
             >
-              <Terminal />
+              <Terminal typedOptions={[]} />
             </SimulatorBox>
           </Grid>
         </Grid>

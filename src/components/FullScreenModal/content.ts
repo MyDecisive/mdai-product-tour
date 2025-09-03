@@ -22,7 +22,6 @@ const MODAL_CONTENT: Record<
 
 export function useGetFullScreenModalPresentationLayer() {
   const { fullScreenModal, setNavigation } = useNavigation();
-  console.log({ fullScreenModal });
   const handleClose = useCallback(() => {
     setNavigation((navState) => ({ ...navState, fullScreenModal: undefined }));
   }, []);

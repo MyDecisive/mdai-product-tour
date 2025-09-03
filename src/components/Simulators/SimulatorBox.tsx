@@ -1,13 +1,5 @@
 import { Typography, Link, Box } from "@mui/material";
-
-type SimulatorBoxProps = {
-  title: string;
-  link?: string;
-  href?: string;
-  children?: React.ReactNode;
-  styles?: object;
-  innerStyles?: object;
-};
+import type { SimulatorBoxProps } from "../../utils/types";
 
 export function SimulatorBox({
   title,
@@ -29,7 +21,7 @@ export function SimulatorBox({
       >
         <Typography variant="subtitle1">{title}</Typography>
         {link && href && (
-          <Link href={href} variant="body2" underline="hover">
+          <Link href={href} variant="body2" underline="hover" target="_blank" rel="noopener">
             {link}
           </Link>
         )}
@@ -38,8 +30,10 @@ export function SimulatorBox({
         sx={{
           p: 1,
           minHeight: "350px",
+          maxWidth: "100%",
           borderRadius: "4px",
           background: "#393939",
+          border: "2px solid #393939",
           ...innerStyles,
         }}
       >

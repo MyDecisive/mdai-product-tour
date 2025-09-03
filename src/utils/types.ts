@@ -34,3 +34,35 @@ export interface NavigationState {
   substep?: StepItemId;
   fullScreenModal?: FullScreenModalType;
 }
+
+export type SimulatorBoxProps = {
+  title: string;
+  link?: string;
+  href?: string;
+  styles?: React.CSSProperties;
+  innerStyles?: React.CSSProperties;
+  children?: React.ReactNode;
+};
+
+export type LineRange = { start: number; end: number };
+
+export type ConfigTextProps = {
+  text?: string;
+  activeRange?: LineRange;
+  view: string;
+  title?: string;
+};
+
+export type PanelId = "config" | "terminal" | "status" | "logs";
+
+export type SimAction =
+  | { t?: number; delay?: number } & (
+      | { simType: "config.show"; href?: string; configFile: string; range?: LineRange; text?: string; configName?: string }
+      | { simType: "terminal.run"; cmd: string }
+      | { simType: "terminal.out"; text: string }
+      | { simType: "status.set"; text: string | string[] | Record<string, unknown> }
+      | { simType: "logs.append"; lines: string[] }
+      | { simType: "wait"; ms: number }
+    );
+
+export type SimScript = SimAction[];

@@ -3,6 +3,7 @@ import type {
   StepItemMap,
   ViewStepOrder,
   ViewTreeItemProps,
+  SimScript,
 } from "../utils/types";
 
 export const ITEM_IDS = {
@@ -59,4 +60,20 @@ export function hydrateViewTreeitems(
       ...step,
     };
   });
+}
+
+export const simScripts = new Map<string, SimScript>();
+
+export function registerSims(view: string, sims: Record<string, SimScript>) {
+  Object.entries(sims).forEach(([substep, script]) => {
+    simScripts.set(`${view}/${substep}`, script);
+  });
+}
+
+export function getSimScriptKey(view: string, step?: string, substep?: string) {
+  return substep ? `${view}/${substep}` : step ? `${view}/${step}` : view;
+}
+
+export function selectSimScript(key: string): SimScript | undefined {
+  return simScripts.get(key);
 }

@@ -1,68 +1,58 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Grid from "@mui/material/Grid";
 import { SimulatorBox } from "./SimulatorBox";
 import { Box } from "@mui/material";
 import { useNavigation } from "../../hooks/useNavigation";
 import { ConfigText } from "./Config";
-import mdaiHubSample from "./configSamples/mdaiHubSample.yaml?raw";
-import otelSample from "./configSamples/otelSample.yaml?raw";
-
-type ActiveViewSim = {
-  configFile: typeof mdaiHubSample;
-  start?: number;
-  end?: number;
-};
+import { useSimRunner } from "../../hooks/useSimRunner";
+import { getSimScriptKey, registerSims, selectSimScript } from "../../views/common";
+import { LOGS_SIMS } from "../../views/Logs/simsContent";
 
 export function Simulators() {
-  const [activeSims, setActiveSims] = useState<ActiveViewSim | undefined>(undefined);
   const navigation = useNavigation();
-  console.log(navigation);
+  const key = useMemo(() => getSimScriptKey(navigation.view, navigation.step, navigation.substep), [navigation]);
+  const script = useMemo(() => selectSimScript(key), [key]);
+  const sim = useSimRunner(script);
 
   useEffect(() => {
-    if (navigation.view === "Logs" && navigation.substep === "step1_configure") {
-       setActiveSims({ configFile: otelSample });
-       return;
-    } else if (navigation.view === "Logs" && navigation.substep === "step2_configure") {
-      setActiveSims({ configFile: mdaiHubSample, start: 80, end: 92 });
-      return;
-    } else {
-      setActiveSims(undefined);
-    }
-  }, [navigation.view, navigation.substep]);
+    registerSims("Logs", LOGS_SIMS);
+  }, []);
 
   return (
     <Box sx={{ width: "100%", p: 3, display: navigation.view === "Home" ? "none" : "block" }}>
-      <Grid
-        container
-        rowSpacing={2}
-        columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-        sx={{ width: "100%" }}
-      >
+      <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ width: "100%" }}>
         <Grid size={5} sx={{ overflow: "hidden" }}>
-          <SimulatorBox
-            title="Config"
-            link="View Config in GitHub →"
-            href="#"
-            innerStyles={{
-              border: "2px solid #B062C2",
-            }}
-            children={<ConfigText text={activeSims?.configFile} activeRange={activeSims?.start !== undefined && activeSims?.end !== undefined ? { start: activeSims.start, end: activeSims.end } : undefined} view={navigation.view} />}
-          />
+          <SimulatorBox title="Config" link="View Config in GitHub →" href={sim.config.href} innerStyles={{ border: "2px solid #B062C2" }}>
+            <ConfigText text={sim.config.text} activeRange={sim.config.range} view={navigation.view} title={sim.config.name} />
+          </SimulatorBox>
         </Grid>
+
         <Grid size={6.5}>
-          <SimulatorBox
-            title="Status"
-          />
+          <SimulatorBox title="Status">
+            <Box sx={{ p: 1, whiteSpace: "pre-wrap" }}>
+              {Array.isArray(sim.status.value)
+                ? sim.status.value.map((s, i) => <div key={i}>• {s}</div>)
+                : typeof sim.status.value === "object" && sim.status.value
+                ? <pre style={{ margin: 0 }}>{JSON.stringify(sim.status.value, null, 2)}</pre>
+                : sim.status.value ?? ""}
+            </Box>
+          </SimulatorBox>
         </Grid>
+
         <Grid size={5}>
-          <SimulatorBox
-            title="Terminal"
-          />
+          <SimulatorBox title="Terminal">
+            <Box component="pre" sx={{ m: 0, p: 1, whiteSpace: "pre-wrap" }}>
+              {sim.terminal.lines.join("\n")}
+            </Box>
+          </SimulatorBox>
         </Grid>
+
         <Grid size={6.5}>
-          <SimulatorBox
-            title="Tail Logs"
-          />
+          <SimulatorBox title="Tail Logs">
+            <Box component="pre" sx={{ m: 0, p: 1, whiteSpace: "pre-wrap" }}>
+              {sim.logs.lines.join("\n")}
+            </Box>
+          </SimulatorBox>
         </Grid>
       </Grid>
     </Box>

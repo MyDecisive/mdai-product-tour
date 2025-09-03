@@ -1,21 +1,12 @@
-import Box from "@mui/material/Box";
 import { useEffect, useMemo, useRef } from "react";
-
-type Range = { 
-    start: number; 
-    end: number 
-};
-
-type ConfigTextProps = { 
-    text?: string; 
-    activeRange?: Range 
-    view: string
-};
+import type { ConfigTextProps } from "../../utils/types";
+import { Box, Typography } from "@mui/material";
 
 export function ConfigText({
   text,
   activeRange,
-  view
+  view,
+  title
 }: ConfigTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lines = useMemo(() => (text ?? "").split("\n"), [text]);
@@ -26,16 +17,21 @@ export function ConfigText({
       return;
     }
     const el = containerRef.current?.querySelector<HTMLDivElement>(
-      `[data-line="${activeRange.start}"]`
+      `[data-line="${activeRange.start - 1}"]`
     );
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [activeRange, view]);
 
   return (
+    <>
+    <Typography variant="body2" color="text.secondary" sx={{ display: "block", position: "fixed", background: "#00000059", px: 0.5, borderRadius: 1 }}>
+            {title}
+    </Typography>
     <Box
       ref={containerRef}
       sx={{
-        maxHeight: 350,
+        maxHeight: 325,
+        pt: 3,
         overflow: "scroll",
         fontFamily:
           'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
@@ -75,5 +71,6 @@ export function ConfigText({
         );
       })}
     </Box>
+    </>
   );
 }

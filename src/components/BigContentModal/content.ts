@@ -7,11 +7,6 @@ import type {
 import { ContactForm } from "./ContactForm";
 import { TourFinished } from "./TourFinished";
 
-const MODAL_TITLES: Record<FullScreenModalType, string> = {
-  contact: "Contact Us",
-  finished: "Not the end of the road",
-};
-
 const MODAL_CONTENT: Record<
   FullScreenModalType,
   FunctionComponent<FullScreenModalContentProps>
@@ -28,7 +23,6 @@ export function useGetBigContentModalPresentationLayer() {
 
   if (!fullScreenModal) {
     return {
-      title: null,
       ContentComponent: null,
       handleClose,
     };
@@ -36,14 +30,12 @@ export function useGetBigContentModalPresentationLayer() {
   if (!["contact", "finished"].includes(fullScreenModal)) {
     console.error("Modal type not supported ", fullScreenModal);
     return {
-      title: null,
       ContentComponent: null,
       handleClose,
     };
   }
 
   return {
-    title: MODAL_TITLES[fullScreenModal],
     ContentComponent: MODAL_CONTENT[fullScreenModal],
     handleClose,
   };

@@ -5,7 +5,6 @@ import { Box, Typography } from "@mui/material";
 export function ConfigText({
   text,
   activeRange,
-  view,
   title
 }: ConfigTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +19,7 @@ export function ConfigText({
       `[data-line="${activeRange.start - 1}"]`
     );
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeRange, view]);
+  }, [activeRange]);
 
   return (
     <>

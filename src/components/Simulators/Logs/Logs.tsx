@@ -24,12 +24,12 @@ function selectPropLog(logs: LogRecord[], logIndex: number) {
   return logs[logIndex];
 }
 
-function numNotNil(arg?: number) {
-  return arg != null;
+function numIsNull(arg: number | null) {
+  return arg == null;
 }
 
-function createNextLogId(cycleCount?: number, logIndex?: number) {
-  if (numNotNil(cycleCount) && numNotNil(logIndex)) {
+function createNextLogId(cycleCount: number | null, logIndex: number | null) {
+  if (numIsNull(cycleCount) && numIsNull(logIndex)) {
     return `error-${Date.now()}-${Math.random()}`;
   }
   return `log-${cycleCount}-${logIndex}`;
@@ -37,8 +37,8 @@ function createNextLogId(cycleCount?: number, logIndex?: number) {
 
 function createNextLog(
   propLog: LogRecord,
-  cycleCount?: number,
-  logIndex?: number
+  cycleCount: number | null,
+  logIndex: number | null
 ) {
   return {
     ...propLog,
@@ -76,7 +76,7 @@ const LogSimulator: React.FC<LogSimulatorProps> = ({
         let nextLog: LogRecord;
         if (shouldInjectError(!!errorLogs.length, errorFrequency)) {
           const propLog = selectErrorPropLog(errorLogs);
-          nextLog = createNextLog(propLog);
+          nextLog = createNextLog(propLog, null, null);
         } else {
           const logIndex = currentIndex % logs.length;
           const propLog = selectPropLog(logs, logIndex);

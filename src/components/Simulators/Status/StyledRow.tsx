@@ -51,7 +51,7 @@ export function StyledRow({
           textAlign: "end",
         }}
       >
-        {ready}
+        {status}
       </Typography>
       <Typography
         sx={{
@@ -64,7 +64,7 @@ export function StyledRow({
           textAlign: "end",
         }}
       >
-        {status}
+        {ready}
       </Typography>
       <Typography
         sx={{

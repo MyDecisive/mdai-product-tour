@@ -82,3 +82,12 @@ export type SimAction =
     );
 
 export type SimScript = SimAction[];
+
+export interface LogRecord {
+  message?: string;
+  content?: string;
+  level?: string;
+  timestamp?: string;
+  id?: string;
+  [key: string]: any;
+}

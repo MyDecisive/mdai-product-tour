@@ -1,3 +1,4 @@
+import { Box, Typography } from "@mui/material";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import type { Service } from "../../../utils/types";
 import { ServiceRow } from "./ServiceRow";
@@ -162,19 +163,30 @@ export const Status: FC<StatusProps> = ({ services = [], onAllStabilized }) => {
   }, [services, podStatuses]);
 
   return (
-    <div className="bg-black text-white font-mono text-sm p-4 rounded-lg border border-gray-700">
-      <div className="mb-4">
-        <div className="text-gray-400 text-xs">NAMESPACE: mdai</div>
-      </div>
+    <Box className="bg-black text-white font-mono text-sm p-4 rounded-lg border border-gray-700">
+      <Box>
+        <Typography
+          sx={{
+            fontFamily:
+              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+            fontSize: 13,
+            lineHeight: 1.5,
+          }}
+        >
+          NAMESPACE: mdai
+        </Typography>
+      </Box>
 
-      <div className="space-y-1">
+      <Box className="space-y-1">
         <StyledRow
           name="NAME"
           ready="READY"
           status="STATUS"
           restarts="RESTARTS"
+          containerStyles={{
+            borderBottom: "1px solid rgba(111, 111, 111, 0.50)",
+          }}
         />
-        <div className="grid grid-cols-12 gap-2 text-gray-400 border-b border-gray-600 pb-1"></div>
 
         {podOrder.map((podId) => {
           const { name, shouldReplace, skipStartup } = activePods[podId];
@@ -193,9 +205,11 @@ export const Status: FC<StatusProps> = ({ services = [], onAllStabilized }) => {
         })}
 
         {podOrder.length === 0 && (
-          <div className="text-gray-500 text-center py-4">No pods running</div>
+          <Typography className="text-gray-500 text-center py-4">
+            No pods running
+          </Typography>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

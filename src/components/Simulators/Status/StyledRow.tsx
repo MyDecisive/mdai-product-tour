@@ -31,6 +31,11 @@ export function StyledRow({
       <Typography
         sx={{
           flex: "1 1 50%",
+
+          fontFamily:
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+          fontSize: 13,
+          lineHeight: 1.5,
         }}
       >
         {name}
@@ -38,6 +43,11 @@ export function StyledRow({
       <Typography
         sx={{
           flex: "1 1 16.3%",
+
+          fontFamily:
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+          fontSize: 13,
+          lineHeight: 1.5,
           textAlign: "end",
         }}
       >
@@ -46,6 +56,11 @@ export function StyledRow({
       <Typography
         sx={{
           flex: "1 1 16.3%",
+
+          fontFamily:
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+          fontSize: 13,
+          lineHeight: 1.5,
           textAlign: "end",
         }}
       >
@@ -54,6 +69,11 @@ export function StyledRow({
       <Typography
         sx={{
           flex: "1 1 16.3%",
+
+          fontFamily:
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+          fontSize: 13,
+          lineHeight: 1.5,
           textAlign: "end",
         }}
       >

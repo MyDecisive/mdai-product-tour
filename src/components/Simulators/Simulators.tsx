@@ -11,6 +11,7 @@ import {
 } from "../../views/common";
 import { LOGS_SIMS } from "../../views/Logs/simsContent";
 import { ConfigText } from "./Config";
+import LogSimulator from "./Logs/Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status/Status";
 import { Terminal } from "./Terminal";
@@ -90,9 +91,7 @@ export function Simulators() {
 
         <Grid size={6.5}>
           <SimulatorBox title="Tail Logs">
-            <Box component="pre" sx={{ m: 0, p: 1, whiteSpace: "pre-wrap" }}>
-              {sim.logs.lines.join("\n")}
-            </Box>
+            <LogSimulator />
           </SimulatorBox>
         </Grid>
       </Grid>

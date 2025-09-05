@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import { useEffect, useMemo } from "react";
 import { useNavigation } from "../../hooks/useNavigation";
 import { useSimRunner } from "../../hooks/useSimRunner";
+import type { Service } from "../../utils/types";
 import {
   getSimScriptKey,
   registerSims,
@@ -11,7 +12,14 @@ import {
 import { LOGS_SIMS } from "../../views/Logs/simsContent";
 import { ConfigText } from "./Config";
 import { SimulatorBox } from "./SimulatorBox";
+import { Status } from "./Status/Status";
 import { Terminal } from "./Terminal";
+
+const services: Service[] = [
+  { name: "web-server", replicas: 2 },
+  { name: "api-gateway" },
+  { name: "database" },
+];
 
 export function Simulators() {
   const navigation = useNavigation();
@@ -59,15 +67,10 @@ export function Simulators() {
         <Grid size={6.5}>
           <SimulatorBox title="Status">
             <Box sx={{ p: 1, whiteSpace: "pre-wrap" }}>
-              {Array.isArray(sim.status.value) ? (
-                sim.status.value.map((s, i) => <div key={i}>• {s}</div>)
-              ) : typeof sim.status.value === "object" && sim.status.value ? (
-                <pre style={{ margin: 0 }}>
-                  {JSON.stringify(sim.status.value, null, 2)}
-                </pre>
-              ) : (
-                sim.status.value ?? ""
-              )}
+              <Status
+                services={services}
+                onAllStabilized={() => console.log("All services running")}
+              />
             </Box>
           </SimulatorBox>
         </Grid>

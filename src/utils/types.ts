@@ -55,12 +55,28 @@ export type ConfigTextProps = {
 
 export type PanelId = "config" | "terminal" | "status" | "logs";
 
+export interface Service {
+  name: string;
+  replicas?: number;
+  skipStartup?: boolean;
+}
+
 export type SimAction =
   | { t?: number; delay?: number } & (
-      | { simType: "config.show"; href?: string; configFile: string; range?: LineRange; text?: string; configName?: string }
+      | {
+          simType: "config.show";
+          href?: string;
+          configFile: string;
+          range?: LineRange;
+          text?: string;
+          configName?: string;
+        }
       | { simType: "terminal.run"; cmd: string }
       | { simType: "terminal.out"; text: string }
-      | { simType: "status.set"; text: string | string[] | Record<string, unknown> }
+      | {
+          simType: "status.set";
+          text: string | string[] | Record<string, unknown>;
+        }
       | { simType: "logs.append"; lines: string[] }
       | { simType: "wait"; ms: number }
     );

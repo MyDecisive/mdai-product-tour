@@ -1,93 +1,22 @@
 import { Box } from "@mui/material";
-import React, { useEffect, useRef } from "react";
-import Typed, { type TypedOptions } from "typed.js";
+import { useEffect, useRef } from "react";
+import Typed from "typed.js";
+import { useAnimationIndex } from "../../hooks/useAnimationIndex";
+import type { TerminalTypedProps } from "../../utils/types";
 
-export interface TerminalTypedOptions extends TypedOptions {
-  prompt?: string;
-}
-
-export interface TerminalTypedProps {
-  typedOptions?: TerminalTypedOptions[];
-  style?: React.CSSProperties;
-  className?: string;
-}
-
-const TERMINAL_PROMPT = "eng@local-terminal > ";
-const CURSOR_CHAR = "█";
-
-const terminalAutoLines = [
-  "<br/>",
-  "<br/>",
-  "^700🧪 Deploying synthetic log generators...^450",
-  "deployment.apps/mdai-logger-xnoisy created",
-  "deployment.apps/mdai-logger-noisy created^450",
-  "deployment.apps/mdai-logger created",
-  "✅ Log generators deployed",
-];
-
-const userEntry = [
-  "./MDAI-kind",
-  "./mdai-kind .sh",
-  "./mdai-kind.sh kif",
-  "./mdai-kind.sh logs",
-];
-
-export function useTerminalTypedProps() {
-  const terminalTypedOptions: TerminalTypedOptions[] = [
-    {
-      prompt: "eng@local-terminal > ",
-      strings: userEntry,
-      typeSpeed: 70,
-      backSpeed: 150,
-      cursorChar: CURSOR_CHAR,
-      showCursor: true,
-    },
-    ...(terminalAutoLines.map((line) => ({
-      strings: [line],
-      startDelay: 500,
-      typeSpeed: 5,
-      cursorChar: CURSOR_CHAR,
-      showCursor: true,
-      contentType: "html",
-    })) as TerminalTypedOptions[]),
-    {
-      prompt: "eng@local-terminal > ",
-      strings: [""],
-      typeSpeed: 70,
-      backSpeed: 150,
-      cursorChar: CURSOR_CHAR,
-      showCursor: true,
-    },
-  ];
-
-  return {
-    terminalTypedOptions,
-    TERMINAL_PROMPT,
-    CURSOR_CHAR,
-  };
-}
-
-export function Terminal({
-  typedOptions: typedOptionsProp,
-  className,
-}: TerminalTypedProps) {
-  const { terminalTypedOptions } = useTerminalTypedProps();
-
+export function Terminal({ typedOptions = [], className }: TerminalTypedProps) {
+  const { incrementAnimation } = useAnimationIndex();
   const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
   const promptElementsRef = useRef<(HTMLPreElement | null)[]>([]);
-
-  const typedOptions = typedOptionsProp || terminalTypedOptions;
 
   useEffect(() => {
     typedOptions.forEach((options, index) => {
       const element = elementsRef.current[index];
       if (element) {
-        const { prompt, ...typedJsOptions } = options;
-
-        const originalOnComplete = typedJsOptions.onComplete;
+        const originalOnComplete = options.onComplete;
         const wrappedOptions = {
-          ...typedJsOptions,
+          ...options,
           onComplete: (typed: Typed) => {
             if (originalOnComplete) {
               originalOnComplete(typed);
@@ -109,6 +38,9 @@ export function Terminal({
                 nextTyped.cursor.style.display = "inline-block";
                 nextTyped.start();
               }
+            }
+            if (index === typedOptions.length - 1) {
+              incrementAnimation();
             }
           },
         };
@@ -138,7 +70,7 @@ export function Terminal({
       });
       typedInstancesRef.current = [];
     };
-  }, [typedOptions]);
+  }, [typedOptions, incrementAnimation]);
 
   return (
     <Box

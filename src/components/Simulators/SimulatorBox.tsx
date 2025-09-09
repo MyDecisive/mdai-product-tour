@@ -8,6 +8,7 @@ export function SimulatorBox({
   children,
   styles,
   innerStyles,
+  active,
 }: SimulatorBoxProps) {
   return (
     <>
@@ -34,12 +35,13 @@ export function SimulatorBox({
       </Box>
       <Box
         sx={{
-          p: 1,
+          p: "24px 16px 16px 16px",
           minHeight: "350px",
           maxWidth: "100%",
           borderRadius: "4px",
           background: "#393939",
-          border: "2px solid #393939",
+          position: "relative",
+          border: `2px solid ${active ? "#B062C2" : "#393939"}`,
           ...innerStyles,
         }}
       >

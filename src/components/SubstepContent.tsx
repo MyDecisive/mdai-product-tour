@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { type ReactNode } from "react";
 
-const SubstepStyles = css({
+const SubStepStyles = css({
   borderRadius: "4px",
   padding: "8px 16px",
   display: "flex",
@@ -11,26 +11,26 @@ const SubstepStyles = css({
   gap: "16px",
 });
 
-const SubstepTitleStyles = css({
+const SubStepTitleStyles = css({
   fontWeight: 700,
 });
 
-const SubstepBodyStyles = css({});
+const SubStepBodyStyles = css({});
 
-type SubstepProps = {
+type SubStepProps = {
   children: ReactNode;
   title?: ReactNode;
 };
 
-export function SubstepContent({ children, title }: SubstepProps) {
+export function SubStepContent({ children, title }: SubStepProps) {
   return (
-    <Box sx={SubstepStyles}>
+    <Box sx={SubStepStyles}>
       {title && (
-        <Typography component="span" sx={SubstepTitleStyles}>
+        <Typography component="span" sx={SubStepTitleStyles}>
           {title}
         </Typography>
       )}
-      <Typography component="span" sx={SubstepBodyStyles}>
+      <Typography component="span" sx={SubStepBodyStyles}>
         {children}
       </Typography>
     </Box>

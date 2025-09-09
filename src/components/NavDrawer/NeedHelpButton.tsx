@@ -22,8 +22,8 @@ export function NeedHelpButton() {
   const { setNavigation } = useNavigation();
 
   const openContactModal = useCallback(() => {
-    setNavigation((navState) => ({ ...navState, fullScreenModal: "contact" }));
-  }, []);
+    setNavigation((navState) => ({ ...navState, bigContentModal: "contact" }));
+  }, [setNavigation]);
 
   return (
     <Box sx={rowStyles}>

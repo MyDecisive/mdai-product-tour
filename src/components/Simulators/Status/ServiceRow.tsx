@@ -98,6 +98,7 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
 
   useEffect(() => {
     onStatusChange(podId, podStatus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const rowColor = STATUS_STYLE_MAP[podStatus]?.color;

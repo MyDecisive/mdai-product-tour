@@ -1,83 +1,58 @@
-import { Box } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import { useEffect, useMemo } from "react";
+import { Box, Grid } from "@mui/material";
+import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { useNavigation } from "../../hooks/useNavigation";
-import { useSimRunner } from "../../hooks/useSimRunner";
 import { Home } from "../../utils/constants";
-import type { Service } from "../../utils/types";
-import {
-  getSimScriptKey,
-  registerSims,
-  selectSimScript,
-} from "../../views/common";
-import { LOGS_SIMS } from "../../views/Logs/simsContent";
 import { ConfigText } from "./Config";
-import LogSimulator from "./Logs/Logs";
+import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
-import { Status } from "./Status/Status";
+import { Status } from "./Status";
 import { Terminal } from "./Terminal";
 
-const services: Service[] = [
-  { name: "web-server", replicas: 2 },
-  { name: "api-gateway" },
-  { name: "mdai-operator" },
-  { name: "otel-controller", replicas: 3 },
-  { name: "random-service" },
-  { name: "database" },
-];
-
 export function Simulators() {
-  const navigation = useNavigation();
-  const key = useMemo(
-    () => getSimScriptKey(navigation.view, navigation.step, navigation.substep),
-    [navigation]
-  );
-  const script = useMemo(() => selectSimScript(key), [key]);
-  const sim = useSimRunner(script);
-
-  useEffect(() => {
-    registerSims("Logs", LOGS_SIMS);
-  }, []);
+  const { view } = useNavigation();
+  const { config, terminal, status, logs } = useGetPanelContent();
 
   return (
     <Box
       sx={{
         width: "100%",
-        p: 3,
-        display: navigation.view === "Home" ? "none" : "block",
+        display: view === Home ? "none" : "block",
       }}
     >
-      {navigation.view === Home ? null : (
+      {view === Home ? null : (
         <Grid
           container
           rowSpacing={2}
           columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+          justifyContent={"space-evenly"}
+          alignItems={"stretch"}
           sx={{ width: "100%" }}
         >
           <Grid size={5} sx={{ overflow: "hidden" }}>
             <SimulatorBox
               title="Config"
               link="View Config in GitHub →"
-              href={sim.config.href}
-              innerStyles={{ border: "2px solid #B062C2" }}
+              href={config?.href}
+              active={!!config?.active}
             >
-              <ConfigText
-                text={sim.config.text}
-                activeRange={sim.config.range}
-                view={navigation.view}
-                title={sim.config.name}
-              />
+              {config !== null && (
+                <ConfigText
+                  text={config.text}
+                  activeRange={config.activeRange}
+                  title={config.title}
+                />
+              )}
             </SimulatorBox>
           </Grid>
 
           <Grid size={6.5}>
-            <SimulatorBox title="Status">
-              <Box sx={{ p: 1, whiteSpace: "pre-wrap" }}>
+            <SimulatorBox title="Status" active={!!status?.active}>
+              {status !== null && (
                 <Status
-                  services={services}
-                  onAllStabilized={() => console.log("All services running")}
+                  services={status.services}
+                  namespace={status.namespace}
                 />
-              </Box>
+              )}
             </SimulatorBox>
           </Grid>
 
@@ -89,14 +64,29 @@ export function Simulators() {
                 flexDirection: "column",
                 justifyContent: "flex-end",
               }}
+              active={!!terminal?.active}
             >
-              <Terminal />
+              {terminal !== null && (
+                <Terminal
+                  typedOptions={terminal.typedOptions}
+                  contextLabel={terminal.contextLabel}
+                />
+              )}
             </SimulatorBox>
           </Grid>
 
           <Grid size={6.5}>
-            <SimulatorBox title="Tail Logs">
-              <LogSimulator />
+            <SimulatorBox title="Tail Logs" active={!!logs?.active}>
+              {logs !== null && (
+                <LogsSimulator
+                  logs={logs.logs}
+                  speed={logs.speed}
+                  errorLogs={logs.errorLogs}
+                  errorFrequency={logs.errorFrequency}
+                  isPaused={logs.isPaused}
+                  contextLabel={logs.contextLabel}
+                />
+              )}
             </SimulatorBox>
           </Grid>
         </Grid>

@@ -1,31 +1,9 @@
-import { Logs, PII, Traces } from "../utils/constants";
 import type {
+  SimulatorPanelState,
   StepItemMap,
   ViewStepOrder,
   ViewTreeItemProps,
-  SimScript,
 } from "../utils/types";
-
-export const ITEM_IDS = {
-  introduction: "introduction",
-  step1: "step1",
-  step2: "step2",
-  step3: "step3",
-  introduction_what: "introduction_what",
-  introduction_unified: "introduction_unified",
-  step1_data: "step1_data",
-  step1_visualize: "step1_visualize",
-  step2_configure: "step2_configure",
-  step2_take: "step2_take",
-  step2_explore: "step2_explore",
-  step2_visualize: "step2_visualize",
-  step3_add: "step3_add",
-  step3_take: "step3_take",
-  step3_vizualize: "step3_vizualize",
-  Logs,
-  Traces,
-  PII,
-} as const;
 
 export function hydrateViewTreeitems(
   itemsMap: StepItemMap,
@@ -38,14 +16,14 @@ export function hydrateViewTreeitems(
     }
 
     if (subStepIds && subStepIds.length) {
-      const subSteps = subStepIds.map((substepId) => {
-        const substep = itemsMap[substepId];
-        if (!substep) {
-          throw new Error(`Substep with ID "${substepId}" not found in map`);
+      const subSteps = subStepIds.map((subStepId) => {
+        const subStep = itemsMap[subStepId];
+        if (!subStep) {
+          throw new Error(`SubStep with ID "${subStepId}" not found in map`);
         }
         return {
-          itemId: substepId,
-          ...substep,
+          itemId: subStepId,
+          ...subStep,
         };
       });
 
@@ -62,18 +40,33 @@ export function hydrateViewTreeitems(
   });
 }
 
-export const simScripts = new Map<string, SimScript>();
-
-export function registerSims(view: string, sims: Record<string, SimScript>) {
-  Object.entries(sims).forEach(([substep, script]) => {
-    simScripts.set(`${view}/${substep}`, script);
-  });
+function isObject(item: unknown): item is Record<string, unknown> {
+  return item !== null && typeof item === "object" && !Array.isArray(item);
 }
 
-export function getSimScriptKey(view: string, step?: string, substep?: string) {
-  return substep ? `${view}/${substep}` : step ? `${view}/${step}` : view;
+function deepMerge<T>(target: T, source: Partial<T>): T {
+  const result = { ...target };
+
+  for (const key in source) {
+    const sourceValue = source[key];
+    const targetValue = result[key];
+
+    if (isObject(sourceValue) && isObject(targetValue)) {
+      result[key] = deepMerge(
+        targetValue,
+        sourceValue as Partial<T[Extract<keyof T, string>]>
+      ) as T[Extract<keyof T, string>];
+    } else if (sourceValue !== undefined) {
+      result[key] = sourceValue as T[Extract<keyof T, string>];
+    }
+  }
+
+  return result;
 }
 
-export function selectSimScript(key: string): SimScript | undefined {
-  return simScripts.get(key);
+export function mergeAnimationState(
+  currentState: SimulatorPanelState,
+  stateChanges: Partial<SimulatorPanelState>
+): SimulatorPanelState {
+  return deepMerge(currentState, stateChanges);
 }

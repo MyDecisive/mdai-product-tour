@@ -2,21 +2,11 @@ import { Box, Grid } from "@mui/material";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { useNavigation } from "../../hooks/useNavigation";
 import { Home } from "../../utils/constants";
-// import type { Service } from "../../utils/types";
 import { ConfigText } from "./Config";
 import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
 import { Terminal } from "./Terminal";
-
-// const services: Service[] = [
-//   { name: "web-server", replicas: 2 },
-//   { name: "api-gateway" },
-//   { name: "mdai-operator" },
-//   { name: "otel-controller", replicas: 3 },
-//   { name: "random-service" },
-//   { name: "database" },
-// ];
 
 export function Simulators() {
   const { view } = useNavigation();

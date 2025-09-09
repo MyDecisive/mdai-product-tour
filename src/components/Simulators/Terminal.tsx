@@ -2,63 +2,7 @@ import { Box } from "@mui/material";
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import { useAnimationIndex } from "../../hooks/useAnimationIndex";
-import type {
-  // TerminalTypedOptions,
-  TerminalTypedProps,
-} from "../../utils/types";
-// import { CURSOR_CHAR, TERMINAL_PROMPT } from "../../views/common";
-
-// const terminalAutoLines = [
-//   "<br/>",
-//   "<br/>",
-//   "^700🧪 Deploying synthetic log generators...^450",
-//   "deployment.apps/mdai-logger-xnoisy created",
-//   "deployment.apps/mdai-logger-noisy created^450",
-//   "deployment.apps/mdai-logger created",
-//   "✅ Log generators deployed",
-// ];
-
-// const userEntry = [
-//   "./MDAI-kind",
-//   "./mdai-kind .sh",
-//   "./mdai-kind.sh kif",
-//   "./mdai-kind.sh logs",
-// ];
-
-// export function useTerminalTypedProps() {
-//   const terminalTypedOptions: TerminalTypedOptions[] = [
-//     {
-//       prompt: "eng@local-terminal > ",
-//       strings: userEntry,
-//       typeSpeed: 70,
-//       backSpeed: 150,
-//       cursorChar: CURSOR_CHAR,
-//       showCursor: true,
-//     },
-//     ...(terminalAutoLines.map((line) => ({
-//       strings: [line],
-//       startDelay: 500,
-//       typeSpeed: 5,
-//       cursorChar: CURSOR_CHAR,
-//       showCursor: true,
-//       contentType: "html",
-//     })) as TerminalTypedOptions[]),
-//     {
-//       prompt: "eng@local-terminal > ",
-//       strings: [""],
-//       typeSpeed: 70,
-//       backSpeed: 150,
-//       cursorChar: CURSOR_CHAR,
-//       showCursor: true,
-//     },
-//   ];
-
-//   return {
-//     terminalTypedOptions,
-//     TERMINAL_PROMPT,
-//     CURSOR_CHAR,
-//   };
-// }
+import type { TerminalTypedProps } from "../../utils/types";
 
 export function Terminal({ typedOptions = [], className }: TerminalTypedProps) {
   const { incrementAnimation } = useAnimationIndex();

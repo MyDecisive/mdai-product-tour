@@ -129,25 +129,3 @@ export const LogsSimulator: React.FC<LogSimulatorProps> = ({
     </>
   );
 };
-
-// const sampleLogs: LogRecord[] = [
-//   { message: "Application started successfully" },
-//   { message: "Database connection established" },
-//   { message: "Loading configuration from /etc/app/config.yaml" },
-//   { message: "Starting HTTP server on port 8080" },
-//   { message: "Processing incoming request GET /api/users" },
-//   { message: "Query executed in 23ms" },
-//   { message: "Response sent with status 200" },
-//   { message: "Cache hit for key: user_123" },
-//   { message: "Background job scheduled: data-cleanup" },
-//   { message: "Memory usage: 245MB / 512MB" },
-//   { message: "Processing batch job with 150 items" },
-//   { message: "Health check passed" },
-// ];
-
-// const errorLogs: LogRecord[] = [
-//   { message: "Failed to connect to external API", level: "error" },
-//   { message: "Database query timeout after 30s", level: "error" },
-//   { message: "Invalid JSON in request body", level: "error" },
-//   { message: "Rate limit exceeded for client 192.168.1.100", level: "warn" },
-// ];

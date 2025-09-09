@@ -1,4 +1,9 @@
 {
+  "compilerOptions": {
+    "types": [
+      "@modyfi/vite-plugin-yaml/modules"
+    ]
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },

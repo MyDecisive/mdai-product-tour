@@ -94,8 +94,6 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isErrored, setIsErrored] = useState(false);
-
-  const [loading, setLoading] = useState(false);
   
   const resetForm = useCallback(() => {
     setName(defaultValues?.name ?? "");
@@ -121,9 +119,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
   };
 
   const onClickSubmit = async () => {
-    setLoading(true)
     if (!validate()) {
-      setLoading(false)
       return;
     }
     setIsSending(true);
@@ -141,12 +137,10 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
     } as FormValues;
     try {
       await sendContactForm(values);
-      setLoading(false);
       setIsSuccess(true);
       resetForm();
       setTimeout(handleClose, 5000);
     } catch (error) {
-      setLoading(false);
       console.log(error);
       setIsErrored(true);
     } finally {
@@ -283,7 +277,6 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
         sx={buttonStyles}
         size="medium"
         onClick={onClickSubmit}
-        loading={loading}
         variant="contained"
         disabled={isSending || isSuccess}
       >
@@ -294,6 +287,9 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
         size="medium"
         onClick={handleClose}
         variant="outlined"
+        href="https://mydecisivecommunity.slack.com/archives/C08LE3DJ877"
+        target="_blank"
+        rel="noreferrer"
       >
         Join our Slack
       </Button>

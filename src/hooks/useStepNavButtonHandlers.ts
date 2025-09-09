@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import { Home } from "../utils/constants";
 import type { NavigationState, StepItemId, View } from "../utils/types";
-import { getViewStepOrder } from "../views/content";
+import { getViewStepOrder } from "../views/allViewsDrawerContent";
 import { useAnimationIndex } from "./useAnimationIndex";
 import { useNavigation } from "./useNavigation";
 

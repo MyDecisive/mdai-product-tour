@@ -1,32 +1,12 @@
-import { Home, Logs } from "../utils/constants";
+import { Logs } from "../utils/constants";
 import type {
-  AnimationAction,
   SimulatorPanelState,
+  AnimationAction,
   StepDefinition,
-  StepItemId,
   View,
+  StepItemId,
 } from "../utils/types";
-import * as HomeDrawerContent from "../views/Home/drawerContent";
-import * as LogsDrawerContent from "../views/Logs/drawerContent";
 import * as LogsPanelContent from "../views/Logs/simsContent";
-
-const drawerContentMap = {
-  [Home]: HomeDrawerContent.viewTreeItems,
-  [Logs]: LogsDrawerContent.viewTreeitems,
-};
-
-export function getViewDrawerItems(view: View) {
-  return drawerContentMap[view] || [];
-}
-
-const drawerStepOrderMap = {
-  [Home]: HomeDrawerContent.STEP_ORDER,
-  [Logs]: LogsDrawerContent.STEP_ORDER,
-};
-
-export function getViewStepOrder(view: View) {
-  return drawerStepOrderMap[view] || [];
-}
 
 const panelContentMap = {
   [Logs]: LogsPanelContent.PANEL_STATE,

@@ -1,17 +1,14 @@
 import { css } from "@emotion/react";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import Typography from "@mui/material/Typography";
+import { List, ListItem, Typography } from "@mui/material";
 import { SubStepContent } from "../../components/SubStepContent";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
-import { Logs } from "../../utils/constants";
+import { ITEM_IDS } from "../../utils/constants";
 import type {
-  NavigationState,
   StepItemMap,
   ViewStepOrder,
   ViewTreeItemProps,
 } from "../../utils/types";
-import { hydrateViewTreeitems, ITEM_IDS } from "../common";
+import { hydrateViewTreeitems } from "../common";
 
 function WhatIs() {
   return (
@@ -304,9 +301,3 @@ export const viewTreeitems: ViewTreeItemProps[] = hydrateViewTreeitems(
   stepItemsMap,
   STEP_ORDER
 );
-
-export const logs_default_steps: NavigationState = {
-  view: Logs,
-  step: "introduction",
-  subStep: "introduction_what",
-};

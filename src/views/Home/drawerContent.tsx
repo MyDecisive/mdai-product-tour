@@ -2,15 +2,20 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components/InfoBox";
 import { useNavigation } from "../../hooks/useNavigation";
-import { Logs, PII, Traces } from "../../utils/constants";
+import {
+  ITEM_IDS,
+  Logs,
+  LOGS_DEFAULT_STEPS,
+  PII,
+  Traces,
+} from "../../utils/constants";
 import { getViewTitle } from "../../utils/strings";
 import type {
   StepItemMap,
   ViewStepOrder,
   ViewTreeItemProps,
 } from "../../utils/types";
-import { logs_default_steps } from "../Logs/drawerContent";
-import { hydrateViewTreeitems, ITEM_IDS } from "../common";
+import { hydrateViewTreeitems } from "../common";
 
 function DynamicLogFiltrationContent() {
   const { setNavigation } = useNavigation();
@@ -31,7 +36,7 @@ function DynamicLogFiltrationContent() {
       <Typography>You can learn about it in 3 steps</Typography>
       <br />
       <div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
-        <Button size="medium" onClick={() => setNavigation(logs_default_steps)}>
+        <Button size="medium" onClick={() => setNavigation(LOGS_DEFAULT_STEPS)}>
           Start the Demo
         </Button>
       </div>

@@ -1,15 +1,15 @@
+import {
+  DEFAULT_ANIMATION_STEP_DURATION,
+  ITEM_IDS,
+  TERMINAL_PROMPT,
+} from "../../utils/constants";
 import type {
   AnimationAction,
   // Service,
   SimulatorPanelState,
   StepDefinitions,
 } from "../../utils/types";
-import {
-  DEFAULT_ANIMATION_STEP_DURATION,
-  ITEM_IDS,
-  TERMINAL_PROMPT,
-} from "../common";
-import { createEmptySimulatorPanelState } from "../content";
+import { createEmptySimulatorPanelState } from "../allViewsPanelContent";
 // import mdaiHubSample from "../Logs/configSamples/mdaiHubSample.yaml?raw";
 // import otelSample from "../Logs/configSamples/otelSample.yaml?raw";
 
@@ -23,7 +23,6 @@ function createAnimationAction(
     delay,
   };
 }
-
 export const PANEL_STATE: StepDefinitions = {
   [ITEM_IDS.introduction_what]: {
     initialState: createEmptySimulatorPanelState(),

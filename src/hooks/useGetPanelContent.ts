@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
 import { type SimulatorPanelState } from "../utils/types";
+import { getPanelContent } from "../views/allViewsPanelContent";
 import { mergeAnimationState } from "../views/common";
-import { getPanelContent } from "../views/content";
 import { useAnimationIndex } from "./useAnimationIndex";
 import { useNavigation } from "./useNavigation";
 

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Home } from "../utils/constants";
 import { getViewTitle } from "../utils/strings";
 import type { StepItemId } from "../utils/types";
-import { getViewDrawerItems } from "../views/content";
+import { getViewDrawerItems } from "../views/allViewsDrawerContent";
 import { useNavigation } from "./useNavigation";
 
 type DrawerItemClick = (

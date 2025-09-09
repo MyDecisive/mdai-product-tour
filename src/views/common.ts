@@ -1,32 +1,9 @@
-import { Logs, PII, Traces } from "../utils/constants";
 import type {
-  SimScript,
   SimulatorPanelState,
   StepItemMap,
   ViewStepOrder,
   ViewTreeItemProps,
 } from "../utils/types";
-
-export const ITEM_IDS = {
-  introduction: "introduction",
-  step1: "step1",
-  step2: "step2",
-  step3: "step3",
-  introduction_what: "introduction_what",
-  introduction_unified: "introduction_unified",
-  step1_data: "step1_data",
-  step1_visualize: "step1_visualize",
-  step2_configure: "step2_configure",
-  step2_take: "step2_take",
-  step2_explore: "step2_explore",
-  step2_visualize: "step2_visualize",
-  step3_add: "step3_add",
-  step3_take: "step3_take",
-  step3_vizualize: "step3_vizualize",
-  Logs,
-  Traces,
-  PII,
-} as const;
 
 export function hydrateViewTreeitems(
   itemsMap: StepItemMap,
@@ -62,27 +39,6 @@ export function hydrateViewTreeitems(
     };
   });
 }
-
-export const simScripts = new Map<string, SimScript>();
-
-export function registerSims(view: string, sims: Record<string, SimScript>) {
-  Object.entries(sims).forEach(([subStep, script]) => {
-    simScripts.set(`${view}/${subStep}`, script);
-  });
-}
-
-export function getSimScriptKey(view: string, step?: string, subStep?: string) {
-  return subStep ? `${view}/${subStep}` : step ? `${view}/${step}` : view;
-}
-
-export function selectSimScript(key: string): SimScript | undefined {
-  return simScripts.get(key);
-}
-
-export const TERMINAL_PROMPT = "eng@local-terminal > ";
-export const CURSOR_CHAR = "█";
-
-export const DEFAULT_ANIMATION_STEP_DURATION = 750;
 
 function isObject(item: unknown): item is Record<string, unknown> {
   return item !== null && typeof item === "object" && !Array.isArray(item);

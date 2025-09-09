@@ -1,7 +1,7 @@
 import type { TreeItemSlotProps } from "@mui/x-tree-view";
 import type { JSX } from "react";
 import type { TypedOptions } from "typed.js";
-import { ITEM_IDS } from "../views/common";
+import { ITEM_IDS } from "../utils/constants";
 
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
@@ -118,7 +118,4 @@ export interface StepDefinition {
   animations: AnimationAction[];
 }
 
-export type StepDefinitions = Record<
-  (typeof ITEM_IDS)[keyof typeof ITEM_IDS],
-  StepDefinition
->;
+export type StepDefinitions = Record<StepItemId, StepDefinition>;

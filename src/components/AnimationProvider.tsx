@@ -10,9 +10,9 @@ import {
   type AnimationContextValue,
 } from "../contexts/animation";
 import { useNavigation } from "../hooks/useNavigation";
+import { DEFAULT_ANIMATION_STEP_DURATION } from "../utils/constants";
 import type { AnimationState } from "../utils/types";
-import { DEFAULT_ANIMATION_STEP_DURATION } from "../views/common";
-import { getPanelContent } from "../views/content";
+import { getPanelContent } from "../views/allViewsPanelContent";
 
 interface AnimationProviderProps {
   children: ReactNode;
@@ -37,7 +37,7 @@ export function AnimationProvider({
 
   useEffect(() => {
     resetAnimations();
-  }, [view, step, subStep]);
+  }, [view, step, subStep, resetAnimations]);
 
   const { animations } = useMemo(() => {
     return getPanelContent(view, step, subStep);

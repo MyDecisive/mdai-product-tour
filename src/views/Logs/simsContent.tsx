@@ -1,7 +1,17 @@
-import type { SimScript } from "../../utils/types";
-import { ITEM_IDS } from "../common";
-import otelSample from "../Logs/configSamples/otelSample.yaml?raw";
+import type {
+  AnimationAction,
+  SimScript,
+  SimulatorPanelState,
+  StepDefinitions,
+} from "../../utils/types";
+import {
+  createEmptySimulatorPanelState,
+  DEFAULT_ANIMATION_STEP_DURATION,
+  ITEM_IDS,
+  TERMINAL_PROMPT,
+} from "../common";
 import mdaiHubSample from "../Logs/configSamples/mdaiHubSample.yaml?raw";
+import otelSample from "../Logs/configSamples/otelSample.yaml?raw";
 
 export const LOGS_SIMS: Record<string, SimScript> = {
   [ITEM_IDS.step1_visualize]: [
@@ -54,4 +64,79 @@ export const LOGS_SIMS: Record<string, SimScript> = {
       delay: 250,
     },
   ],
+};
+
+function createAnimationAction(
+  stateChanges: Partial<SimulatorPanelState>,
+  delay?: number
+): AnimationAction {
+  return {
+    type: delay !== undefined ? "delay" : "state_update",
+    stateChanges,
+    delay,
+  };
+}
+
+export const PANEL_STATE: StepDefinitions = {
+  [ITEM_IDS.introduction_what]: {
+    initialState: createEmptySimulatorPanelState(),
+    animations: [],
+  },
+  [ITEM_IDS.introduction_unified]: {
+    initialState: {
+      config: {
+        text: "",
+      },
+      terminal: {
+        typedOptions: [
+          {
+            prompt: TERMINAL_PROMPT,
+            showCursor: false,
+            strings: [""],
+          },
+        ],
+      },
+      status: {
+        services: [],
+      },
+      logs: {
+        logs: [],
+        isPaused: true,
+      },
+    },
+    animations: [
+      createAnimationAction(
+        { config: { active: true } },
+        DEFAULT_ANIMATION_STEP_DURATION
+      ),
+      createAnimationAction(
+        {
+          config: { active: false },
+          terminal: { active: true },
+        },
+        DEFAULT_ANIMATION_STEP_DURATION
+      ),
+      createAnimationAction(
+        {
+          config: { active: false },
+          terminal: { active: false },
+          status: { active: true },
+        },
+        DEFAULT_ANIMATION_STEP_DURATION
+      ),
+      createAnimationAction(
+        {
+          config: { active: false },
+          status: { active: false },
+          terminal: { active: false },
+          logs: { active: true },
+        },
+        DEFAULT_ANIMATION_STEP_DURATION
+      ),
+      createAnimationAction(
+        { logs: { active: false } },
+        DEFAULT_ANIMATION_STEP_DURATION
+      ),
+    ],
+  },
 };

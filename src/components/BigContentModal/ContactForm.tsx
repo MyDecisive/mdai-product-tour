@@ -3,15 +3,16 @@ import {
   Box,
   Button,
   Checkbox,
-  FilledInput,
   FormControl,
   FormControlLabel,
-  OutlinedInput,
+  TextField,
   Stack,
   Typography,
   Alert,
   Link
 } from "@mui/material";
+import { MuiTelInput } from 'mui-tel-input'
+import { isValidPhoneNumber, parsePhoneNumberFromString } from 'libphonenumber-js';
 import { useCallback, useState, useEffect } from "react";
 import { contactAPIEndpoint, contactUrl } from "../../utils/constants";
 import contactFormContent from "../../utils/contactForm.yml";
@@ -38,7 +39,7 @@ const emailRegex =
 
 const textFieldStyles = css({
   marginBottom: "16px",
-  width: "70%",
+  width: "100%",
 });
 
 const buttonStyles = css({
@@ -89,11 +90,14 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
   const [licensing, setLicensing] = useState<boolean>(initialLicensing);
   const [help, setHelp] = useState<boolean>(initialHelp);
   const [questions, setQuestions] = useState<string>(defaultValues?.questions ?? "");
-
   const [showValidationIssues, setShowValidationIssues] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isErrored, setIsErrored] = useState(false);
+  const disabled = isSending || isSuccess || !(name.trim() && email.trim());
+  const emailIsValid = (v: string) => !!v && emailRegex.test(v);
+  const phoneIsValid = (v: string) => !v || isValidPhoneNumber(v);
+
   
   const resetForm = useCallback(() => {
     setName(defaultValues?.name ?? "");
@@ -113,28 +117,34 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
   }, [resetForm]);
 
   const validate = () => {
-    const valid = !!email && emailRegex.test(email);
+    const valid = emailIsValid(email) && phoneIsValid(phone);
     setShowValidationIssues(!valid);
     return valid;
   };
 
   const onClickSubmit = async () => {
+    const contactReasons: string[] = [];
+
     if (!validate()) {
       return;
     }
-    setIsSending(true);
-    setIsErrored(false);
-    const contactReasons: string[] = [];
     if (licensing) contactReasons.push("I'm interested in using MDAI");
     if (help) contactReasons.push("Help me set it up");
+
+    const normalizedPhone = phone
+      ? (parsePhoneNumberFromString(phone)?.number ?? phone)
+      : undefined;
 
     const values = {
       name,
       email,
-      phone,
+      phone: normalizedPhone,
       questions,
       contactReasons,
     } as FormValues;
+
+    setIsSending(true);
+    setIsErrored(false);
     try {
       await sendContactForm(values);
       setIsSuccess(true);
@@ -164,14 +174,14 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
         Have questions or feedback?
       </Typography>
 
-      <OutlinedInput
+      <TextField
         sx={textFieldStyles}
         name="email"
-        placeholder="Email Address*"
+        label="Email Address"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        error={showValidationIssues && !emailRegex.test(email)}
+        error={showValidationIssues && !emailIsValid(email)}
       />
       {showValidationIssues && !email && (
         <Typography sx={{ color: "error.main", mt: -1, mb: 1 }}>
@@ -183,21 +193,36 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
           Please enter a valid email address.
         </Typography>
       )}
-      <OutlinedInput
+      <TextField
         sx={textFieldStyles}
         name="name"
-        placeholder="Full Name*"
+        label="Full Name"
         required
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <OutlinedInput
+      <MuiTelInput
         sx={textFieldStyles}
         name="phone"
-        placeholder="Phone Number"
+        defaultCountry="US"
+        label="Phone Number"
+        forceCallingCode
         value={phone}
-        onChange={(e) => setPhone(e.target.value)}
+        error={showValidationIssues && !!phone && !phoneIsValid(phone)}
+        onChange={(value) => {
+          setPhone(value);
+          if (showValidationIssues) {
+            if (!value || phoneIsValid(value)) {
+              setShowValidationIssues(false);
+            }
+          }
+        }}
       />
+      {showValidationIssues && !!phone && !phoneIsValid(phone) && (
+        <Typography sx={{ color: 'error.main', mt: -1, mb: 1 }}>
+          Please enter a valid phone number.
+        </Typography>
+      )}
       <Typography sx={{ fontWeight: 700, mt: "16px" }}>
         Reason for Contact
       </Typography>
@@ -236,9 +261,10 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
       <Typography sx={{ mt: "40px", mb: "8px" }}>
         I have questions about the product
       </Typography>
-      <FilledInput
+      <TextField
         sx={{ width: "100%" }}
         name="questions"
+        variant="outlined"
         multiline
         minRows={4}
         maxRows={8}
@@ -278,7 +304,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
         size="medium"
         onClick={onClickSubmit}
         variant="contained"
-        disabled={isSending || isSuccess}
+        disabled={disabled}
       >
         {isSending ? "Sending..." : isSuccess ? "Sent" : "Submit"}
       </Button>

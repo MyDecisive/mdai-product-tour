@@ -39,6 +39,8 @@ jobs:
           cache: "npm"
       - name: Build decisive app
         env:
+          VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
+          VITE_CONTACT_API_URL: ${{ vars.VITE_CONTACT_API_URL }}
           VITE_GOOGLE_ANALYTICS_KEY: ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.GTAG_PROD || vars.GTAG_STAGING }}
         run: npm install && npm run build
       - name: Set AWS credentials

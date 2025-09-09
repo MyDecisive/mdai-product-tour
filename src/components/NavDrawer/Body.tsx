@@ -49,11 +49,12 @@ export function Body() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      e.preventDefault();
       if (inTour) {
         if (e.key === "ArrowRight") {
+          e.preventDefault();
           handleNextButtonClick();
         } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
           handlePrevButtonClick();
         }
       }

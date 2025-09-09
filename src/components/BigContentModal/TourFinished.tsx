@@ -1,6 +1,6 @@
 import { Box, Button, css, List, ListItem, Typography } from "@mui/material";
 import FullLogo from "../../assets/full_logo.svg";
-import type { FullScreenModalContentProps } from "../../utils/types";
+import type { BigContentModalContentProps } from "../../utils/types";
 import { ContactForm } from "./ContactForm";
 
 const listItemStyles = css({
@@ -9,7 +9,7 @@ const listItemStyles = css({
   marginLeft: "20px",
 });
 
-export function TourFinished({ handleClose }: FullScreenModalContentProps) {
+export function TourFinished({ handleClose }: BigContentModalContentProps) {
   return (
     <Box
       sx={{

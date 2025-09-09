@@ -1,34 +1,34 @@
 import { useCallback, type FunctionComponent } from "react";
 import { useNavigation } from "../../hooks/useNavigation";
 import type {
-  FullScreenModalContentProps,
-  FullScreenModalType,
+  BigContentModalContentProps,
+  BigContentModalType,
 } from "../../utils/types";
 import { ContactForm } from "./ContactForm";
 import { TourFinished } from "./TourFinished";
 
 const MODAL_CONTENT: Record<
-  FullScreenModalType,
-  FunctionComponent<FullScreenModalContentProps>
+  BigContentModalType,
+  FunctionComponent<BigContentModalContentProps>
 > = {
   contact: ContactForm,
   finished: TourFinished,
 };
 
 export function useGetBigContentModalPresentationLayer() {
-  const { fullScreenModal, setNavigation } = useNavigation();
+  const { bigContentModal, setNavigation } = useNavigation();
   const handleClose = useCallback(() => {
-    setNavigation((navState) => ({ ...navState, fullScreenModal: undefined }));
-  }, []);
+    setNavigation((navState) => ({ ...navState, bigContentModal: undefined }));
+  }, [setNavigation]);
 
-  if (!fullScreenModal) {
+  if (!bigContentModal) {
     return {
       ContentComponent: null,
       handleClose,
     };
   }
-  if (!["contact", "finished"].includes(fullScreenModal)) {
-    console.error("Modal type not supported ", fullScreenModal);
+  if (!["contact", "finished"].includes(bigContentModal)) {
+    console.error("Modal type not supported ", bigContentModal);
     return {
       ContentComponent: null,
       handleClose,
@@ -36,7 +36,7 @@ export function useGetBigContentModalPresentationLayer() {
   }
 
   return {
-    ContentComponent: MODAL_CONTENT[fullScreenModal],
+    ContentComponent: MODAL_CONTENT[bigContentModal],
     handleClose,
   };
 }

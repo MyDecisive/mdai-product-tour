@@ -5,11 +5,11 @@ import type {
   StepDefinitions,
 } from "../../utils/types";
 import {
-  createEmptySimulatorPanelState,
   DEFAULT_ANIMATION_STEP_DURATION,
   ITEM_IDS,
   TERMINAL_PROMPT,
 } from "../common";
+import { createEmptySimulatorPanelState } from "../content";
 import mdaiHubSample from "../Logs/configSamples/mdaiHubSample.yaml?raw";
 import otelSample from "../Logs/configSamples/otelSample.yaml?raw";
 

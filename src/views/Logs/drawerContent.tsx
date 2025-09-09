@@ -2,7 +2,8 @@ import { css } from "@emotion/react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
-import { SubstepContent } from "../../components/SubstepContent";
+import { SubStepContent } from "../../components/SubStepContent";
+import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { Logs } from "../../utils/constants";
 import type {
   NavigationState,
@@ -14,11 +15,11 @@ import { hydrateViewTreeitems, ITEM_IDS } from "../common";
 
 function WhatIs() {
   return (
-    <SubstepContent title={"Filtering log data to improve signal"}>
+    <SubStepContent title={"Filtering log data to improve signal"}>
       Stop paying for data you’ll never use. Take control of your observability
       budget by controlling the data stream, while it is still inside your
       network. Send just what you need with the MyDecisive SmartHub.
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
@@ -36,8 +37,10 @@ const BulletStyle = css({
 });
 
 function UnifiedView() {
+  const { config, terminal, status, logs } = useGetPanelContent();
+
   return (
-    <SubstepContent title="Consolidated tools">
+    <SubStepContent title="Consolidated tools">
       <Typography>
         Multiple tools, consolidated into a unified view to make it easy for you
         to see how MyDecisive works
@@ -46,39 +49,79 @@ function UnifiedView() {
         <ListItem sx={ListItemStyles}>
           <Typography sx={BulletStyle}>1.</Typography>
           <Typography>
-            <span style={{ fontWeight: 700 }}>IDE Simulator:</span> Configure,
-            control the SmartHub through its config files.
+            <span
+              style={{
+                fontWeight: 700,
+                ...(config?.active && {
+                  color: "#000000",
+                  backgroundColor: "#B062C2",
+                }),
+              }}
+            >
+              Configurations
+            </span>{" "}
+            Configure, control the SmartHub through its config files.
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
           <Typography sx={BulletStyle}>2.</Typography>
           <Typography>
-            <span style={{ fontWeight: 700 }}>Terminal Simulator:</span> Deploy
-            changes to the SmartHub
+            <span
+              style={{
+                fontWeight: 700,
+                ...(terminal?.active && {
+                  color: "#000000",
+                  backgroundColor: "#B062C2",
+                }),
+              }}
+            >
+              Terminal
+            </span>{" "}
+            Deploy changes to the SmartHub
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
           <Typography sx={BulletStyle}>3.</Typography>
           <Typography>
-            <span style={{ fontWeight: 700 }}>Status Simulator:</span> the
-            running SmartHub processes
+            <span
+              style={{
+                fontWeight: 700,
+                ...(status?.active && {
+                  color: "#000000",
+                  backgroundColor: "#B062C2",
+                }),
+              }}
+            >
+              Status
+            </span>{" "}
+            the running SmartHub processes
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
           <Typography sx={BulletStyle}>4.</Typography>
           <Typography>
-            <span style={{ fontWeight: 700 }}>Tail logs Simulator:</span>{" "}
+            <span
+              style={{
+                fontWeight: 700,
+                ...(logs?.active && {
+                  color: "#000000",
+                  backgroundColor: "#B062C2",
+                }),
+              }}
+            >
+              Tail logs
+            </span>{" "}
             SmartHub logs
           </Typography>
         </ListItem>
       </List>
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function DataStarts() {
   return (
-    <SubstepContent title="Simulate incoming logs">
+    <SubStepContent title="Simulate incoming logs">
       Run this <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to get
       the data flowing. <br />
       <br /> You can see the SmartHub running now in the{" "}
@@ -86,71 +129,71 @@ function DataStarts() {
       <br />
       Click <span style={{ color: "#B062C2" }}>See Results</span> to see what
       has changed.
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function VisualizeThe() {
   return (
-    <SubstepContent title="What are you seeing">
+    <SubStepContent title="What are you seeing">
       Some copy explaining what you would normally expect to see
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function ConfigureStatus() {
   return (
-    <SubstepContent title="We use OpenTelemetry static filters">
+    <SubStepContent title="We use OpenTelemetry static filters">
       Control your data with open standards that decouple you from your vendors.
       Free, forever. No added cloud vendors or vendor costs.
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function TakeNote() {
   return (
-    <SubstepContent title="We prepare the data for you">
+    <SubStepContent title="We prepare the data for you">
       <ol style={{ paddingLeft: "24px" }}>
         <li>“mdai_service” is set for you in the data filtration solution</li>
         <li>
           In this example, Service1234 and 4321 are generated service names.
         </li>
       </ol>
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function ExploreThe() {
   return (
-    <SubstepContent title="OTEL is now running">
+    <SubStepContent title="OTEL is now running">
       The OTEL collector your configured is now running inside our SmartHub.
       <br />
       And the logs show you are dropping data from service1234 and 4321.
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function VisualizeThe2() {
   return (
-    <SubstepContent title="Saving Money but...">
+    <SubStepContent title="Saving Money but...">
       You can see from our dashboards that data is filtered effectively. But now
       Service1234 and 4321 are missing from your vendors. Let’s do better.
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function AddA() {
   return (
-    <SubstepContent title="Variables make data streams smart">
+    <SubStepContent title="Variables make data streams smart">
       Click the <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to add a
       variable
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
 function TakeNote2() {
   return (
-    <SubstepContent title="Label">
+    <SubStepContent title="Label">
       <ol style={{ paddingLeft: "24px" }}>
         <li>
           “top loggers” are services that log more than your budget can handle.
@@ -165,7 +208,7 @@ function TakeNote2() {
           more here.
         </li>
       </ol>
-    </SubstepContent>
+    </SubStepContent>
   );
 }
 
@@ -265,5 +308,5 @@ export const viewTreeitems: ViewTreeItemProps[] = hydrateViewTreeitems(
 export const logs_default_steps: NavigationState = {
   view: Logs,
   step: "introduction",
-  substep: "introduction_what",
+  subStep: "introduction_what",
 };

@@ -4,8 +4,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
-import { useEffect } from "react";
-import { useGetViewContent } from "../../hooks/useGetViewContent";
+import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
 import { TreeItem } from "../TreeItem";
 import { StepNavButtons } from "./StepNavButtons";
 
@@ -38,34 +37,8 @@ const BodyScrollContainer = css({
 });
 
 export function Body() {
-  const {
-    drawerItems,
-    handleDrawerItemClick,
-    expandedDrawerItems,
-    handleNextButtonClick,
-    handlePrevButtonClick,
-    inTour,
-  } = useGetViewContent();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (inTour) {
-        if (e.key === "ArrowRight") {
-          e.preventDefault();
-          handleNextButtonClick();
-        } else if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          handlePrevButtonClick();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleNextButtonClick, handlePrevButtonClick, inTour]);
+  const { drawerItems, handleDrawerItemClick, expandedDrawerItems } =
+    useGetDrawerContent();
 
   return (
     <Box sx={css([BodyScrollContainer])}>
@@ -91,20 +64,17 @@ export function Body() {
                   ? subSteps.map(
                       ({
                         itemId: id,
-                        label: substepLabel,
-                        content: substepContent,
+                        label: subStepLabel,
+                        content: subStepContent,
                       }) => (
                         <TreeItem
                           key={id}
                           sx={NavTreeSubStepStyles}
                           itemId={id}
-                          label={substepLabel}
+                          label={subStepLabel}
                         >
-                          {substepContent}
-                          <StepNavButtons
-                            onNext={handleNextButtonClick}
-                            onPrev={handlePrevButtonClick}
-                          />
+                          {subStepContent}
+                          <StepNavButtons />
                         </TreeItem>
                       )
                     )

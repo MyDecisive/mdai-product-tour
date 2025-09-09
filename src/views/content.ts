@@ -1,6 +1,7 @@
 import { Home, Logs } from "../utils/constants";
 import type {
   AnimationAction,
+  SimulatorPanelState,
   StepDefinition,
   StepItemId,
   View,
@@ -8,7 +9,6 @@ import type {
 import * as HomeDrawerContent from "../views/Home/drawerContent";
 import * as LogsDrawerContent from "../views/Logs/drawerContent";
 import * as LogsPanelContent from "../views/Logs/simsContent";
-import { createEmptySimulatorPanelState } from "./common";
 
 const drawerContentMap = {
   [Home]: HomeDrawerContent.viewTreeItems,
@@ -31,6 +31,15 @@ export function getViewStepOrder(view: View) {
 const panelContentMap = {
   [Logs]: LogsPanelContent.PANEL_STATE,
 };
+
+export function createEmptySimulatorPanelState(): SimulatorPanelState {
+  return {
+    config: null,
+    terminal: null,
+    status: null,
+    logs: null,
+  };
+}
 
 function createEmptyPanelContentState() {
   return {

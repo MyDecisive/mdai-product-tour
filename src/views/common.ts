@@ -79,15 +79,6 @@ export function selectSimScript(key: string): SimScript | undefined {
   return simScripts.get(key);
 }
 
-export function createEmptySimulatorPanelState(): SimulatorPanelState {
-  return {
-    config: null,
-    terminal: null,
-    status: null,
-    logs: null,
-  };
-}
-
 export const TERMINAL_PROMPT = "eng@local-terminal > ";
 export const CURSOR_CHAR = "█";
 

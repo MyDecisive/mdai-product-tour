@@ -1,15 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
-import type { Service } from "../../../utils/types";
+import { useAnimationIndex } from "../../../hooks/useAnimationIndex";
+import type { Service, StatusProps } from "../../../utils/types";
+import { SimulatorContextLabel } from "../SimContextLabel";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
 import { STATUS } from "./constants";
 import type { PodId, StatusString } from "./types";
-
-interface StatusProps {
-  services?: Service[];
-  onAllStabilized?: () => void;
-}
 
 type PodStatuses = Record<
   string,
@@ -86,7 +83,8 @@ function servicesToActivePods(services: Service[]) {
   );
 }
 
-export const Status: FC<StatusProps> = ({ services = [], onAllStabilized }) => {
+export const Status: FC<StatusProps> = ({ services = [], namespace }) => {
+  const { incrementAnimation } = useAnimationIndex();
   const [podOrder, setPodOrder] = useState<PodId[]>([]);
   const [activePods, setActivePods] = useState<ActivePodMap>({});
   const [podStatuses, setPodStatuses] = useState<PodStatuses>({});
@@ -114,12 +112,13 @@ export const Status: FC<StatusProps> = ({ services = [], onAllStabilized }) => {
     const activePods = Object.entries(podStatuses);
     const allStabilized =
       activePods.length > 0 &&
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       activePods.every(([_, status]) => status === "Running");
 
-    if (allStabilized && onAllStabilized) {
-      onAllStabilized();
+    if (allStabilized) {
+      incrementAnimation();
     }
-  }, [podStatuses, onAllStabilized]);
+  }, [podStatuses, incrementAnimation]);
 
   useEffect(() => {
     // NOTE: The code below expects `services` to _always_ grow
@@ -160,56 +159,42 @@ export const Status: FC<StatusProps> = ({ services = [], onAllStabilized }) => {
     setPodOrder((old) => old.concat(newPodOrder));
     processedServices.current =
       processedServices.current.concat(newProcessedServices);
-  }, [services, podStatuses]);
+  }, [services, podStatuses, activePods, podOrder]);
 
   return (
-    <Box className="bg-black text-white font-mono text-sm p-4 rounded-lg border border-gray-700">
-      <Box>
-        <Typography
-          sx={{
-            fontFamily:
-              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
-            fontSize: 13,
-            lineHeight: 1.5,
-          }}
-        >
-          NAMESPACE: mdai
+    <>
+      <SimulatorContextLabel>{namespace}</SimulatorContextLabel>
+      <StyledRow
+        name="NAME"
+        ready="READY"
+        status="STATUS"
+        restarts="RESTARTS"
+        containerStyles={{
+          borderBottom: "1px solid rgba(111, 111, 111, 0.50)",
+        }}
+      />
+
+      {podOrder.map((podId) => {
+        const { name, shouldReplace, skipStartup } = activePods[podId];
+
+        return (
+          <ServiceRow
+            key={podId}
+            podId={podId}
+            shouldReplace={shouldReplace}
+            skipStartup={skipStartup}
+            name={name}
+            onStatusChange={handleStatusChange}
+            onRemove={handlePodRemove}
+          />
+        );
+      })}
+
+      {podOrder.length === 0 && (
+        <Typography className="text-gray-500 text-center py-4">
+          No pods running
         </Typography>
-      </Box>
-
-      <Box className="space-y-1">
-        <StyledRow
-          name="NAME"
-          ready="READY"
-          status="STATUS"
-          restarts="RESTARTS"
-          containerStyles={{
-            borderBottom: "1px solid rgba(111, 111, 111, 0.50)",
-          }}
-        />
-
-        {podOrder.map((podId) => {
-          const { name, shouldReplace, skipStartup } = activePods[podId];
-
-          return (
-            <ServiceRow
-              key={podId}
-              podId={podId}
-              shouldReplace={shouldReplace}
-              skipStartup={skipStartup}
-              name={name}
-              onStatusChange={handleStatusChange}
-              onRemove={handlePodRemove}
-            />
-          );
-        })}
-
-        {podOrder.length === 0 && (
-          <Typography className="text-gray-500 text-center py-4">
-            No pods running
-          </Typography>
-        )}
-      </Box>
-    </Box>
+      )}
+    </>
   );
 };

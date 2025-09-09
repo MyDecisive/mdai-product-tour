@@ -4,7 +4,11 @@ import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 
-import { useGetViewContent } from "../../hooks/useGetViewContent";
+import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
+import { useNavigation } from "../../hooks/useNavigation";
+import { useNavButtonHandlers } from "../../hooks/useStepNavButtonHandlers";
+import { Home } from "../../utils/constants";
+import { useMemo } from "react";
 
 const homeStyles = css({
   height: "62px",
@@ -40,8 +44,11 @@ const backButtonStyles = css({
 });
 
 export function Header() {
-  const { inTour, drawerHeaderText, handleBackButtonClick } =
-    useGetViewContent();
+  const { view } = useNavigation();
+  const inTour = useMemo(() => view !== Home, [view]);
+
+  const { handleBackButtonClick } = useNavButtonHandlers();
+  const { drawerHeaderText } = useGetDrawerContent();
 
   return (
     <Toolbar sx={inTour ? viewStyles : homeStyles}>

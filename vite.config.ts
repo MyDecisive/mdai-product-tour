@@ -18,6 +18,11 @@ export default defineConfig(({ mode }) => {
             id: envVars.VITE_GOOGLE_ANALYTICS_KEY,
           },
         ],
+        gtm: [
+          {
+            id: envVars.VITE_GOOGLE_ANALYTICS_KEY,
+          },
+        ],
       }),
     ],
   };

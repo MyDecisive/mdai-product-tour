@@ -13,10 +13,11 @@ export const ITEM_IDS = {
   step1: "step1",
   step2: "step2",
   step3: "step3",
-  introduction_what: "introduction_what",
-  introduction_unified: "introduction_unified",
+  introduction_meet: "introduction_meet",
+  introduction_guide: "introduction_guide",
+  introduction_consolidated: "introduction_consolidated",
   step1_data: "step1_data",
-  step1_visualize: "step1_visualize",
+  step1_results: "step1_results",
   step2_configure: "step2_configure",
   step2_take: "step2_take",
   step2_explore: "step2_explore",
@@ -37,5 +38,5 @@ export const DEFAULT_ANIMATION_STEP_DURATION = 750;
 export const LOGS_DEFAULT_STEPS: NavigationState = {
   view: Logs,
   step: ITEM_IDS.introduction,
-  subStep: ITEM_IDS.introduction_what,
+  subStep: ITEM_IDS.introduction_meet,
 };

@@ -27,9 +27,9 @@ export function NeedHelpButton() {
 
   return (
     <Box sx={rowStyles}>
-      <Typography sx={textStyles}>Need help?</Typography>
+      <Typography sx={textStyles}>Stuck?</Typography>
       <Button color="secondary" onClick={openContactModal}>
-        Contact us now
+        We've got you.
       </Button>
     </Box>
   );

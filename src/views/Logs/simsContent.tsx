@@ -94,11 +94,11 @@ function createAnimationAction(
 }
 
 export const PANEL_STATE: StepDefinitions = {
-  [ITEM_IDS.introduction_what]: {
+  [ITEM_IDS.introduction_meet]: {
     initialState: createEmptySimulatorPanelState(),
     animations: [],
   },
-  [ITEM_IDS.introduction_unified]: {
+  [ITEM_IDS.introduction_consolidated]: {
     initialState: {
       config: {
         text: "",

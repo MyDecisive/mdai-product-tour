@@ -116,7 +116,7 @@ export const PANEL_STATE: StepDefinitions = {
         services: [],
       },
       logs: {
-        logs: [],
+        logRecords: [],
         isPaused: true,
       },
     },
@@ -177,7 +177,7 @@ export const PANEL_STATE: StepDefinitions = {
         services: [],
       },
       logs: {
-        logs: [],
+        logRecords: [],
         isPaused: true,
       },
     },
@@ -186,7 +186,7 @@ export const PANEL_STATE: StepDefinitions = {
         {
           logs: {
             active: true,
-            logs: sampleLogs,
+            logRecords: sampleLogs,
             speed: 500,
             errorLogs: errorLogs,
             errorFrequency: 0.15,

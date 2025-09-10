@@ -88,7 +88,7 @@ export interface StatusProps {
 }
 
 export interface LogSimulatorProps {
-  logs?: LogRecord[];
+  logRecords?: LogRecord[];
   speed?: number;
   errorLogs?: LogRecord[];
   errorFrequency?: number;

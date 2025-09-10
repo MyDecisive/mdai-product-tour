@@ -150,7 +150,7 @@ function DataStarts() {
 function SeeResults() {
   return (
     <SubStepContent title="See the results!">
-      Data’s flowing. Next stop: Let’s save you some serious coin money.
+      Data’s flowing. Next stop: Let’s save you some serious money.
     </SubStepContent>
   );
 }

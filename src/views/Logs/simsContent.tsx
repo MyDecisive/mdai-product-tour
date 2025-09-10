@@ -7,7 +7,7 @@ import {
 import type {
   AnimationAction,
   LogRecord,
-  // Service,
+  Service,
   SimulatorPanelState,
   StepDefinitions,
   TerminalTypedOptions,
@@ -27,9 +27,9 @@ const terminalAutoLines = [
 ];
 
 const userEntry = [
-  // "./MDAI-kind",
-  // "./mdai-kind .sh",
-  // "./mdai-kind.sh kif",
+  "./MDAI-kind",
+  "./mdai-kind .sh",
+  "./mdai-kind.sh kif",
   "./mdai-kind.sh logs",
 ];
 
@@ -82,6 +82,15 @@ const terminalTypedOptions: TerminalTypedOptions[] = [
   },
 ];
 
+const services: Service[] = [
+  { skipStartup: true, name: "web-server", replicas: 2 },
+  { skipStartup: true, name: "api-gateway" },
+  { skipStartup: true, name: "mdai-operator" },
+  { skipStartup: true, name: "otel-controller", replicas: 3 },
+  { skipStartup: true, name: "random-service" },
+  { skipStartup: true, name: "database" },
+];
+
 function createAnimationAction(
   stateChanges: Partial<SimulatorPanelState>,
   delay?: number
@@ -116,7 +125,7 @@ export const PANEL_STATE: StepDefinitions = {
         services: [],
       },
       logs: {
-        logs: [],
+        logRecords: [],
         isPaused: true,
       },
     },
@@ -130,25 +139,23 @@ export const PANEL_STATE: StepDefinitions = {
           config: { active: false },
           terminal: {
             active: true,
-            typedOptions: terminalTypedOptions,
           },
-        }
-        // DEFAULT_ANIMATION_STEP_DURATION
+        },
+        DEFAULT_ANIMATION_STEP_DURATION
       ),
       createAnimationAction(
         {
           config: { active: false },
+          terminal: { active: false },
           status: { active: true },
         },
         DEFAULT_ANIMATION_STEP_DURATION
       ),
-      // createAnimationAction({
-      //   terminal: { typedOptions: terminalTypedOptions },
-      // }),
       createAnimationAction(
         {
           config: { active: false },
           status: { active: false },
+          terminal: { active: false },
           logs: { active: true },
         },
         DEFAULT_ANIMATION_STEP_DURATION
@@ -174,19 +181,39 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: [],
+        services,
       },
       logs: {
-        logs: [],
+        logRecords: [],
         isPaused: true,
       },
     },
     animations: [
+      createAnimationAction({
+        terminal: {
+          active: true,
+          typedOptions: terminalTypedOptions,
+        },
+      }),
+      createAnimationAction({
+        terminal: {
+          active: false,
+        },
+        status: {
+          active: true,
+          services: [
+            { name: "logs-gen" },
+            { name: "noisy-logs-gen" },
+            { name: "xtra-noisy-logs-gen", replicas: 2 },
+          ],
+        },
+      }),
       createAnimationAction(
         {
+          status: { active: false },
           logs: {
             active: true,
-            logs: sampleLogs,
+            logRecords: sampleLogs,
             speed: 500,
             errorLogs: errorLogs,
             errorFrequency: 0.15,
@@ -204,12 +231,3 @@ export const PANEL_STATE: StepDefinitions = {
     ],
   },
 };
-
-// const services: Service[] = [
-//   { name: "web-server", replicas: 2 },
-//   { name: "api-gateway" },
-//   { name: "mdai-operator" },
-//   { name: "otel-controller", replicas: 3 },
-//   { name: "random-service" },
-//   { name: "database" },
-// ];

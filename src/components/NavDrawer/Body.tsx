@@ -1,10 +1,13 @@
 import { css } from "@emotion/react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
+import { useNavigation } from "../../hooks/useNavigation";
+import { Home } from "../../utils/constants";
 import { TreeItem } from "../TreeItem";
 import { StepNavButtons } from "./StepNavButtons";
 
@@ -40,8 +43,17 @@ export function Body() {
   const { drawerItems, handleDrawerItemClick, expandedDrawerItems } =
     useGetDrawerContent();
 
+  const { view } = useNavigation();
+
   return (
     <Box sx={css([BodyScrollContainer])}>
+      {view === Home && (
+        <Box sx={{ padding: "10px 4px 10px 8px" }}>
+          <Typography>
+            Ready to play? Select a use case and let's roll.
+          </Typography>
+        </Box>
+      )}
       <Box sx={css([NavDrawerBodyStyles])} className="drawer-body">
         <SimpleTreeView
           slots={{

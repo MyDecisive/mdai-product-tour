@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { List, ListItem, Typography } from "@mui/material";
+import { Link, List, ListItem, Typography } from "@mui/material";
 import { SubStepContent } from "../../components/SubStepContent";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { ITEM_IDS } from "../../utils/constants";
@@ -10,12 +10,11 @@ import type {
 } from "../../utils/types";
 import { hydrateViewTreeitems } from "../common";
 
-function WhatIs() {
+function MeetDLF() {
   return (
-    <SubStepContent title={"Filtering log data to improve signal"}>
-      Stop paying for data you’ll never use. Take control of your observability
-      budget by controlling the data stream, while it is still inside your
-      network. Send just what you need with the MyDecisive SmartHub.
+    <SubStepContent>
+      Big bills? Not cool. Dynamic Log Filtering helps you slash up to 90% of
+      your Datadog or New Relic spend. Here’s how, in three painless steps.
     </SubStepContent>
   );
 }
@@ -33,14 +32,33 @@ const BulletStyle = css({
   paddingRight: "4px",
 });
 
+function YourGuide() {
+  return (
+    <List>
+      <ListItem sx={ListItemStyles}>
+        <Typography sx={BulletStyle}>Step 1:</Typography>
+        <Typography>Turn on the tap</Typography>
+      </ListItem>
+      <ListItem sx={ListItemStyles}>
+        <Typography sx={BulletStyle}>Step 2:</Typography>
+        <Typography>Toss the junk</Typography>
+      </ListItem>
+      <ListItem sx={ListItemStyles}>
+        <Typography sx={BulletStyle}>Step 3:</Typography>
+        <Typography>Kick back, let the system shine</Typography>
+      </ListItem>
+    </List>
+  );
+}
+
 function UnifiedView() {
   const { config, terminal, status, logs } = useGetPanelContent();
 
   return (
     <SubStepContent title="Consolidated tools">
       <Typography>
-        Multiple tools, consolidated into a unified view to make it easy for you
-        to see how MyDecisive works
+        Multiple tools in one unified view--making it easy to see how MyDecisive
+        works.
       </Typography>
       <List>
         <ListItem sx={ListItemStyles}>
@@ -55,9 +73,9 @@ function UnifiedView() {
                 }),
               }}
             >
-              Configurations
+              IDE Simulator:
             </span>{" "}
-            Configure, control the SmartHub through its config files.
+            Tweak and control SmartHub through its config files.
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
@@ -72,9 +90,9 @@ function UnifiedView() {
                 }),
               }}
             >
-              Terminal
+              Terminal Simulator:
             </span>{" "}
-            Deploy changes to the SmartHub
+            Deploy changes to SmartHub like a pro
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
@@ -89,9 +107,9 @@ function UnifiedView() {
                 }),
               }}
             >
-              Status
+              Status Simulator:
             </span>{" "}
-            the running SmartHub processes
+            Keep an eye on running SmartHub processes and components
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
@@ -106,9 +124,9 @@ function UnifiedView() {
                 }),
               }}
             >
-              Tail logs
+              Tail logs Simulator:
             </span>{" "}
-            SmartHub logs
+            Watch SmartHub's logs stream by in real time.
           </Typography>
         </ListItem>
       </List>
@@ -118,42 +136,45 @@ function UnifiedView() {
 
 function DataStarts() {
   return (
-    <SubStepContent title="Simulate incoming logs">
-      Run this <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to get
-      the data flowing. <br />
-      <br /> You can see the SmartHub running now in the{" "}
+    <SubStepContent title="Simulate the log stream">
+      Run this <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to open
+      the floodgates. <br />
+      <br /> Watch the SmartHub come alive in the Status Simulator Window{" "}
       <span style={{ color: "#B062C2" }}>Status Simulator window</span> <br />
       <br />
-      Click <span style={{ color: "#B062C2" }}>See Results</span> to see what
-      has changed.
+      Heads up: you’ll get to see the results in the next step
     </SubStepContent>
   );
 }
 
-function VisualizeThe() {
+function SeeResults() {
   return (
-    <SubStepContent title="What are you seeing">
-      Some copy explaining what you would normally expect to see
+    <SubStepContent title="See the results!">
+      Data’s flowing. Next stop: Let’s save you some serious coin money.
     </SubStepContent>
   );
 }
 
 function ConfigureStatus() {
   return (
-    <SubStepContent title="We use OpenTelemetry static filters">
-      Control your data with open standards that decouple you from your vendors.
-      Free, forever. No added cloud vendors or vendor costs.
+    <SubStepContent title="Your data, your rules">
+      OpenTelemetry static filters give you control and freedom--forever at no
+      cost, no added vendor charges.
     </SubStepContent>
   );
 }
 
 function TakeNote() {
   return (
-    <SubStepContent title="We prepare the data for you">
+    <SubStepContent title="We’ve got the heavy lifting covered, so working with your logs is a breeze.">
       <ol style={{ paddingLeft: "24px" }}>
-        <li>“mdai_service” is set for you in the data filtration solution</li>
         <li>
-          In this example, Service1234 and 4321 are generated service names.
+          In this example, Service1234 and 4321 are just part of the generated
+          data. They are some random service names like you might have.
+        </li>
+        <li>
+          “mdai_service” is a variable--yep, a little bit of magic. Hang tight,
+          you’ll learn more about variables in just a minute.
         </li>
       </ol>
     </SubStepContent>
@@ -162,47 +183,47 @@ function TakeNote() {
 
 function ExploreThe() {
   return (
-    <SubStepContent title="OTEL is now running">
-      The OTEL collector your configured is now running inside our SmartHub.
-      <br />
-      And the logs show you are dropping data from service1234 and 4321.
+    <SubStepContent title="OTEL’s online!">
+      Your collector is running in the SmartHub, and the dashboards confirm:
+      Service1234 and 4321 are filtered out.
     </SubStepContent>
   );
 }
 
 function VisualizeThe2() {
   return (
-    <SubStepContent title="Saving Money but...">
-      You can see from our dashboards that data is filtered effectively. But now
-      Service1234 and 4321 are missing from your vendors. Let’s do better.
+    <SubStepContent title="Nice work on the filters!">
+      You are cutting down the noise big-time. One hitch--Service1234 and 4321
+      are missing from Datadog. Don’t worry, we’ll get it right together.
     </SubStepContent>
   );
 }
 
 function AddA() {
   return (
-    <SubStepContent title="Variables make data streams smart">
-      Click the <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to add a
-      variable
+    <SubStepContent>
+      {`Variables == smarter data streams.  Use <command> to add one to your configuration file now.`}
     </SubStepContent>
   );
 }
 
 function TakeNote2() {
   return (
-    <SubStepContent title="Label">
+    <SubStepContent title="What’s happening in the config file? ">
       <ol style={{ paddingLeft: "24px" }}>
         <li>
-          “top loggers” are services that log more than your budget can handle.
-          The name of the variable is “Service_list”
+          Top loggers: Services that log more than your budget can handle are
+          called your top loggers. We store them in a variable called
+          "service_list".
         </li>
         <li>
-          Your code only needs to reference the variable named “service_list”.
-          We compute them for you automatically.
+          Easy reference: Your code only needs to reference "service_list". We
+          handle the heavy lifting—dynamically computing top loggers and keeping
+          the variable updated continuously.
         </li>
         <li>
-          The “service_list” behavior is managed by configuration as well. Learn
-          more here.
+          Config-controlled behavior: The "service_list" computation itself is
+          managed via configuration too. Learn more <Link>here.</Link>
         </li>
       </ol>
     </SubStepContent>
@@ -211,7 +232,7 @@ function TakeNote2() {
 
 export const stepItemsMap: StepItemMap = {
   [ITEM_IDS.introduction]: {
-    label: "Introduction",
+    label: "Let's set the stage",
   },
   [ITEM_IDS.step1]: {
     label: "Step 1: Get the data flowing",
@@ -220,24 +241,28 @@ export const stepItemsMap: StepItemMap = {
     label: "Step 2: Drop unwanted data",
   },
   [ITEM_IDS.step3]: {
-    label: "Step 3: Let the system help you",
+    label: "Step 3: Kick back and let our system shine...",
   },
 
-  [ITEM_IDS.introduction_what]: {
-    label: "What is Dynamic log Filtering",
-    content: <WhatIs />,
+  [ITEM_IDS.introduction_meet]: {
+    label: "Meet Dynamic Log Filtering",
+    content: <MeetDLF />,
   },
-  [ITEM_IDS.introduction_unified]: {
-    label: "Unified View For Easier Understanding",
+  [ITEM_IDS.introduction_guide]: {
+    label: "Your guide to using this demo.",
+    content: <YourGuide />,
+  },
+  [ITEM_IDS.introduction_consolidated]: {
+    label: "This is a consolidated experience",
     content: <UnifiedView />,
   },
   [ITEM_IDS.step1_data]: {
     label: "Data Starts to Flow",
     content: <DataStarts />,
   },
-  [ITEM_IDS.step1_visualize]: {
-    label: "Visualize The Results",
-    content: <VisualizeThe />,
+  [ITEM_IDS.step1_results]: {
+    label: "See The Results",
+    content: <SeeResults />,
   },
   [ITEM_IDS.step2_configure]: {
     label: "Configure static filters",
@@ -252,11 +277,11 @@ export const stepItemsMap: StepItemMap = {
     content: <ExploreThe />,
   },
   [ITEM_IDS.step2_visualize]: {
-    label: "Visualize The Results",
+    label: "See the results",
     content: <VisualizeThe2 />,
   },
   [ITEM_IDS.step3_add]: {
-    label: "Add a variable",
+    label: "Sprinkle in some variables.",
     content: <AddA />,
   },
   [ITEM_IDS.step3_take]: {
@@ -272,11 +297,14 @@ export const stepItemsMap: StepItemMap = {
 export const STEP_ORDER: ViewStepOrder = [
   {
     stepId: ITEM_IDS.introduction,
-    subStepIds: [ITEM_IDS.introduction_what, ITEM_IDS.introduction_unified],
+    subStepIds: [
+      ITEM_IDS.introduction_meet,
+      ITEM_IDS.introduction_consolidated,
+    ],
   },
   {
     stepId: ITEM_IDS.step1,
-    subStepIds: [ITEM_IDS.step1_data, ITEM_IDS.step1_visualize],
+    subStepIds: [ITEM_IDS.step1_data, ITEM_IDS.step1_results],
   },
   {
     stepId: ITEM_IDS.step2,

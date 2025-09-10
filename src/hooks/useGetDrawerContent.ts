@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { Home } from "../utils/constants";
 import { getViewTitle } from "../utils/strings";
 import type { StepItemId } from "../utils/types";
 import { getViewDrawerItems } from "../views/allViewsDrawerContent";
@@ -48,7 +47,6 @@ export function useGetDrawerContent() {
   return {
     drawerItems,
     drawerHeaderText,
-    inTour: view !== Home,
     handleDrawerItemClick,
     expandedDrawerItems,
   };

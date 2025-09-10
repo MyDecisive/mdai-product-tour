@@ -45,19 +45,14 @@ export function WelcomeModal() {
       aria-describedby="alert-dialog-description"
     >
       <DialogTitle id="alert-dialog-title">
-        Welcome to the MyDecisive.ai demo
+        Welcome to the MyDecisive.ai demo!
       </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
           <Typography component={"span"}>
-            Learn about different configurations of our SmartHub and see how to
-            instantly control your telemetry data. Everything is pre-configured
-            and ready to use.
-          </Typography>
-          <br />
-          <br />
-          <Typography component={"span"} sx={{ fontWeight: 700 }}>
-            This is a demo.
+            Come in, check out our SmartHub where you control the best of
+            OpenTelemetry, Kubernetes, and Observability. Enjoy, and don’t
+            forget to use our community Slack for questions.
           </Typography>
         </DialogContentText>
       </DialogContent>
@@ -76,7 +71,7 @@ export function WelcomeModal() {
           variant="contained"
           onClick={handleClose}
         >
-          Got it
+          Let's go!
         </Button>
       </DialogActions>
     </Dialog>

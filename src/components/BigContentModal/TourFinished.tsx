@@ -40,10 +40,10 @@ export function TourFinished({ handleClose }: BigContentModalContentProps) {
           You're all set!
         </Typography>
         <Typography sx={{ mb: "32px" }}>
-          That's the end of the MDAI demo - thanks for taking the tour!
+          That’s a wrap on the MyDecisive.ai demo--thanks for taking the tour!
         </Typography>
         <Typography sx={{ fontWeight: 700, fontSize: "24px", mb: "8px" }}>
-          MDAI is Open Source!
+          And remember: we call ourselves MDAI, and we’re open source, forever!
         </Typography>
         <List
           sx={{
@@ -53,14 +53,13 @@ export function TourFinished({ handleClose }: BigContentModalContentProps) {
             marginBottom: "48px",
           }}
         >
-          <ListItem sx={listItemStyles}>MDAI has no sales reps.</ListItem>
+          <ListItem sx={listItemStyles}>No sales reps.</ListItem>
+          <ListItem sx={listItemStyles}>No pressure to buy.</ListItem>
           <ListItem sx={listItemStyles}>
-            You will not feel pressure to buy anything.
-          </ListItem>
-          <ListItem sx={listItemStyles}>
-            All that you experienced is free to use forever.
+            Just smart technology, solving problems alongside you, always!
           </ListItem>
         </List>
+        <Typography>Go forth and observe, smarter.</Typography>
         <Button
           sx={{
             width: "100%",

@@ -22,22 +22,11 @@ function DynamicLogFiltrationContent() {
 
   return (
     <InfoBox>
-      <Typography>
-        MDAI offers multiple solutions. Let’s explore{" "}
-        <Typography
-          component="span"
-          sx={{ textDecoration: "underline", display: "inline" }}
-        >
-          Dynamic Log Filtering
-        </Typography>{" "}
-        now!
-      </Typography>
-      <br />
-      <Typography>You can learn about it in 3 steps</Typography>
+      <Typography>Ready to see how it works?</Typography>
       <br />
       <div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
         <Button size="medium" onClick={() => setNavigation(LOGS_DEFAULT_STEPS)}>
-          Start the Demo
+          Fire it up
         </Button>
       </div>
     </InfoBox>

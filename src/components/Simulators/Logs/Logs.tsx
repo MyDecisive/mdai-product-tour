@@ -41,7 +41,7 @@ function createNextLog(
 }
 
 export const LogsSimulator: React.FC<LogSimulatorProps> = ({
-  logs = [],
+  logRecords = [],
   speed = 1000,
   errorLogs = [],
   errorFrequency = 0.1,
@@ -63,7 +63,7 @@ export const LogsSimulator: React.FC<LogSimulatorProps> = ({
       return;
     }
 
-    if (logs.length === 0) return;
+    if (logRecords.length === 0) return;
 
     intervalRef.current = setInterval(() => {
       setDisplayedLogs((prev) => {
@@ -72,13 +72,13 @@ export const LogsSimulator: React.FC<LogSimulatorProps> = ({
           const propLog = selectErrorPropLog(errorLogs);
           nextLog = createNextLog(propLog, null, null);
         } else {
-          const logIndex = currentIndex % logs.length;
-          const propLog = selectPropLog(logs, logIndex);
+          const logIndex = currentIndex % logRecords.length;
+          const propLog = selectPropLog(logRecords, logIndex);
           nextLog = createNextLog(propLog, cycleCount, logIndex);
 
           setCurrentIndex((prevIndex) => {
             const newIndex = prevIndex + 1;
-            if (newIndex >= logs.length) {
+            if (newIndex >= logRecords.length) {
               setCycleCount((prev) => prev + 1);
               return 0;
             }
@@ -96,7 +96,7 @@ export const LogsSimulator: React.FC<LogSimulatorProps> = ({
       }
     };
   }, [
-    logs,
+    logRecords,
     speed,
     errorLogs,
     errorFrequency,

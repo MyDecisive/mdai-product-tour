@@ -79,7 +79,7 @@ export function Simulators() {
             <SimulatorBox title="Tail Logs" active={!!logs?.active}>
               {logs !== null && (
                 <LogsSimulator
-                  logs={logs.logs}
+                  logRecords={logs.logRecords}
                   speed={logs.speed}
                   errorLogs={logs.errorLogs}
                   errorFrequency={logs.errorFrequency}

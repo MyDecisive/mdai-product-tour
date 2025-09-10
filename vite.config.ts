@@ -16,11 +16,6 @@ export default defineConfig(({ mode }) => {
         analytics: [
         {
           id: envVars.VITE_GOOGLE_ANALYTICS_KEY,
-          // FIXME: DO NOT PROD THIS
-          consentDefaults: {
-            ad_storage: 'granted',
-            analytics_storage: 'granted'
-          },
         }
       ],
       }),

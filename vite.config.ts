@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       viteYaml(),
       VitePluginRadar({
         enableDev: false,
-        gtm: [
+        analytics: [
           {
             id: envVars.VITE_GOOGLE_ANALYTICS_KEY,
           },

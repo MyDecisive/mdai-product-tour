@@ -75,7 +75,7 @@ function UnifiedView() {
             >
               IDE Simulator:
             </span>{" "}
-            Twak and control SmartHub through its config files.
+            Tweak and control SmartHub through its config files.
           </Typography>
         </ListItem>
         <ListItem sx={ListItemStyles}>
@@ -214,7 +214,7 @@ function TakeNote2() {
         <li>
           Top loggers: Services that log more than your budget can handle are
           called your top loggers. We store them in a variable called
-          "service_List".
+          "service_list".
         </li>
         <li>
           Easy reference: Your code only needs to reference "service_list". We
@@ -261,7 +261,7 @@ export const stepItemsMap: StepItemMap = {
     content: <DataStarts />,
   },
   [ITEM_IDS.step1_results]: {
-    label: "Visualize The Results",
+    label: "See The Results",
     content: <SeeResults />,
   },
   [ITEM_IDS.step2_configure]: {

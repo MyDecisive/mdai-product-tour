@@ -46,7 +46,10 @@ export function Banner() {
         sentToVendor: 1.4,
         logsFiltered: 10.7,
       });
-    }}, [subStep]);
+      } else {
+        setBannerInfo(initialBannerState);
+      }
+  }, [subStep]);
 
   return (
     <AppBar position="static" sx={{ display: view === "Home" ? "none" : "block" }}>

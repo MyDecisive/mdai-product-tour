@@ -27,11 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check for Production Environment
-        if: github.event.inputs.environment == 'Prod'
-        run: |
-          echo "PROD? THERE IS NO PROD HERE."
-          exit 1
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:

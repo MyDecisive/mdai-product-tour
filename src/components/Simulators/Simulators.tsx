@@ -14,9 +14,11 @@ export function Simulators() {
 
   return (
     <Box
+      className="simulators-container"
       sx={{
-        width: "100%",
         display: inTour ? "block" : "none",
+        flexGrow: 1,
+        padding: "24px",
       }}
     >
       {inTour ? (
@@ -24,7 +26,7 @@ export function Simulators() {
           container
           rowSpacing={2}
           columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-          justifyContent={"space-evenly"}
+          justifyContent={"space-between"}
           alignItems={"stretch"}
           sx={{ width: "100%" }}
         >
@@ -52,6 +54,9 @@ export function Simulators() {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "flex-end",
+                boxSizing: "border-box",
+                maxHeight: "394px",
+                height: "394px",
               }}
               active={!!terminal?.active}
             >
@@ -60,7 +65,15 @@ export function Simulators() {
           </Grid>
 
           <Grid size={6.5}>
-            <SimulatorBox title="Tail Logs" active={!!logs?.active}>
+            <SimulatorBox
+              title="Tail Logs"
+              active={!!logs?.active}
+              innerStyles={{
+                padding: "24px 14px 16px 14px",
+                boxSizing: "border-box",
+                minHeight: "394px",
+              }}
+            >
               {logs !== null && <LogsSimulator />}
             </SimulatorBox>
           </Grid>

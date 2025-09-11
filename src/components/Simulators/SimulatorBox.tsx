@@ -34,6 +34,7 @@ export function SimulatorBox({
         )}
       </Box>
       <Box
+        className={`actual-simulator-container ${title.toLowerCase()}`}
         sx={{
           p: "24px 16px 16px 16px",
           minHeight: "350px",

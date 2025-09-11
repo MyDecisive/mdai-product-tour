@@ -12,11 +12,14 @@ export const LogsSimulator: React.FC = () => {
     <>
       <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
       <Box
+        className="log-rows-container"
         ref={logContainerRef}
         sx={{
           scrollBehavior: "smooth",
           overflowY: "auto",
           maxHeight: "350px",
+          maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         {displayedLogs.map((log) => (

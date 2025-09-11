@@ -52,6 +52,7 @@ export interface Service {
   name: string;
   replicas?: number;
   skipStartup?: boolean;
+  noSuffix?: boolean;
 }
 export interface LogRecord {
   message?: string;

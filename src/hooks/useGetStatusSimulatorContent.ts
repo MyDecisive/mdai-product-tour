@@ -91,6 +91,7 @@ export function useGetStatusSimulatorContent() {
   const [podOrder, setPodOrder] = useState<PodId[]>([]);
   const [activePods, setActivePods] = useState<ActivePodMap>({});
   const processedServices = useRef<string[]>([]);
+  const serviceContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleStatusChange = useCallback((podId: string, status: string) => {
     setActivePods((prev) => ({ ...prev, [podId]: { ...prev[podId], status } }));
@@ -170,11 +171,19 @@ export function useGetStatusSimulatorContent() {
     }
   }, [animationIndex]);
 
+  useEffect(() => {
+    if (serviceContainerRef.current) {
+      serviceContainerRef.current.scrollTop =
+        serviceContainerRef.current.scrollHeight;
+    }
+  }, [servicesToDisplay]);
+
   return {
     services: servicesToDisplay,
     contextLabel,
     handlePodRemove,
     handleStatusChange,
     incrementAnimation: actions.INCREMENT_ANIMATION,
+    serviceContainerRef,
   };
 }

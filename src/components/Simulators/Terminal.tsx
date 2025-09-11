@@ -7,6 +7,7 @@ export function Terminal() {
     promptElementsRef,
     elementsRef,
     className,
+    containerElementRef,
   } = useGetTerminalSimulatorContent();
 
   return (
@@ -17,11 +18,19 @@ export function Terminal() {
         justifyContent: "flex-end",
         height: "100%",
         width: "100%",
+        maxHeight: "3350px",
+        overflowY: "auto",
         flex: 1,
       }}
+      ref={containerElementRef}
     >
-      <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-        <div style={{ display: "inline" }} className={className}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+        }}
+      >
+        <div style={{ display: "inline", width: "100%" }} className={className}>
           {typedOptions.map((options, index) => (
             <div
               key={index}
@@ -49,7 +58,13 @@ export function Terminal() {
                 ref={(el) => {
                   elementsRef.current[index] = el;
                 }}
-                style={{ margin: 0, lineHeight: "1.5em", display: "inline" }}
+                style={{
+                  margin: 0,
+                  lineHeight: "1.5em",
+                  display: "inline",
+                  wordWrap: "break-word",
+                  whiteSpace: "break-spaces",
+                }}
               />
             </div>
           ))}

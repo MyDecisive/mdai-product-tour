@@ -21,6 +21,7 @@ const getLogLevelColor = (level: string): string => {
     case "ERROR":
       return red[400];
     case "WARN":
+    case "WARNING":
       return yellow[400];
     case "DEBUG":
       return grey[400];
@@ -43,6 +44,8 @@ export function LogRow(props: LogRowProps) {
         },
         borderRadius: "8px",
         padding: "2px 4px",
+        maxWidth: "100%",
+        boxSizing: "border-box",
       }}
     >
       <Typography
@@ -69,6 +72,9 @@ export function LogRow(props: LogRowProps) {
           flexShrink: 0,
           width: "48px",
           color: levelColor,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
         {level}
@@ -80,7 +86,10 @@ export function LogRow(props: LogRowProps) {
           fontSize: 13,
           lineHeight: 1.5,
           color: grey[200],
-          wordBreak: "break-all",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          flex: "0 1 auto",
         }}
       >
         {props.message || props.content || JSON.stringify(props)}

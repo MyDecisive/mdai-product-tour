@@ -13,6 +13,7 @@ export function useGetTerminalSimulatorContent() {
   const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
   const promptElementsRef = useRef<(HTMLPreElement | null)[]>([]);
+  const containerElementRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     typedOptions.forEach((options, index) => {
@@ -76,10 +77,18 @@ export function useGetTerminalSimulatorContent() {
     };
   }, [typedOptions, actions]);
 
+  useEffect(() => {
+    if (containerElementRef.current) {
+      containerElementRef.current.scrollTop =
+        containerElementRef.current.scrollHeight;
+    }
+  }, [...elementsRef.current]);
+
   return {
     typedOptions,
     promptElementsRef,
     elementsRef,
     className,
+    containerElementRef,
   };
 }

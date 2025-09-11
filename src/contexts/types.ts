@@ -1,6 +1,7 @@
 import type { NavigationState, StepItemId, TourState } from "../utils/types";
 import type { ACTION_TYPES } from "./constants";
 
+// TODO: Type PayloadMap so it enforces 1:1 with ACTION_TYPES entries
 export interface PayloadMap {
   [ACTION_TYPES.BEGIN_ANIMATION]: undefined;
   [ACTION_TYPES.RESET_ANIMATION]: undefined;

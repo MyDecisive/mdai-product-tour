@@ -202,6 +202,8 @@ export const PANEL_STATE: StepDefinitions = {
         status: {
           active: true,
           services: [
+            { name: "otel-controller", replicas: 2 },
+            { name: "api-gateway" },
             { name: "logs-gen" },
             { name: "noisy-logs-gen" },
             { name: "xtra-noisy-logs-gen", replicas: 2 },

@@ -7,11 +7,11 @@ import type { AppAction, PayloadMap, ReducerFunction } from "./types";
 const reducerFunctions = {
   [ACTION_TYPES.BEGIN_ANIMATION]: (state) => ({
     ...state,
-    animationIndex: -1,
+    animationIndex: 0,
   }),
   [ACTION_TYPES.RESET_ANIMATION]: (state) => ({
     ...state,
-    animationIndex: 0,
+    animationIndex: -1,
   }),
   [ACTION_TYPES.INCREMENT_ANIMATION]: (state) => ({
     ...state,

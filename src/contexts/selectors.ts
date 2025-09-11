@@ -7,7 +7,7 @@ import { getPanelContent } from "../views/allViewsPanelContent";
 import { mergeAnimationState } from "../views/common";
 
 export const selectNavigation = (state: TourState) => state.navigation;
-const selectAnimationIndex = (state: TourState) => state.animationIndex;
+export const selectAnimationIndex = (state: TourState) => state.animationIndex;
 
 export const selectInTour = createSelector(
   [selectNavigation],

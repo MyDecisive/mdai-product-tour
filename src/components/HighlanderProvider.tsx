@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useReducer } from "react";
+import { type ReactNode, useEffect, useMemo, useReducer } from "react";
 import { createActionCreator } from "../contexts/actions";
 import { ACTION_TYPES } from "../contexts/constants";
 import { HighlanderContext } from "../contexts/highlander";
@@ -8,7 +8,9 @@ import type {
   DispatchedActionCreators,
   PayloadMap,
 } from "../contexts/types";
+import { DEFAULT_ANIMATION_STEP_DURATION } from "../utils/constants";
 import type { TourState } from "../utils/types";
+import { getPanelContent } from "../views/allViewsPanelContent";
 
 interface HighlanderProviderProps {
   children: ReactNode;
@@ -47,6 +49,36 @@ export function HighlanderProvider({
     }),
     [state, dispatchedActionCreators]
   );
+
+  const { navigation, animationIndex } = state;
+
+  useEffect(() => {
+    const { animations } = getPanelContent(navigation);
+    if (animations.length === 0 || animationIndex >= animations.length - 1)
+      return;
+
+    let timeout: NodeJS.Timeout;
+
+    if (animationIndex === -1) {
+      timeout = setTimeout(() => {
+        dispatchedActionCreators.BEGIN_ANIMATION();
+      }, DEFAULT_ANIMATION_STEP_DURATION);
+    } else {
+      const currentAnimation = animations[animationIndex];
+
+      if (currentAnimation.type === "delay") {
+        timeout = setTimeout(() => {
+          dispatchedActionCreators.INCREMENT_ANIMATION();
+        }, currentAnimation.delay);
+      }
+    }
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [animationIndex, navigation, dispatchedActionCreators]);
 
   return (
     <HighlanderContext.Provider value={contextValue}>

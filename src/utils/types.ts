@@ -119,3 +119,12 @@ export interface StepDefinition {
 }
 
 export type StepDefinitions = Record<StepItemId, StepDefinition>;
+
+export type InfoBannerProps = {
+  percentText?: string;
+  percentFiltered?: boolean;
+  logs: {
+    sentToVendor: number;
+    filtered: number;
+  };
+};

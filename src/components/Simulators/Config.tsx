@@ -1,11 +1,11 @@
 import { Box } from "@mui/material";
 import { useEffect, useMemo, useRef } from "react";
-import { useAnimationIndex } from "../../hooks/useAnimationIndex";
-import type { ConfigTextProps } from "../../utils/types";
+import { useGetConfigSimulatorContent } from "../../hooks/useGetConfigSimulatorContent";
 import { SimulatorContextLabel } from "./SimContextLabel";
 
-export function ConfigText({ text, activeRange, title }: ConfigTextProps) {
-  const { incrementAnimation } = useAnimationIndex();
+export function ConfigText() {
+  const { incrementAnimation, text, activeRange, title } =
+    useGetConfigSimulatorContent();
   const containerRef = useRef<HTMLDivElement>(null);
   const lines = useMemo(() => (text ?? "").split("\n"), [text]);
 

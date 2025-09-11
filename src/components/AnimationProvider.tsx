@@ -30,10 +30,10 @@ export function AnimationProvider({
 
   const beginAnimations = useCallback(() => setAnimationIndex(0), []);
   const resetAnimations = useCallback(() => setAnimationIndex(-1), []);
-  const incrementAnimation = useCallback(
-    () => setAnimationIndex((prev) => prev + 1),
-    []
-  );
+  const incrementAnimation = useCallback((caller: string) => {
+    console.log("caller ", caller);
+    setAnimationIndex((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     resetAnimations();
@@ -58,7 +58,7 @@ export function AnimationProvider({
 
       if (currentAnimation.type === "delay") {
         timeout = setTimeout(() => {
-          incrementAnimation();
+          incrementAnimation("provider");
         }, currentAnimation.delay);
       }
     }

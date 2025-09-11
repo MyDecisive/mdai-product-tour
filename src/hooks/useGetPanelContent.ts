@@ -1,34 +1,12 @@
-import { useMemo } from "react";
-
-import { type SimulatorPanelState } from "../utils/types";
-import { getPanelContent } from "../views/allViewsPanelContent";
-import { mergeAnimationState } from "../views/common";
-import { useAnimationIndex } from "./useAnimationIndex";
-import { useNavigation } from "./useNavigation";
+import { selectInTour, selectPanelState } from "../contexts/selectors";
+import { useSelector } from "./useSelector";
 
 export function useGetPanelContent() {
-  const { view, step, subStep } = useNavigation();
-  const { animationIndex } = useAnimationIndex();
+  const inTour = useSelector(selectInTour);
+  const panelState = useSelector(selectPanelState);
 
-  const { initialState, animations } = useMemo(() => {
-    return getPanelContent(view, step, subStep);
-  }, [view, step, subStep]);
-
-  const panelState = useMemo(() => {
-    let state = initialState;
-
-    for (let i = 0; i <= animationIndex && i < animations.length; i++) {
-      const animation = animations[i];
-      if (animation.stateChanges) {
-        state = mergeAnimationState(
-          state,
-          animation.stateChanges
-        ) as SimulatorPanelState;
-      }
-    }
-
-    return state;
-  }, [initialState, animations, animationIndex]);
-
-  return panelState;
+  return {
+    panelState,
+    inTour,
+  };
 }

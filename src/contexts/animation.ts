@@ -6,7 +6,7 @@ export interface AnimationContextValue {
   setAnimationIndex: React.Dispatch<React.SetStateAction<AnimationState>>;
   beginAnimations: () => void;
   resetAnimations: () => void;
-  incrementAnimation: () => void;
+  incrementAnimation: (caller: string) => void;
 }
 
 export const AnimationContext = createContext<

@@ -1,11 +1,14 @@
 import { Box } from "@mui/material";
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
-import { useAnimationIndex } from "../../hooks/useAnimationIndex";
-import type { TerminalTypedProps } from "../../utils/types";
+import { useGetTerminalSimulatorContent } from "../../hooks/useGetTerminalSimulatorContent";
 
-export function Terminal({ typedOptions = [], className }: TerminalTypedProps) {
-  const { incrementAnimation } = useAnimationIndex();
+export function Terminal() {
+  const {
+    incrementAnimation,
+    typedOptions = [],
+    className,
+  } = useGetTerminalSimulatorContent();
   const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
   const promptElementsRef = useRef<(HTMLPreElement | null)[]>([]);

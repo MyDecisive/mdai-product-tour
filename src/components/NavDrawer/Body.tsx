@@ -6,8 +6,6 @@ import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
-import { useNavigation } from "../../hooks/useNavigation";
-import { Home } from "../../utils/constants";
 import { TreeItem } from "../TreeItem";
 import { StepNavButtons } from "./StepNavButtons";
 
@@ -40,14 +38,12 @@ const BodyScrollContainer = css({
 });
 
 export function Body() {
-  const { drawerItems, handleDrawerItemClick, expandedDrawerItems } =
+  const { inTour, drawerItems, handleDrawerItemClick, expandedDrawerItems } =
     useGetDrawerContent();
-
-  const { view } = useNavigation();
 
   return (
     <Box sx={css([BodyScrollContainer])}>
-      {view === Home && (
+      {!inTour && (
         <Box sx={{ padding: "10px 4px 10px 8px" }}>
           <Typography>
             Ready to play? Select a use case and let's roll.

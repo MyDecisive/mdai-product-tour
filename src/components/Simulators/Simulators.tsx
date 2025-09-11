@@ -1,7 +1,5 @@
 import { Box, Grid } from "@mui/material";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
-import { useNavigation } from "../../hooks/useNavigation";
-import { Home } from "../../utils/constants";
 import { ConfigText } from "./Config";
 import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
@@ -9,17 +7,19 @@ import { Status } from "./Status";
 import { Terminal } from "./Terminal";
 
 export function Simulators() {
-  const { view } = useNavigation();
-  const { config, terminal, status, logs } = useGetPanelContent();
+  const {
+    inTour,
+    panelState: { config, terminal, status, logs },
+  } = useGetPanelContent();
 
   return (
     <Box
       sx={{
         width: "100%",
-        display: view === Home ? "none" : "block",
+        display: inTour ? "block" : "none",
       }}
     >
-      {view === Home ? null : (
+      {inTour ? (
         <Grid
           container
           rowSpacing={2}
@@ -35,24 +35,13 @@ export function Simulators() {
               href={config?.href}
               active={!!config?.active}
             >
-              {config !== null && (
-                <ConfigText
-                  text={config.text}
-                  activeRange={config.activeRange}
-                  title={config.title}
-                />
-              )}
+              {config !== null && <ConfigText />}
             </SimulatorBox>
           </Grid>
 
           <Grid size={6.5}>
             <SimulatorBox title="Status" active={!!status?.active}>
-              {status !== null && (
-                <Status
-                  services={status.services}
-                  namespace={status.namespace}
-                />
-              )}
+              {status !== null && <Status />}
             </SimulatorBox>
           </Grid>
 
@@ -66,31 +55,17 @@ export function Simulators() {
               }}
               active={!!terminal?.active}
             >
-              {terminal !== null && (
-                <Terminal
-                  typedOptions={terminal.typedOptions}
-                  contextLabel={terminal.contextLabel}
-                />
-              )}
+              {terminal !== null && <Terminal />}
             </SimulatorBox>
           </Grid>
 
           <Grid size={6.5}>
             <SimulatorBox title="Tail Logs" active={!!logs?.active}>
-              {logs !== null && (
-                <LogsSimulator
-                  logRecords={logs.logRecords}
-                  speed={logs.speed}
-                  errorLogs={logs.errorLogs}
-                  errorFrequency={logs.errorFrequency}
-                  isPaused={logs.isPaused}
-                  contextLabel={logs.contextLabel}
-                />
-              )}
+              {logs !== null && <LogsSimulator />}
             </SimulatorBox>
           </Grid>
         </Grid>
-      )}
+      ) : null}
     </Box>
   );
 }

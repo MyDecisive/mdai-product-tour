@@ -1,159 +1,35 @@
-import { useCallback } from "react";
-
-import { Home } from "../utils/constants";
-import type { NavigationState, StepItemId, View } from "../utils/types";
-import { getViewStepOrder } from "../views/allViewsDrawerContent";
-import { useAnimationIndex } from "./useAnimationIndex";
-import { useNavigation } from "./useNavigation";
+import { useEffect } from "react";
+import { selectInTour } from "../contexts/selectors";
+import { useHighlander } from "./useHighlander";
+import { useSelector } from "./useSelector";
 
 export function useNavButtonHandlers() {
-  const { view, step, subStep, setNavigation } = useNavigation();
+  const { actions } = useHighlander();
+  const inTour = useSelector(selectInTour);
 
-  const { resetAnimations } = useAnimationIndex();
-
-  const handleBackButtonClick = useCallback(
-    () => setNavigation({ view: Home, step: view }),
-    [setNavigation, view]
-  );
-
-  const handleNextButtonClick = useCallback(() => {
-    const nextNavState = deriveNextStepNavState(view, step, subStep);
-    setNavigation(nextNavState);
-  }, [view, step, subStep, setNavigation]);
-
-  const handlePrevButtonClick = useCallback(() => {
-    const prevNavState = derivePrevStepNavState(view, step, subStep);
-    setNavigation(prevNavState);
-  }, [view, step, subStep, setNavigation]);
-
-  return {
-    handleBackButtonClick,
-    handleNextButtonClick,
-    handlePrevButtonClick,
-    handleResetButtonClick: resetAnimations,
-  };
-}
-
-function deriveNextStepNavState(
-  view: View,
-  step?: StepItemId,
-  subStep?: StepItemId
-): NavigationState {
-  const stepOrder = getViewStepOrder(view);
-
-  if (!step) {
-    return {
-      view,
-      step: stepOrder[0].stepId,
-      ...(stepOrder[0].subStepIds && {
-        subStep: stepOrder[0].subStepIds[0],
-      }),
-    };
-  }
-  const stepIdx = stepOrder.findIndex(({ stepId }) => stepId === step);
-  const { stepId, subStepIds } = stepOrder[stepIdx];
-
-  if (!subStep) {
-    return {
-      view,
-      step: stepId,
-      subStep: subStepIds?.[0],
-    };
-  }
-
-  if (subStepIds && subStepIds.length) {
-    const subStepIdx = subStepIds?.findIndex((stepId) => stepId === subStep);
-
-    if (subStepIdx > -1 && subStepIdx < subStepIds.length - 1) {
-      const nextSubStepId = subStepIds[subStepIdx + 1];
-      return {
-        view,
-        step: stepId,
-        subStep: nextSubStepId,
-      };
-    }
-  }
-
-  if (stepIdx < stepOrder.length - 1) {
-    const { stepId, subStepIds } = stepOrder[stepIdx + 1];
-
-    return {
-      view: view,
-      step: stepId,
-      ...(subStepIds &&
-        subStepIds.length && {
-          subStep: subStepIds[0],
-        }),
-    };
-  }
-
-  return {
-    view: Home,
-    bigContentModal: "finished",
-  };
-}
-
-function derivePrevStepNavState(
-  view: View,
-  step?: StepItemId,
-  subStep?: StepItemId
-): NavigationState {
-  const stepOrder = getViewStepOrder(view);
-
-  if (!step) {
-    return {
-      view,
-      step: stepOrder[stepOrder.length - 1].stepId,
-      subStep: stepOrder[stepOrder.length - 1].subStepIds
-        ? stepOrder[stepOrder.length - 1].subStepIds?.[
-            stepOrder[stepOrder.length - 1].subStepIds!.length - 1
-          ]
-        : undefined,
-    };
-  }
-
-  const stepIdx = stepOrder.findIndex(({ stepId }) => stepId === step);
-  const { subStepIds } = stepOrder[stepIdx];
-
-  if (!subStep) {
-    return {
-      view,
-      step,
-      subStep: subStepIds ? subStepIds[subStepIds?.length - 1] : undefined,
-    };
-  }
-
-  if (subStepIds && subStepIds.length) {
-    const subStepIdx = subStepIds?.findIndex((stepId) => stepId === subStep);
-
-    if (subStepIdx === 0) {
-      if (stepIdx === 0) {
-        return {
-          view: Home,
-        };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (inTour) {
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          actions.GO_NEXT_STEP();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          actions.GO_PREV_STEP();
+        }
       }
-
-      const { stepId: prevStepId, subStepIds: prevSubStepIds } =
-        stepOrder[stepIdx - 1];
-
-      return {
-        view,
-        step: prevStepId,
-        ...(prevSubStepIds &&
-          prevSubStepIds.length && {
-            subStep: prevSubStepIds[prevSubStepIds.length - 1],
-          }),
-      };
-    }
-
-    return {
-      view,
-      step,
-      subStep: subStepIds[subStepIdx - 1],
     };
-  }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [actions, inTour]);
 
   return {
-    view: Home,
+    handleNextButtonClick: actions.GO_NEXT_STEP,
+    handlePrevButtonClick: actions.GO_PREV_STEP,
+    handleResetButtonClick: actions.RESET_ANIMATION,
   };
 }

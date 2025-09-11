@@ -1,5 +1,7 @@
-import { useCallback, type FunctionComponent } from "react";
-import { useNavigation } from "../../hooks/useNavigation";
+import { type FunctionComponent } from "react";
+import { selectNavigation } from "../../contexts/selectors";
+import { useHighlander } from "../../hooks/useHighlander";
+import { useSelector } from "../../hooks/useSelector";
 import type {
   BigContentModalContentProps,
   BigContentModalType,
@@ -15,11 +17,10 @@ const MODAL_CONTENT: Record<
   finished: TourFinished,
 };
 
-export function useGetBigContentModalPresentationLayer() {
-  const { bigContentModal, setNavigation } = useNavigation();
-  const handleClose = useCallback(() => {
-    setNavigation((navState) => ({ ...navState, bigContentModal: undefined }));
-  }, [setNavigation]);
+export function useGetBigContentModalContent() {
+  const { bigContentModal } = useSelector(selectNavigation);
+  const { actions } = useHighlander();
+  const handleClose = actions.CLOSE_BIG_CONTENT_MODAL;
 
   if (!bigContentModal) {
     return {

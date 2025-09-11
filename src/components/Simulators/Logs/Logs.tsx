@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
-import type { LogRecord, LogSimulatorProps } from "../../../utils/types";
+import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorContent";
+import type { LogRecord } from "../../../utils/types";
 import { SimulatorContextLabel } from "../SimContextLabel";
 import { LogRow } from "./LogRow";
 
@@ -40,17 +41,22 @@ function createNextLog(
   };
 }
 
-export const LogsSimulator: React.FC<LogSimulatorProps> = ({
-  logRecords = [],
-  speed = 1000,
-  errorLogs = [],
-  errorFrequency = 0.1,
-  isPaused = false,
-  contextLabel,
-}) => {
+export const LogsSimulator: React.FC = () => {
+  const logs = useGetLogsSimulatorContent();
+  const {
+    logRecords = [],
+    speed = 1000,
+    errorLogs = [],
+    errorFrequency = 0.1,
+    isPaused = false,
+    contextLabel,
+  } = logs || {};
+
   const [displayedLogs, setDisplayedLogs] = useState<LogRecord[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [cycleCount, setCycleCount] = useState<number>(0);
+  const [lastKnownLogsLength, setLastKnownLogsLength] = useState<number>(0);
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -110,6 +116,26 @@ export const LogsSimulator: React.FC<LogSimulatorProps> = ({
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [displayedLogs]);
+
+  useEffect(() => {
+    const currentLogsLength = logRecords?.length || 0;
+
+    if (
+      currentLogsLength < lastKnownLogsLength ||
+      (currentLogsLength > 0 && displayedLogs.length === 0)
+    ) {
+      setDisplayedLogs([]);
+      setCurrentIndex(0);
+      setCycleCount(0);
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+
+    setLastKnownLogsLength(currentLogsLength);
+  }, [logRecords?.length, lastKnownLogsLength, displayedLogs.length]);
 
   return (
     <>

@@ -1,10 +1,7 @@
 import { css } from "@emotion/react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { useEffect, useMemo } from "react";
-import { useNavigation } from "../../hooks/useNavigation";
 import { useNavButtonHandlers } from "../../hooks/useStepNavButtonHandlers";
-import { Home } from "../../utils/constants";
 
 const ContainerStyles = css({
   display: "flex",
@@ -20,34 +17,11 @@ const NavButtonBoxStyles = css({
 });
 
 export function StepNavButtons() {
-  const { view } = useNavigation();
   const {
     handleNextButtonClick,
     handlePrevButtonClick,
     handleResetButtonClick,
   } = useNavButtonHandlers();
-
-  const inTour = useMemo(() => view !== Home, [view]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (inTour) {
-        if (e.key === "ArrowRight") {
-          e.preventDefault();
-          handleNextButtonClick();
-        } else if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          handlePrevButtonClick();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleNextButtonClick, handlePrevButtonClick, inTour]);
 
   return (
     <Box sx={ContainerStyles}>

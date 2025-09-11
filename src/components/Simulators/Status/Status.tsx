@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
-import { useAnimationIndex } from "../../../hooks/useAnimationIndex";
-import type { Service, StatusProps } from "../../../utils/types";
+import { useGetStatusSimulatorContent } from "../../../hooks/useGetStatusSimulatorContent";
+import type { Service } from "../../../utils/types";
 import { SimulatorContextLabel } from "../SimContextLabel";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
@@ -83,12 +83,19 @@ function servicesToActivePods(services: Service[]) {
   );
 }
 
-export const Status: FC<StatusProps> = ({ services = [], namespace }) => {
-  const { incrementAnimation } = useAnimationIndex();
+export const Status: FC = () => {
+  const {
+    services = [],
+    contextLabel,
+    incrementAnimation,
+  } = useGetStatusSimulatorContent();
+
   const [podOrder, setPodOrder] = useState<PodId[]>([]);
   const [activePods, setActivePods] = useState<ActivePodMap>({});
   const [podStatuses, setPodStatuses] = useState<PodStatuses>({});
   const processedServices = useRef<string[]>([]);
+  const [lastKnownServicesLength, setLastKnownServicesLength] =
+    useState<number>(0);
 
   const handleStatusChange = useCallback((podId: string, status: string) => {
     setPodStatuses((prev) => ({ ...prev, [podId]: status }));
@@ -161,9 +168,24 @@ export const Status: FC<StatusProps> = ({ services = [], namespace }) => {
       processedServices.current.concat(newProcessedServices);
   }, [services, podStatuses, activePods, podOrder]);
 
+  useEffect(() => {
+    const currentServicesLength = services.length || 0;
+    if (
+      currentServicesLength < lastKnownServicesLength ||
+      (currentServicesLength > 0 && podOrder.length === 0)
+    ) {
+      setPodOrder([]);
+      setActivePods({});
+      setPodStatuses({});
+      processedServices.current = [];
+    }
+
+    setLastKnownServicesLength(currentServicesLength);
+  }, [services, lastKnownServicesLength, podOrder.length]);
+
   return (
     <>
-      <SimulatorContextLabel>{namespace}</SimulatorContextLabel>
+      <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
       <StyledRow
         name="NAME"
         ready="READY"

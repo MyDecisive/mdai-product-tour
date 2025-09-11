@@ -11,6 +11,11 @@ import {
 export function Banner() {
   const { view, subStep } = useNavigation();
   const [bannerInfo, setBannerInfo] = useState<InfoBannerProps>(initialBannerState);
+  const received = Math.round((bannerInfo.logs.sentToVendor + bannerInfo.logs.filtered) * 100) / 100;
+  const percentFiltered =
+  received > 0
+    ? Math.round((bannerInfo.logs.filtered / received) * 100)
+    : 0;
 
   useEffect(() => {
     if (!subStep) {
@@ -45,9 +50,9 @@ export function Banner() {
             alignItems: "center",
           }}
         >
-          {bannerInfo.percentFiltered !== null && (
+          {!!bannerInfo.percentFiltered && (
             <Typography variant="h2" sx={{ pr: 1 }} color="primary">
-              {bannerInfo.percentFiltered}%
+              {percentFiltered}%
             </Typography>
           )}
           <Typography variant="overline" sx={{ p: 0 }}>
@@ -61,18 +66,18 @@ export function Banner() {
         >
           <Bars
             title="Logs Received"
-            amount={bannerInfo.logs.received}
-            value={bannerInfo.logs.received}
+            amount={received}
+            value={received}
           />
           <Bars
             title="Sent to Vendor"
             amount={bannerInfo.logs.sentToVendor}
-            value={bannerInfo.logs.received}
+            value={received}
           />
           <Bars
             title="Logs Filtered"
             amount={bannerInfo.logs.filtered}
-            value={bannerInfo.logs.received}
+            value={received}
             reverse
           />
         </Box>

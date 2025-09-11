@@ -122,9 +122,8 @@ export type StepDefinitions = Record<StepItemId, StepDefinition>;
 
 export type InfoBannerProps = {
   percentText?: string;
-  percentFiltered?: number | null;
+  percentFiltered?: boolean;
   logs: {
-    received: number;
     sentToVendor: number;
     filtered: number;
   };

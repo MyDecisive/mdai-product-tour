@@ -53,7 +53,7 @@ export function Bars({ title, value = 0, amount = 0, reverse = false }: BarsProp
           variant="determinate"
           color={reverse ? "primary" : "secondary"}
           value={displayValue}
-          sx={{ width: "100%", p: 0, borderRadius: "4px", background: "transparent", transform: reverse ? "scaleX(-1)" : "none" }}
+          sx={{ transform: reverse ? "scaleX(-1)" : "none" }}
         />
       </Box>
       <Typography variant="caption" sx={{ width: "40%", pl: 1 }}>

@@ -41,6 +41,15 @@ export const theme = createTheme({
         barColorSecondary: {
           backgroundColor: "#EDEDED",
         },
+        barColorPrimary: {
+          backgroundColor: "#B062C2",
+        },
+        root: {
+          width: "100%", 
+          p: 0,
+          borderRadius: "4px",
+          background: "transparent"
+        },
       },
     },
     MuiButton: {

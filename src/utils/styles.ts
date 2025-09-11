@@ -36,6 +36,13 @@ export const theme = createTheme({
     // }
   },
   components: {
+    MuiLinearProgress: {
+      styleOverrides: {
+        barColorSecondary: {
+          backgroundColor: "#EDEDED",
+        },
+      },
+    },
     MuiButton: {
       defaultProps: {
         size: "small",

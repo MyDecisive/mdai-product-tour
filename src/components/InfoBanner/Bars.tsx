@@ -5,9 +5,10 @@ type BarsProps = {
   title: string;
   value?: number;
   amount?: number;
+  reverse?: boolean;
 };
 
-export function Bars({ title, value = 0, amount = 0 }: BarsProps) {
+export function Bars({ title, value = 0, amount = 0, reverse = false }: BarsProps) {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
@@ -50,8 +51,9 @@ export function Bars({ title, value = 0, amount = 0 }: BarsProps) {
       >
         <LinearProgress
           variant="determinate"
+          color={reverse ? "primary" : "secondary"}
           value={displayValue}
-          sx={{ width: "100%", p: 0 }}
+          sx={{ width: "100%", p: 0, borderRadius: "4px", background: "transparent", transform: reverse ? "scaleX(-1)" : "none" }}
         />
       </Box>
       <Typography variant="caption" sx={{ width: "40%", pl: 1 }}>

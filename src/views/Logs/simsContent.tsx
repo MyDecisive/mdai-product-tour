@@ -175,12 +175,10 @@ export const PANEL_STATE: StepDefinitions = {
         terminal: {
           active: false,
         },
-        // TODO: fluentD is supposed to run in default namespace
-        // this will just add it to the current lists.
-        // Right now there's no mechanism for the status sim to switch contexts like that
         status: {
           active: true,
           services: fluentDServices,
+          contextLabel: "NAMESPACE: default",
         },
       }),
       createAnimationAction(
@@ -208,7 +206,6 @@ export const PANEL_STATE: StepDefinitions = {
     initialState: {
       config: {
         active: true,
-        ...staticFilterConfig,
       },
       terminal: {
         typedOptions: [
@@ -230,14 +227,21 @@ export const PANEL_STATE: StepDefinitions = {
     },
     animations: [
       createAnimationAction({
+        config: staticFilterConfig,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
         config: staticFilterConfigPartTwo,
       }),
+      createAnimationAction({}, 2000),
       createAnimationAction({
         config: staticFilterNoCommentConfig,
       }),
+      createAnimationAction({}, 2000),
       createAnimationAction({
         config: staticFilterConfigPartTwo,
       }),
+      createAnimationAction({}, 2000),
       createAnimationAction({
         config: {
           active: false,
@@ -270,7 +274,6 @@ export const PANEL_STATE: StepDefinitions = {
     initialState: {
       config: {
         active: true,
-        ...step3HubConfigPartOne,
       },
       terminal: {
         typedOptions: [
@@ -291,11 +294,17 @@ export const PANEL_STATE: StepDefinitions = {
     },
     animations: [
       createAnimationAction({
+        config: step3HubConfigPartOne,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
         config: step3HubConfigPartTwo,
       }),
+      createAnimationAction({}, 2000),
       createAnimationAction({
         config: step3OTelConfigPartOne,
       }),
+      createAnimationAction({}, 2000),
       createAnimationAction({
         config: step3OTelConfigPartTwo,
       }),

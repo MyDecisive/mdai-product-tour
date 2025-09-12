@@ -48,12 +48,13 @@ export function useGetLogsSimulatorContent() {
     errorLogs = [],
     errorFrequency = 0.1,
     isPaused = false,
-    contextLabel,
+    contextLabel = "",
   } = logs as LogSimulatorProps;
 
   const [displayedLogs, setDisplayedLogs] = useState<LogRecord[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [cycleCount, setCycleCount] = useState<number>(0);
+  const [workingContext, setWorkingContext] = useState<string>(contextLabel);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
@@ -116,7 +117,7 @@ export function useGetLogsSimulatorContent() {
   }, [displayedLogs]);
 
   useEffect(() => {
-    if (animationIndex === -1) {
+    if (animationIndex === -1 || contextLabel !== workingContext) {
       setDisplayedLogs([]);
       setCurrentIndex(0);
       setCycleCount(0);
@@ -125,8 +126,9 @@ export function useGetLogsSimulatorContent() {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      setWorkingContext(contextLabel);
     }
-  }, [animationIndex]);
+  }, [animationIndex, contextLabel, workingContext]);
 
   return {
     logContainerRef,

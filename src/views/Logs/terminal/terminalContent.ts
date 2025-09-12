@@ -65,6 +65,6 @@ export const applyConfigTerminalContent: TerminalTypedOptions[] = (
   [] as TerminalTypedOptions[]
 ).concat(
   createTerminalContent(applyOtelConfig),
-  createTerminalContent(applyConfigOutput),
+  createTerminalContent(applyConfigOutput, "terminal"),
   createTerminalContent([""])
 );

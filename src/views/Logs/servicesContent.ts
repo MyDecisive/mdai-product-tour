@@ -49,7 +49,7 @@ export const step2StartingSvcs: Service[] = [
 
 export const step2UpdateSvcs: Service[] = [
   {
-    name: "gatewa-collector",
+    name: "gateway-collector",
     replicas: 5,
   },
 ];

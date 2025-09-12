@@ -92,6 +92,7 @@ export function useGetStatusSimulatorContent() {
   const [activePods, setActivePods] = useState<ActivePodMap>({});
   const processedServices = useRef<string[]>([]);
   const serviceContainerRef = useRef<HTMLDivElement | null>(null);
+  const [workingContext, setWorkingContext] = useState<string>(contextLabel);
 
   const handleStatusChange = useCallback((podId: string, status: string) => {
     setActivePods((prev) => ({ ...prev, [podId]: { ...prev[podId], status } }));
@@ -164,12 +165,13 @@ export function useGetStatusSimulatorContent() {
   }, [activePods, podOrder]);
 
   useEffect(() => {
-    if (animationIndex === -1) {
+    if (animationIndex === -1 || contextLabel !== workingContext) {
       setPodOrder([]);
       setActivePods({});
       processedServices.current = [];
+      setWorkingContext(contextLabel);
     }
-  }, [animationIndex]);
+  }, [animationIndex, contextLabel, workingContext]);
 
   useEffect(() => {
     if (serviceContainerRef.current) {

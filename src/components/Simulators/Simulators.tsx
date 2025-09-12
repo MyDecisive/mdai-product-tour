@@ -15,11 +15,11 @@ export function Simulators() {
   const { view, subStep } = useNavigation();
   const { config, terminal, status, logs } = useGetPanelContent();
   const visualizations = subStep === "step1_results" ? (
-    <img src={logsView} alt="Logs Visualization" style={{ width: "100%", aspectRatio: 1/1 }} />
+    <img src={logsView} alt="Logs Visualization" style={{ width: "100%", maxWidth: "900px", aspectRatio: "1/1" }} />
   ) : subStep === "step2_visualize" ? (
-    <img src={postfilter} alt="Prefilter Visualization" style={{ width: "100%", aspectRatio: 1/1 }} />
+    <img src={postfilter} alt="Prefilter Visualization" style={{ width: "100%", maxWidth: "900px", aspectRatio: "1.25/1" }} />
   ) : subStep === "step3_visualize" ? (
-    <img src={postfilter} alt="Postfilter Visualization" style={{ width: "100%", aspectRatio: 1/1 }} />
+    <img src={postfilter} alt="Postfilter Visualization" style={{ width: "100%", maxWidth: "900px", aspectRatio: "1.25/1" }} />
   ) : null;
 
   return (
@@ -30,7 +30,6 @@ export function Simulators() {
         display: view === Home ? "none" : "block",
       }}
     >
-      
         {(subStep === "step1_results") || (subStep === "step2_visualize") || (subStep === "step3_visualize") ? (
           visualizations
         ) : (

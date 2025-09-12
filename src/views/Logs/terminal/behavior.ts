@@ -7,6 +7,7 @@ const userEntryBehavior: Partial<TerminalTypedOptions> = {
   backSpeed: 150,
   cursorChar: CURSOR_CHAR,
   showCursor: true,
+  contentType: "html",
 };
 
 // NOTE: For good terminal simulation, the `strings` array for this one should only have a single line in it. Just repeat for as many lines as the terminal is supposed to be executing.
@@ -39,7 +40,7 @@ export function createTerminalContent(
   return [
     {
       ...userEntryBehavior,
-      strings,
+      strings: strings.map((str) => `\`${userEntryBehavior.prompt}\` ${str}`),
     },
   ];
 }

@@ -4,7 +4,6 @@ import { useGetTerminalSimulatorContent } from "../../hooks/useGetTerminalSimula
 export function Terminal() {
   const {
     typedOptions = [],
-    promptElementsRef,
     elementsRef,
     className,
     containerElementRef,
@@ -31,7 +30,7 @@ export function Terminal() {
         }}
       >
         <div style={{ display: "inline", width: "100%" }} className={className}>
-          {typedOptions.map((options, index) => (
+          {typedOptions.map((_, index) => (
             <div
               key={index}
               style={{
@@ -40,20 +39,6 @@ export function Terminal() {
                 lineHeight: "1.5em",
               }}
             >
-              {options.prompt && (
-                <pre
-                  ref={(el) => {
-                    promptElementsRef.current[index] = el;
-                  }}
-                  style={{
-                    margin: 0,
-                    lineHeight: "1.5em",
-                    display: index === 0 ? "inline" : "none", // Hide all prompts except first
-                  }}
-                >
-                  {options.prompt}
-                </pre>
-              )}
               <pre
                 ref={(el) => {
                   elementsRef.current[index] = el;

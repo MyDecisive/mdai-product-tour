@@ -82,7 +82,7 @@ export function useGetTerminalSimulatorContent() {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-  }, [...elementsRef.current]);
+  }, [elementsRef.current]);
 
   return {
     typedOptions,

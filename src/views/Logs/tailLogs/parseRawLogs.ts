@@ -14,6 +14,7 @@ export function parseRawServiceLogs(rawLogString: string): LogRecord[] {
         return acc;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_, service, team, region, level, ...messageParts] = parts;
       const message = messageParts.join(" - ");
 
@@ -38,7 +39,7 @@ export function parseRawCollectorLogs(rawLogString: string): LogRecord[] {
         console.warn("Invalid structured log format:", line);
         return acc;
       }
-
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_, level, component, ...jsonParts] = parts;
       const jsonString = jsonParts.join(" ");
 
@@ -50,10 +51,9 @@ export function parseRawCollectorLogs(rawLogString: string): LogRecord[] {
           message,
         });
       } catch (e) {
-        console.warn("Failed to parse JSON in log:", line);
-        return acc;
-      } finally {
+        console.warn(`Failed to parse JSON in log: ${line}`, e);
         return acc;
       }
+      return acc;
     }, [] as LogRecord[]);
 }

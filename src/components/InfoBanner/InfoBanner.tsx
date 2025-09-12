@@ -1,21 +1,24 @@
-import { useState, useEffect } from "react";
-import { useNavigation } from "../../hooks/useNavigation";
 import { AppBar, Box, Container, Toolbar, Typography } from "@mui/material";
-import { Bars } from "./Bars";
+import { useEffect, useState } from "react";
+import { selectNavigation } from "../../contexts/selectors";
+import { useSelector } from "../../hooks/useSelector";
 import type { InfoBannerProps } from "../../utils/types";
 import {
   BANNER_BY_STEP,
   initialBannerState,
 } from "../../views/Logs/bannerContent";
+import { Bars } from "./Bars";
 
 export function Banner() {
-  const { view, subStep } = useNavigation();
-  const [bannerInfo, setBannerInfo] = useState<InfoBannerProps>(initialBannerState);
-  const received = Math.round((bannerInfo.logs.sentToVendor + bannerInfo.logs.filtered) * 100) / 100;
+  const { view, subStep } = useSelector(selectNavigation);
+  const [bannerInfo, setBannerInfo] =
+    useState<InfoBannerProps>(initialBannerState);
+  const received =
+    Math.round(
+      (bannerInfo.logs.sentToVendor + bannerInfo.logs.filtered) * 100
+    ) / 100;
   const percentFiltered =
-  received > 0
-    ? Math.round((bannerInfo.logs.filtered / received) * 100)
-    : 0;
+    received > 0 ? Math.round((bannerInfo.logs.filtered / received) * 100) : 0;
 
   useEffect(() => {
     if (!subStep) {
@@ -64,11 +67,7 @@ export function Banner() {
             width: "40%",
           }}
         >
-          <Bars
-            title="Logs Received"
-            amount={received}
-            value={received}
-          />
+          <Bars title="Logs Received" amount={received} value={received} />
           <Bars
             title="Sent to Vendor"
             amount={bannerInfo.logs.sentToVendor}

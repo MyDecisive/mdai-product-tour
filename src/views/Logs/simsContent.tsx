@@ -1,95 +1,38 @@
 import {
-  CURSOR_CHAR,
   DEFAULT_ANIMATION_STEP_DURATION,
   ITEM_IDS,
   TERMINAL_PROMPT,
 } from "../../utils/constants";
 import type {
   AnimationAction,
-  LogRecord,
-  Service,
   SimulatorPanelState,
   StepDefinitions,
-  TerminalTypedOptions,
 } from "../../utils/types";
 import { createEmptySimulatorPanelState } from "../allViewsPanelContent";
+import {
+  staticFilterConfig,
+  staticFilterConfigPartTwo,
+  staticFilterNoCommentConfig,
+  step3HubConfigPartOne,
+  step3HubConfigPartTwo,
+  step3OTelConfigPartOne,
+  step3OTelConfigPartTwo,
+} from "./configSamples/configContent";
+import {
+  fluentDServices,
+  logGenServices,
+  startingServices,
+  step2StartingSvcs,
+  step2UpdateSvcs,
+} from "./servicesContent";
+import { braidedLogs, collectorLogs } from "./tailLogs/tailLogsContent";
+import {
+  applyConfigTerminalContent,
+  portForwardTerminalContent,
+  startLogsTerminalContent,
+} from "./terminal/terminalContent";
 // import mdaiHubSample from "../Logs/configSamples/mdaiHubSample.yaml?raw";
 // import otelSample from "../Logs/configSamples/otelSample.yaml?raw";
-
-const terminalAutoLines = [
-  "<br/>",
-  "<br/>",
-  "^700🧪 Deploying synthetic log generators...^450",
-  "deployment.apps/mdai-logger-xnoisy created",
-  "deployment.apps/mdai-logger-noisy created^450",
-  "deployment.apps/mdai-logger created",
-  "✅ Log generators deployed",
-];
-
-const userEntry = [
-  "./MDAI-kind",
-  "./mdai-kind .sh",
-  "./mdai-kind.sh kif",
-  "./mdai-kind.sh logs",
-];
-
-const sampleLogs: LogRecord[] = [
-  { message: "Application started successfully" },
-  { message: "Database connection established" },
-  { message: "Loading configuration from /etc/app/config.yaml" },
-  { message: "Starting HTTP server on port 8080" },
-  { message: "Processing incoming request GET /api/users" },
-  { message: "Query executed in 23ms" },
-  { message: "Response sent with status 200" },
-  { message: "Cache hit for key: user_123" },
-  { message: "Background job scheduled: data-cleanup" },
-  { message: "Memory usage: 245MB / 512MB" },
-  { message: "Processing batch job with 150 items" },
-  { message: "Health check passed" },
-];
-
-const errorLogs: LogRecord[] = [
-  { message: "Failed to connect to external API", level: "error" },
-  { message: "Database query timeout after 30s", level: "error" },
-  { message: "Invalid JSON in request body", level: "error" },
-  { message: "Rate limit exceeded for client 192.168.1.100", level: "warn" },
-];
-
-const terminalTypedOptions: TerminalTypedOptions[] = [
-  {
-    prompt: TERMINAL_PROMPT,
-    strings: userEntry,
-    typeSpeed: 70,
-    backSpeed: 150,
-    cursorChar: CURSOR_CHAR,
-    showCursor: true,
-  },
-  ...(terminalAutoLines.map((line) => ({
-    strings: [line],
-    startDelay: 500,
-    typeSpeed: 5,
-    cursorChar: CURSOR_CHAR,
-    showCursor: true,
-    contentType: "html",
-  })) as TerminalTypedOptions[]),
-  {
-    prompt: TERMINAL_PROMPT,
-    strings: [""],
-    typeSpeed: 70,
-    backSpeed: 150,
-    cursorChar: CURSOR_CHAR,
-    showCursor: true,
-  },
-];
-
-const services: Service[] = [
-  { skipStartup: true, name: "web-server", replicas: 2 },
-  { skipStartup: true, name: "api-gateway" },
-  { skipStartup: true, name: "mdai-operator" },
-  { skipStartup: true, name: "otel-controller", replicas: 3 },
-  { skipStartup: true, name: "random-service" },
-  { skipStartup: true, name: "database" },
-];
 
 function createAnimationAction(
   stateChanges: Partial<SimulatorPanelState>,
@@ -181,7 +124,8 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services,
+        contextLabel: "NAMESPACE: mdai",
+        services: startingServices,
       },
       logs: {
         logRecords: [],
@@ -192,7 +136,7 @@ export const PANEL_STATE: StepDefinitions = {
       createAnimationAction({
         terminal: {
           active: true,
-          typedOptions: terminalTypedOptions,
+          typedOptions: startLogsTerminalContent,
         },
       }),
       createAnimationAction({
@@ -201,32 +145,168 @@ export const PANEL_STATE: StepDefinitions = {
         },
         status: {
           active: true,
-          services: [
-            { name: "logs-gen" },
-            { name: "noisy-logs-gen" },
-            { name: "xtra-noisy-logs-gen", replicas: 2 },
-          ],
+          services: logGenServices,
         },
       }),
       createAnimationAction(
         {
           status: { active: false },
           logs: {
+            contextLabel: logGenServices.map((svc) => svc.name).join(" - "),
             active: true,
-            logRecords: sampleLogs,
-            speed: 500,
-            errorLogs: errorLogs,
-            errorFrequency: 0.15,
+            logRecords: braidedLogs,
+            speed: 50,
             isPaused: false,
           },
         },
-        10000
+        5000
       ),
       createAnimationAction({
         logs: {
           active: false,
           isPaused: true,
         },
+        terminal: {
+          active: true,
+          typedOptions: portForwardTerminalContent,
+        },
+      }),
+      createAnimationAction({
+        terminal: {
+          active: false,
+        },
+        status: {
+          active: true,
+          services: fluentDServices,
+          contextLabel: "NAMESPACE: default",
+        },
+      }),
+      createAnimationAction(
+        {
+          status: {
+            active: false,
+          },
+          logs: {
+            active: true,
+            isPaused: false,
+            contextLabel: fluentDServices.map((svc) => svc.name).join(" - "),
+          },
+        },
+        5000
+      ),
+      createAnimationAction({
+        logs: {
+          active: false,
+          isPaused: true,
+        },
+      }),
+    ],
+  },
+  [ITEM_IDS.step2_configure]: {
+    initialState: {
+      config: {
+        active: true,
+      },
+      terminal: {
+        typedOptions: [
+          {
+            prompt: TERMINAL_PROMPT,
+            showCursor: false,
+            strings: [""],
+          },
+        ],
+      },
+      status: {
+        contextLabel: "NAMESPACE: mdai",
+        services: step2StartingSvcs,
+      },
+      logs: {
+        logRecords: [],
+        isPaused: true,
+      },
+    },
+    animations: [
+      createAnimationAction({
+        config: staticFilterConfig,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: staticFilterConfigPartTwo,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: staticFilterNoCommentConfig,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: staticFilterConfigPartTwo,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: {
+          active: false,
+        },
+        terminal: {
+          active: true,
+          typedOptions: applyConfigTerminalContent,
+        },
+      }),
+      createAnimationAction({
+        terminal: {
+          active: false,
+        },
+        status: {
+          active: true,
+          services: step2UpdateSvcs,
+        },
+      }),
+      createAnimationAction({
+        status: {
+          active: false,
+        },
+        logs: {
+          logRecords: collectorLogs,
+        },
+      }),
+    ],
+  },
+  [ITEM_IDS.step3_add]: {
+    initialState: {
+      config: {
+        active: true,
+      },
+      terminal: {
+        typedOptions: [
+          {
+            prompt: TERMINAL_PROMPT,
+            showCursor: false,
+            strings: [""],
+          },
+        ],
+      },
+      status: {
+        services: [],
+      },
+      logs: {
+        logRecords: [],
+        isPaused: true,
+      },
+    },
+    animations: [
+      createAnimationAction({
+        config: step3HubConfigPartOne,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: step3HubConfigPartTwo,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: step3OTelConfigPartOne,
+      }),
+      createAnimationAction({}, 2000),
+      createAnimationAction({
+        config: step3OTelConfigPartTwo,
       }),
     ],
   },

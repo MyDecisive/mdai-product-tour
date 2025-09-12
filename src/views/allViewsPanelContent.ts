@@ -1,10 +1,9 @@
 import { Logs } from "../utils/constants";
 import type {
-  SimulatorPanelState,
   AnimationAction,
+  NavigationState,
+  SimulatorPanelState,
   StepDefinition,
-  View,
-  StepItemId,
 } from "../utils/types";
 import * as LogsPanelContent from "../views/Logs/simsContent";
 
@@ -28,11 +27,7 @@ function createEmptyPanelContentState() {
   } as StepDefinition;
 }
 
-export function getPanelContent(
-  view: View,
-  step?: StepItemId,
-  subStep?: StepItemId
-) {
+export function getPanelContent({ view, step, subStep }: NavigationState) {
   const viewContentMap = panelContentMap[view];
   if (!viewContentMap || !step || !subStep) {
     return createEmptyPanelContentState();

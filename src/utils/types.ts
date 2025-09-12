@@ -52,6 +52,7 @@ export interface Service {
   name: string;
   replicas?: number;
   skipStartup?: boolean;
+  noSuffix?: boolean;
 }
 export interface LogRecord {
   message?: string;
@@ -83,7 +84,7 @@ export interface TerminalTypedProps {
 }
 
 export interface StatusProps {
-  namespace?: string;
+  contextLabel?: string;
   services?: Service[];
 }
 
@@ -128,3 +129,7 @@ export type InfoBannerProps = {
     filtered: number;
   };
 };
+export interface TourState {
+  navigation: NavigationState;
+  animationIndex: number;
+}

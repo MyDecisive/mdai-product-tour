@@ -1,8 +1,11 @@
-import { useMemo } from "react";
-import { getViewTitle } from "../utils/strings";
+import {
+  selectDrawerItems,
+  selectExpandedDrawerItems,
+  selectInTour,
+} from "../contexts/selectors";
 import type { StepItemId } from "../utils/types";
-import { getViewDrawerItems } from "../views/allViewsDrawerContent";
-import { useNavigation } from "./useNavigation";
+import { useHighlander } from "./useHighlander";
+import { useSelector } from "./useSelector";
 
 type DrawerItemClick = (
   event: React.MouseEvent<Element, MouseEvent>,
@@ -10,43 +13,23 @@ type DrawerItemClick = (
 ) => void;
 
 export function useGetDrawerContent() {
-  const { view, step, subStep, setNavigation } = useNavigation();
+  const { actions } = useHighlander();
 
-  const { drawerItems, drawerHeaderText } = useMemo(() => {
-    return {
-      drawerItems: getViewDrawerItems(view),
-      drawerHeaderText: getViewTitle(view),
-    };
-  }, [view]);
+  const drawerItems = useSelector(selectDrawerItems);
+  const expandedDrawerItems = useSelector(selectExpandedDrawerItems);
+  const inTour = useSelector(selectInTour);
 
   const handleDrawerItemClick: DrawerItemClick = (_, itemId: StepItemId) => {
     if (drawerItems.find((item) => item.itemId === itemId)) {
-      setNavigation({
-        view,
-        subStep,
-        step: step === itemId ? undefined : itemId,
-      });
+      actions.TOGGLE_STEP(itemId);
     } else {
-      setNavigation({
-        view,
-        step,
-        subStep: subStep === itemId ? undefined : itemId,
-      });
+      actions.TOGGLE_SUB_STEP(itemId);
     }
   };
 
-  // TODO: Is there a better way to do this part?
-  const expandedDrawerItems = [] as string[];
-  if (step) {
-    expandedDrawerItems.push(step);
-    if (subStep) {
-      expandedDrawerItems.push(subStep);
-    }
-  }
-
   return {
+    inTour,
     drawerItems,
-    drawerHeaderText,
     handleDrawerItemClick,
     expandedDrawerItems,
   };

@@ -2,20 +2,17 @@ import { ThemeProvider } from "@mui/material/styles";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import { AnimationProvider } from "./components/AnimationProvider";
-import { NavigationProvider } from "./components/NavigationProvider";
+import { HighlanderProvider } from "./components/HighlanderProvider";
 import "./index.css";
-import { Home } from "./utils/constants";
+import { DEFAULT_TOUR_STATE } from "./utils/constants";
 import { theme } from "./utils/styles";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <NavigationProvider initialState={{ view: Home }}>
-        <AnimationProvider initialState={-1}>
-          <App />
-        </AnimationProvider>
-      </NavigationProvider>
+      <HighlanderProvider initialState={DEFAULT_TOUR_STATE}>
+        <App />
+      </HighlanderProvider>
     </ThemeProvider>
   </StrictMode>
 );

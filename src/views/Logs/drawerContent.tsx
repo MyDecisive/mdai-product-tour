@@ -1,5 +1,6 @@
 import { css } from "@emotion/react";
 import { Box, Link, List, ListItem, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { ITEM_IDS } from "../../utils/constants";
 import type {
@@ -8,7 +9,6 @@ import type {
   ViewTreeItemProps,
 } from "../../utils/types";
 import { hydrateViewTreeitems } from "../common";
-import type { ReactNode } from "react";
 
 const SubStepStyles = css({
   borderRadius: "4px",
@@ -86,7 +86,9 @@ function YourGuide() {
 }
 
 function UnifiedView() {
-  const { config, terminal, status, logs } = useGetPanelContent();
+  const {
+    panelState: { config, terminal, status, logs },
+  } = useGetPanelContent();
 
   return (
     <SubStepContent title="Consolidated tools">

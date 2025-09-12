@@ -1,14 +1,8 @@
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components/InfoBox";
-import { useNavigation } from "../../hooks/useNavigation";
-import {
-  ITEM_IDS,
-  Logs,
-  LOGS_DEFAULT_STEPS,
-  PII,
-  Traces,
-} from "../../utils/constants";
+import { useHighlander } from "../../hooks/useHighlander";
+import { ITEM_IDS, Logs, PII, Traces } from "../../utils/constants";
 import { getViewTitle } from "../../utils/strings";
 import type {
   StepItemMap,
@@ -18,14 +12,14 @@ import type {
 import { hydrateViewTreeitems } from "../common";
 
 function DynamicLogFiltrationContent() {
-  const { setNavigation } = useNavigation();
+  const { actions } = useHighlander();
 
   return (
     <InfoBox>
       <Typography>Ready to see how it works?</Typography>
       <br />
       <div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
-        <Button size="medium" onClick={() => setNavigation(LOGS_DEFAULT_STEPS)}>
+        <Button size="medium" onClick={actions.START_LOGS_DEMO}>
           Fire it up
         </Button>
       </div>

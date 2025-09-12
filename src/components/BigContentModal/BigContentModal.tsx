@@ -3,11 +3,10 @@ import { Paper } from "@mui/material";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
-import { useGetBigContentModalPresentationLayer } from "./content";
+import { useGetBigContentModalContent } from "./useGetBigContentModalContent";
 
 export function BigContentModal() {
-  const { ContentComponent, handleClose } =
-    useGetBigContentModalPresentationLayer();
+  const { ContentComponent, handleClose } = useGetBigContentModalContent();
 
   const open = ContentComponent !== null;
 

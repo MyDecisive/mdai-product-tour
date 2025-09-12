@@ -1,4 +1,4 @@
-import type { NavigationState, View } from "./types";
+import type { AnimationState, NavigationState, TourState, View } from "./types";
 
 export const Logs: View = "Logs";
 export const Traces: View = "Traces";
@@ -39,4 +39,15 @@ export const LOGS_DEFAULT_STEPS: NavigationState = {
   view: Logs,
   step: ITEM_IDS.introduction,
   subStep: ITEM_IDS.introduction_meet,
+};
+
+const DEFAULT_NAV_STATE: NavigationState = {
+  view: Home,
+};
+
+const DEFAULT_ANIMATION_INDEX: AnimationState = -1;
+
+export const DEFAULT_TOUR_STATE: TourState = {
+  navigation: DEFAULT_NAV_STATE,
+  animationIndex: DEFAULT_ANIMATION_INDEX,
 };

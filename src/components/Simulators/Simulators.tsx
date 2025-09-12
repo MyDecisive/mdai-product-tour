@@ -7,25 +7,39 @@ import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
 import { Terminal } from "./Terminal";
+import logsView from "../../assets/logs.gif";
+import postfilter from "../../assets/post-filter.gif";
+
 
 export function Simulators() {
-  const { view } = useNavigation();
+  const { view, subStep } = useNavigation();
   const { config, terminal, status, logs } = useGetPanelContent();
+  const visualizations = subStep === "step1_results" ? (
+    <img src={logsView} alt="Logs Visualization" style={{ width: "100%", aspectRatio: 1/1 }} />
+  ) : subStep === "step2_visualize" ? (
+    <img src={postfilter} alt="Prefilter Visualization" style={{ width: "100%", aspectRatio: 1/1 }} />
+  ) : subStep === "step3_visualize" ? (
+    <img src={postfilter} alt="Postfilter Visualization" style={{ width: "100%", aspectRatio: 1/1 }} />
+  ) : null;
 
   return (
     <Box
       sx={{
         width: "100%",
+        height: "100%",
         display: view === Home ? "none" : "block",
       }}
     >
-      {view === Home ? null : (
-        <Grid
-          container
-          rowSpacing={2}
-          columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-          justifyContent={"space-evenly"}
-          alignItems={"stretch"}
+      
+        {(subStep === "step1_results") || (subStep === "step2_visualize") || (subStep === "step3_visualize") ? (
+          visualizations
+        ) : (
+          <Grid
+            container
+            rowSpacing={2}
+            columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+            justifyContent={"space-evenly"}
+            alignItems={"stretch"}
           sx={{ width: "100%" }}
         >
           <Grid size={5} sx={{ overflow: "hidden" }}>
@@ -91,6 +105,7 @@ export function Simulators() {
           </Grid>
         </Grid>
       )}
+
     </Box>
   );
 }

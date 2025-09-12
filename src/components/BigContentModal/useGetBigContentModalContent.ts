@@ -7,6 +7,7 @@ import type {
   BigContentModalType,
 } from "../../utils/types";
 import { ContactForm } from "./ContactForm";
+import { StepResults } from "./StepResults";
 import { TourFinished } from "./TourFinished";
 
 const MODAL_CONTENT: Record<
@@ -15,6 +16,7 @@ const MODAL_CONTENT: Record<
 > = {
   contact: ContactForm,
   finished: TourFinished,
+  results: StepResults,
 };
 
 export function useGetBigContentModalContent() {
@@ -28,7 +30,7 @@ export function useGetBigContentModalContent() {
       handleClose,
     };
   }
-  if (!["contact", "finished"].includes(bigContentModal)) {
+  if (!["contact", "finished", "results"].includes(bigContentModal)) {
     console.error("Modal type not supported ", bigContentModal);
     return {
       ContentComponent: null,

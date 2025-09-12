@@ -1,9 +1,20 @@
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { Paper } from "@mui/material";
+import { Paper, Slide } from "@mui/material";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
+import type { TransitionProps } from "@mui/material/transitions";
+import React from "react";
 import { useGetBigContentModalContent } from "./useGetBigContentModalContent";
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export function BigContentModal() {
   const { ContentComponent, handleClose } = useGetBigContentModalContent();
@@ -14,6 +25,9 @@ export function BigContentModal() {
     <Dialog
       open={open}
       onClose={handleClose}
+      slots={{
+        transition: Transition,
+      }}
       slotProps={{
         paper: {
           sx: {

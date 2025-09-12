@@ -1,4 +1,4 @@
-import { Home, LOGS_DEFAULT_STEPS } from "../utils/constants";
+import { Home, ITEM_IDS, LOGS_DEFAULT_STEPS } from "../utils/constants";
 import type { NavigationState, TourState } from "../utils/types";
 import { getViewStepOrder } from "../views/allViewsDrawerContent";
 import { ACTION_TYPES } from "./constants";
@@ -133,6 +133,9 @@ function deriveNextStepNavState({
         view,
         step: stepId,
         subStep: nextSubStepId,
+        ...(nextSubStepId === ITEM_IDS.step1_results && {
+          bigContentModal: "results",
+        }),
       };
     }
   }

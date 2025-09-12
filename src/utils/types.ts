@@ -6,7 +6,7 @@ import { ITEM_IDS } from "../utils/constants";
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
 
-export type BigContentModalType = "contact" | "finished";
+export type BigContentModalType = "contact" | "finished" | "results";
 
 export type BigContentModalContentProps = {
   handleClose: () => void;

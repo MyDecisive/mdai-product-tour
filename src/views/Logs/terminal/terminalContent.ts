@@ -2,8 +2,6 @@ import type { TerminalTypedOptions } from "../../../utils/types";
 import { createTerminalContent } from "./behavior";
 
 const terminalAutoLines = [
-  "<br/>",
-  "<br/>",
   "^700🧪 Deploying synthetic log generators...^450",
   "deployment.apps/mdai-logger-xnoisy created",
   "deployment.apps/mdai-logger-noisy created^450",
@@ -11,12 +9,7 @@ const terminalAutoLines = [
   "✅ Log generators deployed",
 ];
 
-const userEntry = [
-  "./MDAI-kind",
-  "./mdai-kind .sh",
-  "./mdai-kind.sh kif",
-  "./mdai-kind.sh logs",
-];
+const userEntry = ["./mdai-kind.sh logs"];
 
 export const startLogsTerminalContent: TerminalTypedOptions[] = (
   [] as TerminalTypedOptions[]
@@ -31,8 +24,7 @@ const portForwardCommand = [
 ];
 
 const fluentDOutput = [
-  "<br/>",
-  `Release "fluent" does not exist. Installing it now.`,
+  `Release "fluent" does not exist. Installing it now.^450`,
   `NAME: fluent`,
   `LAST DEPLOYED: Thu Sep 11 10:58:12 2025`,
   `NAMESPACE: default`,
@@ -58,7 +50,7 @@ export const portForwardTerminalContent: TerminalTypedOptions[] = (
 const applyOtelConfig = ["kubectl apply -f otel/otel_ref.yaml"];
 
 const applyConfigOutput = [
-  "opentelemetrycollector.opentelemetry.io/gateway created",
+  "^450opentelemetrycollector.opentelemetry.io/gateway created",
 ];
 
 export const applyConfigTerminalContent: TerminalTypedOptions[] = (

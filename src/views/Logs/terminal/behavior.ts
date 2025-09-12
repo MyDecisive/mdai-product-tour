@@ -23,10 +23,17 @@ export function createTerminalContent(
   behavior?: string
 ): TerminalTypedOptions[] {
   if (behavior === "terminal") {
-    return strings.map((string) => ({
-      ...terminalExecutionBehavior,
-      strings: [string],
-    }));
+    return [
+      {
+        ...terminalExecutionBehavior,
+        strings: ["<br/>"],
+      },
+    ].concat(
+      strings.map((string) => ({
+        ...terminalExecutionBehavior,
+        strings: [string],
+      }))
+    );
   }
 
   return [

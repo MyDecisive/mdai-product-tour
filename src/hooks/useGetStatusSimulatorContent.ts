@@ -32,6 +32,7 @@ type ActivePod = {
   replicaNo: number;
   parentServiceKey: string;
   beingReplaced?: boolean;
+  replacing?: PodId;
 };
 
 type ActivePodMap = Record<PodId, ActivePod>;
@@ -105,7 +106,17 @@ export function useGetStatusSimulatorContent() {
   ]);
 
   const handleStatusChange = useCallback((podId: string, status: string) => {
-    setActivePods((prev) => ({ ...prev, [podId]: { ...prev[podId], status } }));
+    setActivePods((prev) => {
+      const prevPod = prev[podId];
+      const nextActivePods = { ...prev, [podId]: { ...prevPod, status } };
+      if (prevPod.replacing && nextActivePods[prevPod.replacing]) {
+        nextActivePods[prevPod.replacing] = {
+          ...nextActivePods[prevPod.replacing],
+          beingReplaced: true,
+        };
+      }
+      return nextActivePods;
+    });
   }, []);
 
   const handlePodRemove = useCallback((podId: string) => {
@@ -154,12 +165,14 @@ export function useGetStatusSimulatorContent() {
         );
       });
 
-      if (shouldReplace) toBeReplaced.push(shouldReplace);
+      if (shouldReplace) {
+        toBeReplaced.push(shouldReplace);
+        partialPod.replacing = shouldReplace;
+      }
     });
 
     setActivePods((old) => {
       const newActivePodMap = Object.assign(old, newActivePods);
-      toBeReplaced.forEach((id) => (newActivePodMap[id].beingReplaced = true));
 
       return newActivePodMap;
     });

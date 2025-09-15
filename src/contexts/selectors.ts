@@ -39,14 +39,27 @@ export const selectExpandedDrawerItems = createSelector(
 export const selectPanelState = createSelector(
   [selectNavigation, selectAnimationIndex],
   (navigation, animationIndex) => {
-    const { initialState, animations } = getPanelContent(navigation);
+    const panelContent = getPanelContent(navigation);
+    const { initialState, animations, isShowingPreviousContent } = panelContent;
     let state = initialState;
 
-    for (let i = 0; i <= animationIndex && i < animations.length; i++) {
+    const effectiveAnimationIndex = isShowingPreviousContent
+      ? animations.length - 1
+      : animationIndex;
+
+    for (
+      let i = 0;
+      i <= effectiveAnimationIndex && i < animations.length;
+      i++
+    ) {
       if (animations[i].stateChanges) {
         state = mergeAnimationState(state, animations[i].stateChanges!);
       }
     }
-    return state;
+
+    return {
+      ...state,
+      isShowingPreviousContent,
+    };
   }
 );

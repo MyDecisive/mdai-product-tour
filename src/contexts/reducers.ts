@@ -1,6 +1,7 @@
 import { Home, ITEM_IDS, LOGS_DEFAULT_STEPS } from "../utils/constants";
 import type { NavigationState, TourState } from "../utils/types";
 import { getViewStepOrder } from "../views/allViewsDrawerContent";
+import { getPanelContent } from "../views/allViewsPanelContent";
 import { ACTION_TYPES } from "./constants";
 import type { AppAction, PayloadMap, ReducerFunction } from "./types";
 
@@ -21,12 +22,15 @@ const reducerFunctions = {
     ...state,
     animationIndex: action.payload,
   }),
-  [ACTION_TYPES.GO_BACK]: (state) => ({
-    ...state,
-    view: Home,
-    step: state.navigation.view,
-    animationIndex: -1,
-  }),
+  [ACTION_TYPES.GO_BACK]: (state) => {
+    return {
+      navigation: {
+        view: Home,
+        step: state.navigation.view,
+      },
+      animationIndex: -1,
+    };
+  },
 
   [ACTION_TYPES.GO_NEXT_STEP]: (state) => ({
     ...state,
@@ -34,11 +38,16 @@ const reducerFunctions = {
     animationIndex: -1,
   }),
 
-  [ACTION_TYPES.GO_PREV_STEP]: (state) => ({
-    ...state,
-    navigation: derivePrevStepNavState(state.navigation),
-    animationIndex: -1,
-  }),
+  [ACTION_TYPES.GO_PREV_STEP]: (state) => {
+    const newNavState = derivePrevStepNavState(state.navigation);
+    const animationIndex =
+      deriveAnimationIndexFromNewPrevStepNavState(newNavState);
+    return {
+      ...state,
+      navigation: newNavState,
+      animationIndex,
+    };
+  },
 
   [ACTION_TYPES.SET_NAVIGATION]: (state, action) => ({
     ...state,
@@ -222,4 +231,12 @@ function derivePrevStepNavState({
   return {
     view: Home,
   };
+}
+
+function deriveAnimationIndexFromNewPrevStepNavState(
+  navState: NavigationState
+): number {
+  const panelContent = getPanelContent(navState);
+
+  return panelContent.animations ? panelContent.animations.length - 1 : -1;
 }

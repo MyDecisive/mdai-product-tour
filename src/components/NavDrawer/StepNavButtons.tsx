@@ -18,16 +18,24 @@ const NavButtonBoxStyles = css({
 
 export function StepNavButtons() {
   const {
+    isShowingPreviousContent,
     handleNextButtonClick,
     handlePrevButtonClick,
     handleResetButtonClick,
   } = useNavButtonHandlers();
 
   return (
-    <Box sx={ContainerStyles}>
-      <Button variant="text" onClick={handleResetButtonClick}>
-        Reset
-      </Button>
+    <Box
+      sx={css([
+        ContainerStyles,
+        isShowingPreviousContent ? { justifyContent: "flex-end " } : {},
+      ])}
+    >
+      {!isShowingPreviousContent && (
+        <Button variant="text" onClick={handleResetButtonClick}>
+          Reset
+        </Button>
+      )}
       <Box sx={NavButtonBoxStyles}>
         <Button variant="text" onClick={handlePrevButtonClick}>
           Prev

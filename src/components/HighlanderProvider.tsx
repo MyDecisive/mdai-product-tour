@@ -53,8 +53,13 @@ export function HighlanderProvider({
   const { navigation, animationIndex } = state;
 
   useEffect(() => {
-    const { animations } = getPanelContent(navigation);
-    if (animations.length === 0 || animationIndex >= animations.length - 1)
+    const panelContent = getPanelContent(navigation);
+    const { animations, isShowingPreviousContent } = panelContent;
+    if (
+      animations.length === 0 ||
+      animationIndex >= animations.length - 1 ||
+      isShowingPreviousContent
+    )
       return;
 
     let timeout: NodeJS.Timeout;

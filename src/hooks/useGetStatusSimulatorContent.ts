@@ -95,6 +95,7 @@ export function useGetStatusSimulatorContent() {
   const processedServices = useRef<string[]>([]);
   const serviceContainerRef = useRef<HTMLDivElement | null>(null);
   const [workingContext, setWorkingContext] = useState<string>(contextLabel);
+  const [workDone, setWorkDone] = useState<boolean>(false);
 
   const memoizedServices = useMemo(() => {
     return services;
@@ -133,6 +134,7 @@ export function useGetStatusSimulatorContent() {
     const allStabilized =
       pods.length > 0 && pods.every((pod) => pod.status === "Running");
     if (allStabilized && !isShowingPreviousContent) {
+      setWorkDone(true);
       actions.INCREMENT_ANIMATION();
     }
   }, [activePods, actions, isShowingPreviousContent]);
@@ -195,22 +197,22 @@ export function useGetStatusSimulatorContent() {
       setActivePods({});
       processedServices.current = [];
       setWorkingContext(contextLabel);
+      setWorkDone(false);
     }
   }, [animationIndex, contextLabel, workingContext, isShowingPreviousContent]);
 
   useEffect(() => {
-    if (serviceContainerRef.current) {
+    if (!workDone && serviceContainerRef.current) {
       serviceContainerRef.current.scrollTop =
         serviceContainerRef.current.scrollHeight;
     }
-  }, [servicesToDisplay]);
+  }, [servicesToDisplay, workDone]);
 
   return {
     services: servicesToDisplay,
     contextLabel,
     handlePodRemove,
     handleStatusChange,
-    incrementAnimation: actions.INCREMENT_ANIMATION,
     serviceContainerRef,
   };
 }

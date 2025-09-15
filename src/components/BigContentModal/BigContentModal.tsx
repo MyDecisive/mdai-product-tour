@@ -13,7 +13,14 @@ const Transition = React.forwardRef(function Transition(
   },
   ref: React.Ref<unknown>
 ) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return (
+    <Slide
+      direction="up"
+      timeout={{ enter: 450, exit: 390 }}
+      ref={ref}
+      {...props}
+    />
+  );
 });
 
 export function BigContentModal() {

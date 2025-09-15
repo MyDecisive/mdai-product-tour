@@ -183,8 +183,17 @@ function derivePrevStepNavState({
   view,
   step,
   subStep,
+  bigContentModal,
 }: NavigationState): NavigationState {
   const stepOrder = getViewStepOrder(view);
+
+  if (bigContentModal === "results") {
+    return {
+      view,
+      step,
+      subStep,
+    };
+  }
 
   if (!step) {
     return {

@@ -18,6 +18,11 @@ export function createEmptySimulatorPanelState(): SimulatorPanelState {
     terminal: null,
     status: null,
     logs: null,
+    banner: {
+      percentText: "Start log filtration to see results",
+      showPercentFiltered: false,
+      logs: { sentToVendor: 0, filtered: 0 },
+    },
   };
 }
 

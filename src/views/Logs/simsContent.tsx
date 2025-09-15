@@ -9,6 +9,7 @@ import type {
   StepDefinitions,
 } from "../../utils/types";
 import { createEmptySimulatorPanelState } from "../allViewsPanelContent";
+import { filterOff, filterOn, initialBannerState } from "./bannerContent";
 import {
   staticFilterConfig,
   staticFilterConfigPartTwo,
@@ -31,8 +32,6 @@ import {
   portForwardTerminalContent,
   startLogsTerminalContent,
 } from "./terminal/terminalContent";
-// import mdaiHubSample from "../Logs/configSamples/mdaiHubSample.yaml?raw";
-// import otelSample from "../Logs/configSamples/otelSample.yaml?raw";
 
 function createAnimationAction(
   stateChanges: Partial<SimulatorPanelState>,
@@ -71,6 +70,7 @@ export const PANEL_STATE: StepDefinitions = {
         logRecords: [],
         isPaused: true,
       },
+      banner: initialBannerState,
     },
     animations: [
       createAnimationAction(
@@ -131,6 +131,7 @@ export const PANEL_STATE: StepDefinitions = {
         logRecords: [],
         isPaused: true,
       },
+      banner: initialBannerState,
     },
     animations: [
       createAnimationAction({
@@ -158,6 +159,7 @@ export const PANEL_STATE: StepDefinitions = {
             speed: 50,
             isPaused: false,
           },
+          banner: filterOff,
         },
         5000
       ),
@@ -224,6 +226,7 @@ export const PANEL_STATE: StepDefinitions = {
         logRecords: [],
         isPaused: true,
       },
+      banner: filterOff,
     },
     animations: [
       createAnimationAction({
@@ -267,6 +270,7 @@ export const PANEL_STATE: StepDefinitions = {
         logs: {
           logRecords: collectorLogs,
         },
+        banner: filterOn,
       }),
     ],
   },
@@ -291,6 +295,7 @@ export const PANEL_STATE: StepDefinitions = {
         logRecords: [],
         isPaused: true,
       },
+      banner: filterOn,
     },
     animations: [
       createAnimationAction({

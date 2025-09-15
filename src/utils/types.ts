@@ -106,6 +106,7 @@ export interface SimulatorPanelState {
   terminal: WithPanelState<TerminalTypedProps> | null;
   status: WithPanelState<StatusProps> | null;
   logs: WithPanelState<LogSimulatorProps> | null;
+  banner: InfoBannerProps | null;
 }
 
 export interface AnimationAction {
@@ -123,7 +124,7 @@ export type StepDefinitions = Record<StepItemId, StepDefinition>;
 
 export type InfoBannerProps = {
   percentText?: string;
-  percentFiltered?: boolean;
+  showPercentFiltered?: boolean;
   logs: {
     sentToVendor: number;
     filtered: number;

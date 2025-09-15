@@ -32,11 +32,14 @@ const reducerFunctions = {
     };
   },
 
-  [ACTION_TYPES.GO_NEXT_STEP]: (state) => ({
-    ...state,
-    navigation: deriveNextStepNavState(state.navigation),
-    animationIndex: -1,
-  }),
+  [ACTION_TYPES.GO_NEXT_STEP]: (state) => {
+    const nextNavState = deriveNextStepNavState(state.navigation);
+    return {
+      ...state,
+      navigation: nextNavState,
+      animationIndex: deriveAnimationIndexFromNewNextStepNavState(nextNavState),
+    };
+  },
 
   [ACTION_TYPES.GO_PREV_STEP]: (state) => {
     const newNavState = derivePrevStepNavState(state.navigation);
@@ -110,6 +113,7 @@ function deriveNextStepNavState({
   view,
   step,
   subStep,
+  bigContentModal,
 }: NavigationState): NavigationState {
   const stepOrder = getViewStepOrder(view);
 
@@ -136,16 +140,23 @@ function deriveNextStepNavState({
   if (subStepIds && subStepIds.length) {
     const subStepIdx = subStepIds?.findIndex((stepId) => stepId === subStep);
 
-    if (subStepIdx > -1 && subStepIdx < subStepIds.length - 1) {
-      const nextSubStepId = subStepIds[subStepIdx + 1];
-      return {
-        view,
-        step: stepId,
-        subStep: nextSubStepId,
-        ...(nextSubStepId === ITEM_IDS.step1_results && {
+    if (subStepIdx > -1) {
+      if (subStepIdx < subStepIds.length - 1) {
+        const nextSubStepId = subStepIds[subStepIdx + 1];
+        return {
+          view,
+          step: stepId,
+          subStep: nextSubStepId,
+        };
+      }
+      if (step !== ITEM_IDS.introduction && !bigContentModal) {
+        return {
+          view,
+          step,
+          subStep,
           bigContentModal: "results",
-        }),
-      };
+        };
+      }
     }
   }
 
@@ -239,4 +250,14 @@ function deriveAnimationIndexFromNewPrevStepNavState(
   const panelContent = getPanelContent(navState);
 
   return panelContent.animations ? panelContent.animations.length - 1 : -1;
+}
+function deriveAnimationIndexFromNewNextStepNavState(
+  nextNavState: NavigationState
+): number {
+  const panelContent = getPanelContent(nextNavState);
+  if (nextNavState.bigContentModal) {
+    return panelContent.animations.length - 1;
+  }
+
+  return -1;
 }

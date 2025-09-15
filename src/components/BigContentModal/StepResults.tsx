@@ -4,11 +4,12 @@ import logsView from "../../assets/logs.gif";
 import postfilter from "../../assets/post-filter.gif";
 import preFilter from "../../assets/prefilter.gif";
 import { selectNavigation } from "../../contexts/selectors";
+import { useHighlander } from "../../hooks/useHighlander";
 import { useSelector } from "../../hooks/useSelector";
 import { ITEM_IDS } from "../../utils/constants";
 
 const stepVizMap = {
-  [ITEM_IDS.step1_results]: {
+  [ITEM_IDS.step1_data]: {
     src: logsView,
     alt: "Logs Visualization",
     style: {
@@ -16,8 +17,10 @@ const stepVizMap = {
       maxWidth: "900px",
       aspectRation: "1/1",
     },
+    label: "See the results!",
+    content: "Data’s flowing. Next stop: Let’s save you some serious money.",
   },
-  [ITEM_IDS.step2_visualize]: {
+  [ITEM_IDS.step2_explore]: {
     src: preFilter,
     alt: "Prefilter Visualization",
     style: {
@@ -25,8 +28,11 @@ const stepVizMap = {
       maxWidth: "900px",
       aspectRation: "1.25/1",
     },
+    label: "Nice work on the filters!",
+    content:
+      "You are cutting down the noise big-time. One hitch--Service1234 and 4321 are missing from Datadog. Don’t worry, we’ll get it right together.",
   },
-  [ITEM_IDS.step3_vizualize]: {
+  [ITEM_IDS.step3_take]: {
     src: postfilter,
     alt: "Postfilter Visualization",
     style: {
@@ -34,6 +40,8 @@ const stepVizMap = {
       maxWidth: "900px",
       aspectRation: "1.25/1",
     },
+    label: "Visualize the results",
+    content: "",
   },
 };
 
@@ -46,23 +54,27 @@ const ButtonContainerStyles = css({
 
 export function StepResults({ handleClose }: { handleClose: () => void }) {
   const { subStep } = useSelector(selectNavigation);
-
-  const { src, alt, style } = useMemo(() => {
+  const { actions } = useHighlander();
+  const { src, alt, style, label, content } = useMemo(() => {
     if (subStep && Object.keys(stepVizMap).includes(subStep)) {
       return stepVizMap[subStep as keyof typeof stepVizMap];
     }
 
-    return {} as { src: undefined; alt: undefined; style: undefined };
+    return {} as {
+      src: undefined;
+      alt: undefined;
+      style: undefined;
+      label: string;
+      content: string;
+    };
   }, [subStep]);
 
   return (
     <>
       <Typography sx={{ fontWeight: 700 }} component="div">
-        See the results!
+        {label}
       </Typography>
-      <Typography component={"div"}>
-        Data’s flowing. Next stop: Let’s save you some serious money.
-      </Typography>
+      <Typography component={"div"}>{content}</Typography>
       <img src={src} alt={alt} style={style} />
       <Divider />
       <Box sx={ButtonContainerStyles}>
@@ -72,8 +84,8 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
         <Button
           variant="contained"
           onClick={() => {
+            actions.GO_NEXT_STEP();
             handleClose();
-            // but also nav to next step
           }}
         >
           Move on

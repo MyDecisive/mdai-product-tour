@@ -6,7 +6,7 @@ const terminalAutoLines = [
   "deployment.apps/mdai-logger-xnoisy created",
   "deployment.apps/mdai-logger-noisy created^450",
   "deployment.apps/mdai-logger created",
-  "✅ Log generators deployed",
+  "^500✅ Log generators deployed",
 ];
 
 const userEntry = ["./mdai-kind.sh logs"];
@@ -30,7 +30,7 @@ const fluentDOutput = [
   `NAMESPACE: default`,
   `STATUS: deployed`,
   `REVISION: 1`,
-  `NOTES:`,
+  `NOTES:^850`,
   `Get Fluentd build information by running these commands:`,
 
   `export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=fluentd,app.`,

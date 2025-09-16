@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Typed from "typed.js";
 import { selectPanelState } from "../contexts/selectors";
 import type { TerminalTypedProps } from "../utils/types";
@@ -9,11 +9,12 @@ export function useGetTerminalSimulatorContent() {
   const { terminal = {} } = useSelector(selectPanelState);
   const { actions } = useHighlander();
 
-  const { typedOptions = [], className } = terminal as TerminalTypedProps;
+  const { typedOptions = [] } = terminal as TerminalTypedProps;
   const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
-  const promptElementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
+
+  const [workDone, setWorkDone] = useState<boolean>(false);
 
   useEffect(() => {
     typedOptions.forEach((options, index) => {
@@ -22,22 +23,38 @@ export function useGetTerminalSimulatorContent() {
         const originalOnComplete = options.onComplete;
         const wrappedOptions = {
           ...options,
+          preStringTyped: (_: number, typed: Typed) => {
+            if (typed.cursor) {
+              typed.cursor.style.display = "none";
+            }
+          },
+          onTypingPaused: (_: number, typed: Typed) => {
+            if (typed.cursor && options.showCursor) {
+              typed.cursor.style.display = "inline-block";
+              typed.cursor.classList.add("typed-cursor--blink");
+            }
+          },
+          onTypingResumed: (_: number, typed: Typed) => {
+            if (typed.cursor) {
+              typed.cursor.style.display = "none";
+            }
+          },
           onComplete: (typed: Typed) => {
             if (originalOnComplete) {
               originalOnComplete(typed);
             }
 
-            if (typed.cursor && index !== typedOptions.length - 1) {
-              typed.cursor.style.display = "none";
+            if (typed.cursor) {
+              if (index !== typedOptions.length - 1) {
+                typed.cursor.style.display = "none";
+              }
+              if (index === typedOptions.length - 1 && options.showCursor) {
+                typed.cursor.style.display = "inline-block";
+              }
             }
 
             const nextIndex = index + 1;
             if (nextIndex < typedOptions.length) {
-              const nextPromptElement = promptElementsRef.current[nextIndex];
-              if (nextPromptElement) {
-                nextPromptElement.style.display = "inline";
-              }
-
               const nextTyped = typedInstancesRef.current[nextIndex];
               if (nextTyped && nextTyped.cursor) {
                 nextTyped.cursor.style.display = "inline-block";
@@ -46,6 +63,7 @@ export function useGetTerminalSimulatorContent() {
             }
             if (index === typedOptions.length - 1) {
               actions.INCREMENT_ANIMATION();
+              setWorkDone(true);
             }
           },
         };
@@ -78,17 +96,19 @@ export function useGetTerminalSimulatorContent() {
   }, [typedOptions, actions]);
 
   useEffect(() => {
-    if (containerElementRef.current) {
+    if (!workDone && containerElementRef.current) {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-  }, [elementsRef.current]);
+  }, [elementsRef.current, workDone]);
+
+  useEffect(() => {
+    setWorkDone(() => false);
+  }, [JSON.stringify(typedOptions)]);
 
   return {
     typedOptions,
-    promptElementsRef,
     elementsRef,
-    className,
     containerElementRef,
   };
 }

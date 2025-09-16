@@ -40,7 +40,9 @@ export function createTerminalContent(
   return [
     {
       ...userEntryBehavior,
-      strings: strings.map((str) => `\`${userEntryBehavior.prompt}\` ${str}`),
+      strings: strings.map(
+        (str) => `\`${userEntryBehavior.prompt}\` ^850${str}`
+      ),
     },
   ];
 }

@@ -15,7 +15,6 @@ const stepVizMap = {
     style: {
       width: "100%",
       maxWidth: "600px",
-      aspectRatio: "1/1",
     },
     label: "See the results!",
     content: "Data’s flowing. Next stop: Let’s save you some serious money.",

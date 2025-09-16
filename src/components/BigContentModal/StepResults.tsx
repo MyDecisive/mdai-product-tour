@@ -1,8 +1,8 @@
-import { Box, Button, css, Divider, Typography } from "@mui/material";
+import { Box, Button, css, Typography } from "@mui/material";
 import { useMemo } from "react";
-import logsView from "../../assets/logs.gif";
-import postfilter from "../../assets/post-filter.gif";
-import preFilter from "../../assets/prefilter.gif";
+import logsView from "../../assets/logs-example.gif";
+import postfilter from "../../assets/dynamic-example.gif";
+import preFilter from "../../assets/filter-example.gif";
 import { selectNavigation } from "../../contexts/selectors";
 import { useHighlander } from "../../hooks/useHighlander";
 import { useSelector } from "../../hooks/useSelector";
@@ -14,8 +14,8 @@ const stepVizMap = {
     alt: "Logs Visualization",
     style: {
       width: "100%",
-      maxWidth: "900px",
-      aspectRation: "1/1",
+      maxWidth: "600px",
+      aspectRatio: "1/1",
     },
     label: "See the results!",
     content: "Data’s flowing. Next stop: Let’s save you some serious money.",
@@ -25,8 +25,6 @@ const stepVizMap = {
     alt: "Prefilter Visualization",
     style: {
       width: "100%",
-      maxWidth: "900px",
-      aspectRation: "1.25/1",
     },
     label: "Nice work on the filters!",
     content:
@@ -37,8 +35,6 @@ const stepVizMap = {
     alt: "Postfilter Visualization",
     style: {
       width: "100%",
-      maxWidth: "900px",
-      aspectRation: "1.25/1",
     },
     label: "Visualize the results",
     content: "",
@@ -50,6 +46,7 @@ const ButtonContainerStyles = css({
   flexDirection: "row",
   justifyContent: "flex-end",
   gap: "12px",
+  paddingTop: "12px",
 });
 
 export function StepResults({ handleClose }: { handleClose: () => void }) {
@@ -74,9 +71,8 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
       <Typography sx={{ fontWeight: 700 }} component="div">
         {label}
       </Typography>
-      <Typography component={"div"}>{content}</Typography>
+      <Typography component={"div"} sx={{ py: 1 }}>{content}</Typography>
       <img src={src} alt={alt} style={style} />
-      <Divider />
       <Box sx={ButtonContainerStyles}>
         <Button variant="text" onClick={handleClose}>
           Wait a sec

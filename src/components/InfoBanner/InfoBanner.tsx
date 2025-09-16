@@ -30,10 +30,11 @@ export function Banner() {
             width: "55%",
             justifyContent: "flex-start",
             alignItems: "center",
+            px: {md: '0 !important'},
           }}
         >
           {showPercentFiltered && (
-            <Typography variant="h2" sx={{ pr: 1 }} color="primary">
+            <Typography variant={"h2"} sx={{ pr: 1, fontSize:{ md: "2rem"} }} color="primary">
               {percentFiltered}%
             </Typography>
           )}
@@ -43,7 +44,7 @@ export function Banner() {
         </Container>
         <Box
           sx={{
-            width: "40%",
+            width: { lg: "40%" , md: "85%" },
           }}
         >
           <Bars title="Logs Received" amount={received} value={received} />

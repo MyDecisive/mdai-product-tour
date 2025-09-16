@@ -44,7 +44,7 @@ export function Bars({ title, value = 0, amount = 0, reverse = false }: BarsProp
       </Typography>
       <Box
         sx={{
-          width: "100%",
+          width: { lg: "100%", md: "60%" },
           display: "flex",
           p: 0,
         }}

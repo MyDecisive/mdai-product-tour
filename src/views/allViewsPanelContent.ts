@@ -6,6 +6,7 @@ import type {
   StepDefinition,
 } from "../utils/types";
 import * as LogsPanelContent from "../views/Logs/simsContent";
+import { getViewStepOrder } from "./allViewsDrawerContent";
 
 const panelContentMap = {
   [Logs]: LogsPanelContent.PANEL_STATE,
@@ -17,6 +18,11 @@ export function createEmptySimulatorPanelState(): SimulatorPanelState {
     terminal: null,
     status: null,
     logs: null,
+    banner: {
+      percentText: "Start log filtration to see results",
+      showPercentFiltered: false,
+      logs: { sentToVendor: 0, filtered: 0 },
+    },
   };
 }
 
@@ -30,13 +36,56 @@ function createEmptyPanelContentState() {
 export function getPanelContent({ view, step, subStep }: NavigationState) {
   const viewContentMap = panelContentMap[view];
   if (!viewContentMap || !step || !subStep) {
-    return createEmptyPanelContentState();
+    return {
+      ...createEmptyPanelContentState(),
+      isShowingPreviousContent: false,
+    };
   }
 
   const subStepContent = viewContentMap[subStep];
-  if (!subStepContent) {
-    return createEmptyPanelContentState();
+  if (subStepContent) {
+    return {
+      ...subStepContent,
+      isShowingPreviousContent: false,
+    };
   }
 
-  return subStepContent;
+  const stepOrder = getViewStepOrder(view);
+  const currentStepIndex = stepOrder.findIndex((s) => s.stepId === step);
+
+  if (currentStepIndex === -1) {
+    return {
+      ...createEmptyPanelContentState(),
+      isShowingPreviousContent: false,
+    };
+  }
+
+  const currentStep = stepOrder[currentStepIndex];
+  const currentSubStepIndex = (currentStep?.subStepIds || []).indexOf(subStep);
+
+  for (let stepIdx = currentStepIndex; stepIdx >= 0; stepIdx--) {
+    const stepItem = stepOrder[stepIdx];
+    const subStepIds = stepItem.subStepIds || [];
+    const startSubIdx =
+      stepIdx === currentStepIndex
+        ? currentSubStepIndex - 1
+        : subStepIds.length - 1;
+
+    for (let subIdx = startSubIdx; subIdx >= 0; subIdx--) {
+      const candidateSubStep = subStepIds[subIdx];
+      const candidateContent = viewContentMap[candidateSubStep];
+
+      if (candidateContent) {
+        return {
+          ...candidateContent,
+          isShowingPreviousContent: true,
+        };
+      }
+    }
+  }
+
+  return {
+    ...createEmptyPanelContentState(),
+    isShowingPreviousContent: false,
+  };
 }

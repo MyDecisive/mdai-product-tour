@@ -55,6 +55,7 @@ export function useGetLogsSimulatorContent() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [cycleCount, setCycleCount] = useState<number>(0);
   const [workingContext, setWorkingContext] = useState<string>(contextLabel);
+  const [workDone, setWorkDone] = useState<boolean>(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
@@ -111,7 +112,7 @@ export function useGetLogsSimulatorContent() {
   ]);
 
   useEffect(() => {
-    if (logContainerRef.current) {
+    if (!workDone && logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [displayedLogs]);
@@ -127,6 +128,7 @@ export function useGetLogsSimulatorContent() {
         intervalRef.current = null;
       }
       setWorkingContext(contextLabel);
+      setWorkDone(false);
     }
   }, [animationIndex, contextLabel, workingContext]);
 

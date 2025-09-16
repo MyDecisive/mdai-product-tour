@@ -32,6 +32,7 @@ type ActivePod = {
   replicaNo: number;
   parentServiceKey: string;
   beingReplaced?: boolean;
+  replacing?: PodId;
 };
 
 type ActivePodMap = Record<PodId, ActivePod>;
@@ -82,7 +83,8 @@ function servicesToActivePods(services: Service[]) {
 }
 
 export function useGetStatusSimulatorContent() {
-  const { status = {} } = useSelector(selectPanelState);
+  const { status = {}, isShowingPreviousContent } =
+    useSelector(selectPanelState);
   const animationIndex = useSelector(selectAnimationIndex);
   const { actions } = useHighlander();
 
@@ -93,9 +95,29 @@ export function useGetStatusSimulatorContent() {
   const processedServices = useRef<string[]>([]);
   const serviceContainerRef = useRef<HTMLDivElement | null>(null);
   const [workingContext, setWorkingContext] = useState<string>(contextLabel);
+  const [workDone, setWorkDone] = useState<boolean>(false);
+
+  const memoizedServices = useMemo(() => {
+    return services;
+  }, [
+    services.length,
+    services
+      .map((s) => `${s.name}-${s.replicas}-${s.skipStartup}-${s.noSuffix}`)
+      .join(","),
+  ]);
 
   const handleStatusChange = useCallback((podId: string, status: string) => {
-    setActivePods((prev) => ({ ...prev, [podId]: { ...prev[podId], status } }));
+    setActivePods((prev) => {
+      const prevPod = prev[podId];
+      const nextActivePods = { ...prev, [podId]: { ...prevPod, status } };
+      if (prevPod.replacing && nextActivePods[prevPod.replacing]) {
+        nextActivePods[prevPod.replacing] = {
+          ...nextActivePods[prevPod.replacing],
+          beingReplaced: true,
+        };
+      }
+      return nextActivePods;
+    });
   }, []);
 
   const handlePodRemove = useCallback((podId: string) => {
@@ -111,22 +133,22 @@ export function useGetStatusSimulatorContent() {
     const pods = Object.values(activePods).filter((pod) => !pod.skipStartup);
     const allStabilized =
       pods.length > 0 && pods.every((pod) => pod.status === "Running");
-
-    if (allStabilized) {
+    if (allStabilized && !isShowingPreviousContent) {
+      setWorkDone(true);
       actions.INCREMENT_ANIMATION();
     }
-  }, [activePods, actions]);
+  }, [activePods, actions, isShowingPreviousContent]);
 
   useEffect(() => {
     // NOTE: The code below expects `services` to _always_ grow
 
     // TODO: Handle `services` being smaller (new array). -- Is that a thing that needs to be accounted for?
-    const newServices = services.filter((service, idx) => {
+    const newServices = memoizedServices.filter((service, idx) => {
       const key = createServiceKey(service, idx);
       return !processedServices.current.includes(key);
     });
 
-    if (newServices.length === 0) return;
+    if (newServices.length === 0 || isShowingPreviousContent) return;
 
     const { newPodOrder, newActivePods, newProcessedServices } =
       servicesToActivePods(newServices);
@@ -145,12 +167,14 @@ export function useGetStatusSimulatorContent() {
         );
       });
 
-      if (shouldReplace) toBeReplaced.push(shouldReplace);
+      if (shouldReplace) {
+        toBeReplaced.push(shouldReplace);
+        partialPod.replacing = shouldReplace;
+      }
     });
 
     setActivePods((old) => {
       const newActivePodMap = Object.assign(old, newActivePods);
-      toBeReplaced.forEach((id) => (newActivePodMap[id].beingReplaced = true));
 
       return newActivePodMap;
     });
@@ -158,34 +182,37 @@ export function useGetStatusSimulatorContent() {
     setPodOrder((old) => old.concat(newPodOrder));
     processedServices.current =
       processedServices.current.concat(newProcessedServices);
-  }, [services, activePods, podOrder]);
+  }, [memoizedServices, activePods, podOrder, isShowingPreviousContent]);
 
   const servicesToDisplay = useMemo(() => {
     return podOrder.map((podId) => activePods[podId]);
   }, [activePods, podOrder]);
 
   useEffect(() => {
-    if (animationIndex === -1 || contextLabel !== workingContext) {
+    if (
+      (animationIndex === -1 || contextLabel !== workingContext) &&
+      !isShowingPreviousContent
+    ) {
       setPodOrder([]);
       setActivePods({});
       processedServices.current = [];
       setWorkingContext(contextLabel);
+      setWorkDone(false);
     }
-  }, [animationIndex, contextLabel, workingContext]);
+  }, [animationIndex, contextLabel, workingContext, isShowingPreviousContent]);
 
   useEffect(() => {
-    if (serviceContainerRef.current) {
+    if (!workDone && serviceContainerRef.current) {
       serviceContainerRef.current.scrollTop =
         serviceContainerRef.current.scrollHeight;
     }
-  }, [servicesToDisplay]);
+  }, [servicesToDisplay, workDone]);
 
   return {
     services: servicesToDisplay,
     contextLabel,
     handlePodRemove,
     handleStatusChange,
-    incrementAnimation: actions.INCREMENT_ANIMATION,
     serviceContainerRef,
   };
 }

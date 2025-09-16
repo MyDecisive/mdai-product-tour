@@ -340,7 +340,10 @@ export const STEP_ORDER: ViewStepOrder = [
   },
   {
     stepId: ITEM_IDS.step1,
-    subStepIds: [ITEM_IDS.step1_data, ITEM_IDS.step1_results],
+    subStepIds: [
+      ITEM_IDS.step1_data,
+      // ITEM_IDS.step1_results,
+    ],
   },
   {
     stepId: ITEM_IDS.step2,
@@ -348,7 +351,7 @@ export const STEP_ORDER: ViewStepOrder = [
       ITEM_IDS.step2_configure,
       ITEM_IDS.step2_take,
       ITEM_IDS.step2_explore,
-      ITEM_IDS.step2_visualize,
+      // ITEM_IDS.step2_visualize,
     ],
   },
   {
@@ -356,7 +359,7 @@ export const STEP_ORDER: ViewStepOrder = [
     subStepIds: [
       ITEM_IDS.step3_add,
       ITEM_IDS.step3_take,
-      ITEM_IDS.step3_vizualize,
+      // ITEM_IDS.step3_vizualize,
     ],
   },
 ];

@@ -1,24 +1,10 @@
 import { Box } from "@mui/material";
-import { useEffect, useMemo, useRef } from "react";
 import { useGetConfigSimulatorContent } from "../../hooks/useGetConfigSimulatorContent";
 import { SimulatorContextLabel } from "./SimContextLabel";
 
 export function ConfigText() {
-  const { incrementAnimation, text, activeRange, title } =
+  const { onScrollEnd, containerRef, activeRange, title, lines } =
     useGetConfigSimulatorContent();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lines = useMemo(() => (text ?? "").split("\n"), [text]);
-
-  useEffect(() => {
-    if (!activeRange) {
-      containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    const el = containerRef.current?.querySelector<HTMLDivElement>(
-      `[data-line="${activeRange.start - 1}"]`
-    );
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeRange]);
 
   return (
     <>
@@ -35,7 +21,7 @@ export function ConfigText() {
           scrollbarWidth: "thin",
           scrollbarColor: "#B062C2 transparent",
         }}
-        onScrollEnd={incrementAnimation}
+        onScrollEnd={onScrollEnd}
       >
         {lines.map((line, i) => {
           const lineNo = i + 1;

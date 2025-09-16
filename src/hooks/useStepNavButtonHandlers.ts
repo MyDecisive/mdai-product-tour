@@ -1,11 +1,15 @@
 import { useEffect } from "react";
 import { selectInTour } from "../contexts/selectors";
+import { useGetPanelContent } from "./useGetPanelContent";
 import { useHighlander } from "./useHighlander";
 import { useSelector } from "./useSelector";
 
 export function useNavButtonHandlers() {
   const { actions } = useHighlander();
   const inTour = useSelector(selectInTour);
+  const {
+    panelState: { isShowingPreviousContent },
+  } = useGetPanelContent();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,6 +32,7 @@ export function useNavButtonHandlers() {
   }, [actions, inTour]);
 
   return {
+    isShowingPreviousContent,
     handleNextButtonClick: actions.GO_NEXT_STEP,
     handlePrevButtonClick: actions.GO_PREV_STEP,
     handleResetButtonClick: actions.RESET_ANIMATION,

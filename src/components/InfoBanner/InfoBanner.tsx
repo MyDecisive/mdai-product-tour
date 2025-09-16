@@ -1,41 +1,20 @@
 import { AppBar, Box, Container, Toolbar, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { selectNavigation } from "../../contexts/selectors";
-import { useSelector } from "../../hooks/useSelector";
-import type { InfoBannerProps } from "../../utils/types";
-import {
-  BANNER_BY_STEP,
-  initialBannerState,
-} from "../../views/Logs/bannerContent";
+import { useGetInfoBannerContent } from "../../hooks/useGetInfoBannerContent";
 import { Bars } from "./Bars";
 
 export function Banner() {
-  const { view, subStep } = useSelector(selectNavigation);
-  const [bannerInfo, setBannerInfo] =
-    useState<InfoBannerProps>(initialBannerState);
-  const received =
-    Math.round(
-      (bannerInfo.logs.sentToVendor + bannerInfo.logs.filtered) * 100
-    ) / 100;
-  const percentFiltered =
-    received > 0 ? Math.round((bannerInfo.logs.filtered / received) * 100) : 0;
-
-  useEffect(() => {
-    if (!subStep) {
-      setBannerInfo(initialBannerState);
-      return;
-    }
-    const next = BANNER_BY_STEP[subStep];
-    if (next) {
-      setBannerInfo(next);
-    }
-  }, [subStep]);
+  const {
+    percentText,
+    received,
+    sentToVendor,
+    filtered,
+    percentFiltered,
+    inTour,
+    showPercentFiltered,
+  } = useGetInfoBannerContent();
 
   return (
-    <AppBar
-      position="static"
-      sx={{ display: view === "Home" ? "none" : "block" }}
-    >
+    <AppBar position="static" sx={{ display: inTour ? "block" : "none" }}>
       <Toolbar
         sx={{
           display: "flex",
@@ -53,13 +32,13 @@ export function Banner() {
             alignItems: "center",
           }}
         >
-          {!!bannerInfo.percentFiltered && (
+          {showPercentFiltered && (
             <Typography variant="h2" sx={{ pr: 1 }} color="primary">
               {percentFiltered}%
             </Typography>
           )}
           <Typography variant="overline" sx={{ p: 0 }}>
-            {bannerInfo.percentText}
+            {percentText}
           </Typography>
         </Container>
         <Box
@@ -68,14 +47,10 @@ export function Banner() {
           }}
         >
           <Bars title="Logs Received" amount={received} value={received} />
-          <Bars
-            title="Sent to Vendor"
-            amount={bannerInfo.logs.sentToVendor}
-            value={received}
-          />
+          <Bars title="Sent to Vendor" amount={sentToVendor} value={received} />
           <Bars
             title="Logs Filtered"
-            amount={bannerInfo.logs.filtered}
+            amount={filtered}
             value={received}
             reverse
           />

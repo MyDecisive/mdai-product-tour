@@ -3,19 +3,19 @@ import type { InfoBannerProps } from "../../utils/types";
 
 export const initialBannerState: InfoBannerProps = {
   percentText: "Start log filtration to see results",
-  percentFiltered: false,
+  showPercentFiltered: false,
   logs: { sentToVendor: 0, filtered: 0 },
 };
 
-const filterOff: InfoBannerProps = {
+export const filterOff: InfoBannerProps = {
   percentText: "of log data filtered",
-  percentFiltered: true,
+  showPercentFiltered: true,
   logs: { sentToVendor: 4.3, filtered: 0 },
 };
 
-const filterOn: InfoBannerProps = {
+export const filterOn: InfoBannerProps = {
   percentText: "of log data filtered",
-  percentFiltered: true,
+  showPercentFiltered: true,
   logs: { sentToVendor: 1.39, filtered: 10.71 },
 };
 

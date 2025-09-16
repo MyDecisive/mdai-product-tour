@@ -6,7 +6,7 @@ import { ITEM_IDS } from "../utils/constants";
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
 
-export type BigContentModalType = "contact" | "finished";
+export type BigContentModalType = "contact" | "finished" | "results";
 
 export type BigContentModalContentProps = {
   handleClose: () => void;
@@ -106,6 +106,7 @@ export interface SimulatorPanelState {
   terminal: WithPanelState<TerminalTypedProps> | null;
   status: WithPanelState<StatusProps> | null;
   logs: WithPanelState<LogSimulatorProps> | null;
+  banner: InfoBannerProps | null;
 }
 
 export interface AnimationAction {
@@ -123,7 +124,7 @@ export type StepDefinitions = Record<StepItemId, StepDefinition>;
 
 export type InfoBannerProps = {
   percentText?: string;
-  percentFiltered?: boolean;
+  showPercentFiltered?: boolean;
   logs: {
     sentToVendor: number;
     filtered: number;

@@ -1,6 +1,7 @@
-import { Home, LOGS_DEFAULT_STEPS } from "../utils/constants";
+import { Home, ITEM_IDS, LOGS_DEFAULT_STEPS } from "../utils/constants";
 import type { NavigationState, TourState } from "../utils/types";
 import { getViewStepOrder } from "../views/allViewsDrawerContent";
+import { getPanelContent } from "../views/allViewsPanelContent";
 import { ACTION_TYPES } from "./constants";
 import type { AppAction, PayloadMap, ReducerFunction } from "./types";
 
@@ -21,24 +22,35 @@ const reducerFunctions = {
     ...state,
     animationIndex: action.payload,
   }),
-  [ACTION_TYPES.GO_BACK]: (state) => ({
-    ...state,
-    view: Home,
-    step: state.navigation.view,
-    animationIndex: -1,
-  }),
+  [ACTION_TYPES.GO_BACK]: (state) => {
+    return {
+      navigation: {
+        view: Home,
+        step: state.navigation.view,
+      },
+      animationIndex: -1,
+    };
+  },
 
-  [ACTION_TYPES.GO_NEXT_STEP]: (state) => ({
-    ...state,
-    navigation: deriveNextStepNavState(state.navigation),
-    animationIndex: -1,
-  }),
+  [ACTION_TYPES.GO_NEXT_STEP]: (state) => {
+    const nextNavState = deriveNextStepNavState(state.navigation);
+    return {
+      ...state,
+      navigation: nextNavState,
+      animationIndex: deriveAnimationIndexFromNewNextStepNavState(nextNavState),
+    };
+  },
 
-  [ACTION_TYPES.GO_PREV_STEP]: (state) => ({
-    ...state,
-    navigation: derivePrevStepNavState(state.navigation),
-    animationIndex: -1,
-  }),
+  [ACTION_TYPES.GO_PREV_STEP]: (state) => {
+    const newNavState = derivePrevStepNavState(state.navigation);
+    const animationIndex =
+      deriveAnimationIndexFromNewPrevStepNavState(newNavState);
+    return {
+      ...state,
+      navigation: newNavState,
+      animationIndex,
+    };
+  },
 
   [ACTION_TYPES.SET_NAVIGATION]: (state, action) => ({
     ...state,
@@ -101,6 +113,7 @@ function deriveNextStepNavState({
   view,
   step,
   subStep,
+  bigContentModal,
 }: NavigationState): NavigationState {
   const stepOrder = getViewStepOrder(view);
 
@@ -127,13 +140,23 @@ function deriveNextStepNavState({
   if (subStepIds && subStepIds.length) {
     const subStepIdx = subStepIds?.findIndex((stepId) => stepId === subStep);
 
-    if (subStepIdx > -1 && subStepIdx < subStepIds.length - 1) {
-      const nextSubStepId = subStepIds[subStepIdx + 1];
-      return {
-        view,
-        step: stepId,
-        subStep: nextSubStepId,
-      };
+    if (subStepIdx > -1) {
+      if (subStepIdx < subStepIds.length - 1) {
+        const nextSubStepId = subStepIds[subStepIdx + 1];
+        return {
+          view,
+          step: stepId,
+          subStep: nextSubStepId,
+        };
+      }
+      if (step !== ITEM_IDS.introduction && !bigContentModal) {
+        return {
+          view,
+          step,
+          subStep,
+          bigContentModal: "results",
+        };
+      }
     }
   }
 
@@ -160,8 +183,17 @@ function derivePrevStepNavState({
   view,
   step,
   subStep,
+  bigContentModal,
 }: NavigationState): NavigationState {
   const stepOrder = getViewStepOrder(view);
+
+  if (bigContentModal === "results") {
+    return {
+      view,
+      step,
+      subStep,
+    };
+  }
 
   if (!step) {
     return {
@@ -219,4 +251,22 @@ function derivePrevStepNavState({
   return {
     view: Home,
   };
+}
+
+function deriveAnimationIndexFromNewPrevStepNavState(
+  navState: NavigationState
+): number {
+  const panelContent = getPanelContent(navState);
+
+  return panelContent.animations ? panelContent.animations.length - 1 : -1;
+}
+function deriveAnimationIndexFromNewNextStepNavState(
+  nextNavState: NavigationState
+): number {
+  const panelContent = getPanelContent(nextNavState);
+  if (nextNavState.bigContentModal) {
+    return panelContent.animations.length - 1;
+  }
+
+  return -1;
 }

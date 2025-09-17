@@ -30,7 +30,7 @@ const NavTreeSubStepStyles = css({
 });
 
 const HEADER_HEIGHT = 65;
-const FOOTER_HEIGHT = 80;
+const FOOTER_HEIGHT = 75;
 
 const BodyScrollContainer = css({
   maxHeight: `calc(100% - ${HEADER_HEIGHT + FOOTER_HEIGHT}px)`,

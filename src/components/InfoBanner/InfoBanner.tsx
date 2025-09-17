@@ -44,7 +44,7 @@ export function Banner() {
         </Container>
         <Box
           sx={{
-            width: { lg: "40%" , md: "85%" },
+            width: { xl: "40%", lg: "60%", md: "85%" },
           }}
         >
           <Bars title="Logs Received" amount={received} value={received} />

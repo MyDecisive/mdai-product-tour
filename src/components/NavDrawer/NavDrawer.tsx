@@ -1,9 +1,7 @@
 import { css } from "@emotion/react";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
-
 import { Body } from "./Body";
-import { Footer } from "./Footer";
 import { Header } from "./Header";
 
 export const drawerWidth = 400;
@@ -30,7 +28,6 @@ export function NavDrawer() {
       <Header />
       <Divider />
       <Body />
-      <Footer />
     </Drawer>
   );
 }

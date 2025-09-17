@@ -1,0 +1,146 @@
+import GitHubIcon from "../../assets/github-icon.svg";
+import LinkedInIcon from "../../assets/linkedIn-icon.png";
+import Logo from "../../assets/smol-logo.svg";
+import LogoText from "../../assets/mydecisive-ai-logo-text.svg";
+import { Box, Link, Stack, Typography } from "@mui/material";
+import { useHighlander } from "../../hooks/useHighlander";
+
+const linkStyles = {
+  textDecoration: "none",
+  color: "inherit",
+  cursor: "pointer",
+};
+
+export const Footer = () => {
+  const { actions } = useHighlander();
+
+  return (
+    <Box
+      component={"footer"}
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column" },
+        maxHeight: { xs: "500px", md: "325px" },
+        width: "100%",
+        zIndex: 1300,
+        rowGap: { xs: 0, sm: "40px" },
+        justifyContent: "space-between",
+        alignItems: { xs: "flex-start", sm: "center" },
+        borderTop: "1px solid #6F6F6F",
+        bgcolor: "#393939",
+        pt: { xs: 0, sm: "16px" },
+        pr: { sm: "20px" },
+        pb: { xs: "8px", sm: "16px" },
+        position: "relative",
+      }}
+    >
+      <Stack
+        width={"95%"}
+        direction={{ xs: "column", sm: "row" }}
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: { xs: "flex-start", sm: "center" },
+        }}
+        rowGap={{ xs: "48px", sm: "10px" }}
+        px={"12px"}
+      >
+        <Stack
+          direction={{ xs: "column", md: "column" }}
+          justifyContent={"flex-start"}
+          order={{ xs: 99, sm: 0 }}
+        >
+          <Link
+            href={"https://www.mydecisive.ai/"}
+            underline="none"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Stack
+              direction={"row"}
+              columnGap={"6px"}
+              paddingRight={{ xs: "20px", md: "0" }}
+            >
+              <Box
+                component={"img"}
+                src={Logo}
+                sx={{ width: "33px", height: "33px" }}
+              />
+              <Box
+                component="img"
+                src={LogoText}
+                sx={{ color: "red" }}
+                alt={"logo"}
+              />
+            </Stack>
+          </Link>
+          <Typography>&copy; 2025 DecisiveAI</Typography>
+        </Stack>
+        <Stack
+          order={{ xs: 0, sm: 2 }}
+          direction={{ xs: "column", sm: "row" }}
+          width={{ xs: "100%", sm: "60%", md: "50%" }}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+          rowGap="20px"
+          mb="4px"
+        >
+          <Link
+            sx={linkStyles}
+            onClick={() => actions.OPEN_BIG_CONTENT_MODAL("contact")}
+          >
+            Need Help?
+          </Link>
+          <Link
+            href="https://docs.mydecisive.ai/"
+            sx={linkStyles}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Documentation
+          </Link>
+          <Link
+            href="https://mydecisivecommunity.slack.com/archives/C08LE3DJ877"
+            sx={linkStyles}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Community Engagement
+          </Link>
+        </Stack>
+        <Stack
+          rowGap="12px"
+          order={{ xs: 1, sm: 99 }}
+          alignItems={"flex-end"}
+        >
+          <Stack direction={"row"} columnGap={{xs: "8px", sm: "16px", md: "24px" }}>
+            <Link
+              href="https://github.com/orgs/DecisiveAI/repositories?type=public"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Box
+                alt="GitHub"
+                component={"img"}
+                src={GitHubIcon}
+                width={"45px"}
+              />
+            </Link>
+            <Link
+              href="https://www.linkedin.com/company/mydecisiveai/?viewAsMember=true"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Box
+                alt="LinkedIn"
+                component={"img"}
+                src={LinkedInIcon}
+                width={"51px"}
+              />
+            </Link>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Box>
+  );
+};

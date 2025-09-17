@@ -82,7 +82,9 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
           variant="contained"
           onClick={() => {
             actions.GO_NEXT_STEP();
-            handleClose();
+            if (subStep !== ITEM_IDS.step3_take) {
+              handleClose();
+            }
           }}
         >
           Next

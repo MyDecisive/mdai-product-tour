@@ -34,6 +34,7 @@ const reducerFunctions = {
 
   [ACTION_TYPES.GO_NEXT_STEP]: (state) => {
     const nextNavState = deriveNextStepNavState(state.navigation);
+
     return {
       ...state,
       navigation: nextNavState,
@@ -155,6 +156,17 @@ function deriveNextStepNavState({
           step,
           subStep,
           bigContentModal: "results",
+        };
+      }
+
+      if (
+        bigContentModal === "results" &&
+        subStep === ITEM_IDS.step3_take &&
+        step === ITEM_IDS.step3
+      ) {
+        return {
+          view: Home,
+          bigContentModal: "finished",
         };
       }
     }

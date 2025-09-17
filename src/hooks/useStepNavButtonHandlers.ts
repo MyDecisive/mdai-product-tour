@@ -1,14 +1,15 @@
-import { useEffect } from "react";
-import { selectInTour } from "../contexts/selectors";
+import { useEffect, useMemo } from "react";
+import { selectAnimationIndex } from "../contexts/selectors";
 import { useGetPanelContent } from "./useGetPanelContent";
 import { useHighlander } from "./useHighlander";
 import { useSelector } from "./useSelector";
 
 export function useNavButtonHandlers() {
   const { actions } = useHighlander();
-  const inTour = useSelector(selectInTour);
+  const animationIndex = useSelector(selectAnimationIndex);
   const {
-    panelState: { isShowingPreviousContent },
+    panelState: { isShowingPreviousContent, animations },
+    inTour,
   } = useGetPanelContent();
 
   useEffect(() => {
@@ -31,10 +32,24 @@ export function useNavButtonHandlers() {
     };
   }, [actions, inTour]);
 
+  const { showPlayButton, nextButtonDisabled } = useMemo(() => {
+    const hasAnimations = !isShowingPreviousContent && !!animations.length;
+    const showPlayButton = hasAnimations && animationIndex === -1;
+    const animationPlaying = animationIndex < animations.length - 1;
+    const nextButtonDisabled = hasAnimations && animationPlaying;
+    return {
+      showPlayButton,
+      nextButtonDisabled,
+    };
+  }, [animations, animationIndex, isShowingPreviousContent]);
+
   return {
     isShowingPreviousContent,
+    showPlayButton,
+    handleClickPlay: actions.BEGIN_ANIMATION,
     handleNextButtonClick: actions.GO_NEXT_STEP,
     handlePrevButtonClick: actions.GO_PREV_STEP,
     handleResetButtonClick: actions.RESET_ANIMATION,
+    nextButtonDisabled,
   };
 }

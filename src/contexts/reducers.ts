@@ -159,14 +159,22 @@ function deriveNextStepNavState({
         };
       }
 
-      if (
-        bigContentModal === "results" &&
-        subStep === ITEM_IDS.step3_take &&
-        step === ITEM_IDS.step3
-      ) {
+      if (bigContentModal === "results") {
+        if (subStep === ITEM_IDS.step3_take && step === ITEM_IDS.step3) {
+          return {
+            view: Home,
+            bigContentModal: "finished",
+          };
+        }
+        const { stepId, subStepIds } = stepOrder[stepIdx + 1];
+
         return {
-          view: Home,
-          bigContentModal: "finished",
+          view: view,
+          step: stepId,
+          ...(subStepIds &&
+            subStepIds.length && {
+              subStep: subStepIds[0],
+            }),
         };
       }
     }

@@ -8,7 +8,7 @@ import { useHighlander } from "../../hooks/useHighlander";
 import { useSelector } from "../../hooks/useSelector";
 import { ITEM_IDS } from "../../utils/constants";
 
-const stepVizMap = {
+export const stepVizMap = {
   [ITEM_IDS.step1_data]: {
     src: logsView,
     alt: "Logs Visualization",

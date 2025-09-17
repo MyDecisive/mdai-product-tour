@@ -25,6 +25,7 @@ export function StepNavButtons() {
     showPlayButton,
     handleClickPlay,
     nextButtonDisabled,
+    nextButtonText,
   } = useNavButtonHandlers();
 
   return (
@@ -53,7 +54,7 @@ export function StepNavButtons() {
             variant="contained"
             onClick={handleNextButtonClick}
           >
-            Next
+            {nextButtonText}
           </Button>
         )}
       </Box>

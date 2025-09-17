@@ -25,7 +25,8 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export function BigContentModal() {
-  const { ContentComponent, handleClose } = useGetBigContentModalContent();
+  const { ContentComponent, handleClose, showCloseButton } =
+    useGetBigContentModalContent();
 
   const open = ContentComponent !== null;
 
@@ -54,19 +55,21 @@ export function BigContentModal() {
           height: "100%",
         }}
       >
-        <IconButton
-          edge="start"
-          onClick={handleClose}
-          aria-label="close"
-          sx={{
-            position: "absolute",
-            right: "40px",
-            top: "40px",
-            color: "#FFFFFF",
-          }}
-        >
-          <CloseRoundedIcon />
-        </IconButton>
+        {showCloseButton && (
+          <IconButton
+            edge="start"
+            onClick={handleClose}
+            aria-label="close"
+            sx={{
+              position: "absolute",
+              right: "40px",
+              top: "40px",
+              color: "#FFFFFF",
+            }}
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+        )}
         <Paper
           sx={{
             paddingX: "48px",

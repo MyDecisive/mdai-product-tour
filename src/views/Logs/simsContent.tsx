@@ -59,7 +59,6 @@ export const PANEL_STATE: StepDefinitions = {
           {
             prompt: TERMINAL_PROMPT,
             showCursor: false,
-            strings: [""],
           },
         ],
       },
@@ -88,7 +87,6 @@ export const PANEL_STATE: StepDefinitions = {
       ),
       createAnimationAction(
         {
-          config: { active: false },
           terminal: { active: false },
           status: { active: true },
         },
@@ -96,9 +94,7 @@ export const PANEL_STATE: StepDefinitions = {
       ),
       createAnimationAction(
         {
-          config: { active: false },
           status: { active: false },
-          terminal: { active: false },
           logs: { active: true },
         },
         DEFAULT_ANIMATION_STEP_DURATION
@@ -119,7 +115,6 @@ export const PANEL_STATE: StepDefinitions = {
           {
             prompt: TERMINAL_PROMPT,
             showCursor: false,
-            strings: [""],
           },
         ],
       },
@@ -214,7 +209,6 @@ export const PANEL_STATE: StepDefinitions = {
           {
             prompt: TERMINAL_PROMPT,
             showCursor: false,
-            strings: [""],
           },
         ],
       },
@@ -284,7 +278,6 @@ export const PANEL_STATE: StepDefinitions = {
           {
             prompt: TERMINAL_PROMPT,
             showCursor: false,
-            strings: [""],
           },
         ],
       },

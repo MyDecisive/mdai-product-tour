@@ -41,7 +41,7 @@ export function StepNavButtons() {
           Prev
         </Button>
         <Button variant="contained" onClick={handleNextButtonClick}>
-          Next
+          See results
         </Button>
       </Box>
     </Box>

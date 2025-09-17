@@ -8,7 +8,6 @@ import type {
   DispatchedActionCreators,
   PayloadMap,
 } from "../contexts/types";
-import { DEFAULT_ANIMATION_STEP_DURATION } from "../utils/constants";
 import type { TourState } from "../utils/types";
 import { getPanelContent } from "../views/allViewsPanelContent";
 
@@ -57,6 +56,7 @@ export function HighlanderProvider({
     const { animations, isShowingPreviousContent } = panelContent;
     if (
       animations.length === 0 ||
+      animationIndex === -1 ||
       animationIndex >= animations.length - 1 ||
       isShowingPreviousContent
     )
@@ -64,18 +64,12 @@ export function HighlanderProvider({
 
     let timeout: NodeJS.Timeout;
 
-    if (animationIndex === -1) {
-      timeout = setTimeout(() => {
-        dispatchedActionCreators.BEGIN_ANIMATION();
-      }, DEFAULT_ANIMATION_STEP_DURATION);
-    } else {
-      const currentAnimation = animations[animationIndex];
+    const currentAnimation = animations[animationIndex];
 
-      if (currentAnimation.type === "delay") {
-        timeout = setTimeout(() => {
-          dispatchedActionCreators.INCREMENT_ANIMATION();
-        }, currentAnimation.delay);
-      }
+    if (currentAnimation.type === "delay") {
+      timeout = setTimeout(() => {
+        dispatchedActionCreators.INCREMENT_ANIMATION();
+      }, currentAnimation.delay);
     }
 
     return () => {

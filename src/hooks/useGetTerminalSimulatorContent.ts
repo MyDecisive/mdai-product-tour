@@ -23,6 +23,11 @@ export function useGetTerminalSimulatorContent() {
         const originalOnComplete = options.onComplete;
         const wrappedOptions = {
           ...options,
+          onBegin: (typed: Typed) => {
+            if (!options.strings) {
+              typed.stop();
+            }
+          },
           preStringTyped: (_: number, typed: Typed) => {
             if (typed.cursor) {
               typed.cursor.style.display = "none";
@@ -62,6 +67,7 @@ export function useGetTerminalSimulatorContent() {
               }
             }
             if (index === typedOptions.length - 1) {
+              console.log("terminal increment animation");
               actions.INCREMENT_ANIMATION();
               setWorkDone(true);
             }

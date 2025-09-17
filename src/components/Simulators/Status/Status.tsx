@@ -25,6 +25,7 @@ export const Status: FC = () => {
         }}
       >
         <StyledRow
+          namespace="NAMESPACE"
           name="NAME"
           ready="READY"
           status="STATUS"
@@ -42,11 +43,12 @@ export const Status: FC = () => {
           }}
         >
           {services.map((service) => {
-            const { name, beingReplaced, id, status } = service;
+            const { name, beingReplaced, id, status, namespace } = service;
 
             return (
               <ServiceRow
                 key={id}
+                namespace={namespace}
                 podId={id}
                 beingReplaced={beingReplaced}
                 status={status}

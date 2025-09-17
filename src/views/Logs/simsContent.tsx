@@ -119,7 +119,6 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        contextLabel: "NAMESPACE: mdai",
         services: startingServices,
       },
       logs: {
@@ -175,7 +174,6 @@ export const PANEL_STATE: StepDefinitions = {
         status: {
           active: true,
           services: fluentDServices,
-          contextLabel: "NAMESPACE: default",
         },
       }),
       createAnimationAction(
@@ -213,7 +211,6 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        contextLabel: "NAMESPACE: mdai",
         services: step2StartingSvcs,
       },
       logs: {

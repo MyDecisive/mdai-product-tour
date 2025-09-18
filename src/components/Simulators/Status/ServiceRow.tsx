@@ -5,6 +5,7 @@ import type { PodId, StatusString } from "./types";
 
 interface ServiceRowProps {
   name: string;
+  namespace: string;
   podId: PodId;
   status: StatusString;
   beingReplaced?: boolean;
@@ -29,6 +30,7 @@ function createStatusChangeDelay() {
 
 export const ServiceRow: React.FC<ServiceRowProps> = ({
   name,
+  namespace,
   podId,
   beingReplaced,
   status,
@@ -89,6 +91,7 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
   return (
     <StyledRow
       name={podName}
+      namespace={namespace}
       ready={status === STATUS.running ? "1/1" : "0/1"}
       status={status}
       restarts={restartCount.toString()}

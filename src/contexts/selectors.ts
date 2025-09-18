@@ -60,6 +60,7 @@ export const selectPanelState = createSelector(
     return {
       ...state,
       isShowingPreviousContent,
+      animations,
     };
   }
 );

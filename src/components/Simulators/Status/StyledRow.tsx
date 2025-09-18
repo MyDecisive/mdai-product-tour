@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 
 type StyleRowProps = {
   name: string;
+  namespace: string;
   ready: string;
   status: string;
   restarts: string;
@@ -15,6 +16,7 @@ export function StyledRow({
   status,
   restarts,
   containerStyles,
+  namespace,
 }: StyleRowProps) {
   return (
     <Box
@@ -31,7 +33,19 @@ export function StyledRow({
     >
       <Typography
         sx={{
-          flex: "1 1 70%",
+          flex: "1 1 12%",
+
+          fontFamily:
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+          fontSize: 13,
+          lineHeight: 1.5,
+        }}
+      >
+        {namespace}
+      </Typography>
+      <Typography
+        sx={{
+          flex: "1 1 58%",
 
           fontFamily:
             'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',

@@ -1,14 +1,14 @@
 import { Box, Button, css, Typography } from "@mui/material";
 import { useMemo } from "react";
-import logsView from "../../assets/logs-example.gif";
 import postfilter from "../../assets/dynamic-example.gif";
 import preFilter from "../../assets/filter-example.gif";
+import logsView from "../../assets/logs-example.gif";
 import { selectNavigation } from "../../contexts/selectors";
 import { useHighlander } from "../../hooks/useHighlander";
 import { useSelector } from "../../hooks/useSelector";
 import { ITEM_IDS } from "../../utils/constants";
 
-const stepVizMap = {
+export const stepVizMap = {
   [ITEM_IDS.step1_data]: {
     src: logsView,
     alt: "Logs Visualization",
@@ -70,20 +70,24 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
       <Typography sx={{ fontWeight: 700 }} component="div">
         {label}
       </Typography>
-      <Typography component={"div"} sx={{ py: 1 }}>{content}</Typography>
+      <Typography component={"div"} sx={{ py: 1 }}>
+        {content}
+      </Typography>
       <img src={src} alt={alt} style={style} />
       <Box sx={ButtonContainerStyles}>
         <Button variant="text" onClick={handleClose}>
-          Wait a sec
+          Prev
         </Button>
         <Button
           variant="contained"
           onClick={() => {
             actions.GO_NEXT_STEP();
-            handleClose();
+            if (subStep !== ITEM_IDS.step3_take) {
+              handleClose();
+            }
           }}
         >
-          Move on
+          Next
         </Button>
       </Box>
     </>

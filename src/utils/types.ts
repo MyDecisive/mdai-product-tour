@@ -50,6 +50,7 @@ export type SimulatorBoxProps = {
 
 export interface Service {
   name: string;
+  namespace: string;
   replicas?: number;
   skipStartup?: boolean;
   noSuffix?: boolean;

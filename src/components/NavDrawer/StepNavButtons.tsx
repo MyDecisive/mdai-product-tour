@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import { PlayCircleFilled } from "@mui/icons-material";
+import { Box, Button } from "@mui/material";
 import { useNavButtonHandlers } from "../../hooks/useStepNavButtonHandlers";
 
 const ContainerStyles = css({
@@ -22,6 +22,10 @@ export function StepNavButtons() {
     handleNextButtonClick,
     handlePrevButtonClick,
     handleResetButtonClick,
+    showPlayButton,
+    handleClickPlay,
+    nextButtonDisabled,
+    nextButtonText,
   } = useNavButtonHandlers();
 
   return (
@@ -40,9 +44,19 @@ export function StepNavButtons() {
         <Button variant="text" onClick={handlePrevButtonClick}>
           Prev
         </Button>
-        <Button variant="contained" onClick={handleNextButtonClick}>
-          Next
-        </Button>
+        {showPlayButton ? (
+          <Button variant="contained" onClick={handleClickPlay}>
+            <PlayCircleFilled />
+          </Button>
+        ) : (
+          <Button
+            disabled={nextButtonDisabled}
+            variant="contained"
+            onClick={handleNextButtonClick}
+          >
+            {nextButtonText}
+          </Button>
+        )}
       </Box>
     </Box>
   );

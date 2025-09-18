@@ -33,7 +33,7 @@ export const ITEM_IDS = {
 export const TERMINAL_PROMPT = "eng@local-terminal > ";
 export const CURSOR_CHAR = "█";
 
-export const DEFAULT_ANIMATION_STEP_DURATION = 750;
+export const DEFAULT_ANIMATION_STEP_DURATION = 1500;
 
 export const LOGS_DEFAULT_STEPS: NavigationState = {
   view: Logs,
@@ -43,6 +43,7 @@ export const LOGS_DEFAULT_STEPS: NavigationState = {
 
 const DEFAULT_NAV_STATE: NavigationState = {
   view: Home,
+  step: Logs,
 };
 
 const DEFAULT_ANIMATION_INDEX: AnimationState = -1;

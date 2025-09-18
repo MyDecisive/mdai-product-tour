@@ -27,6 +27,7 @@ function createPodId(svc: Service, replicaNo: number, addr: number) {
 type ActivePod = {
   id: PodId;
   name: string;
+  namespace: string;
   status: StatusString;
   skipStartup?: boolean;
   replicaNo: number;
@@ -63,6 +64,7 @@ function servicesToActivePods(services: Service[]) {
         const newPod = {
           id: newPodId,
           name: service.name,
+          namespace: service.namespace,
           status: service.skipStartup ? STATUS.running : STATUS.pending,
           skipStartup: service.skipStartup,
           replicaNo,
@@ -206,7 +208,7 @@ export function useGetStatusSimulatorContent() {
       serviceContainerRef.current.scrollTop =
         serviceContainerRef.current.scrollHeight;
     }
-  }, [servicesToDisplay, workDone]);
+  }, [podOrder.length, activePods, workDone]);
 
   return {
     services: servicesToDisplay,

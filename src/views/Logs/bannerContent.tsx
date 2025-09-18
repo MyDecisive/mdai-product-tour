@@ -10,13 +10,19 @@ export const initialBannerState: InfoBannerProps = {
 export const filterOff: InfoBannerProps = {
   percentText: "of log data filtered",
   showPercentFiltered: true,
-  logs: { sentToVendor: 4.3, filtered: 0 },
+  logs: { sentToVendor: 28.5, filtered: 0 },
 };
 
 export const filterOn: InfoBannerProps = {
   percentText: "of log data filtered",
   showPercentFiltered: true,
-  logs: { sentToVendor: 1.39, filtered: 10.71 },
+  logs: { sentToVendor: 4.23, filtered: 26.92 },
+};
+
+export const dynamicFilterOn: InfoBannerProps = {
+  percentText: "of log data filtered",
+  showPercentFiltered: true,
+  logs: { sentToVendor: 10.4, filtered: 26.92 },
 };
 
 export const BANNER_BY_STEP: Record<string, InfoBannerProps> = {
@@ -27,4 +33,5 @@ export const BANNER_BY_STEP: Record<string, InfoBannerProps> = {
   [ITEM_IDS.step1_results]: filterOff,
   [ITEM_IDS.step2_take]: filterOn,
   [ITEM_IDS.step2_visualize]: filterOn,
+  [ITEM_IDS.step3_take]: dynamicFilterOn,
 };

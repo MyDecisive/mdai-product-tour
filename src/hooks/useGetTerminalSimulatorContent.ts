@@ -106,8 +106,9 @@ export function useGetTerminalSimulatorContent() {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-  }, [elementsRef.current, workDone]);
+  }, [containerElementRef.current, workDone]);
 
+  // eslint-ignore-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setWorkDone(() => false);
   }, [JSON.stringify(typedOptions)]);

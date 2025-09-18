@@ -99,6 +99,7 @@ export function useGetStatusSimulatorContent() {
   const [workingContext, setWorkingContext] = useState<string>(contextLabel);
   const [workDone, setWorkDone] = useState<boolean>(false);
 
+  // eslint-ignore-next-line react-hooks/exhaustive-deps
   const memoizedServices = useMemo(() => {
     return services;
   }, [

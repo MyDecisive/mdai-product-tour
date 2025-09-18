@@ -67,7 +67,6 @@ export function useGetTerminalSimulatorContent() {
               }
             }
             if (index === typedOptions.length - 1) {
-              console.log("terminal increment animation");
               actions.INCREMENT_ANIMATION();
               setWorkDone(true);
             }

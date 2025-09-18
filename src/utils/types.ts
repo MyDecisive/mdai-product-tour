@@ -65,10 +65,12 @@ export interface LogRecord {
 }
 
 export type LineRange = { start: number; end: number };
+export type HighlightBounds = [number, number];
 
 export interface ConfigTextProps {
   text?: string;
   activeRange?: LineRange;
+  highlights?: HighlightBounds[];
   title?: string;
   href?: string;
 }

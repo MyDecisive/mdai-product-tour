@@ -1,5 +1,5 @@
 import { Box, Button, css, Typography } from "@mui/material";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import postfilter from "../../assets/dynamic-example.mp4";
 import preFilter from "../../assets/filter-example.mp4";
 import logsView from "../../assets/logs-example.mp4";
@@ -63,6 +63,16 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
     };
   }, [subStep]);
 
+  const [playing, setPlaying] = useState<boolean>(false);
+
+  const videoTagRef = useRef<HTMLVideoElement | null>(null);
+
+  const playVideo = () => {
+    if (videoTagRef && videoTagRef.current) {
+      videoTagRef.current.play();
+    }
+  };
+
   return (
     <>
       <Box
@@ -77,14 +87,16 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
           <Typography sx={{ fontWeight: 700 }} component="div">
             {label}
           </Typography>
-          {content && 
-          (
-          <Typography component={"div"} sx={{ py: 1 }}>
-            {content}
-          </Typography>
+          {content && (
+            <Typography component={"div"} sx={{ py: 1 }}>
+              {content}
+            </Typography>
           )}
         </Box>
         <Box sx={ButtonContainerStyles}>
+          <Button disabled={playing} variant="text" onClick={playVideo}>
+            Reset
+          </Button>
           <Button variant="text" onClick={handleClose}>
             Prev
           </Button>
@@ -101,11 +113,27 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
           </Button>
         </Box>
       </Box>
-      <Box sx={{ display: "flex", justifyContent: "center"}}>
-        <Box sx={{ display: "flex", justifyContent: "center", pt: 2, width: { xs: "100%", md: "70%" } }}>
-        <video src={src} style={style} controls={true} autoPlay muted>
-          {alt}
-        </video>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            pt: 2,
+            width: { xs: "100%", md: "70%" },
+          }}
+        >
+          <video
+            ref={videoTagRef}
+            src={src}
+            style={style}
+            controls={false}
+            autoPlay
+            muted
+            onPlay={() => setPlaying(true)}
+            onEnded={() => setPlaying(false)}
+          >
+            {alt}
+          </video>
         </Box>
       </Box>
     </>

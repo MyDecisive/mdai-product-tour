@@ -3,7 +3,7 @@ import { useGetConfigSimulatorContent } from "../../hooks/useGetConfigSimulatorC
 import { SimulatorContextLabel } from "./SimContextLabel";
 
 export function ConfigText() {
-  const { onScrollEnd, containerRef, activeRange, title, lines } =
+  const { containerRef, title, processedLines } =
     useGetConfigSimulatorContent();
 
   return (
@@ -21,17 +21,11 @@ export function ConfigText() {
           scrollbarWidth: "thin",
           scrollbarColor: "#B062C2 transparent",
         }}
-        onScrollEnd={onScrollEnd}
       >
-        {lines.map((line, i) => {
-          const lineNo = i + 1;
-          const active =
-            !!activeRange &&
-            lineNo >= activeRange.start &&
-            lineNo <= activeRange.end;
+        {processedLines.map(({ lineNo, content, isHighlighted }) => {
           return (
             <Box
-              key={i}
+              key={lineNo}
               data-line={lineNo}
               sx={{
                 display: "grid",
@@ -40,14 +34,14 @@ export function ConfigText() {
                 px: 1.5,
                 py: 0.25,
                 transition: "background-color 300ms",
-                bgcolor: active ? "#b062c265" : "transparent",
+                bgcolor: isHighlighted ? "#b062c265" : "transparent",
               }}
             >
               <Box sx={{ color: "text.disabled", textAlign: "right", pr: 1 }}>
                 {lineNo}
               </Box>
               <Box component="pre" sx={{ m: 0, whiteSpace: "pre-wrap" }}>
-                {line || "\u00A0"}
+                {content || "\u00A0"}
               </Box>
             </Box>
           );

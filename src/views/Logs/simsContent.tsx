@@ -14,6 +14,7 @@ import {
   staticFilterConfig,
   staticFilterConfigPartTwo,
   staticFilterNoCommentConfig,
+  staticFilterNoCommentConfigPartTwo,
   step3HubConfigPartOne,
   step3HubConfigPartTwo,
   step3OTelConfigPartOne,
@@ -233,7 +234,7 @@ export const PANEL_STATE: StepDefinitions = {
       }),
       createAnimationAction({}, 2000),
       createAnimationAction({
-        config: staticFilterConfigPartTwo,
+        config: staticFilterNoCommentConfigPartTwo,
       }),
       createAnimationAction({}, 2000),
       createAnimationAction({

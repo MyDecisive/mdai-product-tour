@@ -10,6 +10,10 @@ export const staticFilterConfig: ConfigTextProps = {
     start: 73,
     end: 78,
   },
+  highlights: [
+    [74, 78],
+    [100, 100],
+  ],
   title: "otel_ref.yaml",
   href: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
 };
@@ -24,17 +28,21 @@ export const staticFilterConfigPartTwo: ConfigTextProps = {
 export const staticFilterNoCommentConfig: ConfigTextProps = {
   text: staticFilterNoComment,
   activeRange: {
-    start: 73,
-    end: 78,
+    start: 98,
+    end: 108,
   },
+  highlights: [
+    [74, 78],
+    [100, 100],
+  ],
   title: "otel_ref.yaml",
   href: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
 };
 
 export const staticFilterNoCommentConfigPartTwo: ConfigTextProps = {
   activeRange: {
-    start: 98,
-    end: 108,
+    start: 73,
+    end: 78,
   },
 };
 
@@ -43,9 +51,14 @@ export const step3HubConfigPartOne: ConfigTextProps = {
   title: "hub_ref.yaml",
   href: "https://github.com/DecisiveAI/mdai-labs/blob/0.8.5-rc/mdai/hub/0.8.5/hub_ref.yaml",
   activeRange: {
-    start: 11,
+    start: 10,
     end: 17,
   },
+  highlights: [
+    [11, 17],
+    [43, 47],
+    [81, 86],
+  ],
 };
 
 export const step3HubConfigPartTwo: ConfigTextProps = {
@@ -68,6 +81,10 @@ export const step3OTelConfigPartOne: ConfigTextProps = {
     start: 73,
     end: 77,
   },
+  highlights: [
+    [73, 77],
+    [99, 99],
+  ],
 };
 
 export const step3OTelConfigPartTwo: ConfigTextProps = {

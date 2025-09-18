@@ -57,7 +57,7 @@ export function Bars({ title, value = 0, amount = 0, reverse = false }: BarsProp
         />
       </Box>
       <Typography variant="caption" sx={{ width: "40%", pl: 1 }}>
-        {amount} GB/min
+        {amount} MB/min
       </Typography>
     </Box>
   );

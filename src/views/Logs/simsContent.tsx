@@ -9,7 +9,7 @@ import type {
   StepDefinitions,
 } from "../../utils/types";
 import { createEmptySimulatorPanelState } from "../allViewsPanelContent";
-import { filterOff, filterOn, initialBannerState } from "./bannerContent";
+import { filterOff, filterOn, dynamicFilterOn, initialBannerState } from "./bannerContent";
 import {
   staticFilterConfig,
   staticFilterConfigPartTwo,
@@ -304,5 +304,27 @@ export const PANEL_STATE: StepDefinitions = {
         config: step3OTelConfigPartTwo,
       }),
     ],
+  },
+  [ITEM_IDS.step3_take]: {
+    initialState: {
+      config: {},
+      terminal: {
+        typedOptions: [
+          {
+            prompt: TERMINAL_PROMPT,
+            showCursor: false,
+          },
+        ],
+      },
+      status: {
+        services: [],
+      },
+      logs: {
+        logRecords: [],
+        isPaused: true,
+      },
+      banner: dynamicFilterOn,
+    },
+    animations: [],
   },
 };

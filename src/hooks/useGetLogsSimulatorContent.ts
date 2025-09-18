@@ -115,7 +115,7 @@ export function useGetLogsSimulatorContent() {
     if (!workDone && logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  }, [displayedLogs]);
+  }, [displayedLogs, workDone]);
 
   useEffect(() => {
     if (animationIndex === -1 || contextLabel !== workingContext) {

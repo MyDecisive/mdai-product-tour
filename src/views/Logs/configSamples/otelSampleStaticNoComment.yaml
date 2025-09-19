@@ -70,7 +70,7 @@ spec:
             value: "exported"
             action: upsert
 
-      # UNCOMMENT THE FOLLOWING LINE TO ADD FILTER PROCESSOR
+      # FILTER PROCESSOR ADDED
       filter/static_filter:
         error_mode: ignore
         logs:
@@ -96,7 +96,7 @@ spec:
         logs/customer_pipeline:
           receivers: [otlp, fluentforward]
           processors: [
-              # UNCOMMENT THE FOLLOWING LINE TO START FILTRATION
+              # FILTRATION IS RUNNING
               filter/static_filter,
               # DO NOT CHANGE ORDER
               resource/observer_exporter_tag,

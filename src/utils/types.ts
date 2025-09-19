@@ -64,16 +64,31 @@ export interface LogRecord {
   [key: string]: unknown;
 }
 
-export type LineRange = { start: number; end: number };
-export type HighlightBounds = [number, number];
+export type LineChangeBlock = {
+  start: number;
+  end?: number;
+  oldValues: string[];
+};
 
 export interface ConfigTextProps {
   text?: string;
-  activeRange?: LineRange;
-  highlights?: HighlightBounds[];
+  changes?: LineChangeBlock[];
   title?: string;
   href?: string;
+  initialLineToggles?: Record<number, boolean>;
+  showToggleButtons?: boolean;
+  scrollToLine?: number;
 }
+
+export type ProcessedLine = {
+  lineNo: number;
+  content: string;
+  isHighlighted: boolean;
+  hasChange?: boolean;
+  newValue?: string;
+  showingNewValue?: boolean;
+  isGap?: boolean;
+};
 
 export interface TerminalTypedOptions extends TypedOptions {
   prompt?: string;

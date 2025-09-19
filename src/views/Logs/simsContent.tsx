@@ -9,17 +9,13 @@ import type {
   StepDefinitions,
 } from "../../utils/types";
 import { createEmptySimulatorPanelState } from "../allViewsPanelContent";
-import { filterOff, filterOn, dynamicFilterOn, initialBannerState } from "./bannerContent";
 import {
-  staticFilterConfig,
-  staticFilterConfigPartTwo,
-  staticFilterNoCommentConfig,
-  staticFilterNoCommentConfigPartTwo,
-  step3HubConfigPartOne,
-  step3HubConfigPartTwo,
-  step3OTelConfigPartOne,
-  step3OTelConfigPartTwo,
-} from "./configSamples/configContent";
+  dynamicFilterOn,
+  filterOff,
+  filterOn,
+  initialBannerState,
+} from "./bannerContent";
+import { staticFilterNoCommentConfig } from "./configSamples/configContent";
 import {
   fluentDServices,
   logGenServices,
@@ -202,6 +198,7 @@ export const PANEL_STATE: StepDefinitions = {
     initialState: {
       config: {
         active: true,
+        ...staticFilterNoCommentConfig,
       },
       terminal: {
         typedOptions: [
@@ -222,21 +219,46 @@ export const PANEL_STATE: StepDefinitions = {
     },
     animations: [
       createAnimationAction({
-        config: staticFilterConfig,
+        config: {
+          initialLineToggles: {
+            73: true,
+            74: true,
+            75: true,
+            76: true,
+            77: true,
+            78: true,
+          },
+        },
       }),
-      createAnimationAction({}, 2000),
+      createAnimationAction({}, 1500),
       createAnimationAction({
-        config: staticFilterConfigPartTwo,
+        config: {
+          initialLineToggles: {
+            99: true,
+            100: true,
+          },
+        },
       }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: staticFilterNoCommentConfig,
-      }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: staticFilterNoCommentConfigPartTwo,
-      }),
-      createAnimationAction({}, 2000),
+      createAnimationAction(
+        {
+          config: {
+            showToggleButtons: true,
+          },
+        },
+        1500
+      ),
+      // createAnimationAction({
+      //   config: staticFilterConfigPartTwo,
+      // }),
+      // createAnimationAction({}, 2000),
+      // createAnimationAction({
+      //   config: staticFilterNoCommentConfig,
+      // }),
+      // createAnimationAction({}, 2000),
+      // createAnimationAction({
+      //   config: staticFilterNoCommentConfigPartTwo,
+      // }),
+      // createAnimationAction({}, 2000),
       createAnimationAction({
         config: {
           active: false,
@@ -289,21 +311,21 @@ export const PANEL_STATE: StepDefinitions = {
       banner: filterOn,
     },
     animations: [
-      createAnimationAction({
-        config: step3HubConfigPartOne,
-      }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: step3HubConfigPartTwo,
-      }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: step3OTelConfigPartOne,
-      }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: step3OTelConfigPartTwo,
-      }),
+      // createAnimationAction({
+      //   config: step3HubConfigPartOne,
+      // }),
+      // createAnimationAction({}, 2000),
+      // createAnimationAction({
+      //   config: step3HubConfigPartTwo,
+      // }),
+      // createAnimationAction({}, 2000),
+      // createAnimationAction({
+      //   config: step3OTelConfigPartOne,
+      // }),
+      // createAnimationAction({}, 2000),
+      // createAnimationAction({
+      //   config: step3OTelConfigPartTwo,
+      // }),
     ],
   },
   [ITEM_IDS.step3_take]: {

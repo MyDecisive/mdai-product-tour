@@ -1,10 +1,15 @@
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { useGetConfigSimulatorContent } from "../../hooks/useGetConfigSimulatorContent";
 import { SimulatorContextLabel } from "./SimContextLabel";
 
 export function ConfigText() {
-  const { containerRef, title, processedLines } =
-    useGetConfigSimulatorContent();
+  const {
+    containerRef,
+    title,
+    textGroups,
+    showToggleButtons,
+    toggleLineValue,
+  } = useGetConfigSimulatorContent();
 
   return (
     <>
@@ -22,27 +27,106 @@ export function ConfigText() {
           scrollbarColor: "#B062C2 transparent",
         }}
       >
-        {processedLines.map(({ lineNo, content, isHighlighted }) => {
+        {textGroups.map((group, groupIndex) => {
+          const prevGroup = textGroups[groupIndex - 1];
+          const nextGroup = textGroups[groupIndex + 1];
+
+          const isGapAdjacentToChangeBlock =
+            group.isGap &&
+            (prevGroup?.isChangeBlock || nextGroup?.isChangeBlock);
           return (
             <Box
-              key={lineNo}
-              data-line={lineNo}
+              key={`group-${groupIndex}`}
               sx={{
-                display: "grid",
-                gridTemplateColumns: "48px 1fr",
-                gap: 1,
-                px: 1.5,
-                py: 0.25,
-                transition: "background-color 300ms",
-                bgcolor: isHighlighted ? "#b062c265" : "transparent",
+                ...(group.isChangeBlock && {
+                  outline: "2px solid #B062C2",
+                  outlineOffset: "-2px",
+                  borderRadius: "6px",
+                  position: "relative",
+                  my: 0.5,
+                }),
+                ...(isGapAdjacentToChangeBlock && {
+                  my: 1.5,
+                }),
               }}
             >
-              <Box sx={{ color: "text.disabled", textAlign: "right", pr: 1 }}>
-                {lineNo}
-              </Box>
-              <Box component="pre" sx={{ m: 0, whiteSpace: "pre-wrap" }}>
-                {content || "\u00A0"}
-              </Box>
+              {group.isChangeBlock && showToggleButtons && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    toggleLineValue(
+                      group.lines
+                        .filter((line) => {
+                          return !!line.newValue;
+                        })
+                        .map((line) => line.lineNo)
+                    );
+                  }}
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                  }}
+                >
+                  {group.lines[0].showingNewValue ? "⟲" : "↻"}
+                </IconButton>
+              )}
+
+              {group.lines.map((line) => {
+                if (line.isGap) {
+                  return (
+                    <Box
+                      key={`line-${line.lineNo}`}
+                      data-line={line.lineNo}
+                      sx={{
+                        height: "1px",
+                        boxShadow: "0 1px 0 rgba(176, 98, 194, 0.3)",
+                        margin: "1px 0",
+                        position: "relative",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          left: "-8px",
+                          right: "-8px",
+                          top: "-1px",
+                          height: "2px",
+                          background:
+                            "linear-gradient(90deg, transparent, rgba(176, 98, 194, 0.3) 20%, rgba(176, 98, 194, 0.3) 80%, transparent)",
+                        },
+                      }}
+                    ></Box>
+                  );
+                }
+
+                return (
+                  <Box
+                    key={`line-${line.lineNo}`}
+                    data-line={line.lineNo}
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "40px 1fr",
+                      gap: 1,
+                      py: 0.25,
+                      bgcolor: "transparent",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        color: "text.disabled",
+                        textAlign: "right",
+                      }}
+                    >
+                      {line.lineNo}
+                    </Box>
+                    <Box component="pre" sx={{ m: 0, whiteSpace: "pre-wrap" }}>
+                      {(line.showingNewValue ? line.newValue : line.content) ||
+                        "\u00A0"}
+                    </Box>
+                  </Box>
+                );
+              })}
             </Box>
           );
         })}

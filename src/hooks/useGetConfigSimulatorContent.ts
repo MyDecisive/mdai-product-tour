@@ -1,14 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { selectPanelState } from "../contexts/selectors";
-import type { ConfigTextProps, HighlightBounds } from "../utils/types";
+import type {
+  ConfigTextProps,
+  LineChangeBlock,
+  ProcessedLine,
+} from "../utils/types";
 import { useHighlander } from "./useHighlander";
 import { useSelector } from "./useSelector";
 
-function fillHighlightRanges(highlights: HighlightBounds[]): Set<number> {
+function fillHighlightRanges(
+  highlights: LineChangeBlock[],
+  maxEndIdx: number
+): Set<number> {
   const highlightSet = new Set<number>();
 
-  highlights?.forEach(([start, end]) => {
-    for (let i = start; i <= end; i++) {
+  highlights?.forEach(({ start, end }) => {
+    for (let i = start; i <= (end || maxEndIdx); i++) {
       highlightSet.add(i);
     }
   });
@@ -49,62 +56,280 @@ function smoothScrollTo(
   });
 }
 
+function getYamlParents(lines: string[], lineNo: number): number[] {
+  const parents: number[] = [];
+  let targetIndent = lines[lineNo - 1]?.match(/^(\s*)/)?.[1]?.length ?? 0;
+
+  // Work backwards to find parent lines with less indentation
+  for (let i = lineNo - 2; i >= 0; i--) {
+    const line = lines[i];
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+
+    const indent = line.match(/^(\s*)/)?.[1]?.length ?? 0;
+
+    // If this line has less indentation and contains a key, it's a parent
+    if (indent < targetIndent && line.includes(":")) {
+      parents.unshift(i + 1);
+
+      // Update target indent to find grandparents
+      targetIndent = indent;
+      if (indent === 0) break;
+    }
+  }
+
+  return parents;
+}
+
+function groupConsecutiveChanges(processedLines: ProcessedLine[]) {
+  const groups: Array<{
+    lines: ProcessedLine[];
+    startLineNo: number;
+    endLineNo: number;
+    isChangeBlock: boolean;
+    isGap?: boolean;
+  }> = [];
+
+  let currentGroup: ProcessedLine[] = [];
+
+  processedLines.forEach((line, index) => {
+    const nextLine = processedLines[index + 1];
+    const isCurrentLineChanged = line.isHighlighted;
+    const isNextLineChanged = nextLine?.isHighlighted;
+    const isConsecutive = nextLine && nextLine.lineNo === line.lineNo + 1;
+
+    currentGroup.push(line);
+
+    // End current group if:
+    // - This is the last line, OR
+    // - Next line is not consecutive, OR
+    // - Change state is switching (changed->unchanged or vice versa)
+    if (
+      !nextLine ||
+      !isConsecutive ||
+      isCurrentLineChanged !== isNextLineChanged
+    ) {
+      groups.push({
+        lines: currentGroup,
+        startLineNo: currentGroup[0].lineNo,
+        endLineNo: currentGroup[currentGroup.length - 1].lineNo,
+        isChangeBlock: currentGroup.some((l) => l.isHighlighted),
+        isGap: currentGroup[0].isGap,
+      });
+      currentGroup = [];
+    }
+  });
+
+  return groups;
+}
+
+function extractRelevantSections(
+  lines: string[],
+  changes: LineChangeBlock[],
+  contextLines = 2
+): Array<{ lines: string[]; startLineNo: number; isGap: boolean }> {
+  if (!changes?.length) return [{ lines, startLineNo: 1, isGap: false }];
+
+  const relevantLines = new Set<number>();
+
+  changes.forEach(({ start, end = lines.length + 1 }) => {
+    for (let i = start; i <= end; i++) {
+      relevantLines.add(i);
+
+      getYamlParents(lines, i).forEach((parentLine) => {
+        relevantLines.add(parentLine);
+      });
+    }
+
+    for (
+      let i = Math.max(1, start - contextLines);
+      i <= Math.min(lines.length, end + contextLines);
+      i++
+    ) {
+      if (lines[i].trim() === "") {
+        break;
+      }
+      relevantLines.add(i);
+    }
+  });
+
+  const sections: Array<{
+    lines: string[];
+    startLineNo: number;
+    isGap: boolean;
+  }> = [];
+  const sortedLines = Array.from(relevantLines).sort((a, b) => a - b);
+  let currentSection: number[] = [];
+
+  sortedLines.forEach((lineNo, index) => {
+    const nextLineNo = sortedLines[index + 1];
+    currentSection.push(lineNo);
+
+    if (!nextLineNo || nextLineNo > lineNo + 1) {
+      const startLineNo = currentSection[0];
+      const sectionLines = currentSection.map((num) => lines[num - 1]);
+      sections.push({ lines: sectionLines, startLineNo, isGap: false });
+
+      if (nextLineNo) {
+        const lineBeforeGap = sectionLines[sectionLines.length - 1];
+        const indentSpacesCount =
+          lineBeforeGap.match(/^(\s*)/)?.[1]?.length ?? 0;
+
+        const indent = " ".repeat(indentSpacesCount + 2);
+        sections.push({
+          lines: [`${indent}...`],
+          startLineNo: lineNo + 1,
+          isGap: true,
+        });
+      }
+
+      currentSection = [];
+    }
+  });
+
+  return sections;
+}
+
 export function useGetConfigSimulatorContent() {
   const { config = {} } = useSelector(selectPanelState);
   const { actions } = useHighlander();
-  const [workDone, setWorkDone] = useState<boolean>(false);
 
-  const { text, activeRange, title, highlights } = config as ConfigTextProps;
+  const {
+    text,
+    title,
+    changes,
+    initialLineToggles = {},
+    showToggleButtons = false,
+  } = config as ConfigTextProps;
+
+  const [lineToggles, setLineToggles] =
+    useState<Record<number, boolean>>(initialLineToggles);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const isScrollingRef = useRef(false);
 
-  const onScrollEnd = useCallback(() => {
-    actions.INCREMENT_ANIMATION();
-    setWorkDone(true);
-  }, [actions, setWorkDone]);
-
-  const processedLines = useMemo(() => {
-    const rawLines = (text ?? "").split("\n");
-    const highlightSet = fillHighlightRanges(highlights || []);
-
-    return rawLines.map((line, i) => {
-      const lineNo = i + 1;
-      return {
-        lineNo,
-        content: line,
-        isHighlighted: highlightSet.has(lineNo),
-      };
-    });
-  }, [text, activeRange, highlights]);
+  const prevInitialLineTogglesRef =
+    useRef<Record<number, boolean>>(initialLineToggles);
 
   useEffect(() => {
-    if (!workDone) {
-      if (!activeRange) {
-        smoothScrollTo(containerRef.current!, 0, 800);
-        return;
-      }
+    const prev = prevInitialLineTogglesRef.current;
 
-      const el = containerRef.current?.querySelector<HTMLDivElement>(
-        `[data-line="${activeRange.start - 1}"]`
+    const toggledLineNos = Object.keys(initialLineToggles);
+
+    if (toggledLineNos.length === 0 && Object.keys(lineToggles).length) {
+      setLineToggles({});
+      return;
+    }
+
+    const newlyToggledLines = toggledLineNos
+      .map(Number)
+      .filter((lineNo) => initialLineToggles[lineNo] && !prev[lineNo]);
+
+    if (newlyToggledLines.length > 0 && !isScrollingRef.current) {
+      const lowestLineNo = Math.min(...newlyToggledLines);
+
+      setTimeout(() => {
+        const el = containerRef.current?.querySelector<HTMLDivElement>(
+          `[data-line="${lowestLineNo}"]`
+        );
+
+        if (el && containerRef.current) {
+          const containerRect = containerRef.current.getBoundingClientRect();
+          const elementRect = el.getBoundingClientRect();
+          const targetTop =
+            containerRef.current.scrollTop +
+            (elementRect.top - containerRect.top) -
+            24;
+
+          smoothScrollTo(containerRef.current, targetTop, 800)
+            .then(() => {
+              setLineToggles(initialLineToggles);
+            })
+            .then(() => {
+              actions.INCREMENT_ANIMATION();
+            });
+        }
+      }, 0);
+    }
+
+    prevInitialLineTogglesRef.current = initialLineToggles;
+  }, [initialLineToggles, actions, lineToggles]);
+
+  const toggleLineValue = (lineNos: number[]) => {
+    setLineToggles((prev: Record<number, boolean>) => {
+      const newLineToggles = lineNos.reduce(
+        (accum, num) => {
+          accum[num] = !accum[num];
+
+          return accum;
+        },
+        { ...prev } as Record<number, boolean>
       );
 
-      if (el && containerRef.current) {
-        const targetTop = el.offsetTop;
-        smoothScrollTo(containerRef.current, targetTop, 1200).then(() => {
-          onScrollEnd();
-        });
-      }
-    }
-  }, [activeRange, workDone, onScrollEnd]);
+      return newLineToggles;
+    });
+  };
 
-  useEffect(() => {
-    setWorkDone(false);
-  }, [activeRange?.start, activeRange?.end, text, title]);
+  const processedSections = useMemo(() => {
+    const rawLines = (text ?? "").split("\n");
+    const sections = extractRelevantSections(rawLines, changes || []);
+
+    const changeMap = new Map<number, string>();
+    changes?.forEach((block) => {
+      block.oldValues.forEach((oldValue, index) => {
+        const lineNo = block.start + index;
+        changeMap.set(lineNo, oldValue);
+      });
+    });
+
+    const highlightRanges = fillHighlightRanges(changes || [], rawLines.length);
+
+    const processed = sections.map((section) => ({
+      ...section,
+      processedLines: section.lines.map((line, i) => {
+        const lineNo = section.startLineNo + i;
+        const change = changeMap.get(lineNo);
+        const showingNew = lineToggles[lineNo];
+
+        if (change !== undefined) {
+          return {
+            lineNo,
+            content: change,
+            isHighlighted: highlightRanges.has(lineNo),
+            newValue: line,
+            showingNewValue: showingNew,
+            isGap: section.isGap,
+          };
+        }
+
+        return {
+          lineNo,
+          content: line,
+          isHighlighted: false,
+          showingNewValue: false,
+          isGap: section.isGap,
+        };
+      }),
+    }));
+
+    return processed;
+  }, [text, changes, lineToggles]);
+
+  const textGroups = processedSections.flatMap((section, sectionIndex) =>
+    groupConsecutiveChanges(section.processedLines).map(
+      (group, groupIndex) => ({
+        ...group,
+        sectionIndex,
+        groupIndex,
+      })
+    )
+  );
 
   return {
     title,
-    processedLines,
+    textGroups,
+    processedSections,
     containerRef,
-    activeRange,
+    showToggleButtons,
+    toggleLineValue,
   };
 }

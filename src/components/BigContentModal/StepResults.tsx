@@ -16,7 +16,8 @@ export const stepVizMap = {
       width: "100%",
     },
     label: "See the results!",
-    content: "Data’s flowing. Next stop: Let’s save you some serious money.",
+    content:
+      "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money.",
   },
   [ITEM_IDS.step2_explore]: {
     src: preFilter,
@@ -26,7 +27,7 @@ export const stepVizMap = {
     },
     label: "Nice work on the filters!",
     content:
-      "You are cutting down the noise big-time. One hitch--Service1234 and 4321 are missing from Datadog. Don’t worry, we’ll get it right together.",
+      "You are cutting down the noise big-time. One hitch--Service4321 are missing from Datadog. Don’t worry, we’ll get it right together.",
   },
   [ITEM_IDS.step3_take]: {
     src: postfilter,

@@ -13,7 +13,7 @@ export interface PayloadMap {
   [ACTION_TYPES.SET_NAVIGATION]: NavigationState;
   [ACTION_TYPES.TOGGLE_STEP]: StepItemId;
   [ACTION_TYPES.TOGGLE_SUB_STEP]: StepItemId;
-  [ACTION_TYPES.OPEN_BIG_CONTENT_MODAL]: "contact" | "finished";
+  [ACTION_TYPES.OPEN_BIG_CONTENT_MODAL]: "contact" | "finished" | "results";
   [ACTION_TYPES.CLOSE_BIG_CONTENT_MODAL]: undefined;
   [ACTION_TYPES.START_LOGS_DEMO]: undefined;
 }

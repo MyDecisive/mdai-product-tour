@@ -9,16 +9,17 @@ import type {
   StepDefinitions,
 } from "../../utils/types";
 import { createEmptySimulatorPanelState } from "../allViewsPanelContent";
-import { filterOff, filterOn, dynamicFilterOn, initialBannerState } from "./bannerContent";
 import {
-  staticFilterConfig,
-  staticFilterConfigPartTwo,
+  dynamicFilterOn,
+  filterOff,
+  filterOn,
+  initialBannerState,
+} from "./bannerContent";
+import {
+  buildInitialToggles,
   staticFilterNoCommentConfig,
-  staticFilterNoCommentConfigPartTwo,
-  step3HubConfigPartOne,
-  step3HubConfigPartTwo,
-  step3OTelConfigPartOne,
-  step3OTelConfigPartTwo,
+  step3HubConfig,
+  step3OtelConfig,
 } from "./configSamples/configContent";
 import {
   fluentDServices,
@@ -200,9 +201,7 @@ export const PANEL_STATE: StepDefinitions = {
   },
   [ITEM_IDS.step2_configure]: {
     initialState: {
-      config: {
-        active: true,
-      },
+      config: staticFilterNoCommentConfig,
       terminal: {
         typedOptions: [
           {
@@ -222,21 +221,25 @@ export const PANEL_STATE: StepDefinitions = {
     },
     animations: [
       createAnimationAction({
-        config: staticFilterConfig,
+        config: {
+          active: true,
+          initialLineToggles: buildInitialToggles(73, 78),
+        },
       }),
-      createAnimationAction({}, 2000),
+      createAnimationAction({}, 1500),
       createAnimationAction({
-        config: staticFilterConfigPartTwo,
+        config: {
+          initialLineToggles: buildInitialToggles(99, 100),
+        },
       }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: staticFilterNoCommentConfig,
-      }),
-      createAnimationAction({}, 2000),
-      createAnimationAction({
-        config: staticFilterNoCommentConfigPartTwo,
-      }),
-      createAnimationAction({}, 2000),
+      createAnimationAction(
+        {
+          config: {
+            showToggleButtons: true,
+          },
+        },
+        1500
+      ),
       createAnimationAction({
         config: {
           active: false,
@@ -268,9 +271,7 @@ export const PANEL_STATE: StepDefinitions = {
   },
   [ITEM_IDS.step3_add]: {
     initialState: {
-      config: {
-        active: true,
-      },
+      config: step3HubConfig,
       terminal: {
         typedOptions: [
           {
@@ -290,25 +291,41 @@ export const PANEL_STATE: StepDefinitions = {
     },
     animations: [
       createAnimationAction({
-        config: step3HubConfigPartOne,
+        config: {
+          active: true,
+          initialLineToggles: buildInitialToggles(11, 17),
+        },
       }),
-      createAnimationAction({}, 2000),
+      createAnimationAction({}, 1500),
       createAnimationAction({
-        config: step3HubConfigPartTwo,
+        config: {
+          initialLineToggles: buildInitialToggles(43, 47),
+        },
       }),
-      createAnimationAction({}, 2000),
+      createAnimationAction({}, 1500),
       createAnimationAction({
-        config: step3OTelConfigPartOne,
+        config: {
+          initialLineToggles: buildInitialToggles(81, 86),
+        },
       }),
-      createAnimationAction({}, 2000),
+      createAnimationAction({}, 1500),
       createAnimationAction({
-        config: step3OTelConfigPartTwo,
+        config: {
+          ...step3OtelConfig,
+          initialLineToggles: buildInitialToggles(73, 77),
+        },
+      }),
+      createAnimationAction({}, 1500),
+      createAnimationAction({
+        config: {
+          initialLineToggles: buildInitialToggles(99, 99),
+        },
       }),
     ],
   },
   [ITEM_IDS.step3_take]: {
     initialState: {
-      config: {},
+      config: step3HubConfig,
       terminal: {
         typedOptions: [
           {

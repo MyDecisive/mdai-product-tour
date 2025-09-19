@@ -113,7 +113,11 @@ export function useGetStatusSimulatorContent() {
     setActivePods((prev) => {
       const prevPod = prev[podId];
       const nextActivePods = { ...prev, [podId]: { ...prevPod, status } };
-      if (prevPod.replacing && nextActivePods[prevPod.replacing]) {
+      if (
+        prevPod.replacing &&
+        status === STATUS.running &&
+        nextActivePods[prevPod.replacing]
+      ) {
         nextActivePods[prevPod.replacing] = {
           ...nextActivePods[prevPod.replacing],
           beingReplaced: true,
@@ -152,7 +156,7 @@ export function useGetStatusSimulatorContent() {
     });
 
     if (newServices.length === 0 || isShowingPreviousContent) return;
-
+    setWorkDone(false);
     const { newPodOrder, newActivePods, newProcessedServices } =
       servicesToActivePods(newServices);
 

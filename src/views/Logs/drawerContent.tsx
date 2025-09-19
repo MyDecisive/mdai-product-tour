@@ -166,6 +166,10 @@ function UnifiedView() {
           </Typography>
         </ListItem>
       </List>
+      <Typography>
+        You can also navigate through the steps with your left and right arrow
+        keys.
+      </Typography>
     </SubStepContent>
   );
 }

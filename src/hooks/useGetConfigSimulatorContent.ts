@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { selectPanelState } from "../contexts/selectors";
 import type {
   ConfigTextProps,
@@ -204,11 +204,42 @@ export function useGetConfigSimulatorContent() {
   const [lineToggles, setLineToggles] =
     useState<Record<number, boolean>>(initialLineToggles);
 
+  const [pulsedLines, setPulsedLines] = useState<Set<number>>(new Set());
+
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
 
   const prevInitialLineTogglesRef =
     useRef<Record<number, boolean>>(initialLineToggles);
+
+  const toggleLineValue = useCallback((lineNos: number[]) => {
+    setLineToggles((prev: Record<number, boolean>) => {
+      const newLineToggles = lineNos.reduce(
+        (accum, num) => {
+          accum[num] = !accum[num];
+
+          return accum;
+        },
+        { ...prev } as Record<number, boolean>
+      );
+
+      return newLineToggles;
+    });
+
+    setPulsedLines((prev) => {
+      const newSet = new Set(prev);
+      lineNos.forEach((lineNo) => newSet.add(lineNo));
+      return newSet;
+    });
+
+    setTimeout(() => {
+      setPulsedLines((prev) => {
+        const newSet = new Set(prev);
+        lineNos.forEach((lineNo) => newSet.delete(lineNo));
+        return newSet;
+      });
+    }, 1500);
+  }, []);
 
   useEffect(() => {
     const prev = prevInitialLineTogglesRef.current;
@@ -242,7 +273,7 @@ export function useGetConfigSimulatorContent() {
 
           smoothScrollTo(containerRef.current, targetTop, 800)
             .then(() => {
-              setLineToggles(initialLineToggles);
+              toggleLineValue(newlyToggledLines);
             })
             .then(() => {
               actions.INCREMENT_ANIMATION();
@@ -253,21 +284,6 @@ export function useGetConfigSimulatorContent() {
 
     prevInitialLineTogglesRef.current = initialLineToggles;
   }, [initialLineToggles, actions, lineToggles]);
-
-  const toggleLineValue = (lineNos: number[]) => {
-    setLineToggles((prev: Record<number, boolean>) => {
-      const newLineToggles = lineNos.reduce(
-        (accum, num) => {
-          accum[num] = !accum[num];
-
-          return accum;
-        },
-        { ...prev } as Record<number, boolean>
-      );
-
-      return newLineToggles;
-    });
-  };
 
   const processedSections = useMemo(() => {
     const rawLines = (text ?? "").split("\n");
@@ -328,6 +344,7 @@ export function useGetConfigSimulatorContent() {
     title,
     textGroups,
     processedSections,
+    pulsedLines,
     containerRef,
     showToggleButtons,
     toggleLineValue,

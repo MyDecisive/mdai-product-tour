@@ -8,6 +8,7 @@ export function ConfigText() {
     title,
     textGroups,
     showToggleButtons,
+    pulsedLines,
     toggleLineValue,
   } = useGetConfigSimulatorContent();
 
@@ -110,6 +111,13 @@ export function ConfigText() {
                       gap: 1,
                       py: 0.25,
                       bgcolor: "transparent",
+                      "@keyframes backgroundPulse": {
+                        "0%": { backgroundColor: "rgba(176, 98, 194, 0.6)" },
+                        "100%": { backgroundColor: "transparent" },
+                      },
+                      ...(pulsedLines.has(line.lineNo) && {
+                        animation: "backgroundPulse 1s ease-out forwards",
+                      }),
                     }}
                   >
                     <Box

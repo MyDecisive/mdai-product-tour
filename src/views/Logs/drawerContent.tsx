@@ -173,8 +173,9 @@ function UnifiedView() {
 function DataStarts() {
   return (
     <SubStepContent title="Simulate the log stream">
-      Starting with the MDAI cluster already running, run these{" "}
-      <span style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</span>{" "}
+      Starting with the MDAI cluster already running, run{" "}
+      <span style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</span>
+      {" and then "}
       <span
         style={{ color: "#B062C2" }}
       >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</span>{" "}
@@ -242,7 +243,21 @@ function VisualizeThe2() {
 function AddA() {
   return (
     <SubStepContent>
-      {`Variables == smarter data streams.  Use <command> to add one to your configuration file now.`}
+      {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
+      <ol style={{ paddingLeft: "24px" }}>
+        <li>
+          <span style={{ color: "#B062C2" }}>
+            kubectl apply -f mdai/hub/hub_ref.yaml
+          </span>{" "}
+          updates your MDAI hub
+        </li>
+        <li>
+          <span style={{ color: "#B062C2" }}>
+            kubectl apply -f otel/otel_ref.yaml
+          </span>{" "}
+          puts the variable to use in your OTel collector
+        </li>
+      </ol>
     </SubStepContent>
   );
 }

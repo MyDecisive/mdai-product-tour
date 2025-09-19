@@ -62,8 +62,8 @@ export const startingServices: Service[] = [
 ];
 
 export const logGenServices: Service[] = [
-  { namespace: "mdai", name: "mdai-logger-xnoisy-6f986cf574", replicas: 3 },
-  { namespace: "mdai", name: "mdai-logger-noisy-5d4cc79cf8", replicas: 3 },
+  { namespace: "mdai", name: "mdai-logger-xnoisy-6f986cf574", replicas: 2 },
+  { namespace: "mdai", name: "mdai-logger-noisy-5d4cc79cf8", replicas: 2 },
   { namespace: "mdai", name: "mdai-logger-68b7cc7f48", replicas: 2 },
 ];
 

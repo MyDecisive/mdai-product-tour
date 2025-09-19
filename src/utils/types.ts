@@ -1,5 +1,5 @@
 import type { TreeItemSlotProps } from "@mui/x-tree-view";
-import type { JSX } from "react";
+import type { JSX, RefObject } from "react";
 import type { TypedOptions } from "typed.js";
 import { ITEM_IDS } from "../utils/constants";
 
@@ -46,6 +46,7 @@ export type SimulatorBoxProps = {
   innerStyles?: React.CSSProperties;
   children?: React.ReactNode;
   active?: boolean;
+  ref?: RefObject<HTMLDivElement | null>;
 };
 
 export interface Service {

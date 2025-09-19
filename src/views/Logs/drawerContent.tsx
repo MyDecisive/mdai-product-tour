@@ -173,8 +173,12 @@ function UnifiedView() {
 function DataStarts() {
   return (
     <SubStepContent title="Simulate the log stream">
-      Run this <span style={{ color: "#B062C2" }}>{`<Command>`}</span> to open
-      the floodgates. <br />
+      Starting with the MDAI cluster already running, run these{" "}
+      <span style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</span>{" "}
+      <span
+        style={{ color: "#B062C2" }}
+      >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</span>{" "}
+      to open the floodgates. <br />
       <br /> Watch the SmartHub come alive in the Status Simulator Window{" "}
       <span style={{ color: "#B062C2" }}>Status Simulator window</span> <br />
       <br />
@@ -205,8 +209,8 @@ function TakeNote() {
     <SubStepContent title="We’ve got the heavy lifting covered, so working with your logs is a breeze.">
       <ol style={{ paddingLeft: "24px" }}>
         <li>
-          In this example, Service1234 and 4321 are just part of the generated
-          data. They are some random service names like you might have.
+          In this example, Service4321 are just part of the generated data. They
+          are some random service names like you might have.
         </li>
         <li>
           “mdai_service” is a variable--yep, a little bit of magic. Hang tight,
@@ -221,7 +225,7 @@ function ExploreThe() {
   return (
     <SubStepContent title="OTEL’s online!">
       Your collector is running in the SmartHub, and the dashboards confirm:
-      Service1234 and 4321 are filtered out.
+      Service4321 are filtered out.
     </SubStepContent>
   );
 }
@@ -229,8 +233,8 @@ function ExploreThe() {
 function VisualizeThe2() {
   return (
     <SubStepContent title="Nice work on the filters!">
-      You are cutting down the noise big-time. One hitch--Service1234 and 4321
-      are missing from Datadog. Don’t worry, we’ll get it right together.
+      You are cutting down the noise big-time. One hitch--Service4321 are
+      missing from Datadog. Don’t worry, we’ll get it right together.
     </SubStepContent>
   );
 }
@@ -340,10 +344,7 @@ export const STEP_ORDER: ViewStepOrder = [
   },
   {
     stepId: ITEM_IDS.step1,
-    subStepIds: [
-      ITEM_IDS.step1_data,
-      // ITEM_IDS.step1_results,
-    ],
+    subStepIds: [ITEM_IDS.step1_data],
   },
   {
     stepId: ITEM_IDS.step2,
@@ -351,16 +352,11 @@ export const STEP_ORDER: ViewStepOrder = [
       ITEM_IDS.step2_configure,
       ITEM_IDS.step2_take,
       ITEM_IDS.step2_explore,
-      // ITEM_IDS.step2_visualize,
     ],
   },
   {
     stepId: ITEM_IDS.step3,
-    subStepIds: [
-      ITEM_IDS.step3_add,
-      ITEM_IDS.step3_take,
-      // ITEM_IDS.step3_vizualize,
-    ],
+    subStepIds: [ITEM_IDS.step3_add, ITEM_IDS.step3_take],
   },
 ];
 

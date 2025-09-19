@@ -13,7 +13,7 @@ export const staticFilterNoCommentConfig: ConfigTextProps = {
         "      #   error_mode: ignore",
         "      #   logs:",
         "      #     log_record:",
-        '      #       - \'IsMatch(attributes["mdai_service"], "service1234")\'',
+        '      #       - \'IsMatch(attributes["mdai_service"], "service4321")\'',
       ],
     },
     {

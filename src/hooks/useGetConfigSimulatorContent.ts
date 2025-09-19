@@ -343,7 +343,6 @@ export function useGetConfigSimulatorContent() {
   return {
     title,
     textGroups,
-    processedSections,
     pulsedLines,
     containerRef,
     showToggleButtons,

@@ -32,9 +32,9 @@ export function ConfigText() {
           const prevGroup = textGroups[groupIndex - 1];
           const nextGroup = textGroups[groupIndex + 1];
 
-          const isGapAdjacentToChangeBlock =
-            group.isGap &&
-            (prevGroup?.isChangeBlock || nextGroup?.isChangeBlock);
+          const gapUpTop = group.isChangeBlock && prevGroup?.isGap;
+          const gapDownBelow = group.isChangeBlock && nextGroup?.isGap;
+
           return (
             <Box
               key={`group-${groupIndex}`}
@@ -46,8 +46,11 @@ export function ConfigText() {
                   position: "relative",
                   my: 0.5,
                 }),
-                ...(isGapAdjacentToChangeBlock && {
-                  my: 1.5,
+                ...(gapUpTop && {
+                  mt: 1.5,
+                }),
+                ...(gapDownBelow && {
+                  mb: 1.5,
                 }),
               }}
             >

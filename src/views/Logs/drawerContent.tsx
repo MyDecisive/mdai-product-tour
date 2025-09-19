@@ -178,11 +178,15 @@ function DataStarts() {
   return (
     <SubStepContent title="Simulate the log stream">
       Starting with the MDAI cluster already running, run{" "}
-      <span style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</span>
-      {" and then "}
-      <span
-        style={{ color: "#B062C2" }}
-      >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</span>{" "}
+      <Box sx={{ overflowX: "auto" }}>
+        <pre style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</pre>
+      </Box>
+      {"and then"}
+      <Box sx={{ overflowX: "auto" }}>
+        <pre
+          style={{ color: "#B062C2" }}
+        >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</pre>
+      </Box>
       to open the floodgates. <br />
       <br /> Watch the SmartHub come alive in the Status Simulator Window{" "}
       <span style={{ color: "#B062C2" }}>Status Simulator window</span> <br />
@@ -250,15 +254,19 @@ function AddA() {
       {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
       <ol style={{ paddingLeft: "24px" }}>
         <li>
-          <span style={{ color: "#B062C2" }}>
-            kubectl apply -f mdai/hub/hub_ref.yaml
-          </span>{" "}
+          <Box sx={{ overflowX: "auto" }}>
+            <pre style={{ color: "#B062C2" }}>
+              kubectl apply -f mdai/hub/hub_ref.yaml
+            </pre>
+          </Box>
           updates your MDAI hub
         </li>
         <li>
-          <span style={{ color: "#B062C2" }}>
-            kubectl apply -f otel/otel_ref.yaml
-          </span>{" "}
+          <Box sx={{ overflowX: "auto" }}>
+            <pre style={{ color: "#B062C2" }}>
+              kubectl apply -f otel/otel_ref.yaml
+            </pre>
+          </Box>
           puts the variable to use in your OTel collector
         </li>
       </ol>

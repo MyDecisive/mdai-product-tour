@@ -23,8 +23,6 @@ type FormValues = {
   phone?: string;
   contactReasons?: string[];
   questions?: string;
-  source: "MDAI Product Demo",
-  sourceUrl: string,
 };
 
 export type DefaultValues = Partial<FormValues>;

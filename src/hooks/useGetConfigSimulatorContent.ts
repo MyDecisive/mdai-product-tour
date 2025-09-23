@@ -63,7 +63,7 @@ function getYamlParents(lines: string[], lineNo: number): number[] {
   // Work backwards to find parent lines with less indentation
   for (let i = lineNo - 2; i >= 0; i--) {
     const line = lines[i];
-    if (!line.trim() || line.trim().startsWith("#")) continue;
+    if (!line?.trim() || line.trim().startsWith("#")) continue;
 
     const indent = line.match(/^(\s*)/)?.[1]?.length ?? 0;
 
@@ -127,7 +127,12 @@ function extractRelevantSections(
   changes: LineChangeBlock[],
   contextLines = 2
 ): Array<{ lines: string[]; startLineNo: number; isGap: boolean }> {
-  if (!changes?.length) return [{ lines, startLineNo: 1, isGap: false }];
+  if (
+    !changes?.length ||
+    !lines.length ||
+    (lines.length === 1 && lines[0] === "")
+  )
+    return [];
 
   const relevantLines = new Set<number>();
 
@@ -172,7 +177,7 @@ function extractRelevantSections(
       if (nextLineNo) {
         const lineBeforeGap = sectionLines[sectionLines.length - 1];
         const indentSpacesCount =
-          lineBeforeGap.match(/^(\s*)/)?.[1]?.length ?? 0;
+          lineBeforeGap?.match(/^(\s*)/)?.[1]?.length ?? 0;
 
         const indent = " ".repeat(indentSpacesCount + 2);
         sections.push({
@@ -190,7 +195,7 @@ function extractRelevantSections(
 }
 
 export function useGetConfigSimulatorContent() {
-  const { config = {} } = useSelector(selectPanelState);
+  const { config } = useSelector(selectPanelState);
   const { actions } = useHighlander();
 
   const {
@@ -199,7 +204,7 @@ export function useGetConfigSimulatorContent() {
     changes,
     initialLineToggles = {},
     showToggleButtons = false,
-  } = config as ConfigTextProps;
+  } = (config || {}) as ConfigTextProps;
 
   const [lineToggles, setLineToggles] =
     useState<Record<number, boolean>>(initialLineToggles);
@@ -222,7 +227,6 @@ export function useGetConfigSimulatorContent() {
         },
         { ...prev } as Record<number, boolean>
       );
-
       return newLineToggles;
     });
 
@@ -304,7 +308,7 @@ export function useGetConfigSimulatorContent() {
       processedLines: section.lines.map((line, i) => {
         const lineNo = section.startLineNo + i;
         const change = changeMap.get(lineNo);
-        const showingNew = lineToggles[lineNo];
+        const showingNew = !!lineToggles[lineNo];
 
         if (change !== undefined) {
           return {

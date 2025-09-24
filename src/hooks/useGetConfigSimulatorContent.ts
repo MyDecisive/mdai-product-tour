@@ -321,7 +321,6 @@ const useLineToggles = (initialLineToggles: Record<number, boolean>) => {
 
 const useScrollAnimation = (toggleLineValue: (lineNos: number[]) => void) => {
   const { actions } = useHighlander();
-  const isScrollingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const scrollToAndToggle = useCallback(
@@ -340,7 +339,7 @@ const useScrollAnimation = (toggleLineValue: (lineNos: number[]) => void) => {
     [containerRef, toggleLineValue, actions]
   );
 
-  return { isScrollingRef, scrollToAndToggle, containerRef };
+  return { scrollToAndToggle, containerRef };
 };
 
 function rawLinesFromText(text: string): string[] {
@@ -393,7 +392,7 @@ function useManageInitialLinesUpdates({
   clearToggles: () => void;
   toggleLineValue: (lineNos: number[]) => void;
 }) {
-  const { containerRef, isScrollingRef, scrollToAndToggle } =
+  const { containerRef, scrollToAndToggle } =
     useScrollAnimation(toggleLineValue);
 
   const prevInitialLineTogglesRef =
@@ -413,19 +412,13 @@ function useManageInitialLinesUpdates({
       .map(Number)
       .filter((lineNo) => initialLineToggles[lineNo] && !prev[lineNo]);
 
-    if (newlyToggledLines.length > 0 && !isScrollingRef.current) {
+    if (newlyToggledLines.length > 0) {
       // TODO: extract this evaluation into a const with a meaningful name
       setTimeout(() => scrollToAndToggle(newlyToggledLines), 0);
     }
 
     prevInitialLineTogglesRef.current = initialLineToggles;
-  }, [
-    initialLineToggles,
-    lineToggles,
-    clearToggles,
-    scrollToAndToggle,
-    isScrollingRef,
-  ]);
+  }, [initialLineToggles, lineToggles, clearToggles, scrollToAndToggle]);
 
   return { containerRef };
 }

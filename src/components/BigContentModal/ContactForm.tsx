@@ -69,7 +69,6 @@ const makeEmailBody = (values: FormValues) =>
 export const sendContactForm = async (values: FormValues) => {
   const payload = {
     ...values,
-    source: "MDAI Product Demo",
     sourceUrl: window.location.toString()
   }
   const response = await fetch(contactAPIEndpoint, {

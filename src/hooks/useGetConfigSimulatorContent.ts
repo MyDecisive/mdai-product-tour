@@ -1,9 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { selectPanelState } from "../contexts/selectors";
 import type {
+  ConfigSimulatorTabContent,
   ConfigTextProps,
+  FileConfig,
   LineChangeBlock,
+  LineToggles,
   ProcessedLine,
+  TextGroup,
 } from "../utils/types";
 import { useHighlander } from "./useHighlander";
 import { useSelector } from "./useSelector";
@@ -146,7 +157,7 @@ const createProcessedLine = (
 ): ProcessedLine => {
   const change = changeMap.get(lineNo);
   const showingNew = !!lineToggles[lineNo];
-
+  // console.log({ lineNo, changeMap, lineToggles });
   if (change !== undefined) {
     return {
       lineNo,
@@ -256,38 +267,49 @@ const smoothScrollTo = (
 };
 
 const calculateScrollTarget = (
-  containerRef: React.RefObject<HTMLDivElement | null>,
+  containerRef: HTMLDivElement | null,
   lineNo: number
 ): number | null => {
-  const el = containerRef.current?.querySelector<HTMLDivElement>(
+  const el = containerRef?.querySelector<HTMLDivElement>(
     `[data-line="${lineNo}"]`
   );
 
-  if (!el || !containerRef.current) return null;
+  if (!el || !containerRef) return null;
 
-  const containerRect = containerRef.current.getBoundingClientRect();
+  const containerRect = containerRef.getBoundingClientRect();
   const elementRect = el.getBoundingClientRect();
 
   return (
-    containerRef.current.scrollTop + (elementRect.top - containerRect.top) - 24 // TODO: make this `24` a constant. It's only being added for padding in the cases where the line being scrolled to is at the top of the container.
+    containerRef.scrollTop + (elementRect.top - containerRect.top) - 24 // TODO: make this `24` a constant. It's only being added for padding in the cases where the line being scrolled to is at the top of the container.
   );
 };
 
-const usePulsedLines = () => {
-  const [pulsedLines, setPulsedLines] = useState<Set<number>>(new Set());
+const usePulsedLines = (fileNames: string[]) => {
+  const [pulsedLines, setPulsedLines] = useState<Record<string, Set<number>>>(
+    fileNames.reduce((accum, name) => {
+      accum[name] = new Set();
 
-  const addPulsedLines = useCallback((lineNos: number[]) => {
+      return accum;
+    }, {} as Record<string, Set<number>>)
+  );
+
+  const addPulsedLines = useCallback((fileName: string, lineNos: number[]) => {
     setPulsedLines((prev) => {
-      const newSet = new Set(prev);
-      lineNos.forEach((lineNo) => newSet.add(lineNo));
-      return newSet;
+      const newState = { ...prev };
+
+      if (!newState[fileName]) {
+        newState[fileName] = new Set<number>();
+      }
+
+      lineNos.forEach((lineNo) => newState[fileName].add(lineNo));
+      return newState;
     });
 
     setTimeout(() => {
       setPulsedLines((prev) => {
-        const newSet = new Set(prev);
-        lineNos.forEach((lineNo) => newSet.delete(lineNo));
-        return newSet;
+        const newState = { ...prev };
+        lineNos.forEach((lineNo) => newState[fileName].delete(lineNo));
+        return newState;
       });
     }, 1500);
   }, []);
@@ -295,51 +317,71 @@ const usePulsedLines = () => {
   return { pulsedLines, addPulsedLines };
 };
 
-const useLineToggles = (initialLineToggles: Record<number, boolean>) => {
-  const [lineToggles, setLineToggles] =
-    useState<Record<number, boolean>>(initialLineToggles);
+function initialTogglesForAllFiles(files: Record<string, FileConfig>) {
+  return Object.entries(files).reduce((accum, [key, file]) => {
+    accum[key] = file.initialLineToggles || {};
+    return accum;
+  }, {} as Record<string, LineToggles>);
+}
 
-  const toggleLines = useCallback((lineNos: number[]) => {
-    setLineToggles((prev) => {
-      const newLineToggles = lineNos.reduce(
-        (accum, num) => {
-          accum[num] = !accum[num];
-          return accum;
-        },
-        { ...prev } as Record<number, boolean>
-      );
-      return newLineToggles;
-    });
+const useLineToggles = (files: Record<string, FileConfig>) => {
+  const [lineToggles, setLineToggles] = useState<Record<string, LineToggles>>(
+    () => {
+      return initialTogglesForAllFiles(files);
+    }
+  );
+
+  const toggleLines = useCallback((fileName: string, lineNos: number[]) => {
+    setLineToggles((prev) => ({
+      ...prev,
+      [fileName]: {
+        ...prev[fileName],
+        ...lineNos.reduce((toggles, num) => {
+          toggles[num] = !prev[fileName]?.[num];
+          return toggles;
+        }, {} as LineToggles),
+      },
+    }));
   }, []);
 
   const clearToggles = useCallback(() => {
-    setLineToggles({});
-  }, []);
+    setLineToggles(initialTogglesForAllFiles(files));
+  }, [files]);
 
   return { lineToggles, toggleLines, clearToggles };
 };
 
-const useScrollAnimation = (toggleLineValue: (lineNos: number[]) => void) => {
+const useScrollAnimation = (
+  fileNames: string[],
+  toggleLineValue: (fileName: string, lineNos: number[]) => void
+) => {
   const { actions } = useHighlander();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRefs = useMemo(() => {
+    const refs: Record<string, React.RefObject<HTMLDivElement | null>> = {};
+    fileNames.forEach((name) => {
+      refs[name] = createRef<HTMLDivElement>();
+    });
+    return refs;
+  }, [fileNames]);
 
   const scrollToAndToggle = useCallback(
-    async (lineNos: number[]) => {
+    async (fileName: string, lineNos: number[]) => {
       if (lineNos.length === 0) return;
 
       const lowestLineNo = Math.min(...lineNos);
-      const targetTop = calculateScrollTarget(containerRef, lowestLineNo);
+      const ref = containerRefs[fileName].current;
+      const targetTop = calculateScrollTarget(ref, lowestLineNo);
 
-      if (targetTop !== null && containerRef.current) {
-        await smoothScrollTo(containerRef.current, targetTop, 800);
-        toggleLineValue(lineNos);
+      if (targetTop !== null && ref) {
+        await smoothScrollTo(ref, targetTop, 800);
+        toggleLineValue(fileName, lineNos);
         actions.INCREMENT_ANIMATION();
       }
     },
-    [containerRef, toggleLineValue, actions]
+    [containerRefs, toggleLineValue, actions]
   );
 
-  return { scrollToAndToggle, containerRef };
+  return { scrollToAndToggle, containerRefs };
 };
 
 function rawLinesFromText(text: string): string[] {
@@ -382,27 +424,40 @@ function createTextGroups(
 }
 
 function useManageInitialLinesUpdates({
-  initialLineToggles,
+  activeFileTitle,
+  files,
   lineToggles,
   clearToggles,
   toggleLineValue,
 }: {
-  initialLineToggles: Record<number, boolean>;
-  lineToggles: Record<number, boolean>;
+  activeFileTitle?: string;
+  files: Record<string, FileConfig>;
+  lineToggles: Record<string, LineToggles>;
   clearToggles: () => void;
-  toggleLineValue: (lineNos: number[]) => void;
+  toggleLineValue: (fileName: string, lineNos: number[]) => void;
 }) {
-  const { containerRef, scrollToAndToggle } =
-    useScrollAnimation(toggleLineValue);
+  const { containerRefs, scrollToAndToggle } = useScrollAnimation(
+    Object.keys(files),
+    toggleLineValue
+  );
 
-  const prevInitialLineTogglesRef =
-    useRef<Record<number, boolean>>(initialLineToggles);
+  const prevInitialLineTogglesRef = useRef<Record<string, LineToggles>>(
+    initialTogglesForAllFiles(files)
+  );
 
   useEffect(() => {
-    const prev = prevInitialLineTogglesRef.current;
-    const toggledLineNos = Object.keys(initialLineToggles);
+    if (!activeFileTitle) {
+      return;
+    }
+    const prev = prevInitialLineTogglesRef.current[activeFileTitle];
+    const toggledLineNos = Object.keys(
+      files[activeFileTitle].initialLineToggles || {}
+    );
 
-    if (toggledLineNos.length === 0 && Object.keys(lineToggles).length) {
+    if (
+      toggledLineNos.length === 0 &&
+      Object.keys(lineToggles[activeFileTitle]).length
+    ) {
       // TODO: extract this evaluation into a const with a meaningful name
       clearToggles();
       return;
@@ -410,63 +465,100 @@ function useManageInitialLinesUpdates({
 
     const newlyToggledLines = toggledLineNos
       .map(Number)
-      .filter((lineNo) => initialLineToggles[lineNo] && !prev[lineNo]);
+      .filter(
+        (lineNo) =>
+          files[activeFileTitle].initialLineToggles![lineNo] && !prev[lineNo]
+      );
 
     if (newlyToggledLines.length > 0) {
       // TODO: extract this evaluation into a const with a meaningful name
-      setTimeout(() => scrollToAndToggle(newlyToggledLines), 0);
+      setTimeout(
+        () => scrollToAndToggle(activeFileTitle, newlyToggledLines),
+        0
+      );
     }
 
-    prevInitialLineTogglesRef.current = initialLineToggles;
-  }, [initialLineToggles, lineToggles, clearToggles, scrollToAndToggle]);
+    prevInitialLineTogglesRef.current = {
+      ...prevInitialLineTogglesRef.current,
+      [activeFileTitle]: files[activeFileTitle].initialLineToggles || {},
+    };
+  }, [files, lineToggles, clearToggles, scrollToAndToggle]);
 
-  return { containerRef };
+  return { containerRefs };
 }
 
 export function useGetConfigSimulatorContent() {
   const { config } = useSelector(selectPanelState);
 
-  const {
-    text,
-    title,
-    changes,
-    initialLineToggles = {},
-    showToggleButtons = false,
-  } = (config || {}) as ConfigTextProps;
+  const { files = {}, activeFileTitle } = (config || {}) as ConfigTextProps;
 
-  const { lineToggles, toggleLines, clearToggles } =
-    useLineToggles(initialLineToggles);
-  const { pulsedLines, addPulsedLines } = usePulsedLines();
+  const { lineToggles, toggleLines, clearToggles } = useLineToggles(files);
+  const { pulsedLines, addPulsedLines } = usePulsedLines(Object.keys(files));
+
+  const [activeTab, setActiveTab] = useState<string>(
+    activeFileTitle || Object.keys(files)[0] || ""
+  );
+
+  useEffect(() => {
+    if (activeFileTitle && activeFileTitle !== activeTab) {
+      setActiveTab(activeFileTitle);
+    }
+    // purposefully omitting activeTab from the deps array b/c the logic should only run when activeFileTitle changes
+  }, [activeFileTitle]);
 
   const toggleLineValue = useCallback(
-    (lineNos: number[]) => {
-      toggleLines(lineNos);
-      addPulsedLines(lineNos);
+    (fileName: string, lineNos: number[]) => {
+      toggleLines(fileName, lineNos);
+      addPulsedLines(fileName, lineNos);
     },
     [toggleLines, addPulsedLines]
   );
 
-  const { containerRef } = useManageInitialLinesUpdates({
-    initialLineToggles,
+  const { containerRefs } = useManageInitialLinesUpdates({
+    activeFileTitle: activeTab,
+    files,
     lineToggles,
     clearToggles,
     toggleLineValue,
   });
 
-  const rawLines = useMemo(() => {
-    return rawLinesFromText(text ?? "");
-  }, [text]);
+  const rawLinesByFile = useMemo(() => {
+    return Object.entries(files).reduce((accum, [fileName, { text }]) => {
+      accum[fileName] = rawLinesFromText(text ?? "");
+      return accum;
+    }, {} as Record<string, string[]>);
+  }, [files]);
 
-  const textGroups = useMemo(() => {
-    return createTextGroups(rawLines, changes || [], lineToggles);
-  }, [rawLines, changes, lineToggles]);
+  const textGroupsByFile = useMemo(() => {
+    return Object.entries(files).reduce((accum, [fileName, fileConfig]) => {
+      accum[fileName] = createTextGroups(
+        rawLinesByFile[fileName],
+        fileConfig.changes || [],
+        lineToggles[fileName]
+      );
+      return accum;
+    }, {} as Record<string, TextGroup[]>);
+  }, [rawLinesByFile, files, lineToggles]);
+
+  const tabContents = Object.keys(files).reduce((accum, fileName) => {
+    const content = {
+      title: fileName,
+      textGroups: textGroupsByFile[fileName],
+      pulsedLines: pulsedLines[fileName],
+      showToggleButtons: files[fileName].showToggleButtons,
+      containerRef: containerRefs[fileName],
+      toggleLineValue: (lineNos: number[]) =>
+        toggleLineValue(fileName, lineNos),
+    };
+
+    accum.push(content);
+
+    return accum;
+  }, [] as ConfigSimulatorTabContent[]);
 
   return {
-    title,
-    textGroups,
-    pulsedLines,
-    containerRef,
-    showToggleButtons,
-    toggleLineValue,
+    tabContents,
+    activeTab,
+    setActiveTab,
   };
 }

@@ -72,13 +72,34 @@ export type LineChangeBlock = {
 };
 
 export interface ConfigTextProps {
+  files: Record<string, FileConfig>;
+  activeFileTitle?: string;
+}
+
+export type LineToggles = Record<number, boolean>;
+export interface FileConfig {
   text?: string;
   changes?: LineChangeBlock[];
-  title?: string;
   href?: string;
-  initialLineToggles?: Record<number, boolean>;
+  initialLineToggles?: LineToggles;
   showToggleButtons?: boolean;
-  scrollToLine?: number;
+}
+
+export interface TextGroup {
+  lines: ProcessedLine[];
+  startLineNo: number;
+  endLineNo: number;
+  isChangeBlock: boolean;
+  isGap?: boolean;
+}
+
+export interface ConfigSimulatorTabContent {
+  title: string;
+  textGroups: TextGroup[];
+  pulsedLines: Set<number>;
+  showToggleButtons: boolean | undefined;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  toggleLineValue: (lineNos: number[]) => void;
 }
 
 export type ProcessedLine = {

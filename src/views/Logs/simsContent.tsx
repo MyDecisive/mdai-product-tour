@@ -19,7 +19,6 @@ import {
   buildInitialToggles,
   staticFilterNoCommentConfig,
   step3HubConfig,
-  step3OtelConfig,
 } from "./configSamples/configContent";
 import {
   fluentDServices,
@@ -54,7 +53,7 @@ export const PANEL_STATE: StepDefinitions = {
   [ITEM_IDS.introduction_consolidated]: {
     initialState: {
       config: {
-        text: "",
+        files: {},
       },
       terminal: {
         typedOptions: [
@@ -75,12 +74,12 @@ export const PANEL_STATE: StepDefinitions = {
     },
     animations: [
       createAnimationAction(
-        { config: { active: true } },
+        { config: { active: true, files: {} } },
         DEFAULT_ANIMATION_STEP_DURATION
       ),
       createAnimationAction(
         {
-          config: { active: false },
+          config: { active: false, files: {} },
           terminal: {
             active: true,
           },
@@ -110,7 +109,7 @@ export const PANEL_STATE: StepDefinitions = {
   [ITEM_IDS.step1_data]: {
     initialState: {
       config: {
-        text: "",
+        files: {},
       },
       terminal: {
         typedOptions: [
@@ -223,19 +222,31 @@ export const PANEL_STATE: StepDefinitions = {
       createAnimationAction({
         config: {
           active: true,
-          initialLineToggles: buildInitialToggles(73, 78),
+          files: {
+            ["otel_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(73, 78),
+            },
+          },
         },
       }),
       createAnimationAction({}, 1500),
       createAnimationAction({
         config: {
-          initialLineToggles: buildInitialToggles(99, 100),
+          files: {
+            ["otel_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(99, 100),
+            },
+          },
         },
       }),
       createAnimationAction(
         {
           config: {
-            showToggleButtons: true,
+            files: {
+              ["otel_ref.yaml"]: {
+                showToggleButtons: true,
+              },
+            },
           },
         },
         1500
@@ -243,6 +254,7 @@ export const PANEL_STATE: StepDefinitions = {
       createAnimationAction({
         config: {
           active: false,
+          files: {},
         },
         terminal: {
           active: true,
@@ -293,32 +305,52 @@ export const PANEL_STATE: StepDefinitions = {
       createAnimationAction({
         config: {
           active: true,
-          initialLineToggles: buildInitialToggles(11, 17),
+          files: {
+            ["hub_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(11, 17),
+            },
+          },
         },
       }),
       createAnimationAction({}, 1500),
       createAnimationAction({
         config: {
-          initialLineToggles: buildInitialToggles(43, 47),
+          files: {
+            ["hub_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(43, 47),
+            },
+          },
         },
       }),
       createAnimationAction({}, 1500),
       createAnimationAction({
         config: {
-          initialLineToggles: buildInitialToggles(81, 86),
+          files: {
+            ["hub_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(81, 86),
+            },
+          },
         },
       }),
       createAnimationAction({}, 1500),
       createAnimationAction({
         config: {
-          ...step3OtelConfig,
-          initialLineToggles: buildInitialToggles(73, 77),
+          activeFileTitle: "otel_ref.yaml",
+          files: {
+            ["otel_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(73, 77),
+            },
+          },
         },
       }),
       createAnimationAction({}, 1500),
       createAnimationAction({
         config: {
-          initialLineToggles: buildInitialToggles(99, 99),
+          files: {
+            ["otel_ref.yaml"]: {
+              initialLineToggles: buildInitialToggles(99, 99),
+            },
+          },
         },
       }),
     ],

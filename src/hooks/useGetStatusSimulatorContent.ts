@@ -99,11 +99,12 @@ export function useGetStatusSimulatorContent() {
   const [workingContext, setWorkingContext] = useState<string>(contextLabel);
   const [workDone, setWorkDone] = useState<boolean>(false);
 
-  // eslint-ignore-next-line react-hooks/exhaustive-deps
   const memoizedServices = useMemo(() => {
     return services;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     services.length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     services
       .map((s) => `${s.name}-${s.replicas}-${s.skipStartup}-${s.noSuffix}`)
       .join(","),

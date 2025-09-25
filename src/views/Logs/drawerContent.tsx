@@ -218,7 +218,7 @@ function TakeNote() {
     <SubStepContent title="We’ve got the heavy lifting covered, so working with your logs is a breeze.">
       <ol style={{ paddingLeft: "24px" }}>
         <li>
-          In this example, Service4321 are just part of the generated data. They
+          In this example, Service4321 is just part of the generated data. They
           are some random service names like you might have.
         </li>
         <li>

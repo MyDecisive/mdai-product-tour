@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { stepVizMap } from "../components/BigContentModal/StepResults";
 import { selectAnimationIndex, selectNavigation } from "../contexts/selectors";
 import { useGetPanelContent } from "./useGetPanelContent";
@@ -11,45 +11,18 @@ export function useNavButtonHandlers() {
   const { subStep } = useSelector(selectNavigation);
   const {
     panelState: { isShowingPreviousContent, animations },
-    inTour,
   } = useGetPanelContent();
 
   const { showPlayButton, nextButtonDisabled } = useMemo(() => {
     const hasAnimations = !isShowingPreviousContent && !!animations.length;
     const showPlayButton = hasAnimations && animationIndex === -1;
     const animationPlaying = animationIndex < animations.length - 1;
-    const nextButtonDisabled = hasAnimations && animationPlaying;
+    const nextButtonDisabled = !!subStep && hasAnimations && animationPlaying;
     return {
       showPlayButton,
       nextButtonDisabled,
     };
-  }, [animations, animationIndex, isShowingPreviousContent]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (inTour) {
-        if (e.key === "ArrowRight") {
-          e.preventDefault();
-          if (showPlayButton) {
-            actions.BEGIN_ANIMATION();
-            return;
-          }
-          if (!nextButtonDisabled) {
-            actions.GO_NEXT_STEP();
-          }
-        } else if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          actions.GO_PREV_STEP();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [actions, inTour, showPlayButton, nextButtonDisabled]);
+  }, [animations, animationIndex, isShowingPreviousContent, subStep]);
 
   const nxtBtnTxt = useMemo(() => {
     if (

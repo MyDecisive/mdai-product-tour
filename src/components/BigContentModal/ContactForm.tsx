@@ -67,13 +67,17 @@ const makeEmailBody = (values: FormValues) =>
   }, contactFormContent.emailBodyTemplate);
 
 export const sendContactForm = async (values: FormValues) => {
+  const payload = {
+    ...values,
+    sourceUrl: window.location.toString()
+  }
   const response = await fetch(contactAPIEndpoint, {
     mode: "cors",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(values),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) {
     throw `Error occurred sending contact form. Response: ${response}`;

@@ -30,19 +30,14 @@ export type ReducerFunction<K extends keyof PayloadMap> = (
   action: Extract<AppAction, { type: K }>
 ) => TourState;
 
-export type ActionCreator<K extends keyof PayloadMap> =
-  undefined extends PayloadMap[K]
-    ? (
-        payload?: PayloadMap[K]
-      ) => { type: K } | { type: K; payload: PayloadMap[K] }
-    : (payload: PayloadMap[K]) => { type: K; payload: PayloadMap[K] };
-
 export type ActionCreatorMap = {
-  [K in keyof PayloadMap]: ActionCreator<K>;
+  [K in keyof PayloadMap]: PayloadMap[K] extends undefined
+    ? () => { type: K }
+    : (payload: PayloadMap[K]) => { type: K; payload: PayloadMap[K] };
 };
 
 export type DispatchedActionCreators = {
-  [K in keyof PayloadMap]: undefined extends PayloadMap[K]
-    ? (payload?: PayloadMap[K]) => void
+  [K in keyof PayloadMap]: PayloadMap[K] extends undefined
+    ? () => void
     : (payload: PayloadMap[K]) => void;
 };

@@ -315,9 +315,21 @@ function AddA() {
 function TakeNote2() {
   const makeOnListItemClick = (lineNo: number) => {
     return () => {
-      // TODO: Figure out how to make this config tab visible
       const configContainer = document.getElementById("hub_ref.yaml-tabpanel");
       if (configContainer) {
+        if (configContainer.hidden) {
+          // this swaps the visibility of the tabpanels
+          // but it doesn't toggle the tabs
+          const parentEl = configContainer.parentElement;
+          console.log("parentEl.children ", parentEl?.children);
+          Array.from(parentEl?.children || []).forEach((child) => {
+            if (child.role === "tabpanel") {
+              child === configContainer
+                ? ((child as HTMLDivElement).hidden = false)
+                : ((child as HTMLDivElement).hidden = true);
+            }
+          });
+        }
         const el = configContainer?.querySelector<HTMLDivElement>(
           `[data-line="${lineNo}"]`
         );

@@ -1,7 +1,8 @@
 import { css } from "@emotion/react";
-import { Box, Link, List, ListItem, Typography } from "@mui/material";
+import { Box, Button, Link, List, ListItem, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
+import { useHighlander } from "../../hooks/useHighlander";
 import { ITEM_IDS } from "../../utils/constants";
 import type {
   StepItemMap,
@@ -12,7 +13,7 @@ import { hydrateViewTreeitems } from "../common";
 
 const SubStepStyles = css({
   borderRadius: "4px",
-  padding: "8px 16px",
+  padding: "8px 8px 8px 16px",
   display: "flex",
   flexDirection: "column",
   gap: "16px",
@@ -176,6 +177,27 @@ function UnifiedView() {
 }
 
 function DataStarts() {
+  const handleClick = () => {
+    const statusSimBox = document.getElementsByClassName("status");
+    if (statusSimBox.length > 0) {
+      const element = statusSimBox[0] as HTMLElement;
+      const computedStyles = getComputedStyle(element);
+      const oldTransition = computedStyles.transition;
+      const oldBorderColor = computedStyles.borderColor;
+
+      element.style.transition = "border-color 0.5s ease";
+      element.style.borderColor = "#B062C2";
+
+      setTimeout(() => {
+        element.style.borderColor = oldBorderColor;
+      }, 1000);
+      setTimeout(() => {
+        element.style.transition = oldTransition;
+      }, 1500);
+    } else {
+      console.warn("No element with class 'status' found.");
+    }
+  };
   return (
     <SubStepContent title="Simulate the log stream">
       Starting with the MDAI cluster already running, run{" "}
@@ -189,8 +211,20 @@ function DataStarts() {
         >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</pre>
       </Box>
       to open the floodgates. <br />
-      <br /> Watch the SmartHub come alive in the Status Simulator Window{" "}
-      <span style={{ color: "#B062C2" }}>Status Simulator window</span> <br />
+      <br /> Watch the SmartHub come alive in the{" "}
+      <Button
+        onClick={handleClick}
+        variant="text"
+        sx={{
+          padding: 0,
+          textTransform: "none",
+          fontWeight: 400,
+          fontSize: "1rem",
+        }}
+      >
+        Status Simulator Window
+      </Button>{" "}
+      <br />
       <br />
       Heads up: you’ll get to see the results in the next step
     </SubStepContent>
@@ -290,21 +324,17 @@ function AddA() {
   return (
     <SubStepContent>
       {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
-      <List style={{ paddingLeft: "24px" }}>
-        <ListItem sx={ListItemStyles}>
-          <Box sx={{ overflowX: "auto" }}>
-            <pre style={{ color: "#B062C2" }}>
-              kubectl apply -f mdai/hub/hub_ref.yaml
-            </pre>
-          </Box>
+      <List>
+        <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
+          <pre style={{ width: "100%", overflowX: "auto", color: "#B062C2" }}>
+            kubectl apply -f mdai/hub/hub_ref.yaml
+          </pre>
           updates your MDAI hub
         </ListItem>
-        <ListItem sx={ListItemStyles}>
-          <Box sx={{ overflowX: "auto" }}>
-            <pre style={{ color: "#B062C2" }}>
-              kubectl apply -f otel/otel_ref.yaml
-            </pre>
-          </Box>
+        <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
+          <pre style={{ width: "100%", overflowX: "auto", color: "#B062C2" }}>
+            kubectl apply -f otel/otel_ref.yaml
+          </pre>
           puts the variable to use in your OTel collector
         </ListItem>
       </List>
@@ -313,48 +343,48 @@ function AddA() {
 }
 
 function TakeNote2() {
+  const { actions } = useHighlander();
   const makeOnListItemClick = (lineNo: number) => {
     return () => {
       const configContainer = document.getElementById("hub_ref.yaml-tabpanel");
-      if (configContainer) {
-        if (configContainer.hidden) {
-          // this swaps the visibility of the tabpanels
-          // but it doesn't toggle the tabs
-          const parentEl = configContainer.parentElement;
-          console.log("parentEl.children ", parentEl?.children);
-          Array.from(parentEl?.children || []).forEach((child) => {
-            if (child.role === "tabpanel") {
-              if (child === configContainer) {
-                (child as HTMLDivElement).hidden = false;
-              } else {
-                (child as HTMLDivElement).hidden = true;
-              }
-            }
-          });
-        }
-        const el = configContainer?.querySelector<HTMLDivElement>(
+      if (!configContainer) return;
+
+      if (configContainer.hidden) {
+        actions.SET_ACTIVE_TAB("hub_ref.yaml");
+
+        setTimeout(() => {
+          continueWithScroll();
+        }, 400);
+      } else {
+        continueWithScroll();
+      }
+
+      function continueWithScroll() {
+        const el = configContainer!.querySelector<HTMLDivElement>(
           `[data-line="${lineNo}"]`
         );
-        if (el) {
-          const containerRect = configContainer.getBoundingClientRect();
-          const elementRect = el.getBoundingClientRect();
-          const scrollTarget =
-            configContainer.scrollTop +
-            (elementRect.top - containerRect.top) -
-            24;
+        if (!el) return;
 
-          configContainer.scrollTo({ top: scrollTarget, behavior: "smooth" });
+        const containerRect = configContainer!.getBoundingClientRect();
+        const elementRect = el.getBoundingClientRect();
+        const scrollTarget =
+          configContainer!.scrollTop +
+          (elementRect.top - containerRect.top) -
+          24;
+
+        configContainer!.scrollTo({ top: scrollTarget, behavior: "smooth" });
+
+        setTimeout(() => {
+          el.style.animation = "backgroundPulse 1s ease-out forwards";
+
           setTimeout(() => {
-            el.style.animation = "backgroundPulse 1s ease-out forwards";
-
-            setTimeout(() => {
-              el.style.animation = "";
-            }, 999);
-          }, 200);
-        }
+            el.style.animation = "";
+          }, 999);
+        }, 200);
       }
     };
   };
+
   return (
     <SubStepContent title="What’s happening in the config file? ">
       <List>

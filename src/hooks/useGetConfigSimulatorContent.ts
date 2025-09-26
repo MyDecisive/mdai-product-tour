@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { selectPanelState } from "../contexts/selectors";
+import { selectActiveTab, selectPanelState } from "../contexts/selectors";
 import type {
   ConfigSimulatorTabContent,
   ConfigTextProps,
@@ -506,14 +506,23 @@ function useManageInitialLinesUpdates({
 
 export function useGetConfigSimulatorContent() {
   const { config } = useSelector(selectPanelState);
+  const { actions } = useHighlander();
+  const activeTab = useSelector(selectActiveTab);
+
+  const setActiveTab = useCallback(
+    (tab?: string) => {
+      actions.SET_ACTIVE_TAB(tab);
+    },
+    [actions]
+  );
 
   const { files = {}, activeFileTitle } = (config || {}) as ConfigTextProps;
   const { lineToggles, toggleLines, resetToggles } = useLineToggles(files);
   const { pulsedLines, addPulsedLines } = usePulsedLines(Object.keys(files));
 
-  const [activeTab, setActiveTab] = useState<string>(
-    activeFileTitle || Object.keys(files)[0] || ""
-  );
+  useEffect(() => {
+    setActiveTab(activeFileTitle);
+  }, [activeFileTitle]);
 
   const toggleLineValue = useCallback(
     (fileName: string, lineNos: number[]) => {
@@ -568,20 +577,9 @@ export function useGetConfigSimulatorContent() {
     }, [] as ConfigSimulatorTabContent[]);
   }, [files, textGroupsByFile, pulsedLines, containerRefs]);
 
-  useEffect(() => {
-    if (activeFileTitle && activeFileTitle !== activeTab) {
-      setActiveTab(activeFileTitle);
-      return;
-    }
-    if (!activeTab && tabContents.length) {
-      setActiveTab(tabContents[0].title);
-    }
-    // purposefully omitting activeTab from the deps array b/c the logic should only run when activeFileTitle changes
-  }, [activeFileTitle, tabContents]);
-
   return {
     tabContents,
-    activeTab,
+    activeTab: activeTab || activeFileTitle || tabContents[0]?.title || "",
     setActiveTab,
   };
 }

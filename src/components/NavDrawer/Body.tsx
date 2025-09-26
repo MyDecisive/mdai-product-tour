@@ -29,12 +29,10 @@ const NavTreeSubStepStyles = css({
   },
 });
 
-const HEADER_HEIGHT = 65;
-const FOOTER_HEIGHT = 75;
-
 const BodyScrollContainer = css({
-  maxHeight: `calc(100% - ${HEADER_HEIGHT + FOOTER_HEIGHT}px)`,
+  maxHeight: `100%`,
   overflowY: "auto",
+  overflowX: "hidden",
 });
 
 export function Body() {

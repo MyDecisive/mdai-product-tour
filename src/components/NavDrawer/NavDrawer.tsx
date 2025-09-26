@@ -12,6 +12,7 @@ export function NavDrawer() {
       sx={css([
         {
           width: drawerWidth,
+          overflow: "hidden",
           height: "100%",
           flexShrink: 0,
           "& .MuiDrawer-paper": {

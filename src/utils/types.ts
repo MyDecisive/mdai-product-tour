@@ -174,6 +174,7 @@ export type InfoBannerProps = {
 export interface TourState {
   navigation: NavigationState;
   animationIndex: number;
+  activeTab?: string;
 }
 
 export type DeepPartial<T> = Partial<{

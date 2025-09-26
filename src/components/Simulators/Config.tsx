@@ -11,20 +11,6 @@ export function ConfigText() {
 
   return (
     <>
-      {tabContents.map(({ title, href }) => {
-        return href ? (
-          <Link
-            key={`${title}-${href}`}
-            href={href}
-            variant="body2"
-            underline="hover"
-            target="_blank"
-            rel="noopener"
-          >
-            {`View ${title} Config in GitHub →`}
-          </Link>
-        ) : null;
-      })}
       <Tabs value={activeTab} onChange={handleChange}>
         {tabContents.map(({ title }) => (
           <Tab
@@ -42,6 +28,7 @@ export function ConfigText() {
           textGroups,
           showToggleButtons,
           pulsedLines,
+          href,
           toggleLineValue,
         }) => (
           <Box
@@ -53,15 +40,44 @@ export function ConfigText() {
             ref={containerRef}
             sx={{
               maxHeight: 325,
-              overflow: "scroll",
+              overflowY: "auto",
+              overflowX: "hidden",
               fontFamily:
                 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
               fontSize: 13,
               lineHeight: 1.5,
               scrollbarWidth: "thin",
               scrollbarColor: "#B062C2 transparent",
+              position: "relative",
             }}
           >
+            {href && (
+              <Box
+                sx={{
+                  position: "sticky",
+                  width: "100%",
+                  display: "flex",
+                  top: 0,
+                  right: 0,
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Link
+                  href={href}
+                  variant="body2"
+                  underline="hover"
+                  target="_blank"
+                  rel="noopener"
+                  sx={{
+                    background: "#00000059",
+                    px: "4px",
+                    borderRadius: "8px",
+                  }}
+                >
+                  {`View this config in GitHub →`}
+                </Link>
+              </Box>
+            )}
             {textGroups.map((group, groupIndex) => {
               const prevGroup = textGroups[groupIndex - 1];
               const nextGroup = textGroups[groupIndex + 1];

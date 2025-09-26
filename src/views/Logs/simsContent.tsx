@@ -5,6 +5,7 @@ import {
 } from "../../utils/constants";
 import type {
   AnimationAction,
+  DeepPartial,
   SimulatorPanelState,
   StepDefinitions,
 } from "../../utils/types";
@@ -35,7 +36,7 @@ import {
 } from "./terminal/terminalContent";
 
 function createAnimationAction(
-  stateChanges: Partial<SimulatorPanelState>,
+  stateChanges: DeepPartial<SimulatorPanelState>,
   delay?: number
 ): AnimationAction {
   return {
@@ -332,10 +333,16 @@ export const PANEL_STATE: StepDefinitions = {
           },
         },
       }),
-      createAnimationAction({}, 1500),
+      createAnimationAction(
+        {
+          config: {
+            activeFileTitle: "otel_ref.yaml",
+          },
+        },
+        750
+      ),
       createAnimationAction({
         config: {
-          activeFileTitle: "otel_ref.yaml",
           files: {
             ["otel_ref.yaml"]: {
               initialLineToggles: buildInitialToggles(73, 77),

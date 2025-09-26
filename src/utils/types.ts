@@ -152,7 +152,7 @@ export interface SimulatorPanelState {
 export interface AnimationAction {
   type: "state_update" | "delay";
   delay?: number;
-  stateChanges?: Partial<SimulatorPanelState>;
+  stateChanges?: DeepPartial<SimulatorPanelState>;
 }
 
 export interface StepDefinition {
@@ -174,3 +174,11 @@ export interface TourState {
   navigation: NavigationState;
   animationIndex: number;
 }
+
+export type DeepPartial<T> = Partial<{
+  [P in keyof T]: T[P] extends object
+    ? T[P] extends Array<infer U>
+      ? Array<DeepPartial<U>>
+      : DeepPartial<T[P]>
+    : Partial<T[P]>;
+}>;

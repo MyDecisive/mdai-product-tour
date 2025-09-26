@@ -46,6 +46,7 @@ export const staticFilterNoCommentConfig: ConfigTextProps = {
         },
       ],
       href: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
+      initialLineToggles: {},
     },
   },
   activeFileTitle: "otel_ref.yaml",
@@ -61,6 +62,7 @@ export const step3HubConfig: ConfigTextProps = {
         { start: 43, end: 47, oldValues: [] },
         { start: 81, end: 86, oldValues: [] },
       ],
+      initialLineToggles: {},
     },
     ["otel_ref.yaml"]: {
       text: dynamicFilter,
@@ -69,6 +71,7 @@ export const step3HubConfig: ConfigTextProps = {
         { start: 73, end: 77, oldValues: [] },
         { start: 99, end: 99, oldValues: [] },
       ],
+      initialLineToggles: {},
     },
   },
   activeFileTitle: "hub_ref.yaml",

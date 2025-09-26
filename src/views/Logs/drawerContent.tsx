@@ -216,16 +216,16 @@ function ConfigureStatus() {
 function TakeNote() {
   return (
     <SubStepContent title="We’ve got the heavy lifting covered, so working with your logs is a breeze.">
-      <ol style={{ paddingLeft: "24px" }}>
-        <li>
+      <List style={{ paddingLeft: "24px" }}>
+        <ListItem>
           In this example, Service4321 is just part of the generated data. They
           are some random service names like you might have.
-        </li>
-        <li>
+        </ListItem>
+        <ListItem>
           “mdai_service” is a variable--yep, a little bit of magic. Hang tight,
           you’ll learn more about variables in just a minute.
-        </li>
-      </ol>
+        </ListItem>
+      </List>
     </SubStepContent>
   );
 }
@@ -252,24 +252,24 @@ function AddA() {
   return (
     <SubStepContent>
       {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
-      <ol style={{ paddingLeft: "24px" }}>
-        <li>
+      <List style={{ paddingLeft: "24px" }}>
+        <ListItem>
           <Box sx={{ overflowX: "auto" }}>
             <pre style={{ color: "#B062C2" }}>
               kubectl apply -f mdai/hub/hub_ref.yaml
             </pre>
           </Box>
           updates your MDAI hub
-        </li>
-        <li>
+        </ListItem>
+        <ListItem>
           <Box sx={{ overflowX: "auto" }}>
             <pre style={{ color: "#B062C2" }}>
               kubectl apply -f otel/otel_ref.yaml
             </pre>
           </Box>
           puts the variable to use in your OTel collector
-        </li>
-      </ol>
+        </ListItem>
+      </List>
     </SubStepContent>
   );
 }
@@ -277,22 +277,22 @@ function AddA() {
 function TakeNote2() {
   return (
     <SubStepContent title="What’s happening in the config file? ">
-      <ol style={{ paddingLeft: "24px" }}>
-        <li>
+      <List style={{ paddingLeft: "24px" }}>
+        <ListItem>
           Top loggers: Services that log more than your budget can handle are
           called your top loggers. We store them in a variable called
           "service_list".
-        </li>
-        <li>
+        </ListItem>
+        <ListItem>
           Easy reference: Your code only needs to reference "service_list". We
           handle the heavy lifting—dynamically computing top loggers and keeping
           the variable updated continuously.
-        </li>
-        <li>
+        </ListItem>
+        <ListItem>
           Config-controlled behavior: The "service_list" computation itself is
           managed via configuration too. Learn more <Link>here.</Link>
-        </li>
-      </ol>
+        </ListItem>
+      </List>
     </SubStepContent>
   );
 }

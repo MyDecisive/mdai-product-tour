@@ -7,6 +7,7 @@ const InfoBoxStyles = css({
   borderRadius: "4px",
   padding: "16px",
   fontWeight: 400,
+  cursor: "default",
 });
 
 const InfoBoxTitleStyles = css({

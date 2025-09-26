@@ -16,6 +16,7 @@ const SubStepStyles = css({
   display: "flex",
   flexDirection: "column",
   gap: "16px",
+  cursor: "default",
 });
 
 const SubStepTitleStyles = css({
@@ -214,16 +215,53 @@ function ConfigureStatus() {
 }
 
 function TakeNote() {
+  const onListItemClick = () => {
+    const configContainer = document.getElementById("otel_ref.yaml-tabpanel");
+    if (configContainer) {
+      const el =
+        configContainer?.querySelector<HTMLDivElement>(`[data-line="78"]`);
+      if (el) {
+        const containerRect = configContainer.getBoundingClientRect();
+        const elementRect = el.getBoundingClientRect();
+        const scrollTarget =
+          configContainer.scrollTop +
+          (elementRect.top - containerRect.top) -
+          24;
+
+        configContainer.scrollTo({ top: scrollTarget, behavior: "smooth" });
+        setTimeout(() => {
+          el.style.animation = "backgroundPulse 1s ease-out forwards";
+
+          setTimeout(() => {
+            el.style.animation = "";
+          }, 999);
+        }, 200);
+      }
+    }
+  };
+
   return (
     <SubStepContent title="We’ve got the heavy lifting covered, so working with your logs is a breeze.">
-      <List style={{ paddingLeft: "24px" }}>
-        <ListItem>
-          In this example, Service4321 is just part of the generated data. They
-          are some random service names like you might have.
+      <List>
+        <ListItem
+          onClick={onListItemClick}
+          sx={[ListItemStyles, { cursor: "pointer" }]}
+        >
+          <Typography sx={BulletStyle}>1.</Typography>
+          <Typography>
+            In this example, Service4321 is just part of the generated data.
+            They are some random service names like you might have.
+          </Typography>
         </ListItem>
-        <ListItem>
-          “mdai_service” is a variable--yep, a little bit of magic. Hang tight,
-          you’ll learn more about variables in just a minute.
+        <ListItem
+          onClick={onListItemClick}
+          sx={[ListItemStyles, { cursor: "pointer" }]}
+        >
+          <Typography sx={BulletStyle}>2.</Typography>
+          <Typography>
+            “mdai_service” is a variable--yep, a little bit of magic. Hang
+            tight, you’ll learn more about variables in just a minute.
+          </Typography>
         </ListItem>
       </List>
     </SubStepContent>
@@ -253,7 +291,7 @@ function AddA() {
     <SubStepContent>
       {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
       <List style={{ paddingLeft: "24px" }}>
-        <ListItem>
+        <ListItem sx={ListItemStyles}>
           <Box sx={{ overflowX: "auto" }}>
             <pre style={{ color: "#B062C2" }}>
               kubectl apply -f mdai/hub/hub_ref.yaml
@@ -261,7 +299,7 @@ function AddA() {
           </Box>
           updates your MDAI hub
         </ListItem>
-        <ListItem>
+        <ListItem sx={ListItemStyles}>
           <Box sx={{ overflowX: "auto" }}>
             <pre style={{ color: "#B062C2" }}>
               kubectl apply -f otel/otel_ref.yaml
@@ -275,22 +313,68 @@ function AddA() {
 }
 
 function TakeNote2() {
+  const makeOnListItemClick = (lineNo: number) => {
+    return () => {
+      // TODO: Figure out how to make this config tab visible
+      const configContainer = document.getElementById("hub_ref.yaml-tabpanel");
+      if (configContainer) {
+        const el = configContainer?.querySelector<HTMLDivElement>(
+          `[data-line="${lineNo}"]`
+        );
+        if (el) {
+          const containerRect = configContainer.getBoundingClientRect();
+          const elementRect = el.getBoundingClientRect();
+          const scrollTarget =
+            configContainer.scrollTop +
+            (elementRect.top - containerRect.top) -
+            24;
+
+          configContainer.scrollTo({ top: scrollTarget, behavior: "smooth" });
+          setTimeout(() => {
+            el.style.animation = "backgroundPulse 1s ease-out forwards";
+
+            setTimeout(() => {
+              el.style.animation = "";
+            }, 999);
+          }, 200);
+        }
+      }
+    };
+  };
   return (
     <SubStepContent title="What’s happening in the config file? ">
-      <List style={{ paddingLeft: "24px" }}>
-        <ListItem>
-          Top loggers: Services that log more than your budget can handle are
-          called your top loggers. We store them in a variable called
-          "service_list".
+      <List>
+        <ListItem
+          sx={[ListItemStyles, { cursor: "pointer" }]}
+          onClick={makeOnListItemClick(43)}
+        >
+          <Typography sx={BulletStyle}>1.</Typography>
+          <Typography>
+            Top talkers: Services that log more than your budget can handle are
+            called your top talkers. We store them in a variable called
+            "service_list".
+          </Typography>
         </ListItem>
-        <ListItem>
-          Easy reference: Your code only needs to reference "service_list". We
-          handle the heavy lifting—dynamically computing top loggers and keeping
-          the variable updated continuously.
+        <ListItem
+          sx={[ListItemStyles, { cursor: "pointer" }]}
+          onClick={makeOnListItemClick(11)}
+        >
+          <Typography sx={BulletStyle}>2.</Typography>
+          <Typography>
+            Easy reference: Your code only needs to reference "service_list". We
+            handle the heavy lifting—dynamically computing top loggers and
+            keeping the variable updated continuously.
+          </Typography>
         </ListItem>
-        <ListItem>
-          Config-controlled behavior: The "service_list" computation itself is
-          managed via configuration too. Learn more <Link>here.</Link>
+        <ListItem
+          sx={[ListItemStyles, { cursor: "pointer" }]}
+          onClick={makeOnListItemClick(81)}
+        >
+          <Typography sx={BulletStyle}>3.</Typography>
+          <Typography>
+            Config-controlled behavior: The "service_list" computation itself is
+            managed via configuration too. Learn more <Link>here.</Link>
+          </Typography>
         </ListItem>
       </List>
     </SubStepContent>

@@ -16,6 +16,7 @@ export interface PayloadMap {
   [ACTION_TYPES.OPEN_BIG_CONTENT_MODAL]: "contact" | "finished" | "results";
   [ACTION_TYPES.CLOSE_BIG_CONTENT_MODAL]: undefined;
   [ACTION_TYPES.START_LOGS_DEMO]: undefined;
+  [ACTION_TYPES.SET_ACTIVE_TAB]: string | undefined;
 }
 
 export type AppAction = {
@@ -29,14 +30,19 @@ export type ReducerFunction<K extends keyof PayloadMap> = (
   action: Extract<AppAction, { type: K }>
 ) => TourState;
 
-export type ActionCreatorMap = {
-  [K in keyof PayloadMap]: PayloadMap[K] extends undefined
-    ? () => { type: K }
+export type ActionCreator<K extends keyof PayloadMap> =
+  undefined extends PayloadMap[K]
+    ? (
+        payload?: PayloadMap[K]
+      ) => { type: K } | { type: K; payload: PayloadMap[K] }
     : (payload: PayloadMap[K]) => { type: K; payload: PayloadMap[K] };
+
+export type ActionCreatorMap = {
+  [K in keyof PayloadMap]: ActionCreator<K>;
 };
 
 export type DispatchedActionCreators = {
-  [K in keyof PayloadMap]: PayloadMap[K] extends undefined
-    ? () => void
+  [K in keyof PayloadMap]: undefined extends PayloadMap[K]
+    ? (payload?: PayloadMap[K]) => void
     : (payload: PayloadMap[K]) => void;
 };

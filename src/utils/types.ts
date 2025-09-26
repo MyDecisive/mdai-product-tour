@@ -72,13 +72,35 @@ export type LineChangeBlock = {
 };
 
 export interface ConfigTextProps {
+  files: Record<string, FileConfig>;
+  activeFileTitle?: string;
+}
+
+export type LineToggles = Record<number, boolean>;
+export interface FileConfig {
   text?: string;
   changes?: LineChangeBlock[];
-  title?: string;
   href?: string;
-  initialLineToggles?: Record<number, boolean>;
+  initialLineToggles?: LineToggles;
   showToggleButtons?: boolean;
-  scrollToLine?: number;
+}
+
+export interface TextGroup {
+  lines: ProcessedLine[];
+  startLineNo: number;
+  endLineNo: number;
+  isChangeBlock: boolean;
+  isGap?: boolean;
+}
+
+export interface ConfigSimulatorTabContent {
+  title: string;
+  href?: string;
+  textGroups: TextGroup[];
+  pulsedLines: Set<number>;
+  showToggleButtons: boolean | undefined;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  toggleLineValue: (lineNos: number[]) => void;
 }
 
 export type ProcessedLine = {
@@ -131,7 +153,7 @@ export interface SimulatorPanelState {
 export interface AnimationAction {
   type: "state_update" | "delay";
   delay?: number;
-  stateChanges?: Partial<SimulatorPanelState>;
+  stateChanges?: DeepPartial<SimulatorPanelState>;
 }
 
 export interface StepDefinition {
@@ -152,4 +174,13 @@ export type InfoBannerProps = {
 export interface TourState {
   navigation: NavigationState;
   animationIndex: number;
+  activeTab?: string;
 }
+
+export type DeepPartial<T> = Partial<{
+  [P in keyof T]: T[P] extends object
+    ? T[P] extends Array<infer U>
+      ? Array<DeepPartial<U>>
+      : DeepPartial<T[P]>
+    : Partial<T[P]>;
+}>;

@@ -99,6 +99,10 @@ const reducerFunctions = {
     ...state,
     navigation: LOGS_DEFAULT_STEPS,
   }),
+  [ACTION_TYPES.SET_ACTIVE_TAB]: (state, { payload }) => ({
+    ...state,
+    activeTab: payload,
+  }),
 } as const satisfies {
   [K in keyof PayloadMap]: ReducerFunction<K>;
 };

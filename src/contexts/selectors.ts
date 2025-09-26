@@ -8,6 +8,7 @@ import { mergeAnimationState } from "../views/common";
 
 export const selectNavigation = (state: TourState) => state.navigation;
 export const selectAnimationIndex = (state: TourState) => state.animationIndex;
+export const selectActiveTab = (state: TourState) => state.activeTab;
 
 export const selectInTour = createSelector(
   [selectNavigation],

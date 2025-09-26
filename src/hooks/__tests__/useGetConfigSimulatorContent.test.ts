@@ -39,7 +39,9 @@ const mockSelectPanelState = vi.mocked(selectPanelState);
 
 describe("useGetConfigSimulatorContent", () => {
   const mockConfig = {
-    text: `apiVersion: opentelemetry.io/v1beta1
+    files: {
+      ["otel_ref.yaml"]: {
+        text: `apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   labels:
@@ -160,34 +162,36 @@ spec:
               batch,
             ]
           exporters: [debug, otlp/observer]`,
-    title: "otel_ref.yaml",
-    changes: [
-      {
-        start: 73,
-        end: 78,
-        oldValues: [
-          "      # UNCOMMENT THE FOLLOWING LINE TO ADD FILTER PROCESSOR",
-          "      # filter/static_filter:",
-          "      #   error_mode: ignore",
-          "      #   logs:",
-          "      #     log_record:",
-          '      #       - \'IsMatch(attributes["mdai_service"], "service4321")\'',
+        title: "otel_ref.yaml",
+        changes: [
+          {
+            start: 73,
+            end: 78,
+            oldValues: [
+              "      # UNCOMMENT THE FOLLOWING LINE TO ADD FILTER PROCESSOR",
+              "      # filter/static_filter:",
+              "      #   error_mode: ignore",
+              "      #   logs:",
+              "      #     log_record:",
+              '      #       - \'IsMatch(attributes["mdai_service"], "service4321")\'',
+            ],
+          },
+          {
+            start: 99,
+            end: 100,
+            oldValues: [
+              "              # UNCOMMENT THE FOLLOWING LINE TO START FILTRATION",
+              "              # filter/static_filter",
+            ],
+          },
         ],
+        initialLineToggles: {
+          100: true,
+          99: true,
+        },
+        showToggleButtons: false,
       },
-      {
-        start: 99,
-        end: 100,
-        oldValues: [
-          "              # UNCOMMENT THE FOLLOWING LINE TO START FILTRATION",
-          "              # filter/static_filter",
-        ],
-      },
-    ],
-    initialLineToggles: {
-      100: true,
-      99: true,
     },
-    showToggleButtons: false,
   };
 
   const mockPanelState = {
@@ -209,35 +213,37 @@ spec:
   describe("basic functionality", () => {
     it("should return the correct title", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      expect(result.current.title).toBe("otel_ref.yaml");
+      expect(result.current.tabContents[0].title).toBe("otel_ref.yaml");
     });
 
     it("should return showToggleButtons value", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      expect(result.current.showToggleButtons).toBe(false);
+      expect(result.current.tabContents[0].showToggleButtons).toBe(false);
     });
 
     it("should return containerRef", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      expect(result.current.containerRef).toBeDefined();
-      expect(result.current.containerRef.current).toBeNull();
+      expect(result.current.tabContents[0].containerRef).toBeDefined();
+      expect(result.current.tabContents[0].containerRef.current).toBeNull();
     });
 
     it("should return toggleLineValue function", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      expect(typeof result.current.toggleLineValue).toBe("function");
+      expect(typeof result.current.tabContents[0].toggleLineValue).toBe(
+        "function"
+      );
     });
   });
 
   describe("textGroups generation", () => {
     it("should generate the correct number of textGroups", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      expect(result.current.textGroups).toHaveLength(13);
+      expect(result.current.tabContents[0].textGroups).toHaveLength(13);
     });
 
     it("should correctly identify change blocks", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      const changeBlocks = result.current.textGroups.filter(
+      const changeBlocks = result.current.tabContents[0].textGroups.filter(
         (group) => group.isChangeBlock
       );
       expect(changeBlocks).toHaveLength(2);
@@ -245,7 +251,7 @@ spec:
 
     it("should correctly identify gap sections", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      const gapBlocks = result.current.textGroups.filter(
+      const gapBlocks = result.current.tabContents[0].textGroups.filter(
         (group) => group.isGap
       );
       expect(gapBlocks).toHaveLength(5);
@@ -253,7 +259,7 @@ spec:
 
     it("should match expected structure for first change block", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      const firstChangeBlock = result.current.textGroups.find(
+      const firstChangeBlock = result.current.tabContents[0].textGroups.find(
         (group) => group.isChangeBlock
       );
 
@@ -322,7 +328,7 @@ spec:
 
     it("should match expected structure for second change block", () => {
       const { result } = renderHook(() => useGetConfigSimulatorContent());
-      const changeBlocks = result.current.textGroups.filter(
+      const changeBlocks = result.current.tabContents[0].textGroups.filter(
         (group) => group.isChangeBlock
       );
       const secondChangeBlock = changeBlocks[1];
@@ -362,12 +368,12 @@ spec:
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
       act(() => {
-        result.current.toggleLineValue([73, 74]);
+        result.current.tabContents[0].toggleLineValue([73, 74]);
       });
 
       // Check that pulsedLines is updated
-      expect(result.current.pulsedLines.has(73)).toBe(true);
-      expect(result.current.pulsedLines.has(74)).toBe(true);
+      expect(result.current.tabContents[0].pulsedLines.has(73)).toBe(true);
+      expect(result.current.tabContents[0].pulsedLines.has(74)).toBe(true);
     });
 
     it("should clear pulsed lines after timeout", async () => {
@@ -375,16 +381,16 @@ spec:
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
       act(() => {
-        result.current.toggleLineValue([73]);
+        result.current.tabContents[0].toggleLineValue([73]);
       });
 
-      expect(result.current.pulsedLines.has(73)).toBe(true);
+      expect(result.current.tabContents[0].pulsedLines.has(73)).toBe(true);
 
       act(() => {
         vi.advanceTimersByTime(1500);
       });
 
-      expect(result.current.pulsedLines.has(73)).toBe(false);
+      expect(result.current.tabContents[0].pulsedLines.has(73)).toBe(false);
 
       vi.useRealTimers();
     });
@@ -393,10 +399,10 @@ spec:
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
       act(() => {
-        result.current.toggleLineValue([73]);
+        result.current.tabContents[0].toggleLineValue([73]);
       });
 
-      const changeBlock = result.current.textGroups.find(
+      const changeBlock = result.current.tabContents[0].textGroups.find(
         (group) => group.isChangeBlock
       );
       const toggledLine = changeBlock?.lines.find((line) => line.lineNo === 73);
@@ -409,7 +415,13 @@ spec:
     it("should handle initialLineToggles updates", () => {
       const configWithToggles = {
         ...mockConfig,
-        initialLineToggles: { 73: true, 74: true },
+        files: {
+          ...mockConfig.files,
+          ["otel_ref.yaml"]: {
+            ...mockConfig.files["otel_ref.yaml"],
+            initialLineToggles: { 73: true, 74: true },
+          },
+        },
       };
 
       const panelStateWithToggles = {
@@ -422,7 +434,7 @@ spec:
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
       // Should show new values for toggled lines
-      const changeBlock = result.current.textGroups.find(
+      const changeBlock = result.current.tabContents[0].textGroups.find(
         (group) => group.isChangeBlock
       );
       const line73 = changeBlock?.lines.find((line) => line.lineNo === 73);
@@ -436,7 +448,13 @@ spec:
       // Start with some toggles
       const configWithToggles = {
         ...mockConfig,
-        initialLineToggles: { 73: true },
+        files: {
+          ...mockConfig.files,
+          ["otel_ref.yaml"]: {
+            ...mockConfig.files["otel_ref.yaml"],
+            initialLineToggles: { 73: true },
+          },
+        },
       };
 
       const panelStateWithToggles = {
@@ -450,7 +468,7 @@ spec:
       );
 
       // Verify line is toggled
-      let changeBlock = result.current.textGroups.find(
+      let changeBlock = result.current.tabContents[0].textGroups.find(
         (group) => group.isChangeBlock
       );
       let line73 = changeBlock?.lines.find((line) => line.lineNo === 73);
@@ -459,7 +477,13 @@ spec:
       // Clear toggles
       const configWithoutToggles = {
         ...mockConfig,
-        initialLineToggles: {},
+        files: {
+          ...mockConfig.files,
+          ["otel_ref.yaml"]: {
+            ...mockConfig.files["otel_ref.yaml"],
+            initialLineToggles: {},
+          },
+        },
       };
 
       const panelStateWithoutToggles = {
@@ -471,7 +495,7 @@ spec:
       rerender();
 
       // Verify line is no longer toggled
-      changeBlock = result.current.textGroups.find(
+      changeBlock = result.current.tabContents[0].textGroups.find(
         (group) => group.isChangeBlock
       );
       line73 = changeBlock?.lines.find((line) => line.lineNo === 73);
@@ -488,15 +512,19 @@ spec:
       mockUseSelector.mockReturnValue(emptyPanelState);
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
-      expect(result.current.title).toBeUndefined();
-      expect(result.current.textGroups).toEqual([]);
-      expect(result.current.showToggleButtons).toBe(false);
+      expect(result.current.tabContents.length).toEqual(0);
     });
 
     it("should handle config with no changes", () => {
       const configNoChanges = {
         ...mockConfig,
-        changes: [],
+        files: {
+          ...mockConfig.files,
+          ["otel_ref.yaml"]: {
+            ...mockConfig.files["otel_ref.yaml"],
+            changes: [],
+          },
+        },
       };
 
       const panelStateNoChanges = {
@@ -507,13 +535,19 @@ spec:
       mockUseSelector.mockReturnValue(panelStateNoChanges);
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
-      expect(result.current.textGroups).toHaveLength(0);
+      expect(result.current.tabContents[0].textGroups).toHaveLength(0);
     });
 
     it("should handle empty text", () => {
       const configEmptyText = {
         ...mockConfig,
-        text: "",
+        files: {
+          ...mockConfig.files,
+          ["otel_ref.yaml"]: {
+            ...mockConfig.files["otel_ref.yaml"],
+            text: "",
+          },
+        },
       };
 
       const panelStateEmptyText = {
@@ -524,7 +558,7 @@ spec:
       mockUseSelector.mockReturnValue(panelStateEmptyText);
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
-      expect(result.current.textGroups).toEqual([]);
+      expect(result.current.tabContents[0].textGroups).toEqual([]);
     });
   });
 
@@ -537,8 +571,8 @@ spec:
       mockUseSelector.mockReturnValue(panelStateNoConfig);
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
-      expect(result.current.title).toBeUndefined();
-      expect(result.current.textGroups).toEqual([]);
+      expect(result.current.tabContents.length).toEqual(0);
+      expect(result.current.tabContents).toEqual([]);
     });
 
     it("should handle empty panel state from selector", () => {
@@ -554,8 +588,8 @@ spec:
       mockUseSelector.mockReturnValue(emptyPanelState);
       const { result } = renderHook(() => useGetConfigSimulatorContent());
 
-      expect(result.current.title).toBeUndefined();
-      expect(result.current.textGroups).toEqual([]);
+      expect(result.current.tabContents.length).toEqual(0);
+      expect(result.current.tabContents).toEqual([]);
     });
   });
 });

@@ -324,9 +324,11 @@ function TakeNote2() {
           console.log("parentEl.children ", parentEl?.children);
           Array.from(parentEl?.children || []).forEach((child) => {
             if (child.role === "tabpanel") {
-              child === configContainer
-                ? ((child as HTMLDivElement).hidden = false)
-                : ((child as HTMLDivElement).hidden = true);
+              if (child === configContainer) {
+                (child as HTMLDivElement).hidden = false;
+              } else {
+                (child as HTMLDivElement).hidden = true;
+              }
             }
           });
         }

@@ -55,12 +55,7 @@ export function Simulators() {
             sx={{ width: "100%" }}
           >
             <Grid size={5} sx={{ overflow: "hidden" }}>
-              <SimulatorBox
-                title="Config"
-                link="View Config in GitHub →"
-                href={config?.href}
-                active={!!config?.active}
-              >
+              <SimulatorBox title="Config" active={!!config?.active}>
                 {config !== null && <ConfigText />}
               </SimulatorBox>
             </Grid>

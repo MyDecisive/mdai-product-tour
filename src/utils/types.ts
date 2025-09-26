@@ -95,6 +95,7 @@ export interface TextGroup {
 
 export interface ConfigSimulatorTabContent {
   title: string;
+  href?: string;
   textGroups: TextGroup[];
   pulsedLines: Set<number>;
   showToggleButtons: boolean | undefined;

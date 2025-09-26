@@ -554,6 +554,7 @@ export function useGetConfigSimulatorContent() {
       const content = {
         title: fileName,
         textGroups: textGroupsByFile[fileName],
+        href: files[fileName].href,
         pulsedLines: pulsedLines[fileName] || new Set(),
         showToggleButtons: files[fileName].showToggleButtons,
         containerRef: containerRefs.current[fileName],

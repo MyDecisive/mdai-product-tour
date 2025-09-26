@@ -1,4 +1,4 @@
-import { Box, IconButton, Tab, Tabs } from "@mui/material";
+import { Box, IconButton, Link, Tab, Tabs } from "@mui/material";
 import { useGetConfigSimulatorContent } from "../../hooks/useGetConfigSimulatorContent";
 
 export function ConfigText() {
@@ -11,6 +11,20 @@ export function ConfigText() {
 
   return (
     <>
+      {tabContents.map(({ title, href }) => {
+        return href ? (
+          <Link
+            key={`${title}-${href}`}
+            href={href}
+            variant="body2"
+            underline="hover"
+            target="_blank"
+            rel="noopener"
+          >
+            {`View ${title} Config in GitHub →`}
+          </Link>
+        ) : null;
+      })}
       <Tabs value={activeTab} onChange={handleChange}>
         {tabContents.map(({ title }) => (
           <Tab

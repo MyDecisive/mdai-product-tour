@@ -1,4 +1,5 @@
 import type {
+  DeepPartial,
   SimulatorPanelState,
   StepItemMap,
   ViewStepOrder,
@@ -44,7 +45,7 @@ function isObject(item: unknown): item is Record<string, unknown> {
   return item !== null && typeof item === "object" && !Array.isArray(item);
 }
 
-function deepMerge<T>(target: T, source: Partial<T>): T {
+function deepMerge<T>(target: T, source: DeepPartial<T>): T {
   const result = { ...target };
 
   for (const key in source) {
@@ -54,7 +55,7 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
     if (isObject(sourceValue) && isObject(targetValue)) {
       result[key] = deepMerge(
         targetValue,
-        sourceValue as Partial<T[Extract<keyof T, string>]>
+        sourceValue as DeepPartial<T[Extract<keyof T, string>]>
       ) as T[Extract<keyof T, string>];
     } else if (sourceValue !== undefined) {
       result[key] = sourceValue as T[Extract<keyof T, string>];
@@ -66,7 +67,7 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
 
 export function mergeAnimationState(
   currentState: SimulatorPanelState,
-  stateChanges: Partial<SimulatorPanelState>
+  stateChanges: DeepPartial<SimulatorPanelState>
 ): SimulatorPanelState {
   return deepMerge(currentState, stateChanges);
 }

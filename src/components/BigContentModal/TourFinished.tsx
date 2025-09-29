@@ -15,6 +15,7 @@ export function TourFinished({ handleClose }: BigContentModalContentProps) {
       sx={{
         display: "flex",
         gap: "48px",
+        flexDirection: { sm: "column", lg: "row" },
       }}
     >
       <Box

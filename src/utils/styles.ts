@@ -2,7 +2,21 @@ import { createTheme } from "@mui/material/styles";
 
 import type {} from "@mui/x-tree-view/themeAugmentation";
 
+declare module "@mui/material/styles" {
+  interface BreakpointOverrides {
+    xs: false; // removes the `xs` breakpoint
+    md: false; // removes the `md` breakpoint
+    xl: false;
+  }
+}
+
 export const theme = createTheme({
+  breakpoints: {
+    values: {
+      sm: 0,
+      lg: 1001,
+    },
+  },
   palette: {
     mode: "dark",
     divider: "rgba(111, 111, 111, 0.50)",
@@ -45,10 +59,10 @@ export const theme = createTheme({
           backgroundColor: "#B062C2",
         },
         root: {
-          width: "100%", 
+          width: "100%",
           p: 0,
           borderRadius: "4px",
-          background: "transparent"
+          background: "transparent",
         },
       },
     },

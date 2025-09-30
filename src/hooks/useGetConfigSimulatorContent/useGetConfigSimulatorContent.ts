@@ -273,7 +273,7 @@ const smoothScrollTo = (
     rafId = requestAnimationFrame(animate);
   });
 
-  (promise as any).cancel = () => {
+  (promise as Promise<void> & { cancel: () => void }).cancel = () => {
     cancelled = true;
     if (rafId) {
       cancelAnimationFrame(rafId);
@@ -324,11 +324,13 @@ const usePulsedLines = (fileNames: string[]) => {
   }, []);
 
   useEffect(() => {
-    const newState = fileNames.reduce((accum, name) => {
-      accum[name] = pulsedLines[name] || new Set();
-      return accum;
-    }, {} as Record<string, Set<number>>);
-    setPulsedLines(newState);
+    setPulsedLines((old) => {
+      const newState = fileNames.reduce((accum, name) => {
+        accum[name] = old[name] || new Set();
+        return accum;
+      }, {} as Record<string, Set<number>>);
+      return newState;
+    });
   }, [fileNames]);
 
   const addPulsedLines = useCallback((fileName: string, lineNos: number[]) => {
@@ -501,7 +503,7 @@ function useManageInitialLinesUpdates({
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    let scrollPromise: any;
+    let scrollPromise: Promise<void> & { cancel?: () => void };
     if (!activeFileTitle) {
       return;
     }
@@ -540,11 +542,14 @@ function useManageInitialLinesUpdates({
 
     return () => {
       clearTimeout(timeout);
-      if (scrollPromise && typeof scrollPromise.cancel === "function") {
+      if (
+        typeof scrollPromise !== "undefined" &&
+        typeof scrollPromise.cancel === "function"
+      ) {
         scrollPromise.cancel();
       }
     };
-  }, [files, lineToggles, resetToggles, scrollToAndToggle]);
+  }, [files, lineToggles, resetToggles, scrollToAndToggle, activeFileTitle]);
 
   return { containerRefs };
 }
@@ -571,6 +576,7 @@ export function useGetConfigSimulatorContent() {
     return keysArr.sort().join(",");
   }, [files]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fileNames = useMemo(() => Object.keys(files), [fileKeys]);
 
   const { lineToggles, toggleLines, resetToggles } = useLineToggles(files);
@@ -578,7 +584,7 @@ export function useGetConfigSimulatorContent() {
 
   useEffect(() => {
     setActiveTab(activeFileTitle);
-  }, [activeFileTitle]);
+  }, [activeFileTitle, setActiveTab]);
 
   const toggleLineValue = useCallback(
     (fileName: string, lineNos: number[]) => {
@@ -602,11 +608,12 @@ export function useGetConfigSimulatorContent() {
   }, [files]);
 
   const rawLinesByFile = useMemo(() => {
-    // console.log("Recalculating raw lines for all files...");
+    console.log("Recalculating raw lines for all files...");
     return Object.entries(files).reduce((accum, [fileName, { text }]) => {
       accum[fileName] = rawLinesFromText(text ?? "");
       return accum;
     }, {} as Record<string, string[]>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileTexts]);
 
   const stableChanges = useMemo(() => {
@@ -621,7 +628,7 @@ export function useGetConfigSimulatorContent() {
   );
 
   const textGroupsByFile = useMemo(() => {
-    // console.log("Recalculating text groups for all files...");
+    console.log("Recalculating text groups for all files...");
     return Object.entries(files).reduce((accum, [fileName, fileConfig]) => {
       accum[fileName] = createTextGroups(
         rawLinesByFile[fileName] || [],
@@ -630,7 +637,8 @@ export function useGetConfigSimulatorContent() {
       );
       return accum;
     }, {} as Record<string, TextGroup[]>);
-  }, [rawLinesByFile, stableChanges, stableToggles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawLinesByFile, stableChanges, stableToggles, lineToggles]);
 
   const fileMetadata = useMemo(() => {
     return Object.entries(files).map(([name, config]) => ({

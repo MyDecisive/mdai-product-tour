@@ -1,19 +1,22 @@
 import { css, type CSSObject } from "@emotion/react";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
   FormControl,
   FormControlLabel,
-  TextField,
+  Link,
   Stack,
+  TextField,
   Typography,
-  Alert,
-  Link
 } from "@mui/material";
-import { MuiTelInput } from 'mui-tel-input'
-import { isValidPhoneNumber, parsePhoneNumberFromString } from 'libphonenumber-js';
-import { useCallback, useState, useEffect } from "react";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberFromString,
+} from "libphonenumber-js";
+import { MuiTelInput } from "mui-tel-input";
+import { useCallback, useEffect, useState } from "react";
 import { contactAPIEndpoint, contactUrl } from "../../utils/constants";
 import contactFormContent from "../../utils/contactForm.yml";
 
@@ -64,13 +67,13 @@ const makeEmailBody = (values: FormValues) =>
     } else {
       return emailString.replaceAll(`%${field}%`, value as string);
     }
-  }, contactFormContent.emailBodyTemplate);
+  }, contactFormContent.emailBodyTemplate as string);
 
 export const sendContactForm = async (values: FormValues) => {
   const payload = {
     ...values,
-    sourceUrl: window.location.toString()
-  }
+    sourceUrl: window.location.toString(),
+  };
   const response = await fetch(contactAPIEndpoint, {
     mode: "cors",
     method: "POST",
@@ -80,20 +83,31 @@ export const sendContactForm = async (values: FormValues) => {
     body: JSON.stringify(payload),
   });
   if (!response.ok) {
-    throw `Error occurred sending contact form. Response: ${response}`;
+    throw new Error(
+      `Error occurred sending contact form. Response: ${JSON.stringify(
+        response
+      )}`
+    );
   }
   return response;
 };
 
-export function ContactForm({ handleClose, styles, defaultValues }: ContactFormProps) {
+export function ContactForm({
+  handleClose,
+  styles,
+  defaultValues,
+}: ContactFormProps) {
   const [email, setEmail] = useState<string>(defaultValues?.email ?? "");
   const [name, setName] = useState<string>(defaultValues?.name ?? "");
   const [phone, setPhone] = useState<string>(defaultValues?.phone ?? "");
-  const initialLicensing = !!defaultValues?.contactReasons?.includes("Licensing");
+  const initialLicensing =
+    !!defaultValues?.contactReasons?.includes("Licensing");
   const initialHelp = !!defaultValues?.contactReasons?.includes("Help");
   const [licensing, setLicensing] = useState<boolean>(initialLicensing);
   const [help, setHelp] = useState<boolean>(initialHelp);
-  const [questions, setQuestions] = useState<string>(defaultValues?.questions ?? "");
+  const [questions, setQuestions] = useState<string>(
+    defaultValues?.questions ?? ""
+  );
   const [showValidationIssues, setShowValidationIssues] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -102,7 +116,6 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
   const emailIsValid = (v: string) => !!v && emailRegex.test(v);
   const phoneIsValid = (v: string) => !v || isValidPhoneNumber(v);
 
-  
   const resetForm = useCallback(() => {
     setName(defaultValues?.name ?? "");
     setEmail(defaultValues?.email ?? "");
@@ -126,7 +139,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
     return valid;
   };
 
-  const onClickSubmit = async () => {
+  const onClickSubmit: () => Promise<void> = async () => {
     const contactReasons: string[] = [];
 
     if (!validate()) {
@@ -136,7 +149,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
     if (help) contactReasons.push("Help me set it up");
 
     const normalizedPhone = phone
-      ? (parsePhoneNumberFromString(phone)?.number ?? phone)
+      ? parsePhoneNumberFromString(phone)?.number ?? phone
       : undefined;
 
     const values = {
@@ -161,7 +174,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
       setIsSending(false);
     }
   };
-  
+
   return (
     <Box
       sx={css([
@@ -223,7 +236,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
         }}
       />
       {showValidationIssues && !!phone && !phoneIsValid(phone) && (
-        <Typography sx={{ color: 'error.main', mt: -1, mb: 1 }}>
+        <Typography sx={{ color: "error.main", mt: -1, mb: 1 }}>
           Please enter a valid phone number.
         </Typography>
       )}
@@ -277,26 +290,26 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
         onChange={(e) => setQuestions(e.target.value)}
       />
       {isErrored && (
-              <Alert severity="error" sx={{ mt: "12px" }}>
-                {contactFormContent.emailErrorPrefix}
-                <br />
-                <Link
-                  href={makeFallbackMailtoLink({
-                    name,
-                    email,
-                    phone,
-                    contactReasons: [
-                      ...(licensing ? ["Licensing"] : []),
-                      ...(help ? ["Help"] : []),
-                    ],
-                    questions,
-                  })}
-                >
-                  {contactFormContent.emailErrorLinkLabel}
-                </Link>{" "}
-                {contactFormContent.emailErrorSuffix}
-              </Alert>
-            )}
+        <Alert severity="error" sx={{ mt: "12px" }}>
+          {contactFormContent.emailErrorPrefix}
+          <br />
+          <Link
+            href={makeFallbackMailtoLink({
+              name,
+              email,
+              phone,
+              contactReasons: [
+                ...(licensing ? ["Licensing"] : []),
+                ...(help ? ["Help"] : []),
+              ],
+              questions,
+            })}
+          >
+            {contactFormContent.emailErrorLinkLabel}
+          </Link>{" "}
+          {contactFormContent.emailErrorSuffix}
+        </Alert>
+      )}
       {isSuccess && (
         <Alert severity="success" sx={{ mt: 2, width: "100%" }}>
           Thanks! Your message has been sent.
@@ -306,7 +319,7 @@ export function ContactForm({ handleClose, styles, defaultValues }: ContactFormP
       <Button
         sx={buttonStyles}
         size="medium"
-        onClick={onClickSubmit}
+        onClick={() => void onClickSubmit()}
         variant="contained"
         disabled={disabled}
       >

@@ -362,7 +362,7 @@ describe("useGetConfigSimulatorContent", () => {
       unmount();
     });
 
-    it("should clear pulsed lines after timeout", async () => {
+    it("should clear pulsed lines after timeout", () => {
       vi.useFakeTimers();
 
       const { result, unmount } = renderHook(() =>

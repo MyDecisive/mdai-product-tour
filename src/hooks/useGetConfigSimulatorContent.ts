@@ -489,10 +489,9 @@ function useManageInitialLinesUpdates({
 
     if (newlyToggledLines.length > 0) {
       // TODO: extract this evaluation into a const with a meaningful name
-      setTimeout(
-        () => scrollToAndToggle(activeFileTitle, newlyToggledLines),
-        0
-      );
+      setTimeout(() => {
+        void scrollToAndToggle(activeFileTitle, newlyToggledLines);
+      }, 0);
     }
 
     prevInitialLineTogglesRef.current = {

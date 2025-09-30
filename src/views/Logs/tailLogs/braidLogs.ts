@@ -2,7 +2,7 @@ import type { LogRecord } from "../../../utils/types";
 
 export function braidLogs(...logArrays: LogRecord[][]): LogRecord[] {
   const result: LogRecord[] = [];
-  const indices = new Array(logArrays.length).fill(0);
+  const indices = Array.from({ length: logArrays.length }, () => 0);
 
   // Calculate ratios based on array lengths for proportional distribution
   const lengths = logArrays.map((arr) => arr.length);

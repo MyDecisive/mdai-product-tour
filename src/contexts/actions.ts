@@ -15,7 +15,7 @@ export const actions: ActionCreatorMap = (
 ).reduce((acc, actionType) => {
   const actionCreator = createActionCreator(actionType);
   // TODO: Figure out a way to not cast as any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
   acc[actionType] = actionCreator as any;
   return acc;
 }, {} as ActionCreatorMap);

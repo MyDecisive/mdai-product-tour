@@ -31,7 +31,7 @@ export function HighlanderProvider({
           ) as PayloadMap[typeof actionType] extends undefined
             ? () => AppAction
             : (payload: PayloadMap[typeof actionType]) => AppAction;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument
           acc[actionType] = ((arg: any) => dispatch(actionCreator(arg))) as any;
 
           return acc;

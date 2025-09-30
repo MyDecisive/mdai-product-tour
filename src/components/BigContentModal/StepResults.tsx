@@ -70,7 +70,7 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
 
   const playVideo = () => {
     if (videoTagRef && videoTagRef.current) {
-      videoTagRef.current.play();
+      void videoTagRef.current.play();
     }
   };
 

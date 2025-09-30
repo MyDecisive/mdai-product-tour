@@ -56,7 +56,7 @@ function deepMerge<T>(target: T, source: DeepPartial<T>): T {
       result[key] = deepMerge(
         targetValue,
         sourceValue as DeepPartial<T[Extract<keyof T, string>]>
-      ) as T[Extract<keyof T, string>];
+      );
     } else if (sourceValue !== undefined) {
       result[key] = sourceValue as T[Extract<keyof T, string>];
     }

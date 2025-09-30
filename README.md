@@ -15,6 +15,12 @@ npm start
 
 If everything worked, `Local:   http://localhost:5173/` or similar should appear with the appropriate address!
 
+To sync linting and type checks to this repo's configs:
+
+1. Open a .ts or .tsx file
+2. In the bottom right corner of VS Code you should see a `{}` and `TypeScript` next to one another.
+3. Click on the `{}`, in the menu that pops up, click on `Select Version`. In the menu that opens from that (should be at the top of your screen) select the `Use workspace version` option.
+
 ## Bootstrapped project
 
 This project was bootstrapped with [Vite](https://vitejs.dev/)

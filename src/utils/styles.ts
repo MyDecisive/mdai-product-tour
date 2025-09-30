@@ -2,19 +2,14 @@ import { createTheme } from "@mui/material/styles";
 
 import type {} from "@mui/x-tree-view/themeAugmentation";
 
-declare module "@mui/material/styles" {
-  interface BreakpointOverrides {
-    xs: false; // removes the `xs` breakpoint
-    md: false; // removes the `md` breakpoint
-    xl: false;
-  }
-}
-
 export const theme = createTheme({
   breakpoints: {
     values: {
-      sm: 0,
+      xs: 0,
+      sm: 600,
+      md: 900,
       lg: 1001,
+      xl: 1536,
     },
   },
   palette: {

@@ -6,7 +6,8 @@ function getStorageValue<T>(key: string, defaultValue: T): T {
     if (saved === null) {
       return defaultValue;
     }
-    return JSON.parse(saved);
+    const parsed: unknown = JSON.parse(saved);
+    return parsed as T;
   } catch (error) {
     console.warn(`Error parsing localStorage key "${key}":`, error);
     return defaultValue;

@@ -25,7 +25,7 @@ vi.mock("../../contexts/selectors", () => ({
 }));
 
 // Mock requestAnimationFrame for smooth scrolling tests
-global.requestAnimationFrame = vi.fn((cb) => {
+global.requestAnimationFrame = vi.fn((cb: FrameRequestCallback) => {
   setTimeout(cb, 0);
   return 1;
 });
@@ -371,7 +371,6 @@ spec:
         result.current.tabContents[0].toggleLineValue([73, 74]);
       });
 
-      // Check that pulsedLines is updated
       expect(result.current.tabContents[0].pulsedLines.has(73)).toBe(true);
       expect(result.current.tabContents[0].pulsedLines.has(74)).toBe(true);
     });

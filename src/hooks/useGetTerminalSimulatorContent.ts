@@ -20,7 +20,8 @@ export function useGetTerminalSimulatorContent() {
     typedOptions.forEach((options, index) => {
       const element = elementsRef.current[index];
       if (element) {
-        const originalOnComplete = options.onComplete;
+        const originalOnComplete = options.onComplete?.bind(options);
+
         const wrappedOptions = {
           ...options,
           onBegin: (typed: Typed) => {

@@ -32,7 +32,6 @@ export function useManageScrollToAndToggle({
   );
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout | undefined;
     let scrollPromise: (Promise<void> & { cancel?: () => void }) | undefined;
 
     if (!activeTab) return;
@@ -47,7 +46,7 @@ export function useManageScrollToAndToggle({
       return;
     }
 
-    timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       scrollPromise = scrollToAndToggle(activeTab, newlyToggledLines);
     }, 0);
 
@@ -61,6 +60,7 @@ export function useManageScrollToAndToggle({
         scrollPromise.cancel();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, stableInitialToggles, scrollToAndToggle]);
 
   return { containerRefs };

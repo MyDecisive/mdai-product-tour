@@ -28,5 +28,6 @@ export function useResetObsoleteToggles({
     if (hasNoInitialToggles && hasCurrentToggles) {
       resetToggles();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFileTitle, stableInitialToggles, stableToggles, resetToggles]);
 }

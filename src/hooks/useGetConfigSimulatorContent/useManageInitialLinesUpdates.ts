@@ -79,6 +79,7 @@ export function useManageInitialLinesUpdates({
         scrollPromise.cancel();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     stableInitialToggles,
     stableToggles,

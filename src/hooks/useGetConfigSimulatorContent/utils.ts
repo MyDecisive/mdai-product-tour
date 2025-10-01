@@ -174,6 +174,7 @@ const createProcessedLine = (
     return {
       lineNo,
       content: change,
+      hasChange: true,
       isHighlighted: highlightRanges.has(lineNo),
       newValue: line,
       showingNewValue: showingNew,
@@ -184,7 +185,7 @@ const createProcessedLine = (
   return {
     lineNo,
     content: line,
-    isHighlighted: false,
+    isHighlighted: highlightRanges.has(lineNo),
     showingNewValue: false,
     isGap,
   };
@@ -223,7 +224,7 @@ const groupConsecutiveChanges = (processedLines: ProcessedLine[]) => {
         lines: currentGroup,
         startLineNo: currentGroup[0].lineNo,
         endLineNo: currentGroup[currentGroup.length - 1].lineNo,
-        isChangeBlock: currentGroup.some((l) => l.isHighlighted),
+        isChangeBlock: currentGroup.some((l) => l.hasChange),
         isGap: currentGroup[0].isGap,
       });
       currentGroup = [];

@@ -159,6 +159,9 @@ export function ConfigText() {
                         key={`line-${line.lineNo}`}
                         data-line={line.lineNo}
                         sx={{
+                          ...(!line.isHighlighted && {
+                            color: "var(--mdai-text-disabled)",
+                          }),
                           display: "grid",
                           gridTemplateColumns: "40px 1fr",
                           gap: 1,
@@ -177,7 +180,9 @@ export function ConfigText() {
                       >
                         <Box
                           sx={{
-                            color: "text.disabled",
+                            color: line.isHighlighted
+                              ? "text.disabled"
+                              : "var(--mdai-text-disabled)",
                             textAlign: "right",
                           }}
                         >

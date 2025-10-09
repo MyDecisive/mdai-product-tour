@@ -1,32 +1,37 @@
-import { ANIMATION_TYPES, STATUS } from "../utils/constants";
+import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import { deepMergeWith } from "../utils/deepMergeWith";
-import type { ActivePodMap, PodId } from "../utils/engineTypesScratch";
 import type {
-  AnimateStartupAnimation,
-  Animations,
-  DeepPartial,
-  DelayAnimation,
-  EngineCallbacks,
-  SimulatorTargetState,
-  UpdateEngineAnimation,
-  UpdateServiceAnimation,
-} from "../utils/types";
+  EngineFrames,
+  EngineStatusTarget,
+  EngineTargetState,
+  EngineTerminalTarget,
+  PodId,
+} from "../utils/engineTypesScratch";
+import type { DeepPartial, SimulatorType } from "../utils/types";
+import { POD_NAME_DELIM } from "./configToEngineTransforms";
+
+export interface EngineCallbacks {
+  onStateChange: (state: EngineTargetState) => void;
+  onActiveSimulatorChange: (simulator: SimulatorType | null) => void;
+  onComplete: () => void;
+}
 
 export class AnimationEngineInstance {
-  private actions: Animations;
-  private startState: SimulatorTargetState;
-  private targetState: SimulatorTargetState;
+  private actions: EngineFrames.Any[];
+  private startState: EngineTargetState;
+  private targetState: EngineTargetState;
   private callbacks: EngineCallbacks;
 
-  private currentState: SimulatorTargetState;
+  private currentState: EngineTargetState;
   private isRunning = false;
   private timeouts: NodeJS.Timeout[] = [];
   private currentActionResolver: (() => void) | null = null;
+  private podAnimationResolvers: Map<PodId, () => void> = new Map();
 
   constructor(
-    actions: Animations,
-    startState: SimulatorTargetState,
-    targetState: SimulatorTargetState,
+    actions: EngineFrames.Any[],
+    startState: EngineTargetState,
+    targetState: EngineTargetState,
     callbacks: EngineCallbacks
   ) {
     this.actions = actions;
@@ -36,7 +41,6 @@ export class AnimationEngineInstance {
     this.currentState = { ...startState };
   }
 
-  // Called by simulator components to signal action completion
   advanceAnimation() {
     if (this.currentActionResolver) {
       this.currentActionResolver();
@@ -54,7 +58,6 @@ export class AnimationEngineInstance {
     }
 
     if (this.isRunning) {
-      // Ensure we end at exact target state
       this.currentState = { ...this.targetState };
       this.callbacks.onStateChange(this.currentState);
       this.callbacks.onActiveSimulatorChange(null);
@@ -76,127 +79,133 @@ export class AnimationEngineInstance {
     this.timeouts = [];
   }
 
-  private async executeAction(
-    action:
-      | UpdateEngineAnimation
-      | DelayAnimation
-      | UpdateServiceAnimation
-      | AnimateStartupAnimation
-  ): Promise<void> {
-    // Handle delay
-    if (action.type === ANIMATION_TYPES.delay) {
+  private async executeAction(action: EngineFrames.Any): Promise<void> {
+    if (action.type === FRAME_TYPES.delay) {
       await this.delay(action.duration);
       return;
     }
 
-    // Determine which simulator this action affects
-    const { simulator } = action as UpdateEngineAnimation;
+    if (action.type === FRAME_TYPES.clear) {
+      this.updateState(createClearState(action.simulators));
+      return;
+    }
+
+    const { simulator } = action;
     this.callbacks.onActiveSimulatorChange(simulator);
 
-    // Create a promise that resolves when component signals completion
     const waitForCompletion = action.waitForComplete
       ? new Promise<void>((resolve) => {
           this.currentActionResolver = resolve;
         })
       : Promise.resolve();
 
-    // Execute the action (updates state immediately)
     switch (action.type) {
-      case ANIMATION_TYPES.clear:
-      case ANIMATION_TYPES.pause:
-      case ANIMATION_TYPES.resume:
-      case ANIMATION_TYPES.update:
-      case ANIMATION_TYPES.switch_file:
-      case ANIMATION_TYPES.scroll_to:
-      case ANIMATION_TYPES.highlight_lines:
-      case ANIMATION_TYPES.toggle_line:
-        this.updateState(action.updates);
+      case FRAME_TYPES.enter_command:
+        this.updateState({ [action.simulator]: action.updates }, true);
         break;
-      case ANIMATION_TYPES.type:
-      case ANIMATION_TYPES.enter_command:
-      case ANIMATION_TYPES.stream:
-        this.updateState(action.updates, true);
-        break;
-      case ANIMATION_TYPES.add_services:
-        this.addStatusServices(action);
-        break;
-      case ANIMATION_TYPES.animate_startup:
-        void this.statusAnimateStartup(action);
+      case FRAME_TYPES.add_services:
+        this.addStatusPods(action.updates);
         break;
     }
 
-    // Wait for component to signal completion if requested
     await waitForCompletion;
   }
 
-  private statusAddServices(newPods: ActivePodMap, newPodOrder: PodId[]): void {
+  private addStatusPods({
+    activePods: newPods,
+    podOrder: newPodOrder,
+  }: EngineStatusTarget): void {
     const status = this.currentState.status || { activePods: {}, podOrder: [] };
 
-    // Find replacement relationships
-    newPodOrder.forEach((newPodId) => {
-      const newPod = newPods[newPodId];
-
-      // Find existing pod that matches name, namespace, replicaNo
-      const replacedPodId = Object.keys(status.activePods).find(
-        (existingId) => {
-          const existing = status.activePods[existingId];
-          return (
-            existing.name === newPod.name &&
-            existing.namespace === newPod.namespace &&
-            existing.replicaNo === newPod.replicaNo &&
-            !existing.beingReplaced // Don't replace already-replaced pods
-          );
-        }
-      );
-
-      if (replacedPodId) {
-        newPods[newPodId].replacingPodId = replacedPodId;
-      }
-    });
-
-    // Merge new and existing
     this.updateState({
       status: {
         activePods: { ...status.activePods, ...newPods },
         podOrder: [...status.podOrder, ...newPodOrder],
       },
     });
+
+    this.statusAnimateStartup(newPodOrder);
   }
 
   private statusPodReachedRunning(podId: PodId): void {
-    const pod = this.currentState.status.activePods[podId];
+    const activePods = this.currentState!.status!.activePods;
+    const pod = activePods[podId];
 
-    if (pod.replacingPodId) {
+    const replacementPod = Object.values(activePods).find((active) => {
+      const notSameParent = active.parentServiceKey !== pod.parentServiceKey;
+      const sameNamespace = active.namespace === pod.namespace;
+      const sameService = pod.name.startsWith(
+        active.name.split(POD_NAME_DELIM)[0]
+      );
+      const activeIsRunning = active.status === STATUS.running;
+
+      return notSameParent && sameNamespace && sameService && activeIsRunning;
+    });
+
+    if (replacementPod) {
       // Mark the old pod for shutdown
       const status = this.currentState.status;
-      status.activePods[pod.replacingPodId].beingReplaced = true;
+      status!.activePods[replacementPod.id].status = STATUS.terminating;
       this.updateState({ status });
     }
   }
 
-  private async statusAnimateStartup({
-    updates: { serviceName },
-  }: AnimateStartupAnimation): Promise<void> {
-    const status = this.currentState.status || { services: [] };
-    const service = status.services.find((s) => s.name === serviceName);
+  private statusPodRemove(podId: string): void {
+    const status = this.currentState.status;
+    if (!status || !status.podOrder || !status.podOrder.length) {
+      return;
+    }
 
-    if (service && !service.skipStartup) {
-      for (const state of [
-        STATUS.pending,
-        STATUS.containerCreating,
-        STATUS.running,
-      ] as const) {
-        status.services = status.services.map((s) =>
-          s.name === serviceName ? { ...s, status: state } : s
-        );
-        this.updateState({ status: { ...status } });
-        await this.delay(800);
+    const newPodOrder = status.podOrder.filter((id) => id !== podId);
+    const newActivePods = status.activePods;
+    delete newActivePods[podId];
+    this.updateState({
+      status: {
+        podOrder: newPodOrder,
+        activePods: newActivePods,
+      },
+    });
+  }
+
+  private async statusAnimateStartup(podIds: PodId[]): Promise<void> {
+    const animationPromises = podIds.map((podId) => {
+      const pod = this.currentState.status!.activePods[podId];
+
+      if (pod.status === STATUS.running) {
+        return Promise.resolve();
       }
+
+      return new Promise<void>((resolve) => {
+        this.podAnimationResolvers.set(podId, resolve);
+      });
+    });
+
+    await Promise.all(animationPromises);
+  }
+
+  public onPodStatusChange(
+    podId: PodId,
+    newStatus: (typeof STATUS)[keyof typeof STATUS]
+  ): void {
+    const status = this.currentState.status!;
+    status.activePods[podId].status = newStatus;
+    this.updateState({ status });
+
+    if (newStatus === STATUS.running) {
+      this.statusPodReachedRunning(podId);
+
+      const resolver = this.podAnimationResolvers.get(podId);
+      if (resolver) {
+        resolver();
+        this.podAnimationResolvers.delete(podId);
+      }
+    } else if (newStatus === STATUS.shutdown) {
+      this.statusPodRemove(podId);
     }
   }
 
   private updateState(
-    updates: DeepPartial<SimulatorTargetState>,
+    updates: DeepPartial<EngineTargetState>,
     appendArrays?: boolean
   ): void {
     if (appendArrays) {
@@ -226,3 +235,31 @@ export class AnimationEngineInstance {
     });
   }
 }
+
+export function createClearState(
+  simulators: SimulatorType[]
+): EngineTargetState {
+  const emptyState: Record<
+    SimulatorType,
+    EngineTerminalTarget | EngineStatusTarget
+  > = simulators.reduce((accum, simType) => {
+    accum[simType] = emptyEngineStateCreators[simType]?.();
+    return accum;
+  }, {} as Record<SimulatorType, EngineTerminalTarget | EngineStatusTarget>);
+
+  return emptyState as EngineTargetState;
+}
+
+const emptyEngineStateCreators = {
+  [SIMULATORS.STATUS]: () => {
+    return {
+      activePods: {},
+      podOrder: [],
+    } as EngineStatusTarget;
+  },
+  [SIMULATORS.TERMINAL]: () => {
+    return {
+      strings: [],
+    } as EngineTerminalTarget;
+  },
+};

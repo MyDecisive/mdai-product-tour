@@ -54,7 +54,7 @@ export const DEFAULT_TOUR_STATE: TourState = {
 };
 
 // new stuff below
-export const ANIMATION_TYPES = {
+export const FRAME_TYPES = {
   type: "type",
   enter_command: "enter_command",
   clear: "clear",

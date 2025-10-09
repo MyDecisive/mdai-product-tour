@@ -1,48 +1,72 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { SubstepConfig } from "../utils/configTypesScratch";
+import type { STATUS } from "../utils/constants";
 import type {
-  AnimationEngineControls,
-  AnimationEngineState,
-  Animations,
-  SimulatorTargetState,
-  SimulatorType,
-} from "../utils/types";
+  EngineFrames,
+  EngineTargetState,
+  PodId,
+} from "../utils/engineTypesScratch";
+import type { SimulatorType } from "../utils/types";
 import { AnimationEngineInstance } from "./class";
+import {
+  transformConfigToEngineAnimation,
+  transformConfigToEngineState,
+} from "./configToEngineTransforms";
+
+export interface AnimationEngineState {
+  isPlaying: boolean;
+  currentSimulatorState: EngineTargetState;
+  activeSimulator: Set<SimulatorType>;
+}
+
+export interface AnimationEngineControls {
+  reset: (str?: string) => void; // Reset to previous substep's target state and replay
+  play: (str?: string) => void; // Begin animations
+  advanceAnimation: () => void; // Signal that current action is complete
+  onPodStatusChange: (
+    podId: PodId,
+    newStatus: (typeof STATUS)[keyof typeof STATUS]
+  ) => void;
+}
 
 export function useAnimationEngine(
-  substep: {
-    animations: Animations;
-    targetState: SimulatorTargetState;
-  },
-  previousState: SimulatorTargetState,
+  substep: SubstepConfig,
+  previousState: EngineTargetState,
   onComplete: () => void
 ): [AnimationEngineState, AnimationEngineControls] {
+  const { animation = [], targetState } = substep;
   const [isPlaying, setIsPlaying] = useState(false);
   const [terminalState, setTerminalState] = useState(previousState.terminal);
-  const [configState, setConfigState] = useState(previousState.config);
   const [statusState, setStatusState] = useState(previousState.status);
-  const [logsState, setLogsState] = useState(previousState.logs);
-  const [bannerState, setBannerState] = useState(previousState.banner);
+  // const [configState, setConfigState] = useState(previousState.config);
+  // const [logsState, setLogsState] = useState(previousState.logs);
+  // const [bannerState, setBannerState] = useState(previousState.banner);
   const [activeSimulator, setActiveSimulator] = useState<Set<SimulatorType>>(
     new Set()
   );
 
   const engineRef = useRef<AnimationEngineInstance | null>(null);
 
-  const updateSimulatorStates = useCallback((state: SimulatorTargetState) => {
+  const updateSimulatorStates = useCallback((state: EngineTargetState) => {
     setTerminalState((prev) =>
       state.terminal !== prev ? state.terminal : prev
     );
-    setConfigState((prev) => (state.config !== prev ? state.config : prev));
     setStatusState((prev) => (state.status !== prev ? state.status : prev));
-    setLogsState((prev) => (state.logs !== prev ? state.logs : prev));
-    setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
+    // setConfigState((prev) => (state.config !== prev ? state.config : prev));
+    // setLogsState((prev) => (state.logs !== prev ? state.logs : prev));
+    // setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
   }, []);
 
   useEffect(() => {
+    const engineTargetState: EngineTargetState =
+      transformConfigToEngineState(targetState);
+    const frames: EngineFrames.Any[] =
+      transformConfigToEngineAnimation(animation);
+
     const engine = new AnimationEngineInstance(
-      substep.animations || [],
+      frames,
       previousState,
-      substep.targetState,
+      engineTargetState,
       {
         onStateChange: updateSimulatorStates,
         onActiveSimulatorChange: (sim: SimulatorType | null) => {
@@ -79,17 +103,24 @@ export function useAnimationEngine(
     advanceAnimation: useCallback(() => {
       engineRef.current?.advanceAnimation();
     }, []),
+
+    onPodStatusChange: useCallback(
+      (podId: PodId, newStatus: (typeof STATUS)[keyof typeof STATUS]) => {
+        engineRef.current?.onPodStatusChange(podId, newStatus);
+      },
+      []
+    ),
   };
 
   return [
     {
       isPlaying,
       currentSimulatorState: {
-        logs: logsState,
-        config: configState,
         terminal: terminalState,
         status: statusState,
-        banner: bannerState,
+        // logs: logsState,
+        // config: configState,
+        // banner: bannerState,
       },
       activeSimulator,
     },

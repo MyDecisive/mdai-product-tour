@@ -1,7 +1,7 @@
 import type { TreeItemSlotProps } from "@mui/x-tree-view";
 import type { JSX, RefObject } from "react";
 import type { TypedOptions } from "typed.js";
-import { ITEM_IDS } from "../utils/constants";
+import { FRAME_TYPES, ITEM_IDS, SIMULATORS } from "../utils/constants";
 
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
@@ -184,3 +184,35 @@ export type DeepPartial<T> = Partial<{
       : DeepPartial<T[P]>
     : Partial<T[P]>;
 }>;
+
+export type FrameType = (typeof FRAME_TYPES)[Exclude<
+  keyof typeof FRAME_TYPES,
+  "delay" | "clear"
+>];
+export type SimulatorType = (typeof SIMULATORS)[Exclude<
+  keyof typeof SIMULATORS,
+  "BANNER" | "LOGS" | "CONFIG"
+>];
+
+interface BaseFrame {
+  waitForComplete?: boolean;
+  type: (typeof FRAME_TYPES)[keyof typeof FRAME_TYPES];
+}
+
+export type Frame<
+  S extends SimulatorType = SimulatorType,
+  T extends FrameType = FrameType,
+  U = unknown
+> = [U] extends [undefined]
+  ? BaseFrame & { simulator: S; type: T; updates?: U }
+  : BaseFrame & { simulator: S; type: T; updates: U };
+
+export interface DelayFrame extends BaseFrame {
+  type: typeof FRAME_TYPES.delay;
+  duration: number;
+}
+
+export interface ClearSimulatorsFrame extends BaseFrame {
+  type: typeof FRAME_TYPES.clear;
+  simulators: SimulatorType[];
+}

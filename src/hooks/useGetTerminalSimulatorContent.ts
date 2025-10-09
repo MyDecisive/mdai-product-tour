@@ -1,22 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Typed from "typed.js";
-import { selectPanelState } from "../contexts/selectors";
+import { parseTypedJsString } from "../utils/strings";
 import type { TerminalTypedProps } from "../utils/types";
-import { useHighlander } from "./useHighlander";
-import { useSelector } from "./useSelector";
 
-export function useGetTerminalSimulatorContent() {
-  const { terminal = {} } = useSelector(selectPanelState);
-  const { actions } = useHighlander();
+interface TerminalProps {
+  state: TerminalTypedProps | null | undefined;
+  playing: boolean;
+  onAnimationComplete: () => void;
+}
 
-  const { typedOptions = [] } = terminal as TerminalTypedProps;
+export function useGetTerminalSimulatorContent({
+  state,
+  playing,
+  onAnimationComplete,
+}: TerminalProps) {
   const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
 
-  const [workDone, setWorkDone] = useState<boolean>(false);
+  const typedOptions = state?.typedOptions || [];
 
   useEffect(() => {
+    if (typedOptions.length === 0) {
+      typedInstancesRef.current.forEach((typed) => {
+        if (typed) {
+          typed.destroy();
+        }
+      });
+      typedInstancesRef.current = [];
+      return;
+    }
+
     typedOptions.forEach((options, index) => {
       const element = elementsRef.current[index];
       if (element) {
@@ -25,8 +39,14 @@ export function useGetTerminalSimulatorContent() {
         const wrappedOptions = {
           ...options,
           onBegin: (typed: Typed) => {
-            if (!options.strings) {
+            if (!options.strings || !playing) {
               typed.stop();
+
+              if (options.strings && !playing) {
+                element.innerHTML = options.strings
+                  .map(parseTypedJsString)
+                  .join("\n");
+              }
             }
           },
           preStringTyped: (_: number, typed: Typed) => {
@@ -68,8 +88,7 @@ export function useGetTerminalSimulatorContent() {
               }
             }
             if (index === typedOptions.length - 1) {
-              actions.INCREMENT_ANIMATION();
-              setWorkDone(true);
+              onAnimationComplete();
             }
           },
         };
@@ -78,7 +97,7 @@ export function useGetTerminalSimulatorContent() {
 
         if (index === 0) {
           if (typed.cursor) {
-            typed.cursor.style.display = "inline-block";
+            typed.cursor.style.display = playing ? "inline-block" : "none";
           }
         } else {
           typed.stop();
@@ -86,7 +105,6 @@ export function useGetTerminalSimulatorContent() {
             typed.cursor.style.display = "none";
           }
         }
-
         typedInstancesRef.current[index] = typed;
       }
     });
@@ -99,20 +117,14 @@ export function useGetTerminalSimulatorContent() {
       });
       typedInstancesRef.current = [];
     };
-  }, [typedOptions, actions]);
+  }, [typedOptions, onAnimationComplete, playing]);
 
   useEffect(() => {
-    if (!workDone && containerElementRef.current) {
+    if (playing && containerElementRef.current) {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerElementRef.current, workDone]);
-
-  useEffect(() => {
-    setWorkDone(() => false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(typedOptions)]);
+  }, [containerElementRef.current, playing]);
 
   return {
     typedOptions,

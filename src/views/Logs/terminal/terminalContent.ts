@@ -1,7 +1,7 @@
 import type { TerminalTypedOptions } from "../../../utils/types";
 import { createTerminalContent } from "./behavior";
 
-const terminalAutoLines = [
+export const terminalAutoLines = [
   "^700🧪 Deploying synthetic log generators...^450",
   "deployment.apps/mdai-logger-xnoisy created",
   "deployment.apps/mdai-logger-noisy created^450",
@@ -9,7 +9,7 @@ const terminalAutoLines = [
   "^500✅ Log generators deployed",
 ];
 
-const userEntry = ["./mdai-kind.sh logs"];
+export const userEntry = ["./mdai-kind.sh logs"];
 
 export const startLogsTerminalContent: TerminalTypedOptions[] = (
   [] as TerminalTypedOptions[]

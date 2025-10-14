@@ -16,3 +16,7 @@ export function getViewTitle(view?: View) {
 
   return homeTitle;
 }
+
+export function parseTypedJsString(str: string) {
+  return str.replaceAll(/`/gi, "").replaceAll(/\^\d+/gi, "");
+}

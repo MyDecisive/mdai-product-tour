@@ -21,6 +21,9 @@ export default tseslint.config([
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    rules: {
+      "@typescript-eslint/no-namespace": ["error", { allowDeclarations: true }],
+    },
   },
   {
     files: ["*.config.{ts,js,mjs}"],

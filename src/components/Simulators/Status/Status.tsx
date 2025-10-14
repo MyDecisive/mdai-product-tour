@@ -1,24 +1,40 @@
 import { Box, Typography } from "@mui/material";
 import { type FC } from "react";
 import { useGetStatusSimulatorContent } from "../../../hooks/useGetStatusSimulatorContent";
-import { SimulatorContextLabel } from "../SimContextLabel";
+import type {
+  EngineStatusTarget,
+  PodId,
+} from "../../../utils/engineTypesScratch";
+import type { PodStatusType, SimulatorType } from "../../../utils/types";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
 
 const HEADER_ROW_HEIGHT = 20;
+// TODO: Move these prop types to a types file
+export interface StatusSimulatorProps extends EngineStatusTarget {
+  onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+  onAnimationComplete: (sim?: SimulatorType) => void;
+}
 
-export const Status: FC = () => {
+export const Status: FC<StatusSimulatorProps> = ({
+  activePods,
+  podOrder,
+  onPodStatusChange,
+  onAnimationComplete,
+}: StatusSimulatorProps) => {
   const {
     services = [],
-    contextLabel,
-    handlePodRemove,
-    handleStatusChange,
+    // contextLabel,
     serviceContainerRef,
-  } = useGetStatusSimulatorContent();
+  } = useGetStatusSimulatorContent({
+    activePods,
+    podOrder,
+    onAnimationComplete,
+  });
 
   return (
     <>
-      <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
+      {/* <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel> */}
       <Box
         sx={{
           maxHeight: "350px",
@@ -43,18 +59,17 @@ export const Status: FC = () => {
           }}
         >
           {services.map((service) => {
-            const { name, beingReplaced, id, status, namespace } = service;
+            const { name, id, status, restartCount, namespace } = service;
 
             return (
               <ServiceRow
                 key={id}
                 namespace={namespace}
-                podId={id}
-                beingReplaced={beingReplaced}
+                id={id}
                 status={status}
                 name={name}
-                onStatusChange={handleStatusChange}
-                onRemove={handlePodRemove}
+                restartCount={restartCount}
+                onStatusChange={onPodStatusChange}
               />
             );
           })}

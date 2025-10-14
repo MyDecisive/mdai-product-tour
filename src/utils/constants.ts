@@ -52,3 +52,49 @@ export const DEFAULT_TOUR_STATE: TourState = {
   navigation: DEFAULT_NAV_STATE,
   animationIndex: DEFAULT_ANIMATION_INDEX,
 };
+
+// new stuff below
+export const FRAME_TYPES = {
+  type: "type",
+  enter_command: "enter_command",
+  clear: "clear",
+  switch_file: "switch_file",
+  scroll_to: "scroll_to",
+  highlight_lines: "highlight_lines",
+  toggle_line: "toggle_line",
+  add_services: "add_services",
+  update_service: "update_service",
+  animate_startup: "animate_startup",
+  add: "add",
+  stream: "stream",
+  pause: "pause",
+  resume: "resume",
+  update: "update",
+  delay: "delay",
+} as const;
+
+export const SIMULATORS = {
+  BANNER: "banner",
+  TERMINAL: "terminal",
+  LOGS: "logs",
+  STATUS: "status",
+  CONFIG: "config",
+} as const;
+
+const pending = "Pending";
+const containerCreating = "ContainerCreating";
+const running = "Running";
+const error = "Error";
+const crashLoopBackoff = "CashLoopBackoff";
+const terminating = "Terminating";
+const shutdown = "Shutdown";
+
+export const STATUS = {
+  pending,
+  containerCreating,
+  running,
+  error,
+  crashLoopBackoff,
+  terminating,
+  shutdown,
+} as const;

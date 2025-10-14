@@ -1,23 +1,37 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Typed from "typed.js";
-import { selectPanelState } from "../contexts/selectors";
-import type { TerminalTypedProps } from "../utils/types";
-import { useHighlander } from "./useHighlander";
-import { useSelector } from "./useSelector";
+import { SIMULATORS } from "../utils/constants";
+import { parseTypedJsString } from "../utils/strings";
+import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
 
-export function useGetTerminalSimulatorContent() {
-  const { terminal = {} } = useSelector(selectPanelState);
-  const { actions } = useHighlander();
+// TODO: Move these prop types to a types file
+interface TerminalProps {
+  state: TerminalTypedOptions[] | null | undefined;
+  playing: boolean;
+  onAnimationComplete: (sim?: SimulatorType) => void;
+}
 
-  const { typedOptions = [] } = terminal as TerminalTypedProps;
+export function useGetTerminalSimulatorContent({
+  state,
+  playing,
+  onAnimationComplete,
+}: TerminalProps) {
   const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
 
-  const [workDone, setWorkDone] = useState<boolean>(false);
-
   useEffect(() => {
-    typedOptions.forEach((options, index) => {
+    if (!state || state?.length === 0) {
+      typedInstancesRef.current.forEach((typed) => {
+        if (typed) {
+          typed.destroy();
+        }
+      });
+      typedInstancesRef.current = [];
+      return;
+    }
+
+    state.forEach((options, index) => {
       const element = elementsRef.current[index];
       if (element) {
         const originalOnComplete = options.onComplete?.bind(options);
@@ -25,8 +39,14 @@ export function useGetTerminalSimulatorContent() {
         const wrappedOptions = {
           ...options,
           onBegin: (typed: Typed) => {
-            if (!options.strings) {
+            if (!options.strings || !playing) {
               typed.stop();
+
+              if (options.strings && !playing) {
+                element.innerHTML = options.strings
+                  .map(parseTypedJsString)
+                  .join("\n");
+              }
             }
           },
           preStringTyped: (_: number, typed: Typed) => {
@@ -51,25 +71,24 @@ export function useGetTerminalSimulatorContent() {
             }
 
             if (typed.cursor) {
-              if (index !== typedOptions.length - 1) {
+              if (index !== state.length - 1) {
                 typed.cursor.style.display = "none";
               }
-              if (index === typedOptions.length - 1 && options.showCursor) {
+              if (index === state.length - 1 && options.showCursor) {
                 typed.cursor.style.display = "inline-block";
               }
             }
 
             const nextIndex = index + 1;
-            if (nextIndex < typedOptions.length) {
+            if (nextIndex < state.length) {
               const nextTyped = typedInstancesRef.current[nextIndex];
               if (nextTyped && nextTyped.cursor) {
                 nextTyped.cursor.style.display = "inline-block";
                 nextTyped.start();
               }
             }
-            if (index === typedOptions.length - 1) {
-              actions.INCREMENT_ANIMATION();
-              setWorkDone(true);
+            if (index === state.length - 1) {
+              onAnimationComplete(SIMULATORS.TERMINAL);
             }
           },
         };
@@ -78,7 +97,7 @@ export function useGetTerminalSimulatorContent() {
 
         if (index === 0) {
           if (typed.cursor) {
-            typed.cursor.style.display = "inline-block";
+            typed.cursor.style.display = playing ? "inline-block" : "none";
           }
         } else {
           typed.stop();
@@ -86,7 +105,6 @@ export function useGetTerminalSimulatorContent() {
             typed.cursor.style.display = "none";
           }
         }
-
         typedInstancesRef.current[index] = typed;
       }
     });
@@ -99,23 +117,17 @@ export function useGetTerminalSimulatorContent() {
       });
       typedInstancesRef.current = [];
     };
-  }, [typedOptions, actions]);
+  }, [state, onAnimationComplete, playing]);
 
   useEffect(() => {
-    if (!workDone && containerElementRef.current) {
+    if (playing && containerElementRef.current) {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerElementRef.current, workDone]);
-
-  useEffect(() => {
-    setWorkDone(() => false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(typedOptions)]);
+  }, [playing]);
 
   return {
-    typedOptions,
+    typedOptions: state ?? [],
     elementsRef,
     containerElementRef,
   };

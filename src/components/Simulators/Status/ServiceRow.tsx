@@ -1,28 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import type { ActivePod } from "../../../utils/engineTypesScratch";
+import type { PodStatusType } from "../../../utils/types";
 import { getNextStatus, STATUS, STATUS_STYLE_MAP } from "./constants";
 import { StyledRow } from "./StyledRow";
-import type { PodId, StatusString } from "./types";
+import type { PodId } from "./types";
 
-interface ServiceRowProps {
-  name: string;
-  namespace: string;
-  podId: PodId;
-  status: StatusString;
-  beingReplaced?: boolean;
-  onStatusChange: (podId: string, status: string) => void;
-  onRemove: (podId: string) => void;
-}
-
-const SUFFIX_LENGTH = 5;
-
-function createServiceNameSuffix() {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-  return Array.from(
-    { length: SUFFIX_LENGTH },
-    () => chars[Math.floor(Math.random() * chars.length)]
-  ).join("");
-}
+type ServiceRowProps = Omit<ActivePod, "replicaNo" | "parentServiceKey"> & {
+  onStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+};
 
 function createStatusChangeDelay() {
   return Math.random() * 2000 + 1000; // 1-3 seconds
@@ -31,45 +16,22 @@ function createStatusChangeDelay() {
 export const ServiceRow: React.FC<ServiceRowProps> = ({
   name,
   namespace,
-  podId,
-  beingReplaced,
+  id,
   status,
+  restartCount,
   onStatusChange,
-  onRemove,
 }) => {
-  const podName = useMemo(() => {
-    return `${name}-${createServiceNameSuffix()}`;
-  }, [name]);
-
-  const [restartCount, setRestartCount] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout>(null);
-
-  const isShuttingDown = useMemo(() => {
-    return beingReplaced && status === STATUS.running;
-  }, [beingReplaced, status]);
 
   useEffect(() => {
     const scheduleNextTransition = () => {
-      let nextStatus: StatusString | null;
-
-      if (isShuttingDown && status === STATUS.running) {
-        nextStatus = STATUS.terminating;
-      } else if (status === STATUS.shutdown) {
-        timeoutRef.current = setTimeout(() => onRemove(podId), 1000);
-        return;
-      } else {
-        nextStatus = getNextStatus(status);
-      }
+      const nextStatus = getNextStatus(status);
 
       if (nextStatus !== null) {
         const delay = createStatusChangeDelay();
 
         timeoutRef.current = setTimeout(() => {
-          onStatusChange(podId, nextStatus);
-
-          if (nextStatus === STATUS.crashLoopBackoff) {
-            setRestartCount((prev) => prev + 1);
-          }
+          onStatusChange(id, nextStatus);
 
           scheduleNextTransition();
         }, delay);
@@ -83,14 +45,14 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isShuttingDown, status, podId, onStatusChange, onRemove]);
+  }, [status, id, onStatusChange]);
 
   const rowColor = STATUS_STYLE_MAP[status]?.color;
   const rowBackgroundColor = STATUS_STYLE_MAP[status]?.backgroundColor;
 
   return (
     <StyledRow
-      name={podName}
+      name={name}
       namespace={namespace}
       ready={status === STATUS.running ? "1/1" : "0/1"}
       status={status}

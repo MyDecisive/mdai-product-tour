@@ -3,29 +3,23 @@ import { alpha } from "@mui/material";
 
 import { blue, green, grey, orange, red, yellow } from "@mui/material/colors";
 
-import type { StatusString } from "./types";
-
-const pending: StatusString = "Pending";
-const containerCreating: StatusString = "ContainerCreating";
-const running: StatusString = "Running";
-const error: StatusString = "Error";
-const crashLoopBackoff: StatusString = "CashLoopBackoff";
-const terminating: StatusString = "Terminating";
-const shutdown: StatusString = "Shutdown";
+import type { PodStatusType } from "../../../utils/types";
 
 export const STATUS = {
-  pending,
-  containerCreating,
-  running,
-  error,
-  crashLoopBackoff,
-  terminating,
-  shutdown,
+  pending: "Pending",
+  containerCreating: "ContainerCreating",
+  running: "Running",
+  error: "Error",
+  crashLoopBackoff: "CashLoopBackoff",
+  terminating: "Terminating",
+  shutdown: "Shutdown",
 } as const;
 
 const POD_ERROR_RATE = 0.15;
 
-export function getNextStatus(currentStatus: StatusString) {
+export function getNextStatus(
+  currentStatus: PodStatusType
+): PodStatusType | null {
   switch (currentStatus) {
     case STATUS.pending:
       return STATUS.containerCreating;
@@ -44,32 +38,32 @@ export function getNextStatus(currentStatus: StatusString) {
   }
 }
 
-export const STATUS_STYLE_MAP: Record<StatusString, CSSObject> = {
-  [pending]: {
+export const STATUS_STYLE_MAP: Record<PodStatusType, CSSObject> = {
+  [STATUS.pending]: {
     color: yellow[400],
     backgroundColor: alpha(yellow["900"], 0.2),
   },
-  [containerCreating]: {
+  [STATUS.containerCreating]: {
     color: blue[400],
     backgroundColor: alpha(blue["900"], 0.2),
   },
-  [running]: {
+  [STATUS.running]: {
     color: green[400],
     backgroundColor: alpha(green["900"], 0.2),
   },
-  [error]: {
+  [STATUS.error]: {
     color: red[400],
     backgroundColor: alpha(red["900"], 0.2),
   },
-  [crashLoopBackoff]: {
+  [STATUS.crashLoopBackoff]: {
     color: red[400],
     backgroundColor: alpha(red["900"], 0.2),
   },
-  [terminating]: {
+  [STATUS.terminating]: {
     color: orange[400],
     backgroundColor: alpha(orange["900"], 0.2),
   },
-  [shutdown]: {
+  [STATUS.shutdown]: {
     color: grey[400],
     backgroundColor: alpha(grey["900"], 0.2),
   },

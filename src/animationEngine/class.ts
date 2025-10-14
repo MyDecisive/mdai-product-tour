@@ -124,22 +124,24 @@ export class AnimationEngineInstance {
       },
     });
 
-    this.statusAnimateStartup(newPodOrder);
+    void this.statusAnimateStartup();
   }
 
   private statusPodReachedRunning(podId: PodId): void {
-    const activePods = this.currentState!.status!.activePods;
+    const activePods = this.currentState.status!.activePods;
     const pod = activePods[podId];
 
     const replacementPod = Object.values(activePods).find((active) => {
-      const notSameParent = active.parentServiceKey !== pod.parentServiceKey;
       const sameNamespace = active.namespace === pod.namespace;
+
+      const podNameDelimIdx = active.name.lastIndexOf(POD_NAME_DELIM);
+
       const sameService = pod.name.startsWith(
-        active.name.split(POD_NAME_DELIM)[0]
+        active.name.substring(0, podNameDelimIdx)
       );
       const activeIsRunning = active.status === STATUS.running;
 
-      return notSameParent && sameNamespace && sameService && activeIsRunning;
+      return sameNamespace && sameService && activeIsRunning;
     });
 
     if (replacementPod) {
@@ -150,15 +152,18 @@ export class AnimationEngineInstance {
     }
   }
 
-  private statusPodRemove(podId: string): void {
+  private async statusPodRemove(podId: string): Promise<void> {
+    await this.delay(1000);
+
     const status = this.currentState.status;
     if (!status || !status.podOrder || !status.podOrder.length) {
       return;
     }
 
     const newPodOrder = status.podOrder.filter((id) => id !== podId);
-    const newActivePods = status.activePods;
+    const newActivePods = { ...status.activePods };
     delete newActivePods[podId];
+
     this.updateState({
       status: {
         podOrder: newPodOrder,
@@ -167,7 +172,11 @@ export class AnimationEngineInstance {
     });
   }
 
-  private async statusAnimateStartup(podIds: PodId[]): Promise<void> {
+  private async statusAnimateStartup(): Promise<void> {
+    const podIds = this.currentState.status?.podOrder;
+    if (!podIds || podIds.length === 0) {
+      return;
+    }
     const animationPromises = podIds.map((podId) => {
       const pod = this.currentState.status!.activePods[podId];
 
@@ -189,6 +198,10 @@ export class AnimationEngineInstance {
   ): void {
     const status = this.currentState.status!;
     status.activePods[podId].status = newStatus;
+    if (newStatus === STATUS.crashLoopBackoff) {
+      status.activePods[podId].restartCount =
+        status.activePods[podId].restartCount + 1;
+    }
     this.updateState({ status });
 
     if (newStatus === STATUS.running) {
@@ -200,7 +213,7 @@ export class AnimationEngineInstance {
         this.podAnimationResolvers.delete(podId);
       }
     } else if (newStatus === STATUS.shutdown) {
-      this.statusPodRemove(podId);
+      void this.statusPodRemove(podId);
     }
   }
 

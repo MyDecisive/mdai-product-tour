@@ -25,7 +25,7 @@ export interface ConfigTargetState {
 // CONFIG ANIMATION FRAMES
 // ============================================================================
 
-export namespace ConfigFrames {
+export declare namespace ConfigFrames {
   export namespace Terminal {
     export type EnterCommand = Frame<
       typeof SIMULATORS.TERMINAL,
@@ -44,7 +44,6 @@ export namespace ConfigFrames {
     export type All = AddServices;
   }
 
-  // Union of ALL animations across all simulators
   export type Any =
     | Terminal.All
     | Status.All

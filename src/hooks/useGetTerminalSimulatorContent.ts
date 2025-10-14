@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
+import { SIMULATORS } from "../utils/constants";
 import { parseTypedJsString } from "../utils/strings";
-import type { TerminalTypedProps } from "../utils/types";
+import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
 
 interface TerminalProps {
-  state: TerminalTypedProps | null | undefined;
+  state: TerminalTypedOptions[] | null | undefined;
   playing: boolean;
-  onAnimationComplete: () => void;
+  onAnimationComplete: (sim?: SimulatorType) => void;
 }
 
 export function useGetTerminalSimulatorContent({
@@ -18,10 +19,8 @@ export function useGetTerminalSimulatorContent({
   const typedInstancesRef = useRef<(Typed | null)[]>([]);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
 
-  const typedOptions = state?.typedOptions || [];
-
   useEffect(() => {
-    if (typedOptions.length === 0) {
+    if (!state || state?.length === 0) {
       typedInstancesRef.current.forEach((typed) => {
         if (typed) {
           typed.destroy();
@@ -31,7 +30,7 @@ export function useGetTerminalSimulatorContent({
       return;
     }
 
-    typedOptions.forEach((options, index) => {
+    state.forEach((options, index) => {
       const element = elementsRef.current[index];
       if (element) {
         const originalOnComplete = options.onComplete?.bind(options);
@@ -71,24 +70,24 @@ export function useGetTerminalSimulatorContent({
             }
 
             if (typed.cursor) {
-              if (index !== typedOptions.length - 1) {
+              if (index !== state.length - 1) {
                 typed.cursor.style.display = "none";
               }
-              if (index === typedOptions.length - 1 && options.showCursor) {
+              if (index === state.length - 1 && options.showCursor) {
                 typed.cursor.style.display = "inline-block";
               }
             }
 
             const nextIndex = index + 1;
-            if (nextIndex < typedOptions.length) {
+            if (nextIndex < state.length) {
               const nextTyped = typedInstancesRef.current[nextIndex];
               if (nextTyped && nextTyped.cursor) {
                 nextTyped.cursor.style.display = "inline-block";
                 nextTyped.start();
               }
             }
-            if (index === typedOptions.length - 1) {
-              onAnimationComplete();
+            if (index === state.length - 1) {
+              onAnimationComplete(SIMULATORS.TERMINAL);
             }
           },
         };
@@ -117,17 +116,17 @@ export function useGetTerminalSimulatorContent({
       });
       typedInstancesRef.current = [];
     };
-  }, [typedOptions, onAnimationComplete, playing]);
+  }, [state, onAnimationComplete, playing]);
 
   useEffect(() => {
     if (playing && containerElementRef.current) {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-  }, [containerElementRef.current, playing]);
+  }, [playing]);
 
   return {
-    typedOptions,
+    typedOptions: state ?? [],
     elementsRef,
     containerElementRef,
   };

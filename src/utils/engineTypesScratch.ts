@@ -3,6 +3,7 @@ import type {
   ClearSimulatorsFrame,
   DelayFrame,
   Frame,
+  PodStatusType,
   TerminalTypedOptions,
 } from "./types";
 
@@ -26,19 +27,16 @@ export interface EngineTerminalTarget {
 // STATUS
 // ----------------------------------------------------------------------------
 export type PodId = string;
-type StatusString = string;
 
-type ActivePod = {
+export interface ActivePod {
   id: PodId;
   name: string;
   namespace: string;
-  status: StatusString;
+  status: PodStatusType;
   replicaNo: number;
   parentServiceKey: string;
   restartCount: number;
-  // beingReplaced?: boolean;
-  // replacing?: PodId;
-};
+}
 
 export type ActivePodMap = Record<PodId, ActivePod>;
 
@@ -51,7 +49,7 @@ export interface EngineStatusTarget {
 // ENGINE ANIMATION FRAMES
 // ============================================================================
 
-export namespace EngineFrames {
+export declare namespace EngineFrames {
   export namespace Terminal {
     export type EnterCommand = Frame<
       typeof SIMULATORS.TERMINAL,
@@ -70,7 +68,6 @@ export namespace EngineFrames {
     export type All = AddServices;
   }
 
-  // Union of ALL animations across all simulators
   export type Any =
     | Terminal.All
     | Status.All

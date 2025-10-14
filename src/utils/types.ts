@@ -1,7 +1,7 @@
 import type { TreeItemSlotProps } from "@mui/x-tree-view";
 import type { JSX, RefObject } from "react";
 import type { TypedOptions } from "typed.js";
-import { FRAME_TYPES, ITEM_IDS, SIMULATORS } from "../utils/constants";
+import { FRAME_TYPES, ITEM_IDS, SIMULATORS, STATUS } from "../utils/constants";
 
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
@@ -193,6 +193,7 @@ export type SimulatorType = (typeof SIMULATORS)[Exclude<
   keyof typeof SIMULATORS,
   "BANNER" | "LOGS" | "CONFIG"
 >];
+export type PodStatusType = (typeof STATUS)[keyof typeof STATUS];
 
 interface BaseFrame {
   waitForComplete?: boolean;

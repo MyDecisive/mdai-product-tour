@@ -1,126 +1,140 @@
 import { Box, Button, Grid } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useAnimationEngine } from "../../animationEngine/hook";
-import { ANIMATION_TYPES, SIMULATORS } from "../../utils/constants";
-import type {
-  Animations,
-  ServiceTarget,
-  SimulatorTargetState,
-  TerminalTypedOptions,
-} from "../../utils/types";
-import { startLogsTerminalContent } from "../../views/Logs/terminal/terminalContent";
+import type { SubstepConfig } from "../../utils/configTypesScratch";
+import { FRAME_TYPES, SIMULATORS } from "../../utils/constants";
+import type { EngineTargetState } from "../../utils/engineTypesScratch";
+import {
+  terminalAutoLines,
+  userEntry,
+} from "../../views/Logs/terminal/terminalContent";
 import { ConfigText } from "./Config";
 import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
-import { STATUS } from "./Status/constants";
 import { Terminal } from "./Terminal";
 
 /** hard coded stuff for dev */
-const previousState: SimulatorTargetState = {
+const previousState: EngineTargetState = {
   terminal: {
-    typedOptions: [] as TerminalTypedOptions[],
+    strings: [],
   },
-  config: {
-    files: {
-      "deployment.yaml": {
-        text: `apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web-app
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: web
-  template:
-    metadata:
-      labels:
-        app: web
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.21
-        ports:
-        - containerPort: 80`,
+  //   config: {
+  //     files: {
+  //       "deployment.yaml": {
+  //         text: `apiVersion: apps/v1
+  // kind: Deployment
+  // metadata:
+  //   name: web-app
+  // spec:
+  //   replicas: 3
+  //   selector:
+  //     matchLabels:
+  //       app: web
+  //   template:
+  //     metadata:
+  //       labels:
+  //         app: web
+  //     spec:
+  //       containers:
+  //       - name: nginx
+  //         image: nginx:1.21
+  //         ports:
+  //         - containerPort: 80`,
+  //       },
+  //     },
+  //     activeFile: "deployment.yaml",
+  //   },
+  status: {
+    activePods: {
+      "web-app-default^1@0": {
+        id: "web-app-default^1@0",
+        name: "web-app-2izah",
+        namespace: "default",
+        status: "Running",
+        parentServiceKey: "web-app-default^3@0",
+        replicaNo: 1,
+        restartCount: 0,
+      },
+      "web-app-default^2@0": {
+        id: "web-app-default^2@0",
+        name: "web-app-mttlc",
+        namespace: "default",
+        status: "Running",
+        parentServiceKey: "web-app-default^3@0",
+        replicaNo: 2,
+        restartCount: 0,
+      },
+      "web-app-default^3@0": {
+        id: "web-app-default^3@0",
+        name: "web-app-5gw8e",
+        namespace: "default",
+        status: "Running",
+        parentServiceKey: "web-app-default^3@0",
+        replicaNo: 3,
+        restartCount: 0,
       },
     },
-    activeFile: "deployment.yaml",
+    podOrder: [
+      "web-app-default^1@0",
+      "web-app-default^2@0",
+      "web-app-default^3@0",
+    ],
   },
-  status: {
-    services: [],
-  },
-  logs: {
-    records: [],
-  },
-  banner: null,
 };
 
-const substep = {
+const substep: SubstepConfig = {
   id: "deploy-app",
   label: "Deploy Application",
-  animations: [
+  content: {
+    type: "text",
+    text: "this is substep content",
+  },
+  animation: [
     {
-      type: ANIMATION_TYPES.type,
+      type: FRAME_TYPES.enter_command,
       simulator: SIMULATORS.TERMINAL,
-      updates: {
-        terminal: {
-          typedOptions: startLogsTerminalContent,
+      updates: [
+        {
+          input: userEntry[0],
+          outputs: terminalAutoLines,
         },
-      },
-      waitForComplete: true,
+      ],
     },
     {
-      type: ANIMATION_TYPES.add_services,
+      type: FRAME_TYPES.add_services,
       simulator: SIMULATORS.STATUS,
-      updates: {
-        status: {
-          services: [
-            {
-              name: "web-app",
-              namespace: "default",
-              replicas: 3,
-              status: STATUS.pending,
-            },
-          ],
-        },
-      },
-    },
-    {
-      type: ANIMATION_TYPES.animate_startup,
-      simulator: SIMULATORS.STATUS,
-      updates: {
-        serviceName: "web-app",
-      },
-    },
-  ] as Animations,
-  targetState: {
-    terminal: {
-      // typedOptions: ([] as string[]).concat(terminalAutoLines, userEntry, [""]),
-      typedOptions: startLogsTerminalContent,
-    },
-    config: {
-      files: {
-        "deployment.yaml": {
-          text: previousState.config!.files["deployment.yaml"].text,
-        },
-      },
-      activeFile: "deployment.yaml",
-    },
-    status: {
-      services: [
+      updates: [
         {
           name: "web-app",
           namespace: "default",
           replicas: 3,
-          status: STATUS.running,
         },
-      ] as ServiceTarget[],
+      ],
     },
-    logs: {
-      records: [],
-    },
-    banner: null,
+  ],
+  targetState: {
+    terminal: [
+      {
+        // typedOptions: ([] as string[]).concat(terminalAutoLines, userEntry, [""]),
+        input: "",
+      },
+    ],
+    // config: {
+    //   files: {
+    //     "deployment.yaml": {
+    //       text: previousState.config!.files["deployment.yaml"].text,
+    //     },
+    //   },
+    //   activeFile: "deployment.yaml",
+    // },
+    status: [
+      {
+        name: "web-app",
+        namespace: "default",
+        replicas: 3,
+      },
+    ],
   },
 };
 /** end hard coded dev stuff */
@@ -140,15 +154,15 @@ export function Simulators() {
 
   useEffect(() => {
     if (
-      engineState.activeSimulator.has(SIMULATORS.CONFIG) ||
+      // engineState.activeSimulator.has(SIMULATORS.CONFIG) ||
       engineState.activeSimulator.has(SIMULATORS.STATUS)
     ) {
       if (simContainerParentRef.current) {
         simContainerParentRef.current.scrollTo({ top: 0, behavior: "smooth" });
       }
     } else if (
-      engineState.activeSimulator.has(SIMULATORS.TERMINAL) ||
-      engineState.activeSimulator.has(SIMULATORS.LOGS)
+      // engineState.activeSimulator.has(SIMULATORS.LOGS) ||
+      engineState.activeSimulator.has(SIMULATORS.TERMINAL)
     ) {
       if (simContainerParentRef.current) {
         simContainerParentRef.current.scrollTop =
@@ -158,7 +172,6 @@ export function Simulators() {
   }, [engineState.activeSimulator]);
 
   const config = null;
-  const status = null;
   const logs = null;
 
   return (
@@ -190,7 +203,7 @@ export function Simulators() {
           <Grid size={5} sx={{ overflow: "hidden" }}>
             <SimulatorBox
               title="Config"
-              active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
+              // active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
             >
               {config !== null && <ConfigText />}
             </SimulatorBox>
@@ -201,7 +214,16 @@ export function Simulators() {
               title="Status"
               active={engineState.activeSimulator.has(SIMULATORS.STATUS)}
             >
-              {status !== null && <Status />}
+              {engineState.currentSimulatorState.status !== null && (
+                <Status
+                  activePods={
+                    engineState.currentSimulatorState.status!.activePods
+                  }
+                  podOrder={engineState.currentSimulatorState.status!.podOrder}
+                  onPodStatusChange={engineControls.onPodStatusChange}
+                  onAnimationComplete={engineControls.advanceAnimation}
+                />
+              )}
             </SimulatorBox>
           </Grid>
 
@@ -222,7 +244,7 @@ export function Simulators() {
                 <Terminal
                   onAnimationComplete={engineControls.advanceAnimation}
                   playing={engineState.isPlaying} // TODO: put sim play state in sim state node
-                  state={engineState.currentSimulatorState.terminal}
+                  state={engineState?.currentSimulatorState?.terminal?.strings}
                 />
               )}
             </SimulatorBox>
@@ -231,7 +253,7 @@ export function Simulators() {
           <Grid size={6.5}>
             <SimulatorBox
               title="Tail Logs"
-              active={engineState.activeSimulator.has(SIMULATORS.LOGS)}
+              // active={engineState.activeSimulator.has(SIMULATORS.LOGS)}
               innerStyles={{
                 padding: "24px 14px 16px 14px",
                 boxSizing: "border-box",

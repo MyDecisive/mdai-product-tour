@@ -1,11 +1,14 @@
 import { Box } from "@mui/material";
 import { useGetTerminalSimulatorContent } from "../../hooks/useGetTerminalSimulatorContent";
-import { type TerminalTypedProps } from "../../utils/types";
+import {
+  type SimulatorType,
+  type TerminalTypedOptions,
+} from "../../utils/types";
 
 interface TerminalProps {
-  state: TerminalTypedProps | null | undefined;
+  state: TerminalTypedOptions[] | null | undefined;
   playing: boolean;
-  onAnimationComplete: () => void;
+  onAnimationComplete: (sim?: SimulatorType) => void;
 }
 
 export function Terminal({
@@ -13,15 +16,12 @@ export function Terminal({
   playing,
   onAnimationComplete,
 }: TerminalProps) {
-  const {
-    typedOptions = [],
-    elementsRef,
-    containerElementRef,
-  } = useGetTerminalSimulatorContent({
-    state,
-    playing,
-    onAnimationComplete,
-  });
+  const { typedOptions, elementsRef, containerElementRef } =
+    useGetTerminalSimulatorContent({
+      state,
+      playing,
+      onAnimationComplete,
+    });
 
   return (
     <Box

@@ -1,9 +1,63 @@
+import type { CSSObject } from "@emotion/react";
+import { alpha } from "@mui/material";
+import { blue, green, grey, orange, red, yellow } from "@mui/material/colors";
 import { useEffect, useRef } from "react";
-import type { ActivePod } from "../../../utils/engineTypesScratch";
+import { STATUS } from "../../../utils/constants";
+import type { ActivePod, PodId } from "../../../utils/engineTypesScratch";
 import type { PodStatusType } from "../../../utils/types";
-import { getNextStatus, STATUS, STATUS_STYLE_MAP } from "./constants";
 import { StyledRow } from "./StyledRow";
-import type { PodId } from "./types";
+
+const POD_ERROR_RATE = 0.15;
+
+function getNextStatus(currentStatus: PodStatusType): PodStatusType | null {
+  switch (currentStatus) {
+    case STATUS.pending:
+      return STATUS.containerCreating;
+    case STATUS.containerCreating:
+      return Math.random() < POD_ERROR_RATE ? STATUS.error : STATUS.running;
+    case STATUS.error:
+      return STATUS.crashLoopBackoff;
+    case STATUS.crashLoopBackoff:
+      return STATUS.pending;
+    case STATUS.terminating:
+      return STATUS.shutdown;
+    case STATUS.running:
+    case STATUS.shutdown:
+    default:
+      return null;
+  }
+}
+
+const STATUS_STYLE_MAP: Record<PodStatusType, CSSObject> = {
+  [STATUS.pending]: {
+    color: yellow[400],
+    backgroundColor: alpha(yellow["900"], 0.2),
+  },
+  [STATUS.containerCreating]: {
+    color: blue[400],
+    backgroundColor: alpha(blue["900"], 0.2),
+  },
+  [STATUS.running]: {
+    color: green[400],
+    backgroundColor: alpha(green["900"], 0.2),
+  },
+  [STATUS.error]: {
+    color: red[400],
+    backgroundColor: alpha(red["900"], 0.2),
+  },
+  [STATUS.crashLoopBackoff]: {
+    color: red[400],
+    backgroundColor: alpha(red["900"], 0.2),
+  },
+  [STATUS.terminating]: {
+    color: orange[400],
+    backgroundColor: alpha(orange["900"], 0.2),
+  },
+  [STATUS.shutdown]: {
+    color: grey[400],
+    backgroundColor: alpha(grey["900"], 0.2),
+  },
+};
 
 type ServiceRowProps = Omit<ActivePod, "replicaNo" | "parentServiceKey"> & {
   onStatusChange: (podId: PodId, newStatus: PodStatusType) => void;

@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react";
 import { selectPanelState } from "../../contexts/selectors";
-import {
-  type ConfigTextProps,
-  type LineToggles,
-  type TextGroup,
+import type {
+  ConfigTextProps,
+  LineToggles,
+  TextGroup,
 } from "../../utils/types";
 import { useSelector } from "../useSelector";
 import { useLineToggles } from "./useLineToggles";

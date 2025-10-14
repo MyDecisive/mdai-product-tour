@@ -4,6 +4,7 @@ import { SIMULATORS } from "../utils/constants";
 import { parseTypedJsString } from "../utils/strings";
 import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
 
+// TODO: Move these prop types to a types file
 interface TerminalProps {
   state: TerminalTypedOptions[] | null | undefined;
   playing: boolean;

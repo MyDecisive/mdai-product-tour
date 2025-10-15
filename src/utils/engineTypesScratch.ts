@@ -8,6 +8,33 @@ import type {
 } from "./types";
 
 // ============================================================================
+// TOUR ENGINE STRUCTURE
+// ============================================================================
+
+export interface TourEngine {
+  id: string;
+  version: string;
+  title: string;
+  description?: string;
+  steps: EngineStep[];
+}
+
+interface EngineStep {
+  id: string;
+  label: string;
+  substeps: EngineSubstep[];
+}
+
+export interface EngineSubstep {
+  id: string;
+  label: string;
+  subLabel?: string;
+  content: ContentConfig;
+  targetState: EngineTargetState;
+  frames?: EngineFrames.Any[];
+}
+
+// ============================================================================
 // ENGINE TARGET STATES
 // ============================================================================
 

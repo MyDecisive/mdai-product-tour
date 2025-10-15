@@ -1,36 +1,53 @@
 import type { FRAME_TYPES, SIMULATORS } from "./constants";
-import type { ClearSimulatorsFrame, DelayFrame, Frame } from "./types";
+import type {
+  ClearSimulatorsFrame,
+  DelayFrame,
+  Frame,
+  LineChangeBlock,
+} from "./types";
 
 // ============================================================================
-// CONFIG TARGET STATES
+// TOUR CONFIG TARGET STATES
 // ============================================================================
-export interface ConfigTerminalTarget {
+export interface TourTerminalTarget {
   input: string;
   outputs?: string[];
 }
 
-export interface ConfigStatus {
+export interface TourStatusTarget {
   name: string;
   namespace?: string; // defaults to "default"
   replicas?: number; // defaults to 1
   noSuffix?: boolean; // defaults to false
 }
 
-export interface ConfigTargetState {
-  terminal?: ConfigTerminalTarget[];
-  status?: ConfigStatus[];
+interface TourFileTarget {
+  url: string;
+  fileName?: string;
+  changes?: LineChangeBlock[];
+}
+
+export interface TourConfigSimTarget {
+  files: TourFileTarget[];
+  activeTab?: string; // defaults to first file
+}
+
+export interface TourTargetState {
+  terminal?: TourTerminalTarget[];
+  status?: TourStatusTarget[];
+  config?: TourConfigSimTarget;
 }
 
 // ============================================================================
 // CONFIG ANIMATION FRAMES
 // ============================================================================
 
-export declare namespace ConfigFrames {
+export declare namespace TourFrames {
   export namespace Terminal {
     export type EnterCommand = Frame<
       typeof SIMULATORS.TERMINAL,
       typeof FRAME_TYPES.enter_command,
-      ConfigTerminalTarget[]
+      TourTerminalTarget[]
     >;
     export type All = EnterCommand;
   }
@@ -39,7 +56,7 @@ export declare namespace ConfigFrames {
     export type AddServices = Frame<
       typeof SIMULATORS.STATUS,
       typeof FRAME_TYPES.add_services,
-      ConfigStatus[]
+      TourStatusTarget[]
     >;
     export type All = AddServices;
   }
@@ -73,14 +90,14 @@ export interface SubstepConfig {
   label: string;
   subLabel?: string;
   content: ContentConfig;
-  targetState: ConfigTargetState;
-  animation?: ConfigFrames.Any[];
+  targetState: TourTargetState;
+  animation?: TourFrames.Any[];
 }
 
 // ============================================================================
 // DRAWER CONTENT CONFIG
 // ============================================================================
-type ContentConfig = TextContentConfig | ListContentConfig;
+export type ContentConfig = TextContentConfig | ListContentConfig;
 
 interface TextContentConfig {
   type: "text";
@@ -102,5 +119,5 @@ interface ListItemConfig {
 // Directive for what happens when list item is clicked
 interface ItemClickDirective {
   simulator: "config" | "terminal" | "status" | "logs";
-  action: ConfigFrames.Any;
+  action: TourFrames.Any;
 }

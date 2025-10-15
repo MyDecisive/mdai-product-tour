@@ -1,43 +1,38 @@
+import {
+  createChangeMap,
+  extractRelevantSections,
+  rawLinesFromText,
+} from "../hooks/useGetConfigSimulatorContent/utils";
 import type {
-  ConfigFrames,
-  ConfigStatus,
-  ConfigTargetState,
-  ConfigTerminalTarget,
   SubstepConfig,
+  TourConfigSimTarget,
+  TourFrames,
+  TourStatusTarget,
+  TourTargetState,
+  TourTerminalTarget,
 } from "../utils/configTypesScratch";
 import { FRAME_TYPES, STATUS } from "../utils/constants";
 import type {
   ActivePodMap,
+  ConfigContent,
+  ConfigLine,
+  EngineConfigTarget,
+  EngineFileConfig,
   EngineFrames,
   EngineStatusTarget,
   EngineTargetState,
   EngineTerminalTarget,
   PodId,
 } from "../utils/engineTypesScratch";
+import { fetchGitHubFile } from "../utils/fetchRawGithubFile";
 import { createTerminalContent } from "../views/Logs/terminal/behavior";
-
-// ============================================================================
-// TRANSFORMS FOR STATE
-// ============================================================================
-
-function transformConfigToEngineState(
-  config: ConfigTargetState,
-  contextId: string
-): EngineTargetState {
-  return {
-    terminal: config.terminal ? transformTerminal(config.terminal) : undefined,
-    status: config.status
-      ? transformStatus(config.status, contextId, true)
-      : undefined,
-  };
-}
 
 // ============================================================================
 // TERMINAL SIMULATOR TRANSFORMS
 // ============================================================================
 
 function transformTerminal(
-  terminalTargets: ConfigTerminalTarget[]
+  terminalTargets: TourTerminalTarget[]
 ): EngineTerminalTarget {
   const strings = terminalTargets.flatMap(({ input, outputs = [] }) =>
     createTerminalContent([input]).concat(
@@ -58,13 +53,13 @@ function transformTerminal(
 const CTXID_DELIM = "@";
 const REPLICA_DELIM = "^";
 
-function createServiceKey(svc: ConfigStatus, ctxId: string) {
+function createServiceKey(svc: TourStatusTarget, ctxId: string) {
   return `${svc.name}-${svc.namespace || "default"}${REPLICA_DELIM}${
     svc.replicas || 1
   }${CTXID_DELIM}${ctxId}`;
 }
 
-function createPodId(svc: ConfigStatus, replicaNo: number, ctxId: string) {
+function createPodId(svc: TourStatusTarget, replicaNo: number, ctxId: string) {
   return `${svc.name}-${svc.namespace}${REPLICA_DELIM}${replicaNo}${CTXID_DELIM}${ctxId}`;
 }
 
@@ -81,14 +76,14 @@ function createServiceNameSuffix() {
 
 export const POD_NAME_DELIM = "-";
 
-function createPodName(service: ConfigStatus): string {
+function createPodName(service: TourStatusTarget): string {
   return service.noSuffix
     ? service.name
     : `${service.name}${POD_NAME_DELIM}${createServiceNameSuffix()}`;
 }
 
 function transformStatus(
-  configServices: ConfigStatus[],
+  configServices: TourStatusTarget[],
   contextId: string,
   isStateTransform?: boolean
 ): EngineStatusTarget {
@@ -122,11 +117,89 @@ function transformStatus(
 }
 
 // ============================================================================
+// CONFIG SIMULATOR TRANSFORMS
+// ============================================================================
+
+async function transformConfig(
+  configSimTarget: TourConfigSimTarget
+): Promise<EngineConfigTarget> {
+  const fileEntries = await Promise.all(
+    configSimTarget.files.map(async ({ fileName, url, changes = [] }) => {
+      const name = fileName ?? url.split("/").at(-1) ?? "unknown";
+
+      const fileContents = await fetchGitHubFile(url);
+      const rawLines = rawLinesFromText(fileContents);
+
+      const changeMap = createChangeMap(changes);
+      const sections = extractRelevantSections(rawLines, changes);
+
+      const groups: ConfigContent[] = [];
+
+      sections.forEach((section) => {
+        if (section.isGap) {
+          groups.push({
+            lineNo: section.startLineNo,
+            isGap: true,
+          });
+        } else {
+          const lines: ConfigLine[] = section.lines.map((line, i) => {
+            const lineNo = section.startLineNo + i;
+            const newContent = changeMap.get(lineNo);
+
+            return {
+              lineNo,
+              content: line,
+              ...(newContent && {
+                newLineNo: lineNo,
+                newContent,
+              }),
+            };
+          });
+
+          const start = section.startLineNo;
+          const end = start + section.lines.length - 1;
+          const isChangeBlock = lines.some((l) => l.newContent !== undefined);
+
+          groups.push({
+            groupId: `${name}-${start}-${end}`,
+            start,
+            end,
+            lines,
+            isChangeBlock,
+          });
+        }
+      });
+
+      const engConf: EngineFileConfig = {
+        url,
+        changeMap,
+        showToggleButtons: changeMap.size > 0,
+        groups,
+      };
+
+      return [name, engConf] as const;
+    })
+  );
+
+  const files = Object.fromEntries(fileEntries);
+  const activeTab =
+    configSimTarget.activeTab ??
+    configSimTarget.files[0]?.fileName ??
+    configSimTarget.files[0]?.url.split("/").at(-1) ??
+    "";
+
+  return {
+    files,
+    activeTab,
+  };
+}
+
+// ============================================================================
 // TRANSFORMS FOR ANIMATION
 // ============================================================================
 
-function transformConfigToEngineAnimation(
-  animation: ConfigFrames.Any[],
+function transformTourToEngineAnimation(
+  animation: TourFrames.Any[],
   contextId: string
 ): EngineFrames.Any[] {
   return animation.map((frame) => {
@@ -151,18 +224,37 @@ function transformConfigToEngineAnimation(
 }
 
 // ============================================================================
+// TRANSFORMS FOR STATE
+// ============================================================================
+
+async function transformTourToEngineState(
+  tour: TourTargetState,
+  contextId: string
+): Promise<EngineTargetState> {
+  return {
+    terminal: tour.terminal ? transformTerminal(tour.terminal) : undefined,
+    status: tour.status
+      ? transformStatus(tour.status, contextId, true)
+      : undefined,
+    config: tour.config ? await transformConfig(tour.config) : undefined,
+  };
+}
+
+// ============================================================================
 // TRANSFORMS THE CONFIG STEP
 // ============================================================================
 
-export function transformSubstepConfigToInstanceArgs(substep: SubstepConfig): {
+export async function transformSubstepConfigToInstanceArgs(
+  substep: SubstepConfig
+): Promise<{
   targetState: EngineTargetState;
   frames: EngineFrames.Any[];
-} {
-  const targetState = transformConfigToEngineState(
+}> {
+  const targetState = await transformTourToEngineState(
     substep.targetState,
     substep.id
   );
-  const frames = transformConfigToEngineAnimation(
+  const frames = transformTourToEngineAnimation(
     substep.animation || [],
     substep.id
   );

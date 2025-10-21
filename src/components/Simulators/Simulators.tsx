@@ -36,7 +36,7 @@ export function Simulators({
 
   useEffect(() => {
     if (
-      // engineState.activeSimulator.has(SIMULATORS.CONFIG) ||
+      engineState.activeSimulator.has(SIMULATORS.CONFIG) ||
       engineState.activeSimulator.has(SIMULATORS.STATUS)
     ) {
       if (simContainerParentRef.current) {
@@ -53,7 +53,6 @@ export function Simulators({
     }
   }, [engineState.activeSimulator]);
 
-  const config = null;
   const logs = null;
 
   return (
@@ -85,9 +84,17 @@ export function Simulators({
           <Grid size={5} sx={{ overflow: "hidden" }}>
             <SimulatorBox
               title="Config"
-              // active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
+              active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
             >
-              {config !== null && <ConfigText />}
+              {engineState.currentSimulatorState.config != null && (
+                <Config
+                  {...engineState.currentSimulatorState.config}
+                  onSetActiveTab={engineControls.onSetActiveTab}
+                  onRevealToggleControl={engineControls.onRevealToggleControl}
+                  onToggleShowingChange={engineControls.onToggleShowingChange}
+                  onAnimationComplete={engineControls.advanceAnimation}
+                />
+              )}
             </SimulatorBox>
           </Grid>
 
@@ -96,12 +103,12 @@ export function Simulators({
               title="Status"
               active={engineState.activeSimulator.has(SIMULATORS.STATUS)}
             >
-              {engineState.currentSimulatorState.status !== null && (
+              {engineState.currentSimulatorState.status != null && (
                 <Status
                   activePods={
-                    engineState.currentSimulatorState.status!.activePods
+                    engineState.currentSimulatorState.status.activePods
                   }
-                  podOrder={engineState.currentSimulatorState.status!.podOrder}
+                  podOrder={engineState.currentSimulatorState.status.podOrder}
                   onPodStatusChange={engineControls.onPodStatusChange}
                   onAnimationComplete={engineControls.advanceAnimation}
                 />
@@ -122,10 +129,10 @@ export function Simulators({
               }}
               active={engineState.activeSimulator.has(SIMULATORS.TERMINAL)}
             >
-              {engineState.currentSimulatorState.terminal !== null && (
+              {engineState.currentSimulatorState.terminal != null && (
                 <Terminal
                   onAnimationComplete={engineControls.advanceAnimation}
-                  playing={engineState.isPlaying} // TODO: put sim play state in sim state node
+                  playing={engineState.isPlaying} // TODO: put sim play state in sim state node?
                   state={engineState?.currentSimulatorState?.terminal?.strings}
                 />
               )}

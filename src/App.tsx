@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useEffect, useState } from "react";
+import { transformStatus } from "./animationEngine/configToEngineTransforms";
 import "./App.css";
 import {
   Banner,
@@ -10,50 +10,23 @@ import {
 } from "./components";
 import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
-import type { SubstepConfig } from "./utils/configTypesScratch";
+import { createChangeMap } from "./hooks/useGetConfigSimulatorContent/utils";
 import { FRAME_TYPES, SIMULATORS } from "./utils/constants";
 import type {
   EngineFrames,
   EngineTargetState,
-  TourEngine,
 } from "./utils/engineTypesScratch";
-import { loadAllTourConfigs } from "./utils/loadTourConfigs";
 import {
-  terminalAutoLines,
-  userEntry,
-} from "./views/Logs/terminal/terminalContent";
+  staticFilterNoCommentChanges,
+  staticFilterNoCommentConfigContentGroups,
+} from "./views/Logs/configSamples/configContent";
+import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
   terminal: {
     strings: [],
   },
-  //   config: {
-  //     files: {
-  //       "deployment.yaml": {
-  //         text: `apiVersion: apps/v1
-  // kind: Deployment
-  // metadata:
-  //   name: web-app
-  // spec:
-  //   replicas: 3
-  //   selector:
-  //     matchLabels:
-  //       app: web
-  //   template:
-  //     metadata:
-  //       labels:
-  //         app: web
-  //     spec:
-  //       containers:
-  //       - name: nginx
-  //         image: nginx:1.21
-  //         ports:
-  //         - containerPort: 80`,
-  //       },
-  //     },
-  //     activeFile: "deployment.yaml",
-  //   },
   status: {
     activePods: {
       "web-app-default^1@0": {
@@ -74,109 +47,149 @@ const previousState: EngineTargetState = {
         replicaNo: 2,
         restartCount: 0,
       },
-      "web-app-default^3@0": {
-        id: "web-app-default^3@0",
-        name: "web-app-5gw8e",
-        namespace: "default",
-        status: "Running",
-        parentServiceKey: "web-app-default^3@0",
-        replicaNo: 3,
-        restartCount: 0,
-      },
     },
-    podOrder: [
-      "web-app-default^1@0",
-      "web-app-default^2@0",
-      "web-app-default^3@0",
-    ],
+    podOrder: ["web-app-default^1@0", "web-app-default^2@0"],
   },
 };
 
-const substep: SubstepConfig = {
-  id: "deploy-app",
-  label: "Deploy Application",
-  content: {
-    type: "text",
-    text: "this is substep content",
-  },
-  animation: [
-    {
-      type: FRAME_TYPES.enter_command,
-      simulator: SIMULATORS.TERMINAL,
-      updates: [
-        {
-          input: userEntry[0],
-          outputs: terminalAutoLines,
-        },
-      ],
+const frames: EngineFrames.Any[] = [
+  {
+    type: FRAME_TYPES.enter_command,
+    simulator: SIMULATORS.TERMINAL,
+    updates: {
+      strings: startLogsTerminalContent,
     },
-    {
-      type: FRAME_TYPES.add_services,
-      simulator: SIMULATORS.STATUS,
-      updates: [
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.add_services,
+    simulator: SIMULATORS.STATUS,
+    updates: transformStatus(
+      [
         {
           name: "web-app",
           namespace: "default",
-          replicas: 3,
+          replicas: 2,
         },
       ],
-    },
-  ],
-  targetState: {
-    terminal: [
-      {
-        // typedOptions: ([] as string[]).concat(terminalAutoLines, userEntry, [""]),
-        input: "",
+      "this-step"
+    ),
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.add,
+    simulator: SIMULATORS.CONFIG,
+    updates: {
+      files: {
+        "otel_ref.yaml": {
+          url: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
+          fileName: "otel_ref.yaml",
+          changeMap: createChangeMap(staticFilterNoCommentChanges),
+          groups: staticFilterNoCommentConfigContentGroups,
+        },
       },
-    ],
-    // config: {
-    //   files: {
-    //     "deployment.yaml": {
-    //       text: previousState.config!.files["deployment.yaml"].text,
-    //     },
-    //   },
-    //   activeFile: "deployment.yaml",
-    // },
-    status: [
+      showingToggle: new Set<string>(),
+      showingChange: staticFilterNoCommentConfigContentGroups.reduce(
+        (accum, group) => {
+          if (group.type === "group" && group.isChangeBlock) {
+            accum.add(group.groupId);
+          }
+          return accum;
+        },
+        new Set<string>()
+      ),
+      activeTab: "otel_ref.yaml",
+    },
+    waitForComplete: false,
+  },
+  {
+    type: FRAME_TYPES.delay,
+    duration: 1000,
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.scroll_to,
+    simulator: SIMULATORS.CONFIG,
+    updates: {
+      fileName: "otel_ref.yaml",
+      line: 74,
+    },
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.scroll_to,
+    simulator: SIMULATORS.CONFIG,
+    updates: {
+      fileName: "otel_ref.yaml",
+      line: 100,
+    },
+    waitForComplete: true,
+  },
+];
+const targetState: EngineTargetState = {
+  terminal: {
+    strings: startLogsTerminalContent,
+  },
+  config: {
+    files: {
+      "otel_ref.yaml": {
+        url: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
+        fileName: "otel_ref.yaml",
+        changeMap: createChangeMap(staticFilterNoCommentChanges),
+        groups: staticFilterNoCommentConfigContentGroups,
+      },
+    },
+    showingToggle: new Set<string>([
+      "otel_ref.yaml-95-102",
+      "otel_ref.yaml-73-78",
+    ]),
+    showingChange: new Set<string>(),
+    activeTab: "otel_ref.yaml",
+  },
+  status: transformStatus(
+    [
       {
         name: "web-app",
         namespace: "default",
-        replicas: 3,
+        replicas: 2,
       },
     ],
-  },
+    "this-step",
+    true
+  ),
 };
 /** end hard coded dev stuff */
 
 function onComplete() {
+  // TODO: This would enable the "next" button in the nav
   console.log("animation complete!!");
 }
 
 function App() {
-  const [tourConfig, setTourConfig] = useState<TourEngine[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [tourConfig, setTourConfig] = useState<TourEngine[] | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
 
-  // TODO: Add navigation state here
+  // // TODO: Add navigation state here
 
-  useEffect(() => {
-    loadAllTourConfigs()
-      .then(setTourConfig)
-      .catch((err: unknown) => {
-        const msg =
-          err instanceof Error ? err.message : "Failed to load config";
-        setError(msg);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   loadAllTourConfigs()
+  //     .then(setTourConfig)
+  //     .catch((err: unknown) => {
+  //       const msg =
+  //         err instanceof Error ? err.message : "Failed to load config";
+  //       setError(msg);
+  //     })
+  //     .finally(() => setLoading(false));
+  // }, []);
 
-  if (loading) return <div>Loading tour...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!tourConfig || tourConfig.length === 0) return null;
+  // if (loading) return <div>Loading tour...</div>;
+  // if (error) return <div>Error: {error}</div>;
+  // if (!tourConfig || tourConfig.length === 0) return null;
 
-  const frames =
-    tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
-  const targetState = tourConfig[0].steps[0].substeps[0].targetState;
+  // const frames =
+  //   tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
+  // const targetState = tourConfig[0].steps[0].substeps[0].targetState;
 
   return (
     <Box

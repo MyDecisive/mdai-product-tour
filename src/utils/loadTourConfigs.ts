@@ -33,7 +33,6 @@ async function loadTourConfig(url: string): Promise<TourEngine> {
  */
 function parseYaml(yamlString: string): unknown {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     return parse(yamlString);
   } catch (error: unknown) {
     if (error instanceof Error) {

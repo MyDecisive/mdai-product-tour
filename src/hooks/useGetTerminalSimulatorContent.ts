@@ -39,10 +39,9 @@ export function useGetTerminalSimulatorContent({
         const wrappedOptions = {
           ...options,
           onBegin: (typed: Typed) => {
-            if (!options.strings || !playing) {
+            if (!playing) {
               typed.stop();
-
-              if (options.strings && !playing) {
+              if (options.strings) {
                 element.innerHTML = options.strings
                   .map(parseTypedJsString)
                   .join("\n");
@@ -82,6 +81,11 @@ export function useGetTerminalSimulatorContent({
             const nextIndex = index + 1;
             if (nextIndex < state.length) {
               const nextTyped = typedInstancesRef.current[nextIndex];
+              const nextEle = elementsRef.current[nextIndex];
+              if (nextEle && nextEle.style.display === "none") {
+                nextEle.style.display = "inline-block";
+                nextEle.parentElement!.style.height = "20px";
+              }
               if (nextTyped && nextTyped.cursor) {
                 nextTyped.cursor.style.display = "inline-block";
                 nextTyped.start();
@@ -99,8 +103,10 @@ export function useGetTerminalSimulatorContent({
           if (typed.cursor) {
             typed.cursor.style.display = playing ? "inline-block" : "none";
           }
+          element.parentElement!.style.height = "20px";
         } else {
           typed.stop();
+          element.style.display = playing ? "none" : "inline-block";
           if (typed.cursor) {
             typed.cursor.style.display = "none";
           }

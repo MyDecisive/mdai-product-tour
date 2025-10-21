@@ -1,3 +1,4 @@
+import type { ContentConfig } from "./configTypesScratch";
 import type { FRAME_TYPES, SIMULATORS } from "./constants";
 import type {
   ClearSimulatorsFrame,
@@ -41,6 +42,7 @@ export interface EngineSubstep {
 export interface EngineTargetState {
   terminal?: EngineTerminalTarget;
   status?: EngineStatusTarget;
+  config?: EngineConfigTarget;
 }
 
 // ----------------------------------------------------------------------------
@@ -72,6 +74,47 @@ export interface EngineStatusTarget {
   podOrder: PodId[];
 }
 
+// ----------------------------------------------------------------------------
+// Config
+// ----------------------------------------------------------------------------
+
+export interface EngineConfigTarget {
+  files: Record<string, EngineFileConfig>;
+  activeTab: string;
+  showingToggle: Set<string>; // groupIds
+  showingChange: Set<string>; // groupIds
+}
+
+export type ConfigLine = {
+  lineNo: number;
+  content: string;
+  changeLineNo?: number;
+  changeContent?: string;
+};
+
+export type LineGroup = {
+  type: "group";
+  groupId: string;
+  start: number;
+  end: number;
+  lines: ConfigLine[];
+  isChangeBlock: boolean;
+};
+
+type GapLine = {
+  lineNo: number;
+  type: "gap";
+};
+
+export type ConfigContent = LineGroup | GapLine;
+
+export interface EngineFileConfig {
+  groups: ConfigContent[];
+  fileName: string;
+  url: string;
+  changeMap: Map<number, string>; // from createChangeMap
+}
+
 // ============================================================================
 // ENGINE ANIMATION FRAMES
 // ============================================================================
@@ -95,9 +138,27 @@ export declare namespace EngineFrames {
     export type All = AddServices;
   }
 
+  export namespace Config {
+    export type Add = Frame<
+      typeof SIMULATORS.CONFIG,
+      typeof FRAME_TYPES.add,
+      EngineConfigTarget
+    >;
+    export type ScrollTo = Frame<
+      typeof SIMULATORS.CONFIG,
+      typeof FRAME_TYPES.scroll_to,
+      {
+        fileName: string;
+        line: number;
+      }
+    >;
+    export type ALL = Add | ScrollTo;
+  }
+
   export type Any =
     | Terminal.All
     | Status.All
+    | Config.ALL
     | DelayFrame
     | ClearSimulatorsFrame;
 }

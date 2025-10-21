@@ -1,5 +1,6 @@
 import {
   createChangeMap,
+  createConfigContentGroups,
   extractRelevantSections,
   rawLinesFromText,
 } from "../hooks/useGetConfigSimulatorContent/utils";
@@ -11,17 +12,16 @@ import type {
   TourTargetState,
   TourTerminalTarget,
 } from "../utils/configTypesScratch";
-import { FRAME_TYPES, STATUS } from "../utils/constants";
+import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
   ActivePodMap,
-  ConfigContent,
-  ConfigLine,
   EngineConfigTarget,
   EngineFileConfig,
   EngineFrames,
   EngineStatusTarget,
   EngineTargetState,
   EngineTerminalTarget,
+  LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
 import { fetchGitHubFile } from "../utils/fetchRawGithubFile";
@@ -82,7 +82,9 @@ function createPodName(service: TourStatusTarget): string {
     : `${service.name}${POD_NAME_DELIM}${createServiceNameSuffix()}`;
 }
 
-function transformStatus(
+// TODO: remove export
+// exporting only to hack for local dev
+export function transformStatus(
   configServices: TourStatusTarget[],
   contextId: string,
   isStateTransform?: boolean
@@ -133,47 +135,12 @@ async function transformConfig(
       const changeMap = createChangeMap(changes);
       const sections = extractRelevantSections(rawLines, changes);
 
-      const groups: ConfigContent[] = [];
-
-      sections.forEach((section) => {
-        if (section.isGap) {
-          groups.push({
-            lineNo: section.startLineNo,
-            isGap: true,
-          });
-        } else {
-          const lines: ConfigLine[] = section.lines.map((line, i) => {
-            const lineNo = section.startLineNo + i;
-            const newContent = changeMap.get(lineNo);
-
-            return {
-              lineNo,
-              content: line,
-              ...(newContent && {
-                newLineNo: lineNo,
-                newContent,
-              }),
-            };
-          });
-
-          const start = section.startLineNo;
-          const end = start + section.lines.length - 1;
-          const isChangeBlock = lines.some((l) => l.newContent !== undefined);
-
-          groups.push({
-            groupId: `${name}-${start}-${end}`,
-            start,
-            end,
-            lines,
-            isChangeBlock,
-          });
-        }
-      });
+      const groups = createConfigContentGroups(name, sections, changeMap);
 
       const engConf: EngineFileConfig = {
+        fileName: name,
         url,
         changeMap,
-        showToggleButtons: changeMap.size > 0,
         groups,
       };
 
@@ -188,9 +155,19 @@ async function transformConfig(
     configSimTarget.files[0]?.url.split("/").at(-1) ??
     "";
 
+  const showingChange = new Set(
+    fileEntries.flatMap(([, conf]) =>
+      conf.groups
+        .filter((g): g is LineGroup => g.type === "group" && g.isChangeBlock)
+        .map((g) => g.groupId)
+    )
+  );
+
   return {
     files,
     activeTab,
+    showingToggle: new Set<string>(),
+    showingChange,
   };
 }
 
@@ -198,29 +175,40 @@ async function transformConfig(
 // TRANSFORMS FOR ANIMATION
 // ============================================================================
 
-function transformTourToEngineAnimation(
+async function transformTourToEngineAnimation(
   animation: TourFrames.Any[],
   contextId: string
-): EngineFrames.Any[] {
-  return animation.map((frame) => {
-    if (frame.waitForComplete === undefined) {
-      frame.waitForComplete = true;
-    }
-    switch (frame.type) {
-      case FRAME_TYPES.add_services:
-        return {
-          ...frame,
-          updates: transformStatus(frame.updates, contextId),
-        };
-      case FRAME_TYPES.enter_command:
-        return {
-          ...frame,
-          updates: transformTerminal(frame.updates),
-        };
-      default:
-        return frame;
-    }
-  });
+): Promise<EngineFrames.Any[]> {
+  return Promise.all(
+    animation.map(async (frame) => {
+      if (frame.waitForComplete === undefined) {
+        frame.waitForComplete = true;
+      }
+      switch (frame.type) {
+        case FRAME_TYPES.add_services:
+          return {
+            ...frame,
+            updates: transformStatus(frame.updates, contextId),
+          };
+        case FRAME_TYPES.enter_command:
+          return {
+            ...frame,
+            updates: transformTerminal(frame.updates),
+          };
+        case FRAME_TYPES.add:
+          if (frame.simulator === SIMULATORS.CONFIG) {
+            return {
+              ...frame,
+              updates: await transformConfig(frame.updates),
+            };
+          }
+          return frame;
+        case FRAME_TYPES.scroll_to:
+        default:
+          return frame;
+      }
+    })
+  );
 }
 
 // ============================================================================
@@ -254,7 +242,7 @@ export async function transformSubstepConfigToInstanceArgs(
     substep.targetState,
     substep.id
   );
-  const frames = transformTourToEngineAnimation(
+  const frames = await transformTourToEngineAnimation(
     substep.animation || [],
     substep.id
   );

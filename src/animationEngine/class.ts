@@ -4,7 +4,7 @@ import type {
   EngineFrames,
   EngineStatusTarget,
   EngineTargetState,
-  EngineTerminalTarget,
+  LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
 import type { DeepPartial, SimulatorType } from "../utils/types";
@@ -28,6 +28,9 @@ export class AnimationEngineInstance {
   private currentActionResolver: (() => void) | null = null;
   private podAnimationResolvers: Map<PodId, () => void> = new Map();
 
+  private podsToRemove: Set<PodId> = new Set();
+  private podRemovalTimer: NodeJS.Timeout | null = null;
+
   constructor(
     actions: EngineFrames.Any[],
     startState: EngineTargetState,
@@ -41,7 +44,8 @@ export class AnimationEngineInstance {
     this.currentState = { ...startState };
   }
 
-  advanceAnimation() {
+  advanceAnimation(caller?: string) {
+    console.log("advanceAnimation called ", caller);
     if (this.currentActionResolver) {
       this.currentActionResolver();
       this.currentActionResolver = null;
@@ -58,6 +62,7 @@ export class AnimationEngineInstance {
     }
 
     if (this.isRunning) {
+      console.log("play complete, settingn target state");
       this.currentState = { ...this.targetState };
       this.callbacks.onStateChange(this.currentState);
       this.callbacks.onActiveSimulatorChange(null);
@@ -76,7 +81,12 @@ export class AnimationEngineInstance {
   cleanup() {
     this.isRunning = false;
     this.timeouts.forEach(clearTimeout);
+    if (this.podRemovalTimer) {
+      clearTimeout(this.podRemovalTimer);
+    }
     this.timeouts = [];
+    this.podAnimationResolvers.clear();
+    this.currentActionResolver = null;
   }
 
   private async executeAction(action: EngineFrames.Any): Promise<void> {
@@ -86,19 +96,22 @@ export class AnimationEngineInstance {
     }
 
     if (action.type === FRAME_TYPES.clear) {
+      // TODO: Should this have its own method to set a state node to undefined?
       this.updateState(createClearState(action.simulators));
       return;
     }
 
     const { simulator } = action;
-    this.callbacks.onActiveSimulatorChange(simulator);
+    if (action.waitForComplete) {
+      this.callbacks.onActiveSimulatorChange(simulator);
+    }
 
     const waitForCompletion = action.waitForComplete
       ? new Promise<void>((resolve) => {
           this.currentActionResolver = resolve;
         })
       : Promise.resolve();
-
+    console.log("action ", action);
     switch (action.type) {
       case FRAME_TYPES.enter_command:
         this.updateState({ [action.simulator]: action.updates }, true);
@@ -106,16 +119,30 @@ export class AnimationEngineInstance {
       case FRAME_TYPES.add_services:
         this.addStatusPods(action.updates);
         break;
+      case FRAME_TYPES.add:
+        this.updateState({ [action.simulator]: action.updates });
+        break;
+      case FRAME_TYPES.scroll_to:
+        this.manageScrollTo(action.updates);
+        break;
     }
 
     await waitForCompletion;
   }
 
+  // ----------------------------------------------------------------------------
+  // Status sim methods
+  // ----------------------------------------------------------------------------
+
   private addStatusPods({
     activePods: newPods,
     podOrder: newPodOrder,
   }: EngineStatusTarget): void {
-    const status = this.currentState.status || { activePods: {}, podOrder: [] };
+    const currentStatus = this.currentState.status || {
+      activePods: {},
+      podOrder: [],
+    };
+    const status = { ...currentStatus };
 
     this.updateState({
       status: {
@@ -152,24 +179,49 @@ export class AnimationEngineInstance {
     }
   }
 
-  private async statusPodRemove(podId: string): Promise<void> {
-    await this.delay(1000);
+  private scheduleRemoval(podId: PodId): void {
+    this.podsToRemove.add(podId);
 
+    if (this.podRemovalTimer) {
+      clearTimeout(this.podRemovalTimer);
+    }
+
+    // TODO: make this removal timer respond to the number of pods to remove
+    this.podRemovalTimer = setTimeout(() => {
+      this.executeRemovals();
+    }, 1000);
+  }
+
+  private executeRemovals(): void {
     const status = this.currentState.status;
-    if (!status || !status.podOrder || !status.podOrder.length) {
+    if (!status || this.podsToRemove.size === 0) {
       return;
     }
 
-    const newPodOrder = status.podOrder.filter((id) => id !== podId);
+    const newPodOrder = status.podOrder.filter(
+      (id) => !this.podsToRemove.has(id)
+    );
     const newActivePods = { ...status.activePods };
-    delete newActivePods[podId];
 
-    this.updateState({
+    this.podsToRemove.forEach((podId) => {
+      delete newActivePods[podId];
+    });
+
+    // updateState only handles additions and merges, we have to do this
+    // in order to perform the removals correctly.
+    // TODO: Create a generic `removeFromState` method
+    this.currentState = {
+      ...this.currentState,
       status: {
         podOrder: newPodOrder,
         activePods: newActivePods,
       },
-    });
+    };
+
+    this.callbacks.onStateChange(this.currentState);
+
+    this.podsToRemove.clear();
+    this.podRemovalTimer = null;
   }
 
   private async statusAnimateStartup(): Promise<void> {
@@ -196,7 +248,7 @@ export class AnimationEngineInstance {
     podId: PodId,
     newStatus: (typeof STATUS)[keyof typeof STATUS]
   ): void {
-    const status = this.currentState.status!;
+    const status = { ...this.currentState.status! };
     status.activePods[podId].status = newStatus;
     if (newStatus === STATUS.crashLoopBackoff) {
       status.activePods[podId].restartCount =
@@ -213,10 +265,103 @@ export class AnimationEngineInstance {
         this.podAnimationResolvers.delete(podId);
       }
     } else if (newStatus === STATUS.shutdown) {
-      void this.statusPodRemove(podId);
+      void this.scheduleRemoval(podId);
     }
   }
 
+  // ----------------------------------------------------------------------------
+  // Config sim methods
+  // ----------------------------------------------------------------------------
+  public onSetActiveTab(tabName: string) {
+    console.log("onSetActiveTab called ", tabName);
+    const config = this.currentState.config;
+    if (!config || !config.files[tabName]) {
+      return;
+    }
+
+    this.updateState({
+      config: {
+        ...config,
+        activeTab: tabName,
+      },
+    });
+  }
+
+  public onRevealToggleControl(groupId: string) {
+    console.log("onRevealToggleControl called ", groupId);
+    const config = this.currentState.config;
+    if (!config) {
+      return;
+    }
+
+    const newConfig = { ...config };
+    newConfig.showingToggle.add(groupId);
+
+    this.updateState({ config: newConfig });
+  }
+
+  public onToggleShowingChange(groupId: string) {
+    const config = this.currentState.config;
+    if (!config) {
+      return;
+    }
+
+    const newConfig = { ...config };
+    newConfig.showingChange = new Set(newConfig.showingChange);
+    if (!newConfig.showingToggle.has(groupId)) {
+      newConfig.showingToggle = new Set(newConfig.showingToggle);
+      newConfig.showingToggle.add(groupId);
+    }
+    if (newConfig.showingChange.has(groupId)) {
+      newConfig.showingChange.delete(groupId);
+    } else {
+      newConfig.showingChange.add(groupId);
+    }
+
+    this.currentState = {
+      ...this.currentState,
+      config: newConfig,
+    };
+
+    this.callbacks.onStateChange(this.currentState);
+  }
+
+  private manageScrollTo({
+    fileName,
+    line,
+  }: {
+    fileName: string;
+    line: number;
+  }) {
+    const config = this.currentState.config;
+    if (!config || !config.files[fileName]) {
+      return;
+    }
+
+    if (config.activeTab !== fileName) {
+      console.log("need to set active tab");
+      this.onSetActiveTab(fileName);
+    }
+
+    const file = config.files[fileName];
+
+    const relevantGroup = file.groups.find((grp) => {
+      const isLineGroup = grp.type === "group";
+      if (!isLineGroup) {
+        return;
+      }
+      return grp.start <= line && line <= grp.end;
+    });
+
+    if (!relevantGroup) {
+      return;
+    }
+
+    this.onToggleShowingChange((relevantGroup as LineGroup).groupId);
+  }
+  // ----------------------------------------------------------------------------
+  // Generic/Helper methods
+  // ----------------------------------------------------------------------------
   private updateState(
     updates: DeepPartial<EngineTargetState>,
     appendArrays?: boolean
@@ -252,27 +397,40 @@ export class AnimationEngineInstance {
 export function createClearState(
   simulators: SimulatorType[]
 ): EngineTargetState {
-  const emptyState: Record<
-    SimulatorType,
-    EngineTerminalTarget | EngineStatusTarget
-  > = simulators.reduce((accum, simType) => {
-    accum[simType] = emptyEngineStateCreators[simType]?.();
-    return accum;
-  }, {} as Record<SimulatorType, EngineTerminalTarget | EngineStatusTarget>);
+  const fullEmptyState = createEmptyEngineTargetState();
 
-  return emptyState as EngineTargetState;
+  const emptyState: Partial<EngineTargetState> = {};
+
+  simulators.forEach((sim) => {
+    // this makes typescript happy, but makes me sad
+    if (sim === SIMULATORS.STATUS) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+    if (sim === SIMULATORS.CONFIG) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+    if (sim === SIMULATORS.TERMINAL) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+  });
+
+  return emptyState;
 }
 
-const emptyEngineStateCreators = {
-  [SIMULATORS.STATUS]: () => {
-    return {
+function createEmptyEngineTargetState(): EngineTargetState {
+  return {
+    [SIMULATORS.STATUS]: {
       activePods: {},
       podOrder: [],
-    } as EngineStatusTarget;
-  },
-  [SIMULATORS.TERMINAL]: () => {
-    return {
+    },
+    [SIMULATORS.TERMINAL]: {
       strings: [],
-    } as EngineTerminalTarget;
-  },
-};
+    },
+    [SIMULATORS.CONFIG]: {
+      files: {},
+      activeTab: "",
+      showingToggle: new Set<string>(),
+      showingChange: new Set<string>(),
+    },
+  };
+}

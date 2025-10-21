@@ -44,16 +44,14 @@ export class AnimationEngineInstance {
     this.currentState = { ...startState };
   }
 
-  advanceAnimation(caller?: string) {
-    console.log("advanceAnimation called ", caller);
+  advanceAnimation() {
     if (this.currentActionResolver) {
       this.currentActionResolver();
       this.currentActionResolver = null;
     }
   }
 
-  async play(caller?: string) {
-    console.log("play called by: ", caller);
+  async play() {
     this.isRunning = true;
 
     for (const action of this.actions) {
@@ -62,7 +60,6 @@ export class AnimationEngineInstance {
     }
 
     if (this.isRunning) {
-      console.log("play complete, settingn target state");
       this.currentState = { ...this.targetState };
       this.callbacks.onStateChange(this.currentState);
       this.callbacks.onActiveSimulatorChange(null);
@@ -70,8 +67,7 @@ export class AnimationEngineInstance {
     }
   }
 
-  reset(caller?: string) {
-    console.log("reset called ", caller);
+  reset() {
     this.cleanup();
     this.currentState = { ...this.startState };
     this.callbacks.onStateChange(this.currentState);
@@ -111,7 +107,6 @@ export class AnimationEngineInstance {
           this.currentActionResolver = resolve;
         })
       : Promise.resolve();
-    console.log("action ", action);
     switch (action.type) {
       case FRAME_TYPES.enter_command:
         this.updateState({ [action.simulator]: action.updates }, true);
@@ -273,7 +268,6 @@ export class AnimationEngineInstance {
   // Config sim methods
   // ----------------------------------------------------------------------------
   public onSetActiveTab(tabName: string) {
-    console.log("onSetActiveTab called ", tabName);
     const config = this.currentState.config;
     if (!config || !config.files[tabName]) {
       return;
@@ -285,19 +279,6 @@ export class AnimationEngineInstance {
         activeTab: tabName,
       },
     });
-  }
-
-  public onRevealToggleControl(groupId: string) {
-    console.log("onRevealToggleControl called ", groupId);
-    const config = this.currentState.config;
-    if (!config) {
-      return;
-    }
-
-    const newConfig = { ...config };
-    newConfig.showingToggle.add(groupId);
-
-    this.updateState({ config: newConfig });
   }
 
   public onToggleShowingChange(groupId: string) {
@@ -339,7 +320,6 @@ export class AnimationEngineInstance {
     }
 
     if (config.activeTab !== fileName) {
-      console.log("need to set active tab");
       this.onSetActiveTab(fileName);
     }
 
@@ -397,7 +377,21 @@ export class AnimationEngineInstance {
 export function createClearState(
   simulators: SimulatorType[]
 ): EngineTargetState {
-  const fullEmptyState = createEmptyEngineTargetState();
+  const fullEmptyState: EngineTargetState = {
+    [SIMULATORS.STATUS]: {
+      activePods: {},
+      podOrder: [],
+    },
+    [SIMULATORS.TERMINAL]: {
+      strings: [],
+    },
+    [SIMULATORS.CONFIG]: {
+      files: {},
+      activeTab: "",
+      showingToggle: new Set<string>(),
+      showingChange: new Set<string>(),
+    },
+  };
 
   const emptyState: Partial<EngineTargetState> = {};
 
@@ -415,22 +409,4 @@ export function createClearState(
   });
 
   return emptyState;
-}
-
-function createEmptyEngineTargetState(): EngineTargetState {
-  return {
-    [SIMULATORS.STATUS]: {
-      activePods: {},
-      podOrder: [],
-    },
-    [SIMULATORS.TERMINAL]: {
-      strings: [],
-    },
-    [SIMULATORS.CONFIG]: {
-      files: {},
-      activeTab: "",
-      showingToggle: new Set<string>(),
-      showingChange: new Set<string>(),
-    },
-  };
 }

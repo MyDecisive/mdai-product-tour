@@ -11,7 +11,6 @@ export function useGetConfigSimulatorContent({
   onAnimationComplete,
 }: EngineConfigTarget & {
   onSetActiveTab: (tabName: string) => void;
-  onRevealToggleControl: (groupId: string) => void;
   onAnimationComplete: (sim?: SimulatorType) => void;
 }) {
   const { pulsedGroups, addPulsedGroup } = usePulsedGroup();

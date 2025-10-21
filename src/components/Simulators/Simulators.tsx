@@ -90,7 +90,6 @@ export function Simulators({
                 <Config
                   {...engineState.currentSimulatorState.config}
                   onSetActiveTab={engineControls.onSetActiveTab}
-                  onRevealToggleControl={engineControls.onRevealToggleControl}
                   onToggleShowingChange={engineControls.onToggleShowingChange}
                   onAnimationComplete={engineControls.advanceAnimation}
                 />

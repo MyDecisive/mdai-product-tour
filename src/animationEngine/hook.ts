@@ -23,7 +23,6 @@ export interface AnimationEngineControls {
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
   // config sim
   onSetActiveTab: (tabName: string) => void;
-  onRevealToggleControl: (groupId: string) => void;
   onToggleShowingChange: (groupId: string) => void;
 }
 
@@ -46,7 +45,6 @@ export function useAnimationEngine(
   const engineRef = useRef<AnimationEngineInstance | null>(null);
 
   const updateSimulatorStates = useCallback((state: EngineTargetState) => {
-    console.log("updateSimulatorStates ", state);
     setTerminalState((prev) =>
       state.terminal !== prev ? state.terminal : prev
     );
@@ -58,7 +56,6 @@ export function useAnimationEngine(
 
   const handleSetActiveSimulator = useCallback((sim: SimulatorType | null) => {
     setActiveSimulator((old) => {
-      console.log("handleSetActiveSimulator ", sim);
       if (sim === null) {
         return new Set();
       }
@@ -106,25 +103,19 @@ export function useAnimationEngine(
   ]);
 
   const controls: AnimationEngineControls = {
-    play: useCallback(
-      (caller?: string) => {
-        if (!isPlaying) {
-          setIsPlaying(true);
-          void engineRef.current?.play(caller);
-        }
-      },
-      [isPlaying]
-    ),
+    play: useCallback(() => {
+      if (!isPlaying) {
+        setIsPlaying(true);
+        void engineRef.current?.play();
+      }
+    }, [isPlaying]),
 
-    reset: useCallback(
-      (caller?: string) => {
-        if (!isPlaying) {
-          engineRef.current?.reset(caller);
-          setIsPlaying(false);
-        }
-      },
-      [isPlaying]
-    ),
+    reset: useCallback(() => {
+      if (!isPlaying) {
+        engineRef.current?.reset();
+        setIsPlaying(false);
+      }
+    }, [isPlaying]),
 
     advanceAnimation: useCallback(
       (caller?: SimulatorType) => {
@@ -133,7 +124,7 @@ export function useAnimationEngine(
         if (caller) {
           handleSetActiveSimulator(caller);
         }
-        engineRef.current?.advanceAnimation(caller);
+        engineRef.current?.advanceAnimation();
       },
       [isPlaying, handleSetActiveSimulator]
     ),
@@ -150,14 +141,6 @@ export function useAnimationEngine(
       (tabName: string) => {
         if (!isPlaying) return;
         engineRef.current?.onSetActiveTab(tabName);
-      },
-      [isPlaying]
-    ),
-
-    onRevealToggleControl: useCallback(
-      (groupId: string) => {
-        if (!isPlaying) return;
-        engineRef.current?.onRevealToggleControl(groupId);
       },
       [isPlaying]
     ),

@@ -8,7 +8,6 @@ import { ConfigTabPanel } from "./ConfigtabPanel";
 export function Config(
   props: EngineConfigTarget & {
     onSetActiveTab: (tabName: string) => void;
-    onRevealToggleControl: (groupId: string) => void;
     onToggleShowingChange: (groupId: string) => void;
     onAnimationComplete: (sim?: SimulatorType) => void;
   }

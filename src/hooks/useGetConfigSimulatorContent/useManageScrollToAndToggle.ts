@@ -45,7 +45,6 @@ export function useManageScrollToAndToggle({
     const current = showingChange;
 
     const newlyToggledGroups = getNewlyToggledGroups<string>(current, prev);
-    console.log({ prev, current, newlyToggledGroups });
 
     if (newlyToggledGroups.size === 0) {
       prevTogglesRef.current = current;

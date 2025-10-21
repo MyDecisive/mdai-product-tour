@@ -1,7 +1,13 @@
 import type { DeepPartial } from "./types";
 
 function isObject(item: unknown): item is Record<string, unknown> {
-  return item !== null && typeof item === "object" && !Array.isArray(item);
+  return (
+    item !== null &&
+    typeof item === "object" &&
+    !Array.isArray(item) &&
+    !(item instanceof Set) &&
+    !(item instanceof Map)
+  );
 }
 
 /**
@@ -32,6 +38,36 @@ export function deepMergeWith<T>(
     targetObj: unknown,
     sourceObj: unknown
   ): unknown {
+    // Handle Sets
+    if (sourceNode instanceof Set && targetNode instanceof Set) {
+      if (customizer) {
+        const merged = customizer(
+          targetNode,
+          sourceNode,
+          "",
+          targetObj,
+          sourceObj
+        );
+        if (merged !== undefined) return merged;
+      }
+      return new Set(sourceNode); // Replace with new Set
+    }
+
+    // Handle Maps
+    if (sourceNode instanceof Map && targetNode instanceof Map) {
+      if (customizer) {
+        const merged = customizer(
+          targetNode,
+          sourceNode,
+          "",
+          targetObj,
+          sourceObj
+        );
+        if (merged !== undefined) return merged;
+      }
+      return new Map(sourceNode); // Replace with new Map
+    }
+
     if (isObject(sourceNode) && isObject(targetNode)) {
       const result: Record<string, unknown> = { ...targetNode };
       for (const key in sourceNode) {
@@ -96,39 +132,34 @@ const mergedArrays = deepMergeWith(
     if (Array.isArray(targetVal) && Array.isArray(sourceVal)) {
       return [...targetVal, ...sourceVal];
     }
-    // fallback to default behavior:
     return undefined;
   }
 );
 result: { nums: [1, 2, 3, 4] }
 
-2. Always prefer source values, deep or shallow
-const preferSource = deepMergeWith(
-  { x: 1, y: { z: 2 } },
-  { x: 5, y: { z: 99 } },
-  (_targetVal, sourceVal) => sourceVal
-);
-result: { x: 5, y: { z: 99 } }
-
-3. Skip merging a specific key
-const skipKey = deepMergeWith(
-  { settings: { theme: 'dark' }, version: 1 },
-  { settings: { theme: 'light' }, version: 2 },
-  (targetVal, sourceVal, key) => {
-    if (key === 'settings') return targetVal; // don't merge settings
+2. Merge Sets by union
+const mergedSets = deepMergeWith(
+  { tags: new Set([1, 2]) },
+  { tags: new Set([2, 3]) },
+  (targetVal, sourceVal) => {
+    if (targetVal instanceof Set && sourceVal instanceof Set) {
+      return new Set([...targetVal, ...sourceVal]);
+    }
     return undefined;
   }
 );
-result: { settings: { theme: 'dark' }, version: 2 }
+result: { tags: Set([1, 2, 3]) }
 
-const customizer = (targetVal, sourceVal, key, targetObj, sourceObj) => {
-  if (sourceObj.skipMerge) {
-    // Don't merge anything if skipMerge is true in the source root
-    return targetVal;
+3. Merge Maps by combining entries
+const mergedMaps = deepMergeWith(
+  { cache: new Map([['a', 1]]) },
+  { cache: new Map([['b', 2]]) },
+  (targetVal, sourceVal) => {
+    if (targetVal instanceof Map && sourceVal instanceof Map) {
+      return new Map([...targetVal, ...sourceVal]);
+    }
+    return undefined;
   }
-  return undefined;
-};
-
-const merged = deepMergeWith(target, source, customizer);
-Result: { a: { b: 1 }, skipMerge: true }
+);
+result: { cache: Map([['a', 1], ['b', 2]]) }
  */

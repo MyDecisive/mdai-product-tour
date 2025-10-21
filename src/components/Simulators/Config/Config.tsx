@@ -1,0 +1,54 @@
+import { Tab, Tabs } from "@mui/material";
+import { useCallback } from "react";
+import { useGetConfigSimulatorContent } from "../../../hooks/useGetConfigSimulatorContent";
+import type { EngineConfigTarget } from "../../../utils/engineTypesScratch";
+import type { SimulatorType } from "../../../utils/types";
+import { ConfigTabPanel } from "./ConfigtabPanel";
+
+export function Config(
+  props: EngineConfigTarget & {
+    onSetActiveTab: (tabName: string) => void;
+    onRevealToggleControl: (groupId: string) => void;
+    onToggleShowingChange: (groupId: string) => void;
+    onAnimationComplete: (sim?: SimulatorType) => void;
+  }
+) {
+  const { onSetActiveTab, activeTab, showingToggle, onToggleShowingChange } =
+    props;
+  const { tabContents, groupsShowingChange, pulsedGroups } =
+    useGetConfigSimulatorContent(props);
+
+  const handleChange = useCallback(
+    (_: React.SyntheticEvent, newValue: string) => {
+      onSetActiveTab(newValue);
+    },
+    [onSetActiveTab]
+  );
+
+  return (
+    <>
+      <Tabs value={activeTab} onChange={handleChange}>
+        {tabContents.map(({ fileName }) => (
+          <Tab
+            key={fileName}
+            label={fileName}
+            value={fileName}
+            aria-controls={`${fileName}-control-tab`}
+          />
+        ))}
+      </Tabs>
+      {tabContents.map((tab) => (
+        <ConfigTabPanel
+          key={tab.fileName}
+          {...tab}
+          active={activeTab === tab.fileName}
+          pulsedGroups={pulsedGroups}
+          groupsShowingChanges={groupsShowingChange}
+          groupsShowingToggle={showingToggle}
+          toggleGroupShowingChange={onToggleShowingChange}
+          changeMap={tab.changeMap}
+        />
+      ))}
+    </>
+  );
+}

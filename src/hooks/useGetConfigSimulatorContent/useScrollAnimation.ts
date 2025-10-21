@@ -1,42 +1,42 @@
-import { useRef, useEffect, createRef, useCallback } from "react";
-import { useHighlander } from "../useHighlander";
+import { useCallback, useRef } from "react";
+import { SIMULATORS } from "../../utils/constants";
+import { delay } from "../../utils/delay";
+import type { SimulatorType } from "../../utils/types";
 import { calculateScrollTarget, smoothScrollTo } from "./scrollHelpers";
 
 export const useScrollAnimation = (
-  fileNames: string[],
-  toggleLineValue: (fileName: string, lineNos: number[]) => void
+  addPulsedGroup: (groupId: string) => void,
+  onAnimationComplete: (sim?: SimulatorType) => void
 ) => {
-  const { actions } = useHighlander();
-  const containerRefs = useRef<
-    Record<string, React.RefObject<HTMLDivElement | null>>
-  >({});
+  const containerRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  useEffect(() => {
-    const newRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {};
-    fileNames.forEach((name) => {
-      // Preserve existing refs or create new ones
-      newRefs[name] =
-        containerRefs.current[name] || createRef<HTMLDivElement>();
-    });
-    containerRefs.current = newRefs;
-  }, [fileNames]);
+  const setContainerRef = useCallback((fileName: string) => {
+    return (element: HTMLDivElement | null) => {
+      containerRefs.current[fileName] = element;
+    };
+  }, []);
 
   const scrollToAndToggle = useCallback(
-    async (fileName: string, lineNos: number[]) => {
-      if (lineNos.length === 0) return;
+    async (groupIds: string[]) => {
+      const [fileName] = groupIds[0].split("-"); // This is kind of cheating, but the groupId structure is consistent.
 
-      const lowestLineNo = Math.min(...lineNos);
-      const ref = containerRefs.current[fileName].current;
-      const targetTop = calculateScrollTarget(ref, lowestLineNo);
+      const lowestLine = Math.min(
+        ...groupIds.map((id) => parseInt(id.split("-")[1]))
+      );
+
+      const ref = containerRefs.current[fileName];
+      const targetTop = calculateScrollTarget(ref, lowestLine);
 
       if (targetTop !== null && ref) {
         await smoothScrollTo(ref, targetTop, 800);
-        toggleLineValue(fileName, lineNos);
-        actions.INCREMENT_ANIMATION();
+        groupIds.forEach(addPulsedGroup);
+
+        await delay(750);
+        onAnimationComplete(SIMULATORS.CONFIG);
       }
     },
-    [containerRefs, toggleLineValue, actions]
+    [containerRefs, addPulsedGroup, onAnimationComplete]
   );
 
-  return { scrollToAndToggle, containerRefs };
+  return { scrollToAndToggle, containerRefs, setContainerRef };
 };

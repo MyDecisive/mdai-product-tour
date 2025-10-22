@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useEffect, useState } from "react";
+import { transformStatus } from "./animationEngine/configToEngineTransforms";
 import "./App.css";
 import {
   Banner,
@@ -10,12 +10,12 @@ import {
 } from "./components";
 import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
+import { FRAME_TYPES, SIMULATORS } from "./utils/constants";
 import type {
   EngineFrames,
   EngineTargetState,
-  TourEngine,
 } from "./utils/engineTypesScratch";
-import { loadAllTourConfigs } from "./utils/loadTourConfigs";
+import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
@@ -47,48 +47,48 @@ const previousState: EngineTargetState = {
   },
 };
 
-// const frames: EngineFrames.Any[] = [
-//   {
-//     type: FRAME_TYPES.enter_command,
-//     simulator: SIMULATORS.TERMINAL,
-//     updates: {
-//       strings: startLogsTerminalContent,
-//     },
-//     waitForComplete: true,
-//   },
-//   {
-//     type: FRAME_TYPES.add_services,
-//     simulator: SIMULATORS.STATUS,
-//     updates: transformStatus(
-//       [
-//         {
-//           name: "web-app",
-//           namespace: "default",
-//           replicas: 2,
-//         },
-//       ],
-//       "this-step"
-//     ),
-//     waitForComplete: true,
-//   },
-// ];
-// const targetState: EngineTargetState = {
-//   terminal: {
-//     strings: startLogsTerminalContent,
-//   },
-//   status: transformStatus(
-//     [
-//       {
-//         name: "web-app",
-//         namespace: "default",
-//         replicas: 2,
-//       },
-//     ],
-//     "this-step",
-//     true
-//   ),
-// };
-// /** end hard coded dev stuff */
+const frames: EngineFrames.Any[] = [
+  {
+    type: FRAME_TYPES.enter_command,
+    simulator: SIMULATORS.TERMINAL,
+    updates: {
+      strings: startLogsTerminalContent,
+    },
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.add_services,
+    simulator: SIMULATORS.STATUS,
+    updates: transformStatus(
+      [
+        {
+          name: "web-app",
+          namespace: "default",
+          replicas: 2,
+        },
+      ],
+      "this-step"
+    ),
+    waitForComplete: true,
+  },
+];
+const targetState: EngineTargetState = {
+  terminal: {
+    strings: startLogsTerminalContent,
+  },
+  status: transformStatus(
+    [
+      {
+        name: "web-app",
+        namespace: "default",
+        replicas: 2,
+      },
+    ],
+    "this-step",
+    true
+  ),
+};
+/** end hard coded dev stuff */
 
 function onComplete() {
   // TODO: This would enable the "next" button in the nav
@@ -96,30 +96,30 @@ function onComplete() {
 }
 
 function App() {
-  const [tourConfig, setTourConfig] = useState<TourEngine[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [tourConfig, setTourConfig] = useState<TourEngine[] | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
 
-  // TODO: Add navigation state here
+  // // TODO: Add navigation state here
 
-  useEffect(() => {
-    loadAllTourConfigs()
-      .then(setTourConfig)
-      .catch((err: unknown) => {
-        const msg =
-          err instanceof Error ? err.message : "Failed to load config";
-        setError(msg);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   loadAllTourConfigs()
+  //     .then(setTourConfig)
+  //     .catch((err: unknown) => {
+  //       const msg =
+  //         err instanceof Error ? err.message : "Failed to load config";
+  //       setError(msg);
+  //     })
+  //     .finally(() => setLoading(false));
+  // }, []);
 
-  if (loading) return <div>Loading tour...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!tourConfig || tourConfig.length === 0) return null;
+  // if (loading) return <div>Loading tour...</div>;
+  // if (error) return <div>Error: {error}</div>;
+  // if (!tourConfig || tourConfig.length === 0) return null;
 
-  const frames =
-    tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
-  const targetState = tourConfig[0].steps[0].substeps[0].targetState;
+  // const frames =
+  //   tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
+  // const targetState = tourConfig[0].steps[0].substeps[0].targetState;
 
   return (
     <Box

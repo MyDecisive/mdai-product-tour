@@ -32,7 +32,7 @@ export function useAnimationEngine(
   const [isPlaying, setIsPlaying] = useState(false);
   const [terminalState, setTerminalState] = useState(previousState.terminal);
   const [statusState, setStatusState] = useState(previousState.status);
-  // const [configState, setConfigState] = useState(previousState.config);
+  const [configState, setConfigState] = useState(previousState.config);
   // const [logsState, setLogsState] = useState(previousState.logs);
   // const [bannerState, setBannerState] = useState(previousState.banner);
   const [activeSimulator, setActiveSimulator] = useState<Set<SimulatorType>>(
@@ -46,7 +46,7 @@ export function useAnimationEngine(
       state.terminal !== prev ? state.terminal : prev
     );
     setStatusState((prev) => (state.status !== prev ? state.status : prev));
-    // setConfigState((prev) => (state.config !== prev ? state.config : prev));
+    setConfigState((prev) => (state.config !== prev ? state.config : prev));
     // setLogsState((prev) => (state.logs !== prev ? state.logs : prev));
     // setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
   }, []);
@@ -142,7 +142,7 @@ export function useAnimationEngine(
         terminal: terminalState,
         status: statusState,
         // logs: logsState,
-        // config: configState,
+        config: configState,
         // banner: bannerState,
       },
       activeSimulator,

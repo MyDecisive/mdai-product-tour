@@ -306,6 +306,12 @@ export function createClearState(
     [SIMULATORS.TERMINAL]: {
       strings: [],
     },
+    [SIMULATORS.CONFIG]: {
+      files: {},
+      activeTab: "",
+      showingToggle: new Set<string>(),
+      showingChange: new Set<string>(),
+    },
   };
 
   const emptyState: Partial<EngineTargetState> = {};
@@ -313,6 +319,9 @@ export function createClearState(
   simulators.forEach((sim) => {
     // this makes typescript happy, but makes me sad
     if (sim === SIMULATORS.STATUS) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+    if (sim === SIMULATORS.CONFIG) {
       emptyState[sim] = fullEmptyState[sim];
     }
     if (sim === SIMULATORS.TERMINAL) {

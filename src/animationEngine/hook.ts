@@ -15,9 +15,11 @@ export interface AnimationEngineState {
 }
 
 export interface AnimationEngineControls {
+  // generic
   reset: (str?: string) => void; // Reset to previous substep's target state and replay
   play: (str?: string) => void; // Begin animations
   advanceAnimation: (sim?: SimulatorType) => void; // Signal that current action is complete
+  // status sim
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
 }
 
@@ -40,9 +42,9 @@ export function useAnimationEngine(
   const engineRef = useRef<AnimationEngineInstance | null>(null);
 
   const updateSimulatorStates = useCallback((state: EngineTargetState) => {
-    setTerminalState((prev) => {
-      return state.terminal !== prev ? state.terminal : prev;
-    });
+    setTerminalState((prev) =>
+      state.terminal !== prev ? state.terminal : prev
+    );
     setStatusState((prev) => (state.status !== prev ? state.status : prev));
     // setConfigState((prev) => (state.config !== prev ? state.config : prev));
     // setLogsState((prev) => (state.logs !== prev ? state.logs : prev));
@@ -74,6 +76,7 @@ export function useAnimationEngine(
         onActiveSimulatorChange: handleSetActiveSimulator,
         onComplete: () => {
           setIsPlaying(false);
+          setActiveSimulator(new Set());
           onCompleteCallback();
         },
       }
@@ -97,31 +100,38 @@ export function useAnimationEngine(
   ]);
 
   const controls: AnimationEngineControls = {
-    play: useCallback((caller?: string) => {
-      setIsPlaying(true);
-      void engineRef.current?.play(caller);
-    }, []),
+    play: useCallback(() => {
+      if (!isPlaying) {
+        setIsPlaying(true);
+        void engineRef.current?.play();
+      }
+    }, [isPlaying]),
 
-    reset: useCallback((caller?: string) => {
-      engineRef.current?.reset(caller);
-      setIsPlaying(false);
-    }, []),
+    reset: useCallback(() => {
+      if (!isPlaying) {
+        engineRef.current?.reset();
+        setIsPlaying(false);
+      }
+    }, [isPlaying]),
 
     advanceAnimation: useCallback(
       (caller?: SimulatorType) => {
+        if (!isPlaying) return;
+
         if (caller) {
           handleSetActiveSimulator(caller);
         }
         engineRef.current?.advanceAnimation();
       },
-      [handleSetActiveSimulator]
+      [isPlaying, handleSetActiveSimulator]
     ),
 
     onPodStatusChange: useCallback(
       (podId: PodId, newStatus: (typeof STATUS)[keyof typeof STATUS]) => {
+        if (!isPlaying) return;
         engineRef.current?.onPodStatusChange(podId, newStatus);
       },
-      []
+      [isPlaying]
     ),
   };
 

@@ -52,7 +52,6 @@ export function Terminal({
             style={{
               display: "flex",
               alignItems: "flex-end",
-              lineHeight: "1.5em",
             }}
           >
             <pre
@@ -61,7 +60,7 @@ export function Terminal({
               }}
               style={{
                 margin: 0,
-                lineHeight: "1.5em",
+                lineHeight: "1.25em",
                 display: "inline",
                 wordWrap: "break-word",
                 whiteSpace: "break-spaces",

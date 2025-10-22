@@ -23,7 +23,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "reselect": "^5.1.1",
-    "typed.js": "^2.1.0"
+    "typed.js": "^2.1.0",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -33,6 +34,7 @@
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
     "@vitejs/plugin-react": "^5.0.4",

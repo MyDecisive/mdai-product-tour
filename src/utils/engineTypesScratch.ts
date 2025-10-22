@@ -1,3 +1,4 @@
+import type { ContentConfig } from "./configTypesScratch";
 import type { FRAME_TYPES, SIMULATORS } from "./constants";
 import type {
   ClearSimulatorsFrame,
@@ -6,6 +7,33 @@ import type {
   PodStatusType,
   TerminalTypedOptions,
 } from "./types";
+
+// ============================================================================
+// TOUR ENGINE STRUCTURE
+// ============================================================================
+
+export interface TourEngine {
+  id: string;
+  version: string;
+  title: string;
+  description?: string;
+  steps: EngineStep[];
+}
+
+interface EngineStep {
+  id: string;
+  label: string;
+  substeps: EngineSubstep[];
+}
+
+export interface EngineSubstep {
+  id: string;
+  label: string;
+  subLabel?: string;
+  content: ContentConfig;
+  targetState: EngineTargetState;
+  frames?: EngineFrames.Any[];
+}
 
 // ============================================================================
 // ENGINE TARGET STATES

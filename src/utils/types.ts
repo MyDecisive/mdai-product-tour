@@ -196,7 +196,7 @@ export type SimulatorType = (typeof SIMULATORS)[Exclude<
 export type PodStatusType = (typeof STATUS)[keyof typeof STATUS];
 
 interface BaseFrame {
-  waitForComplete?: boolean;
+  waitForComplete?: boolean; // Defaults to true
   type: (typeof FRAME_TYPES)[keyof typeof FRAME_TYPES];
 }
 

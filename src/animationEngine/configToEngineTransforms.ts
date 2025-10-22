@@ -1,9 +1,9 @@
 import type {
-  ConfigFrames,
-  ConfigStatus,
-  ConfigTargetState,
-  ConfigTerminalTarget,
   SubstepConfig,
+  TourFrames,
+  TourStatusTarget,
+  TourTargetState,
+  TourTerminalTarget,
 } from "../utils/configTypesScratch";
 import { FRAME_TYPES, STATUS } from "../utils/constants";
 import type {
@@ -17,27 +17,11 @@ import type {
 import { createTerminalContent } from "../views/Logs/terminal/behavior";
 
 // ============================================================================
-// TRANSFORMS FOR STATE
-// ============================================================================
-
-function transformConfigToEngineState(
-  config: ConfigTargetState,
-  contextId: string
-): EngineTargetState {
-  return {
-    terminal: config.terminal ? transformTerminal(config.terminal) : undefined,
-    status: config.status
-      ? transformStatus(config.status, contextId, true)
-      : undefined,
-  };
-}
-
-// ============================================================================
 // TERMINAL SIMULATOR TRANSFORMS
 // ============================================================================
 
 function transformTerminal(
-  terminalTargets: ConfigTerminalTarget[]
+  terminalTargets: TourTerminalTarget[]
 ): EngineTerminalTarget {
   const strings = terminalTargets.flatMap(({ input, outputs = [] }) =>
     createTerminalContent([input]).concat(
@@ -58,13 +42,13 @@ function transformTerminal(
 const CTXID_DELIM = "@";
 const REPLICA_DELIM = "^";
 
-function createServiceKey(svc: ConfigStatus, ctxId: string) {
+function createServiceKey(svc: TourStatusTarget, ctxId: string) {
   return `${svc.name}-${svc.namespace || "default"}${REPLICA_DELIM}${
     svc.replicas || 1
   }${CTXID_DELIM}${ctxId}`;
 }
 
-function createPodId(svc: ConfigStatus, replicaNo: number, ctxId: string) {
+function createPodId(svc: TourStatusTarget, replicaNo: number, ctxId: string) {
   return `${svc.name}-${svc.namespace}${REPLICA_DELIM}${replicaNo}${CTXID_DELIM}${ctxId}`;
 }
 
@@ -81,14 +65,16 @@ function createServiceNameSuffix() {
 
 export const POD_NAME_DELIM = "-";
 
-function createPodName(service: ConfigStatus): string {
+function createPodName(service: TourStatusTarget): string {
   return service.noSuffix
     ? service.name
     : `${service.name}${POD_NAME_DELIM}${createServiceNameSuffix()}`;
 }
 
-function transformStatus(
-  configServices: ConfigStatus[],
+// TODO: remove export
+// exporting only to hack for local dev
+export function transformStatus(
+  configServices: TourStatusTarget[],
   contextId: string,
   isStateTransform?: boolean
 ): EngineStatusTarget {
@@ -125,8 +111,8 @@ function transformStatus(
 // TRANSFORMS FOR ANIMATION
 // ============================================================================
 
-function transformConfigToEngineAnimation(
-  animation: ConfigFrames.Any[],
+function transformTourToEngineAnimation(
+  animation: TourFrames.Any[],
   contextId: string
 ): EngineFrames.Any[] {
   return animation.map((frame) => {
@@ -151,6 +137,22 @@ function transformConfigToEngineAnimation(
 }
 
 // ============================================================================
+// TRANSFORMS FOR STATE
+// ============================================================================
+
+function transformTourToEngineState(
+  tour: TourTargetState,
+  contextId: string
+): EngineTargetState {
+  return {
+    terminal: tour.terminal ? transformTerminal(tour.terminal) : undefined,
+    status: tour.status
+      ? transformStatus(tour.status, contextId, true)
+      : undefined,
+  };
+}
+
+// ============================================================================
 // TRANSFORMS THE CONFIG STEP
 // ============================================================================
 
@@ -158,11 +160,11 @@ export function transformSubstepConfigToInstanceArgs(substep: SubstepConfig): {
   targetState: EngineTargetState;
   frames: EngineFrames.Any[];
 } {
-  const targetState = transformConfigToEngineState(
+  const targetState = transformTourToEngineState(
     substep.targetState,
     substep.id
   );
-  const frames = transformConfigToEngineAnimation(
+  const frames = transformTourToEngineAnimation(
     substep.animation || [],
     substep.id
   );

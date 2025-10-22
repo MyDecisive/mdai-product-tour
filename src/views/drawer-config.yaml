@@ -1,0 +1,135 @@
+tours:
+  - id: logs
+    title: "Dynamic Log Filtering"
+    subtitle: "Ready to see how it works?"
+    buttonText: "Fire it up"
+    steps:
+      - id: introduction
+        title: "Let's set the stage"
+        substeps:
+          - id: introduction_meet
+            title: "Meet Dynamic Log Filtering"
+            content: 
+              items: 
+                - text: "Big bills? Not cool. Dynamic Log Filtering helps you slash up to 90% of your Datadog or New Relic spend. Here’s how, in three painless steps."
+          - id: introduction_consolidated
+            title: "This is a consolidated experience"
+            content:
+              title: "Consolidated tools"
+              variant: list
+              items:
+                - text: "Multiple tools in one unified view--making it easy to see how MyDecisive works."
+                - highlightText: "IDE Simulator:"
+                  text: "Tweak and control SmartHub through its config files."
+                  variant: animated
+                - highlightText: "Terminal Simulator:"
+                  text: "Deploy changes to SmartHub like a pro."
+                  variant: animated
+                - highlightText: "Status Simulator:"
+                  text: "Keep an eye on running SmartHub processes and components."
+                  variant: animated
+                - highlightText: "Tail logs Simulator:"
+                  text: "Watch SmartHub's logs stream by in real time."
+                  variant: animated
+                - text: "You can also navigate through the steps with your left and right arrow keys."
+
+      - id: step1
+        title: "Step 1: Get the data flowing"
+        substeps:
+          - id: step1_data
+            title: "Data Starts to Flow"
+            content:
+              title: "Simulate the log stream"
+              items:
+                - text: "Starting with the MDAI cluster already running, run"
+                - text: "Deploy changes to SmartHub like a pro."
+                - text: "./mdai-kind.sh logs"
+                  variant: code
+                - text: "and then"
+                - text: "helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml"
+                  variant: code
+                - text: to open the floodgates.
+                - text: Watch the SmartHub come alive in the
+                - text: Status Simulator Window
+                  variant: button
+          - id: step1_results
+            visualizationModal: true
+            content: 
+              title: See the results!
+              items: 
+                - text: "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money."
+                  src: logsView
+                  alt: Logs Visualization
+
+      - id: step2
+        title: "Step 2: Drop unwanted data"
+        substeps:
+          - id: step2_configure
+            title: Configure static filters
+            content: 
+              title: Your data, your rules
+              items: 
+                - text: OpenTelemetry static filters give you control and freedom--forever at no cost, no added vendor charges.
+          - id: step2_take
+            title: Take Note
+            content: 
+              title: We’ve got the heavy lifting covered, so working with your logs is a breeze.
+              variant: list
+              items: 
+                - text: In this example, Service4321 is just part of the generated data. They are some random service names like you might have.
+                - text: “mdai_service” is a variable--yep, a little bit of magic. Hang tight, you’ll learn more about variables in just a minute.
+          - id: step2_explore
+            title: Explore the running system
+            content: 
+              title: OTEL’s online!
+              items: 
+                - text: "Your collector is running in the SmartHub, and the dashboards confirm: Service4321 are filtered out."
+          - id: step2_visualize
+            visualizationModal: true
+            content: 
+              title: Nice work on the filters!
+              items: 
+                - text: You are cutting down the noise big-time. One hitch--Service4321 are missing from Datadog. Don’t worry, we’ll get it right together.
+                  src: preFilter
+                  alt: "Prefilter Visualization"
+
+      - id: step3
+        title: ""
+        substeps:
+          - id: step3_add
+            title: Sprinkle in some variables
+            content: 
+              items: 
+                - text: "Variables == smarter data streams. Use these commands to add one to your configuration file now:"
+                - text: kubectl apply -f mdai/hub/hub_ref.yaml
+                  variant: code
+                - text: updates your MDAI hub
+                - text: kubectl apply -f otel/otel_ref.yaml
+                  variant: code
+                - text: puts the variable to use in your OTel collector
+          - id: step3_take
+            title: Take Note
+            content: 
+              title: What’s happening in the config file?
+              items: 
+                - text: "Top talkers: Services that log more than your budget can handle are called your top talkers. We store them in a variable called \"service_list\"."
+                - text: "Easy reference: Your code only needs to reference \"service_list\". We handle the heavy lifting—dynamically computing top loggers and keeping the variable updated continuously."
+                - text: "Config-controlled behavior: The \"service_list\" computation itself is managed via configuration too. Learn more here."
+          - id: step3_visualize
+            visualizationModal: true
+            content:
+              title: "Visualize the results"
+              items:
+                - text: null
+                  src: postfilter
+                  alt: "Postfilter Visualization"
+                  
+  - id: traces
+    coming_soon: true
+    title: "Dynamic Trace Filtering"
+    subtitle: "Coming soon"
+
+  - id: pii
+    coming_soon: true
+    title: "PII Redaction"
+    subtitle: "Coming soon"

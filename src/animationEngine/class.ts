@@ -4,7 +4,6 @@ import type {
   EngineFrames,
   EngineStatusTarget,
   EngineTargetState,
-  EngineTerminalTarget,
   PodId,
 } from "../utils/engineTypesScratch";
 import type { DeepPartial, SimulatorType } from "../utils/types";
@@ -27,6 +26,9 @@ export class AnimationEngineInstance {
   private timeouts: NodeJS.Timeout[] = [];
   private currentActionResolver: (() => void) | null = null;
   private podAnimationResolvers: Map<PodId, () => void> = new Map();
+
+  private podsToRemove: Set<PodId> = new Set();
+  private podRemovalTimer: NodeJS.Timeout | null = null;
 
   constructor(
     actions: EngineFrames.Any[],
@@ -95,14 +97,15 @@ export class AnimationEngineInstance {
     }
 
     const { simulator } = action;
-    this.callbacks.onActiveSimulatorChange(simulator);
+    if (action.waitForComplete) {
+      this.callbacks.onActiveSimulatorChange(simulator);
+    }
 
     const waitForCompletion = action.waitForComplete
       ? new Promise<void>((resolve) => {
           this.currentActionResolver = resolve;
         })
       : Promise.resolve();
-
     switch (action.type) {
       case FRAME_TYPES.enter_command:
         this.updateState({ [action.simulator]: action.updates }, true);
@@ -123,7 +126,11 @@ export class AnimationEngineInstance {
     activePods: newPods,
     podOrder: newPodOrder,
   }: EngineStatusTarget): void {
-    const status = this.currentState.status || { activePods: {}, podOrder: [] };
+    const currentStatus = this.currentState.status || {
+      activePods: {},
+      podOrder: [],
+    };
+    const status = { ...currentStatus };
 
     this.updateState({
       status: {
@@ -140,6 +147,8 @@ export class AnimationEngineInstance {
     const pod = activePods[podId];
 
     const replacementPod = Object.values(activePods).find((active) => {
+      const differentPodSource =
+        active.parentServiceKey !== pod.parentServiceKey;
       const sameNamespace = active.namespace === pod.namespace;
 
       const podNameDelimIdx = active.name.lastIndexOf(POD_NAME_DELIM);
@@ -149,35 +158,62 @@ export class AnimationEngineInstance {
       );
       const activeIsRunning = active.status === STATUS.running;
 
-      return sameNamespace && sameService && activeIsRunning;
+      return (
+        differentPodSource && sameNamespace && sameService && activeIsRunning
+      );
     });
 
     if (replacementPod) {
       // Mark the old pod for shutdown
-      const status = this.currentState.status;
-      status!.activePods[replacementPod.id].status = STATUS.terminating;
+      const status = { ...this.currentState.status };
+      status.activePods![replacementPod.id].status = STATUS.terminating;
       this.updateState({ status });
     }
   }
 
-  private async statusPodRemove(podId: string): Promise<void> {
-    await this.delay(1000);
+  private scheduleRemoval(podId: PodId): void {
+    this.podsToRemove.add(podId);
 
+    if (this.podRemovalTimer) {
+      clearTimeout(this.podRemovalTimer);
+    }
+
+    // TODO: make this removal timer respond to the number of pods to remove
+    this.podRemovalTimer = setTimeout(() => {
+      this.executeRemovals();
+    }, 1000);
+  }
+
+  private executeRemovals(): void {
     const status = this.currentState.status;
-    if (!status || !status.podOrder || !status.podOrder.length) {
+    if (!status || this.podsToRemove.size === 0) {
       return;
     }
 
-    const newPodOrder = status.podOrder.filter((id) => id !== podId);
+    const newPodOrder = status.podOrder.filter(
+      (id) => !this.podsToRemove.has(id)
+    );
     const newActivePods = { ...status.activePods };
-    delete newActivePods[podId];
 
-    this.updateState({
+    this.podsToRemove.forEach((podId) => {
+      delete newActivePods[podId];
+    });
+
+    // updateState only handles additions and merges, we have to do this
+    // in order to perform the removals correctly.
+    // TODO: Create a generic `removeFromState` method
+    this.currentState = {
+      ...this.currentState,
       status: {
         podOrder: newPodOrder,
         activePods: newActivePods,
       },
-    });
+    };
+
+    this.callbacks.onStateChange(this.currentState);
+
+    this.podsToRemove.clear();
+    this.podRemovalTimer = null;
   }
 
   private async statusAnimateStartup(): Promise<void> {
@@ -204,7 +240,7 @@ export class AnimationEngineInstance {
     podId: PodId,
     newStatus: (typeof STATUS)[keyof typeof STATUS]
   ): void {
-    const status = this.currentState.status!;
+    const status = { ...this.currentState.status! };
     status.activePods[podId].status = newStatus;
     if (newStatus === STATUS.crashLoopBackoff) {
       status.activePods[podId].restartCount =
@@ -221,7 +257,7 @@ export class AnimationEngineInstance {
         this.podAnimationResolvers.delete(podId);
       }
     } else if (newStatus === STATUS.shutdown) {
-      void this.statusPodRemove(podId);
+      void this.scheduleRemoval(podId);
     }
   }
   // ----------------------------------------------------------------------------

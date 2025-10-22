@@ -68,7 +68,7 @@ export interface LogRecord {
 export type LineChangeBlock = {
   start: number;
   end?: number;
-  oldValues: string[];
+  changeLines: string[];
 };
 
 export interface ConfigTextProps {
@@ -191,7 +191,7 @@ export type FrameType = (typeof FRAME_TYPES)[Exclude<
 >];
 export type SimulatorType = (typeof SIMULATORS)[Exclude<
   keyof typeof SIMULATORS,
-  "BANNER" | "LOGS" | "CONFIG"
+  "BANNER" | "LOGS"
 >];
 export type PodStatusType = (typeof STATUS)[keyof typeof STATUS];
 

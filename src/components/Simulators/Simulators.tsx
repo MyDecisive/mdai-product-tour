@@ -6,7 +6,7 @@ import type {
   EngineFrames,
   EngineTargetState,
 } from "../../utils/engineTypesScratch";
-import { ConfigText } from "./Config.tsx";
+import { Config } from "./Config";
 import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
@@ -36,7 +36,7 @@ export function Simulators({
 
   useEffect(() => {
     if (
-      // engineState.activeSimulator.has(SIMULATORS.CONFIG) ||
+      engineState.activeSimulator.has(SIMULATORS.CONFIG) ||
       engineState.activeSimulator.has(SIMULATORS.STATUS)
     ) {
       if (simContainerParentRef.current) {
@@ -53,7 +53,6 @@ export function Simulators({
     }
   }, [engineState.activeSimulator]);
 
-  const config = null;
   const logs = null;
 
   return (
@@ -85,9 +84,16 @@ export function Simulators({
           <Grid size={5} sx={{ overflow: "hidden" }}>
             <SimulatorBox
               title="Config"
-              // active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
+              active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
             >
-              {config !== null && <ConfigText />}
+              {engineState.currentSimulatorState.config != null && (
+                <Config
+                  {...engineState.currentSimulatorState.config}
+                  onSetActiveTab={engineControls.onSetActiveTab}
+                  onToggleShowingChange={engineControls.onToggleShowingChange}
+                  onAnimationComplete={engineControls.advanceAnimation}
+                />
+              )}
             </SimulatorBox>
           </Grid>
 

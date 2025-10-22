@@ -21,6 +21,9 @@ export interface AnimationEngineControls {
   advanceAnimation: (sim?: SimulatorType) => void; // Signal that current action is complete
   // status sim
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+  // config sim
+  onSetActiveTab: (tabName: string) => void;
+  onToggleShowingChange: (groupId: string) => void;
 }
 
 export function useAnimationEngine(
@@ -133,6 +136,19 @@ export function useAnimationEngine(
       },
       [isPlaying]
     ),
+
+    onSetActiveTab: useCallback(
+      (tabName: string) => {
+        if (!isPlaying) return;
+        engineRef.current?.onSetActiveTab(tabName);
+      },
+      [isPlaying]
+    ),
+
+    onToggleShowingChange: useCallback((groupId: string) => {
+      // no early return b/c this is only used for the manual button click
+      engineRef.current?.onToggleShowingChange(groupId);
+    }, []),
   };
 
   return [

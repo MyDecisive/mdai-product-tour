@@ -61,23 +61,29 @@ function validateTourConfig(
   }
 }
 
-function transformParsedTourConfigToInstanceArgs(
+async function transformParsedTourConfigToInstanceArgs(
   config: TourConfiguration
-): TourEngine {
-  const transformedSteps = config.steps.map((step) => {
-    const transformedSubsteps = step.substeps.map((subStep) => {
-      const transformed = transformSubstepConfigToInstanceArgs(subStep);
-      return {
-        ...subStep,
-        ...transformed,
-      };
-    });
+): Promise<TourEngine> {
+  const transformedSteps = await Promise.all(
+    config.steps.map(async (step) => {
+      const transformedSubsteps = await Promise.all(
+        step.substeps.map(async (subStep) => {
+          const transformed = await transformSubstepConfigToInstanceArgs(
+            subStep
+          );
+          return {
+            ...subStep,
+            ...transformed,
+          };
+        })
+      );
 
-    return {
-      ...step,
-      substeps: transformedSubsteps,
-    };
-  });
+      return {
+        ...step,
+        substeps: transformedSubsteps,
+      };
+    })
+  );
 
   return {
     ...config,

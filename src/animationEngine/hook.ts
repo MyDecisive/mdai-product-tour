@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SubstepConfig } from "../utils/configTypesScratch";
 import { STATUS } from "../utils/constants";
-import type { EngineTargetState, PodId } from "../utils/engineTypesScratch";
+import type {
+  EngineFrames,
+  EngineTargetState,
+  PodId,
+} from "../utils/engineTypesScratch";
 import type { PodStatusType, SimulatorType } from "../utils/types";
 import { AnimationEngineInstance } from "./class";
-import { transformSubstepConfigToInstanceArgs } from "./configToEngineTransforms";
 
 export interface AnimationEngineState {
   isPlaying: boolean;
@@ -20,7 +22,8 @@ export interface AnimationEngineControls {
 }
 
 export function useAnimationEngine(
-  substep: SubstepConfig,
+  targetState: EngineTargetState,
+  frames: EngineFrames.Any[],
   previousState: EngineTargetState,
   onCompleteCallback: () => void
 ): [AnimationEngineState, AnimationEngineControls] {
@@ -62,9 +65,6 @@ export function useAnimationEngine(
   }, []);
 
   useEffect(() => {
-    const { targetState, frames } =
-      transformSubstepConfigToInstanceArgs(substep);
-
     const engine = new AnimationEngineInstance(
       frames,
       previousState,
@@ -88,7 +88,8 @@ export function useAnimationEngine(
       engine.cleanup();
     };
   }, [
-    substep,
+    targetState,
+    frames,
     updateSimulatorStates,
     previousState,
     onCompleteCallback,

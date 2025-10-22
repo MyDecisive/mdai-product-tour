@@ -48,8 +48,7 @@ export class AnimationEngineInstance {
     }
   }
 
-  async play(caller?: string) {
-    console.log("play called by: ", caller);
+  async play() {
     this.isRunning = true;
 
     for (const action of this.actions) {
@@ -65,8 +64,7 @@ export class AnimationEngineInstance {
     }
   }
 
-  reset(caller?: string) {
-    console.log("reset called ", caller);
+  reset() {
     this.cleanup();
     this.currentState = { ...this.startState };
     this.callbacks.onStateChange(this.currentState);
@@ -76,7 +74,12 @@ export class AnimationEngineInstance {
   cleanup() {
     this.isRunning = false;
     this.timeouts.forEach(clearTimeout);
+    if (this.podRemovalTimer) {
+      clearTimeout(this.podRemovalTimer);
+    }
     this.timeouts = [];
+    this.podAnimationResolvers.clear();
+    this.currentActionResolver = null;
   }
 
   private async executeAction(action: EngineFrames.Any): Promise<void> {
@@ -86,6 +89,7 @@ export class AnimationEngineInstance {
     }
 
     if (action.type === FRAME_TYPES.clear) {
+      // TODO: Should this have its own method to set a state node to undefined?
       this.updateState(createClearState(action.simulators));
       return;
     }
@@ -110,6 +114,10 @@ export class AnimationEngineInstance {
 
     await waitForCompletion;
   }
+
+  // ----------------------------------------------------------------------------
+  // Status sim methods
+  // ----------------------------------------------------------------------------
 
   private addStatusPods({
     activePods: newPods,
@@ -216,7 +224,9 @@ export class AnimationEngineInstance {
       void this.statusPodRemove(podId);
     }
   }
-
+  // ----------------------------------------------------------------------------
+  // Generic/Helper methods
+  // ----------------------------------------------------------------------------
   private updateState(
     updates: DeepPartial<EngineTargetState>,
     appendArrays?: boolean
@@ -252,27 +262,27 @@ export class AnimationEngineInstance {
 export function createClearState(
   simulators: SimulatorType[]
 ): EngineTargetState {
-  const emptyState: Record<
-    SimulatorType,
-    EngineTerminalTarget | EngineStatusTarget
-  > = simulators.reduce((accum, simType) => {
-    accum[simType] = emptyEngineStateCreators[simType]?.();
-    return accum;
-  }, {} as Record<SimulatorType, EngineTerminalTarget | EngineStatusTarget>);
-
-  return emptyState as EngineTargetState;
-}
-
-const emptyEngineStateCreators = {
-  [SIMULATORS.STATUS]: () => {
-    return {
+  const fullEmptyState: EngineTargetState = {
+    [SIMULATORS.STATUS]: {
       activePods: {},
       podOrder: [],
-    } as EngineStatusTarget;
-  },
-  [SIMULATORS.TERMINAL]: () => {
-    return {
+    },
+    [SIMULATORS.TERMINAL]: {
       strings: [],
-    } as EngineTerminalTarget;
-  },
-};
+    },
+  };
+
+  const emptyState: Partial<EngineTargetState> = {};
+
+  simulators.forEach((sim) => {
+    // this makes typescript happy, but makes me sad
+    if (sim === SIMULATORS.STATUS) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+    if (sim === SIMULATORS.TERMINAL) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+  });
+
+  return emptyState;
+}

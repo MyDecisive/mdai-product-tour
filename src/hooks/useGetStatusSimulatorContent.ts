@@ -11,9 +11,14 @@ export function useGetStatusSimulatorContent({
   const [workDone, setWorkDone] = useState<boolean>(false);
 
   useEffect(() => {
+    setWorkDone(false);
+  }, [activePods]);
+
+  useEffect(() => {
     const pods = Object.values(activePods);
     const allStabilized =
       pods.length > 0 && pods.every((pod) => pod.status === "Running");
+
     if (allStabilized && !workDone) {
       setWorkDone(true);
       onAnimationComplete(SIMULATORS.STATUS);

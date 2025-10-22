@@ -96,12 +96,12 @@ export function Simulators({
               title="Status"
               active={engineState.activeSimulator.has(SIMULATORS.STATUS)}
             >
-              {engineState.currentSimulatorState.status !== null && (
+              {engineState.currentSimulatorState.status != null && (
                 <Status
                   activePods={
-                    engineState.currentSimulatorState.status!.activePods
+                    engineState.currentSimulatorState.status.activePods
                   }
-                  podOrder={engineState.currentSimulatorState.status!.podOrder}
+                  podOrder={engineState.currentSimulatorState.status.podOrder}
                   onPodStatusChange={engineControls.onPodStatusChange}
                   onAnimationComplete={engineControls.advanceAnimation}
                 />
@@ -122,10 +122,10 @@ export function Simulators({
               }}
               active={engineState.activeSimulator.has(SIMULATORS.TERMINAL)}
             >
-              {engineState.currentSimulatorState.terminal !== null && (
+              {engineState.currentSimulatorState.terminal != null && (
                 <Terminal
                   onAnimationComplete={engineControls.advanceAnimation}
-                  playing={engineState.isPlaying} // TODO: put sim play state in sim state node
+                  playing={engineState.isPlaying} // TODO: put sim play state in sim state node?
                   state={engineState?.currentSimulatorState?.terminal?.strings}
                 />
               )}

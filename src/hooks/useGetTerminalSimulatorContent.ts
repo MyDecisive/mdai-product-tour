@@ -39,10 +39,9 @@ export function useGetTerminalSimulatorContent({
         const wrappedOptions = {
           ...options,
           onBegin: (typed: Typed) => {
-            if (!options.strings || !playing) {
+            if (!playing) {
               typed.stop();
-
-              if (options.strings && !playing) {
+              if (options.strings) {
                 element.innerHTML = options.strings
                   .map(parseTypedJsString)
                   .join("\n");

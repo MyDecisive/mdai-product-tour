@@ -21,6 +21,9 @@ export interface AnimationEngineControls {
   advanceAnimation: (sim?: SimulatorType) => void; // Signal that current action is complete
   // status sim
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+  // config sim
+  onSetActiveTab: (tabName: string) => void;
+  onToggleShowingChange: (groupId: string) => void;
 }
 
 export function useAnimationEngine(
@@ -32,7 +35,7 @@ export function useAnimationEngine(
   const [isPlaying, setIsPlaying] = useState(false);
   const [terminalState, setTerminalState] = useState(previousState.terminal);
   const [statusState, setStatusState] = useState(previousState.status);
-  // const [configState, setConfigState] = useState(previousState.config);
+  const [configState, setConfigState] = useState(previousState.config);
   // const [logsState, setLogsState] = useState(previousState.logs);
   // const [bannerState, setBannerState] = useState(previousState.banner);
   const [activeSimulator, setActiveSimulator] = useState<Set<SimulatorType>>(
@@ -46,7 +49,7 @@ export function useAnimationEngine(
       state.terminal !== prev ? state.terminal : prev
     );
     setStatusState((prev) => (state.status !== prev ? state.status : prev));
-    // setConfigState((prev) => (state.config !== prev ? state.config : prev));
+    setConfigState((prev) => (state.config !== prev ? state.config : prev));
     // setLogsState((prev) => (state.logs !== prev ? state.logs : prev));
     // setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
   }, []);
@@ -133,6 +136,19 @@ export function useAnimationEngine(
       },
       [isPlaying]
     ),
+
+    onSetActiveTab: useCallback(
+      (tabName: string) => {
+        if (!isPlaying) return;
+        engineRef.current?.onSetActiveTab(tabName);
+      },
+      [isPlaying]
+    ),
+
+    onToggleShowingChange: useCallback((groupId: string) => {
+      // no early return b/c this is only used for the manual button click
+      engineRef.current?.onToggleShowingChange(groupId);
+    }, []),
   };
 
   return [
@@ -142,7 +158,7 @@ export function useAnimationEngine(
         terminal: terminalState,
         status: statusState,
         // logs: logsState,
-        // config: configState,
+        config: configState,
         // banner: bannerState,
       },
       activeSimulator,

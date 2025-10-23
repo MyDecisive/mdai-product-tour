@@ -1,24 +1,5 @@
-import { useMemo } from "react";
-import type { LineChangeBlock, ProcessedLine } from "../../utils/types";
-
-export const useStableValue = <T>(value: T) => {
-  return useMemo(() => JSON.stringify(value), [value]);
-};
-
-export const createHighlightRanges = (
-  highlights: LineChangeBlock[],
-  maxEndIdx: number
-): Set<number> => {
-  const highlightSet = new Set<number>();
-
-  highlights?.forEach(({ start, end }) => {
-    for (let i = start; i <= (end || maxEndIdx); i++) {
-      highlightSet.add(i);
-    }
-  });
-
-  return highlightSet;
-};
+import type { ConfigContent, ConfigLine } from "../../utils/engineTypesScratch";
+import type { LineChangeBlock } from "../../utils/types";
 
 export const createChangeMap = (
   changes: LineChangeBlock[]
@@ -26,7 +7,7 @@ export const createChangeMap = (
   const changeMap = new Map<number, string>();
 
   changes?.forEach((block) => {
-    block.oldValues.forEach((oldValue, index) => {
+    block.changeLines.forEach((oldValue, index) => {
       const lineNo = block.start + index;
       changeMap.set(lineNo, oldValue);
     });
@@ -36,7 +17,7 @@ export const createChangeMap = (
 };
 
 // parsing/crawling yaml lines
-export const findYamlParents = (lines: string[], lineNo: number): number[] => {
+const findYamlParents = (lines: string[], lineNo: number): number[] => {
   const parents: number[] = [];
   let targetIndent = lines[lineNo - 1]?.match(/^(\s*)/)?.[1]?.length ?? 0;
 
@@ -60,211 +41,128 @@ export function rawLinesFromText(yaml: string): string[] {
   return yaml.split("\n");
 }
 
-// shaping lines to meet component reqs
-export const extractRelevantLines = (
-  lines: string[],
-  changes: LineChangeBlock[],
-  contextLines = 2
-): Set<number> => {
-  const relevantLines = new Set<number>();
+export function createConfigContentGroups(
+  fileName: string,
+  relevantSections: (
+    | { type: "gap"; lineNo: number }
+    | { type: "group"; start: number; lines: string[] }
+  )[],
+  changeMap: Map<number, string>
+) {
+  const groups: ConfigContent[] = [];
 
-  if (!changes.length) {
-    return relevantLines;
-  }
+  relevantSections.forEach((section) => {
+    if (section.type === "gap") {
+      groups.push(section);
+    } else {
+      const lines: ConfigLine[] = section.lines.map((line, i) => {
+        const lineNo = section.start + i;
+        const newContent = changeMap.get(lineNo);
 
-  changes.forEach(({ start, end = lines.length + 1 }) => {
-    for (let i = start; i <= end; i++) {
-      relevantLines.add(i);
-
-      findYamlParents(lines, i).forEach((parentLine) => {
-        relevantLines.add(parentLine);
+        return {
+          lineNo,
+          content: line,
+          ...(newContent && {
+            changeLineNo: lineNo,
+            changeContent: newContent,
+          }),
+        };
       });
-    }
 
-    for (
-      let i = Math.max(1, start - contextLines);
-      i <= Math.min(lines.length, end + contextLines);
-      i++
-    ) {
-      if (lines[i].trim() === "") break;
-      relevantLines.add(i);
-    }
-  });
+      const start = section.start;
+      const end = start + section.lines.length - 1;
+      const isChangeBlock = lines.some((l) => l.changeContent !== undefined);
 
-  return relevantLines;
-};
-
-const createGapSection = (lineBeforeGap: string, startLineNo: number) => {
-  const indentSpacesCount = lineBeforeGap?.match(/^(\s*)/)?.[1]?.length ?? 0;
-  const indent = " ".repeat(indentSpacesCount + 2);
-
-  return {
-    lines: [`${indent}...`],
-    startLineNo,
-    isGap: true,
-  };
-};
-
-const createSectionsFromLines = (
-  lines: string[],
-  relevantLines: Set<number>
-): Array<{ lines: string[]; startLineNo: number; isGap: boolean }> => {
-  const sections: Array<{
-    lines: string[];
-    startLineNo: number;
-    isGap: boolean;
-  }> = [];
-
-  const sortedLines = Array.from(relevantLines).sort((a, b) => a - b);
-  let currentSection: number[] = [];
-
-  sortedLines.forEach((lineNo, index) => {
-    const nextLineNo = sortedLines[index + 1];
-    currentSection.push(lineNo);
-
-    const isEndOfSection = !nextLineNo || nextLineNo > lineNo + 1;
-
-    if (isEndOfSection) {
-      const startLineNo = currentSection[0];
-      const sectionLines = currentSection.map((num) => lines[num - 1]);
-      sections.push({ lines: sectionLines, startLineNo, isGap: false });
-
-      const shouldCreateGap = !!nextLineNo;
-
-      if (shouldCreateGap) {
-        const lineBeforeGap = sectionLines[sectionLines.length - 1];
-        sections.push(createGapSection(lineBeforeGap, lineNo + 1));
-      }
-
-      currentSection = [];
-    }
-  });
-
-  return sections;
-};
-
-export const extractRelevantSections = (
-  lines: string[],
-  changes: LineChangeBlock[],
-  contextLines = 2
-): Array<{ lines: string[]; startLineNo: number; isGap: boolean }> => {
-  if (
-    !changes?.length ||
-    !lines.length ||
-    (lines.length === 1 && lines[0] === "")
-  ) {
-    return [];
-  }
-
-  const relevantLines = extractRelevantLines(lines, changes, contextLines);
-  return createSectionsFromLines(lines, relevantLines);
-};
-
-const createProcessedLine = (
-  line: string,
-  lineNo: number,
-  changeMap: Map<number, string>,
-  highlightRanges: Set<number>,
-  lineToggles: Record<number, boolean>,
-  isGap: boolean
-): ProcessedLine => {
-  const change = changeMap.get(lineNo);
-  const showingNew = !!lineToggles[lineNo];
-  if (change !== undefined) {
-    return {
-      lineNo,
-      content: change,
-      hasChange: true,
-      isHighlighted: highlightRanges.has(lineNo),
-      newValue: line,
-      showingNewValue: showingNew,
-      isGap,
-    };
-  }
-
-  return {
-    lineNo,
-    content: line,
-    isHighlighted: highlightRanges.has(lineNo),
-    showingNewValue: false,
-    isGap,
-  };
-};
-
-const shouldEndGroup = (
-  currentLine: ProcessedLine,
-  nextLine: ProcessedLine | undefined
-): boolean => {
-  if (!nextLine) return true;
-
-  const isCurrentLineChanged = currentLine.isHighlighted;
-  const isNextLineChanged = nextLine.isHighlighted;
-  const isConsecutive = nextLine.lineNo === currentLine.lineNo + 1;
-
-  return !isConsecutive || isCurrentLineChanged !== isNextLineChanged;
-};
-
-const groupConsecutiveChanges = (processedLines: ProcessedLine[]) => {
-  const groups: Array<{
-    lines: ProcessedLine[];
-    startLineNo: number;
-    endLineNo: number;
-    isChangeBlock: boolean;
-    isGap?: boolean;
-  }> = [];
-
-  let currentGroup: ProcessedLine[] = [];
-
-  processedLines.forEach((line, index) => {
-    const nextLine = processedLines[index + 1];
-    currentGroup.push(line);
-
-    if (shouldEndGroup(line, nextLine)) {
       groups.push({
-        lines: currentGroup,
-        startLineNo: currentGroup[0].lineNo,
-        endLineNo: currentGroup[currentGroup.length - 1].lineNo,
-        isChangeBlock: currentGroup.some((l) => l.hasChange),
-        isGap: currentGroup[0].isGap,
+        type: "group",
+        groupId: `${fileName}-${start}-${end}`,
+        start,
+        end,
+        lines,
+        isChangeBlock,
       });
-      currentGroup = [];
     }
   });
 
   return groups;
-};
-
-export function createTextGroups(
-  rawLines: string[],
-  changes: LineChangeBlock[],
-  lineToggles: Record<number, boolean>
-) {
-  const sections = extractRelevantSections(rawLines, changes);
-  const changeMap = createChangeMap(changes);
-  const highlightRanges = createHighlightRanges(changes, rawLines.length);
-
-  return sections
-    .map((section) => ({
-      ...section,
-      processedLines: section.lines.map((line, i) => {
-        const lineNo = section.startLineNo + i;
-        return createProcessedLine(
-          line,
-          lineNo,
-          changeMap,
-          highlightRanges,
-          lineToggles,
-          section.isGap
-        );
-      }),
-    }))
-    .flatMap((section, sectionIndex) =>
-      groupConsecutiveChanges(section.processedLines).map(
-        (group, groupIndex) => ({
-          ...group,
-          sectionIndex,
-          groupIndex,
-        })
-      )
-    );
 }
+
+function determineChangeEnd(
+  end: number | undefined,
+  changeLinesLength: number,
+  linesLength: number
+) {
+  if (end !== undefined) {
+    return end;
+  }
+  if (changeLinesLength > 0) {
+    return changeLinesLength;
+  }
+  return linesLength;
+}
+
+export const extractRelevantSections = (
+  lines: string[],
+  changes: LineChangeBlock[],
+  contextSpacing = 2
+): (
+  | { type: "gap"; lineNo: number }
+  | { type: "group"; start: number; lines: string[] }
+)[] => {
+  if (!changes?.length || !lines.length) return [];
+
+  const relevantLineNos = new Set<number>();
+
+  changes.forEach(({ start, end, changeLines }) => {
+    const changeEnd = determineChangeEnd(end, changeLines.length, lines.length);
+
+    // Add changed lines and their parents
+    for (let i = start; i <= changeEnd; i++) {
+      relevantLineNos.add(i);
+      findYamlParents(lines, i).forEach((p) => relevantLineNos.add(p));
+    }
+
+    // Add context lines
+    const contextStart = Math.max(1, start - contextSpacing);
+    const contextEnd = Math.min(lines.length, changeEnd + contextSpacing);
+    for (let i = contextStart; i <= contextEnd; i++) {
+      if (lines[i - 1]?.trim()) relevantLineNos.add(i);
+    }
+  });
+
+  // Build sections
+  const allLineNos = Array.from(relevantLineNos);
+  const sortedLineNos = Array.from(allLineNos).sort((a, b) => a - b);
+  const sections: ReturnType<typeof extractRelevantSections> = [];
+  let groupStart = sortedLineNos[0];
+  let groupLineNos: number[] = [groupStart];
+
+  for (let i = 1; i < sortedLineNos.length; i++) {
+    const oneHigherThanPreviousLineNo = sortedLineNos[i - 1] + 1;
+    const isConsecutiveLineNo =
+      sortedLineNos[i] === oneHigherThanPreviousLineNo;
+    if (isConsecutiveLineNo) {
+      // keep building the section
+      groupLineNos.push(sortedLineNos[i]);
+    } else {
+      // section is complete, add it, a gap, and restart
+      sections.push({
+        type: "group",
+        start: groupStart,
+        lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
+      });
+      sections.push({ type: "gap", lineNo: oneHigherThanPreviousLineNo });
+      groupStart = sortedLineNos[i];
+      groupLineNos = [groupStart];
+    }
+  }
+
+  // Add the last group from the mutable variables.
+  sections.push({
+    type: "group",
+    start: groupStart,
+    lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
+  });
+
+  return sections;
+};

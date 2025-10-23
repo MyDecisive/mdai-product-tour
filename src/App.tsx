@@ -10,11 +10,16 @@ import {
 } from "./components";
 import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
+import { createChangeMap } from "./hooks/useGetConfigSimulatorContent/utils";
 import { FRAME_TYPES, SIMULATORS } from "./utils/constants";
 import type {
   EngineFrames,
   EngineTargetState,
 } from "./utils/engineTypesScratch";
+import {
+  staticFilterNoCommentChanges,
+  staticFilterNoCommentConfigContentGroups,
+} from "./views/Logs/configSamples/configContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
 
 /** hard coded stuff for dev */
@@ -71,10 +76,75 @@ const frames: EngineFrames.Any[] = [
     ),
     waitForComplete: true,
   },
+  {
+    type: FRAME_TYPES.add,
+    simulator: SIMULATORS.CONFIG,
+    updates: {
+      files: {
+        "otel_ref.yaml": {
+          url: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
+          fileName: "otel_ref.yaml",
+          changeMap: createChangeMap(staticFilterNoCommentChanges),
+          groups: staticFilterNoCommentConfigContentGroups,
+        },
+      },
+      showingToggle: new Set<string>(),
+      showingChange: staticFilterNoCommentConfigContentGroups.reduce(
+        (accum, group) => {
+          if (group.type === "group" && group.isChangeBlock) {
+            accum.add(group.groupId);
+          }
+          return accum;
+        },
+        new Set<string>()
+      ),
+      activeTab: "otel_ref.yaml",
+    },
+    waitForComplete: false,
+  },
+  {
+    type: FRAME_TYPES.delay,
+    duration: 1000,
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.scroll_to,
+    simulator: SIMULATORS.CONFIG,
+    updates: {
+      fileName: "otel_ref.yaml",
+      line: 74,
+    },
+    waitForComplete: true,
+  },
+  {
+    type: FRAME_TYPES.scroll_to,
+    simulator: SIMULATORS.CONFIG,
+    updates: {
+      fileName: "otel_ref.yaml",
+      line: 100,
+    },
+    waitForComplete: true,
+  },
 ];
 const targetState: EngineTargetState = {
   terminal: {
     strings: startLogsTerminalContent,
+  },
+  config: {
+    files: {
+      "otel_ref.yaml": {
+        url: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
+        fileName: "otel_ref.yaml",
+        changeMap: createChangeMap(staticFilterNoCommentChanges),
+        groups: staticFilterNoCommentConfigContentGroups,
+      },
+    },
+    showingToggle: new Set<string>([
+      "otel_ref.yaml-95-102",
+      "otel_ref.yaml-73-78",
+    ]),
+    showingChange: new Set<string>(),
+    activeTab: "otel_ref.yaml",
   },
   status: transformStatus(
     [

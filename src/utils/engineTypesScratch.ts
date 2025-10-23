@@ -131,7 +131,7 @@ export interface EngineLogsTarget {
 // ============================================================================
 // ENGINE ANIMATION FRAMES
 // ============================================================================
-
+// TODO: Explore a DRYer way to declare these and the correllaries for the Tour configuration
 export declare namespace EngineFrames {
   export namespace Terminal {
     export type EnterCommand = Frame<
@@ -182,7 +182,8 @@ export declare namespace EngineFrames {
     export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
     export type Resume = Frame<
       typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.resume
+      typeof FRAME_TYPES.resume,
+      EngineLogsTarget
     >;
     export type All = Add | Stream | Pause | Resume;
   }

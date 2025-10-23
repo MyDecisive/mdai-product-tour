@@ -3,11 +3,14 @@ import { selectAnimationIndex, selectPanelState } from "../contexts/selectors";
 import type { LogRecord, LogSimulatorProps } from "../utils/types";
 import { useSelector } from "./useSelector";
 
-function shouldInjectError(hasErrorLogs: boolean, errorFrequency: number) {
+export function shouldInjectError(
+  hasErrorLogs: boolean,
+  errorFrequency: number
+) {
   return hasErrorLogs && Math.random() < errorFrequency;
 }
 
-function selectErrorPropLog(errorLogs: LogRecord[]) {
+export function selectErrorPropLog(errorLogs: LogRecord[]) {
   const randomErrorLogIdx = Math.floor(Math.random() * errorLogs.length);
   return errorLogs[randomErrorLogIdx];
 }
@@ -27,7 +30,7 @@ function createNextLogId(cycleCount: number | null, logIndex: number | null) {
   return `log-${cycleCount}-${logIndex}`;
 }
 
-function createNextLog(
+export function createNextLog(
   propLog: LogRecord,
   cycleCount: number | null,
   logIndex: number | null

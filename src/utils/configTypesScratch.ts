@@ -101,7 +101,8 @@ export declare namespace TourFrames {
     export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
     export type Resume = Frame<
       typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.resume
+      typeof FRAME_TYPES.resume,
+      TourLogSimTarget
     >;
     export type All = Add | Stream | Pause | Resume;
   }

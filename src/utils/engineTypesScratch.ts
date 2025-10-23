@@ -122,9 +122,9 @@ export interface EngineConfigTarget {
 // ----------------------------------------------------------------------------
 
 export interface EngineLogsTarget {
-  logs: LogRecord[];
+  records: LogRecord[];
   speed: number;
-  errorLogs: LogRecord[];
+  errorRecords: LogRecord[];
   errorFrequency: number;
 }
 

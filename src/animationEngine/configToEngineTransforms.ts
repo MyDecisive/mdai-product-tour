@@ -204,10 +204,10 @@ async function transformLogs({
   const errorLogs = errorLogsSource ? await loadTextFile(errorLogsSource) : [];
 
   return {
-    logs: braidLogs(...logRecordsByFile),
+    records: braidLogs(...logRecordsByFile),
     speed: engineSpeed,
     errorFrequency: engineErrorFrequency,
-    errorLogs,
+    errorRecords: errorLogs,
   };
 }
 

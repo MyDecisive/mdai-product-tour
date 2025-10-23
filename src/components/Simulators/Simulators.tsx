@@ -43,7 +43,7 @@ export function Simulators({
         simContainerParentRef.current.scrollTo({ top: 0, behavior: "smooth" });
       }
     } else if (
-      // engineState.activeSimulator.has(SIMULATORS.LOGS) ||
+      engineState.activeSimulator.has(SIMULATORS.LOGS) ||
       engineState.activeSimulator.has(SIMULATORS.TERMINAL)
     ) {
       if (simContainerParentRef.current) {
@@ -52,8 +52,6 @@ export function Simulators({
       }
     }
   }, [engineState.activeSimulator]);
-
-  const logs = null;
 
   return (
     <Box
@@ -148,7 +146,9 @@ export function Simulators({
                 minHeight: "394px",
               }}
             >
-              {logs !== null && <LogsSimulator />}
+              {engineState.currentSimulatorState.logs != null && (
+                <LogsSimulator {...engineState.currentSimulatorState.logs} />
+              )}
             </SimulatorBox>
           </Grid>
         </Grid>

@@ -1,16 +1,14 @@
 import { Box } from "@mui/material";
 import React from "react";
 import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorContent";
-import { SimulatorContextLabel } from "../SimContextLabel";
+import type { EngineLogsTarget } from "../../../utils/engineTypesScratch";
 import { LogRow } from "./LogRow";
 
-export const LogsSimulator: React.FC = () => {
-  const { logContainerRef, contextLabel, displayedLogs } =
-    useGetLogsSimulatorContent();
-
+export const LogsSimulator: React.FC<EngineLogsTarget> = ({ records }) => {
+  const { logContainerRef } = useGetLogsSimulatorContent();
   return (
     <>
-      <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
+      {/* <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel> */}
       <Box
         className="log-rows-container"
         ref={logContainerRef}
@@ -22,7 +20,7 @@ export const LogsSimulator: React.FC = () => {
           boxSizing: "border-box",
         }}
       >
-        {displayedLogs.map((log) => (
+        {records.map((log) => (
           <LogRow key={log.id} {...log} />
         ))}
       </Box>

@@ -1,56 +1,63 @@
 import { useEffect, useRef } from "react";
-import type { FileConfig, LineToggles } from "../../utils/types";
-import { initialTogglesForAllFiles } from "./useLineToggles";
+import type { SimulatorType } from "../../utils/types";
 import { useScrollAnimation } from "./useScrollAnimation";
 
-const getNewlyToggledLines = (current: LineToggles, prev: LineToggles) => {
-  return Object.keys(current)
-    .map(Number)
-    .filter((lineNo) => current[lineNo] && !prev[lineNo]);
-};
+function getNewlyToggledGroups<T>(current: Set<T>, previous: Set<T>): Set<T> {
+  const difference = new Set<T>();
+
+  for (const item of current) {
+    if (!previous.has(item)) {
+      difference.add(item);
+    }
+  }
+
+  for (const item of previous) {
+    if (!current.has(item)) {
+      difference.add(item);
+    }
+  }
+
+  return difference;
+}
 
 export function useManageScrollToAndToggle({
   activeTab,
-  files,
-  fileNames,
-  stableInitialToggles,
-  toggleLineValue,
+  showingChange,
+  onAnimationComplete,
+  addPulsedGroup,
 }: {
-  stableInitialToggles: string;
   activeTab?: string;
-  files: Record<string, FileConfig>;
-  fileNames: string[];
-  toggleLineValue: (fileName: string, lineNos: number[]) => void;
+  showingChange: Set<string>;
+  onAnimationComplete: (sim?: SimulatorType) => void;
+  addPulsedGroup: (groupId: string) => void;
 }) {
-  const { containerRefs, scrollToAndToggle } = useScrollAnimation(
-    fileNames,
-    toggleLineValue
+  const { scrollToAndToggle, makeSetContainerRef } = useScrollAnimation(
+    addPulsedGroup,
+    onAnimationComplete
   );
 
-  const prevInitialLineTogglesRef = useRef<Record<string, LineToggles>>(
-    initialTogglesForAllFiles(files)
-  );
+  const prevTogglesRef = useRef<Set<string>>(showingChange);
 
   useEffect(() => {
     let scrollPromise: (Promise<void> & { cancel?: () => void }) | undefined;
 
     if (!activeTab) return;
 
-    const prev = prevInitialLineTogglesRef.current[activeTab] || {};
-    const current = files[activeTab]?.initialLineToggles || {};
+    const prev = prevTogglesRef.current || new Set();
+    const current = showingChange;
 
-    const newlyToggledLines = getNewlyToggledLines(current, prev);
+    const newlyToggledGroups = getNewlyToggledGroups<string>(current, prev);
 
-    if (newlyToggledLines.length === 0) {
-      prevInitialLineTogglesRef.current[activeTab] = current;
+    if (newlyToggledGroups.size === 0) {
+      prevTogglesRef.current = current;
       return;
     }
 
     const timeout = setTimeout(() => {
-      scrollPromise = scrollToAndToggle(activeTab, newlyToggledLines);
+      scrollPromise = scrollToAndToggle([...newlyToggledGroups]);
     }, 0);
 
-    prevInitialLineTogglesRef.current[activeTab] = current;
+    prevTogglesRef.current = current;
 
     return () => {
       if (timeout) {
@@ -60,8 +67,10 @@ export function useManageScrollToAndToggle({
         scrollPromise.cancel();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, stableInitialToggles, scrollToAndToggle]);
+  }, [activeTab, showingChange, scrollToAndToggle]);
 
-  return { containerRefs };
+  return {
+    makeSetContainerRef,
+    groupsShowingChange: prevTogglesRef.current,
+  };
 }

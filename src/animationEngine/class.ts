@@ -4,6 +4,7 @@ import type {
   EngineFrames,
   EngineStatusTarget,
   EngineTargetState,
+  LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
 import type { DeepPartial, SimulatorType } from "../utils/types";
@@ -112,6 +113,12 @@ export class AnimationEngineInstance {
         break;
       case FRAME_TYPES.add_services:
         this.addStatusPods(action.updates);
+        break;
+      case FRAME_TYPES.add:
+        this.updateState({ [action.simulator]: action.updates });
+        break;
+      case FRAME_TYPES.scroll_to:
+        this.manageScrollTo(action.updates);
         break;
     }
 
@@ -260,6 +267,82 @@ export class AnimationEngineInstance {
       void this.scheduleRemoval(podId);
     }
   }
+
+  // ----------------------------------------------------------------------------
+  // Config sim methods
+  // ----------------------------------------------------------------------------
+  public onSetActiveTab(tabName: string) {
+    const config = this.currentState.config;
+    if (!config || !config.files[tabName]) {
+      return;
+    }
+
+    this.updateState({
+      config: {
+        ...config,
+        activeTab: tabName,
+      },
+    });
+  }
+
+  public onToggleShowingChange(groupId: string) {
+    const config = this.currentState.config;
+    if (!config) {
+      return;
+    }
+
+    const newConfig = { ...config };
+    newConfig.showingChange = new Set(newConfig.showingChange);
+    if (!newConfig.showingToggle.has(groupId)) {
+      newConfig.showingToggle = new Set(newConfig.showingToggle);
+      newConfig.showingToggle.add(groupId);
+    }
+    if (newConfig.showingChange.has(groupId)) {
+      newConfig.showingChange.delete(groupId);
+    } else {
+      newConfig.showingChange.add(groupId);
+    }
+
+    this.currentState = {
+      ...this.currentState,
+      config: newConfig,
+    };
+
+    this.callbacks.onStateChange(this.currentState);
+  }
+
+  private manageScrollTo({
+    fileName,
+    line,
+  }: {
+    fileName: string;
+    line: number;
+  }) {
+    const config = this.currentState.config;
+    if (!config || !config.files[fileName]) {
+      return;
+    }
+
+    if (config.activeTab !== fileName) {
+      this.onSetActiveTab(fileName);
+    }
+
+    const file = config.files[fileName];
+
+    const relevantGroup = file.groups.find((grp) => {
+      const isLineGroup = grp.type === "group";
+      if (!isLineGroup) {
+        return;
+      }
+      return grp.start <= line && line <= grp.end;
+    });
+
+    if (!relevantGroup) {
+      return;
+    }
+
+    this.onToggleShowingChange((relevantGroup as LineGroup).groupId);
+  }
   // ----------------------------------------------------------------------------
   // Generic/Helper methods
   // ----------------------------------------------------------------------------
@@ -306,6 +389,12 @@ export function createClearState(
     [SIMULATORS.TERMINAL]: {
       strings: [],
     },
+    [SIMULATORS.CONFIG]: {
+      files: {},
+      activeTab: "",
+      showingToggle: new Set<string>(),
+      showingChange: new Set<string>(),
+    },
   };
 
   const emptyState: Partial<EngineTargetState> = {};
@@ -313,6 +402,9 @@ export function createClearState(
   simulators.forEach((sim) => {
     // this makes typescript happy, but makes me sad
     if (sim === SIMULATORS.STATUS) {
+      emptyState[sim] = fullEmptyState[sim];
+    }
+    if (sim === SIMULATORS.CONFIG) {
       emptyState[sim] = fullEmptyState[sim];
     }
     if (sim === SIMULATORS.TERMINAL) {

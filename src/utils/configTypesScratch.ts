@@ -1,5 +1,10 @@
 import type { FRAME_TYPES, SIMULATORS } from "./constants";
-import type { ClearSimulatorsFrame, DelayFrame, Frame } from "./types";
+import type {
+  ClearSimulatorsFrame,
+  DelayFrame,
+  Frame,
+  LineChangeBlock,
+} from "./types";
 
 // ============================================================================
 // TOUR CONFIG TARGET STATES
@@ -16,9 +21,22 @@ export interface TourStatusTarget {
   noSuffix?: boolean; // defaults to false
 }
 
+// Assumes the file at the URL is what will be shown at the end of an animation set
+interface TourFileTarget {
+  url: string;
+  fileName?: string;
+  changes?: LineChangeBlock[];
+}
+
+export interface TourConfigSimTarget {
+  files: TourFileTarget[];
+  activeTab?: string; // defaults to first file
+}
+
 export interface TourTargetState {
   terminal?: TourTerminalTarget[];
   status?: TourStatusTarget[];
+  config?: TourConfigSimTarget;
 }
 
 // ============================================================================
@@ -44,7 +62,25 @@ export declare namespace TourFrames {
     export type All = AddServices;
   }
 
+  export namespace Config {
+    export type Add = Frame<
+      typeof SIMULATORS.CONFIG,
+      typeof FRAME_TYPES.add,
+      TourConfigSimTarget
+    >;
+    export type ScrollTo = Frame<
+      typeof SIMULATORS.CONFIG,
+      typeof FRAME_TYPES.scroll_to,
+      {
+        fileName: string;
+        line: number;
+      }
+    >;
+    export type All = Add | ScrollTo;
+  }
+
   export type Any =
+    | Config.All
     | Terminal.All
     | Status.All
     | DelayFrame

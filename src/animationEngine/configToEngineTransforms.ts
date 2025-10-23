@@ -180,7 +180,7 @@ async function transformConfig(
 // LOGS SIMULATOR TRANSFORMS
 // ============================================================================
 
-async function loadTextFile(fileName: string): Promise<LogRecord[]> {
+async function loadLogsTextFile(fileName: string): Promise<LogRecord[]> {
   const res = await fetch(`/logs/${fileName}`);
   if (!res.ok) {
     throw new Error(`Failed to load log file: ${fileName}`);
@@ -199,9 +199,11 @@ async function transformLogs({
   const engineSpeed = speed ?? 1000;
   const engineErrorFrequency = errorFrequency ?? 0.1;
 
-  const logRecordsByFile = await Promise.all(logsSources.map(loadTextFile));
+  const logRecordsByFile = await Promise.all(logsSources.map(loadLogsTextFile));
 
-  const errorLogs = errorLogsSource ? await loadTextFile(errorLogsSource) : [];
+  const errorLogs = errorLogsSource
+    ? await loadLogsTextFile(errorLogsSource)
+    : [];
 
   return {
     records: braidLogs(...logRecordsByFile),

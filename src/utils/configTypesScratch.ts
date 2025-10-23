@@ -91,7 +91,7 @@ export declare namespace TourFrames {
     export type Add = Frame<
       typeof SIMULATORS.LOGS,
       typeof FRAME_TYPES.add,
-      TourLogSimTarget
+      Pick<TourLogSimTarget, "logsSources">
     >;
     export type Stream = Frame<
       typeof SIMULATORS.LOGS,

@@ -172,7 +172,7 @@ export declare namespace EngineFrames {
     export type Add = Frame<
       typeof SIMULATORS.LOGS,
       typeof FRAME_TYPES.add,
-      EngineLogsTarget
+      Pick<EngineLogsTarget, "records">
     >;
     export type Stream = Frame<
       typeof SIMULATORS.LOGS,

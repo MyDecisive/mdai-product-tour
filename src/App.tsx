@@ -20,7 +20,7 @@ import {
   staticFilterNoCommentChanges,
   staticFilterNoCommentConfigContentGroups,
 } from "./views/Logs/configSamples/configContent";
-import { errorLogs, serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
+import { serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
 
 /** hard coded stuff for dev */
@@ -63,9 +63,6 @@ const frames: EngineFrames.Any[] = [
         timestamp: new Date().toISOString(),
         id: `log-message-${index}`,
       })),
-      speed: 400,
-      errorFrequency: 0.1,
-      errorRecords: errorLogs,
     },
   },
   {

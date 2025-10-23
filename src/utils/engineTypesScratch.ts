@@ -4,6 +4,7 @@ import type {
   ClearSimulatorsFrame,
   DelayFrame,
   Frame,
+  LogRecord,
   PodStatusType,
   TerminalTypedOptions,
 } from "./types";
@@ -43,6 +44,7 @@ export interface EngineTargetState {
   terminal?: EngineTerminalTarget;
   status?: EngineStatusTarget;
   config?: EngineConfigTarget;
+  logs?: EngineLogsTarget;
 }
 
 // ----------------------------------------------------------------------------
@@ -113,6 +115,17 @@ export interface EngineConfigTarget {
   activeTab: string;
   showingToggle: Set<string>; // groupIds
   showingChange: Set<string>; // groupIds
+}
+
+// ----------------------------------------------------------------------------
+// Logs
+// ----------------------------------------------------------------------------
+
+export interface EngineLogsTarget {
+  logs: LogRecord[];
+  speed: number;
+  errorLogs: LogRecord[];
+  errorFrequency: number;
 }
 
 // ============================================================================

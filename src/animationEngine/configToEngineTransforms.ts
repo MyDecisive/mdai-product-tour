@@ -8,6 +8,7 @@ import type {
   SubstepConfig,
   TourConfigSimTarget,
   TourFrames,
+  TourLogSimTarget,
   TourStatusTarget,
   TourTargetState,
   TourTerminalTarget,
@@ -18,6 +19,7 @@ import type {
   EngineConfigTarget,
   EngineFileConfig,
   EngineFrames,
+  EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
   EngineTerminalTarget,
@@ -25,6 +27,9 @@ import type {
   PodId,
 } from "../utils/engineTypesScratch";
 import { fetchGitHubFile } from "../utils/fetchRawGithubFile";
+import type { LogRecord } from "../utils/types";
+import { braidLogs } from "../views/Logs/tailLogs/braidLogs";
+import { parseRawLogFileToLogLines } from "../views/Logs/tailLogs/parseRawLogs";
 import { createTerminalContent } from "../views/Logs/terminal/behavior";
 
 // ============================================================================
@@ -172,6 +177,41 @@ async function transformConfig(
 }
 
 // ============================================================================
+// LOGS SIMULATOR TRANSFORMS
+// ============================================================================
+
+async function loadTextFile(fileName: string): Promise<LogRecord[]> {
+  const res = await fetch(`/logs/${fileName}`);
+  if (!res.ok) {
+    throw new Error(`Failed to load log file: ${fileName}`);
+  }
+
+  const text = await res.text();
+  return parseRawLogFileToLogLines(text);
+}
+
+async function transformLogs({
+  logsSources = [],
+  speed,
+  errorFrequency,
+  errorLogsSource,
+}: TourLogSimTarget): Promise<EngineLogsTarget> {
+  const engineSpeed = speed ?? 1000;
+  const engineErrorFrequency = errorFrequency ?? 0.1;
+
+  const logRecordsByFile = await Promise.all(logsSources.map(loadTextFile));
+
+  const errorLogs = errorLogsSource ? await loadTextFile(errorLogsSource) : [];
+
+  return {
+    logs: braidLogs(...logRecordsByFile),
+    speed: engineSpeed,
+    errorFrequency: engineErrorFrequency,
+    errorLogs,
+  };
+}
+
+// ============================================================================
 // TRANSFORMS FOR ANIMATION
 // ============================================================================
 
@@ -225,6 +265,7 @@ async function transformTourToEngineState(
       ? transformStatus(tour.status, contextId, true)
       : undefined,
     config: tour.config ? await transformConfig(tour.config) : undefined,
+    logs: tour.logs ? await transformLogs(tour.logs) : undefined,
   };
 }
 

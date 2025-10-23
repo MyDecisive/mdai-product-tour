@@ -2,76 +2,63 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { InfoBox } from "../../components/InfoBox";
 import { useHighlander } from "../../hooks/useHighlander";
-import { ITEM_IDS, Logs, PII, Traces } from "../../utils/constants";
-import { getViewTitle } from "../../utils/strings";
-import type {
-  StepItemMap,
-  ViewStepOrder,
-  ViewTreeItemProps,
-} from "../../utils/types";
-import { hydrateViewTreeitems } from "../common";
+import type { ViewTreeItemProps } from "../../utils/types";
+import type { Tours } from "../../utils/drawerTypes";
+import drawerConfig from "../drawer-config.yaml";
 
-function DynamicLogFiltrationContent() {
-  const { actions } = useHighlander();
-
+function HomeTourCard({ tour, onStart }: { tour: Tours; onStart?: () => void }) {
   return (
     <InfoBox>
-      <Typography>Ready to see how it works?</Typography>
-      <br />
-      <div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
-        <Button size="medium" onClick={actions.START_LOGS_DEMO}>
-          Fire it up
-        </Button>
-      </div>
+      {tour.subtitle && <Typography>{tour.subtitle}</Typography>}
+      {tour.buttonText && onStart && (
+        <>
+          <br />
+          <div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
+            <Button size="medium" onClick={onStart}>
+              {tour.buttonText}
+            </Button>
+          </div>
+        </>
+      )}
     </InfoBox>
   );
 }
 
-export const stepItemsMap: StepItemMap = {
-  [ITEM_IDS.Logs]: {
-    label: getViewTitle(Logs),
-    content: <DynamicLogFiltrationContent />,
-    slotProps: {
-      label: {
-        style: { textTransform: "uppercase" },
-      },
-    },
-  },
-  [ITEM_IDS.Traces]: {
-    label: getViewTitle(Traces),
-    content: null,
-    slotProps: {
-      label: {
-        style: { textTransform: "uppercase" },
-        subLabel: "Coming soon",
-      },
-    },
-  },
-  [ITEM_IDS.PII]: {
-    label: getViewTitle(PII),
-    content: null,
-    slotProps: {
-      label: {
-        style: { textTransform: "uppercase" },
-        subLabel: "Coming soon",
-      },
-    },
-  },
-};
+export const viewTreeItems: ViewTreeItemProps[] = (() => {
+  const { tours = [] } = (drawerConfig as { tours?: Tours[] }) || {};
+  const useActions = () => {
+    const { actions } = useHighlander();
+    return {
+      logs: actions.START_LOGS_DEMO,
+    } as Record<string, (() => void) | undefined>;
+  };
 
-export const STEP_ORDER: ViewStepOrder = [
-  {
-    stepId: ITEM_IDS.Logs,
-  },
-  {
-    stepId: ITEM_IDS.Traces,
-  },
-  {
-    stepId: ITEM_IDS.PII,
-  },
-];
+  const items: ViewTreeItemProps[] = tours.map((tour) => {
+    const Content = () => {
+      const actionMap = useActions();
+      const onStart = actionMap[tour.id];
+      return tour.coming_soon ? null : <HomeTourCard tour={tour} onStart={onStart} />;
+    };
 
-export const viewTreeItems: ViewTreeItemProps[] = hydrateViewTreeitems(
-  stepItemsMap,
-  STEP_ORDER
-);
+    return {
+      itemId: tour.id,
+      label: tour.title,
+      content: tour.coming_soon ? null : <Content />,
+      slotProps: {
+        label: {
+          style: { textTransform: "uppercase" },
+          ...(tour.coming_soon ? { subLabel: tour.subtitle } : {}),
+        },
+      },
+    };
+  });
+
+  return items;
+})();
+
+export const STEP_ORDER = (() =>
+  toursToStepOrder((drawerConfig as { tours?: Tours[] })?.tours || []))();
+
+function toursToStepOrder(tours: Tours[]) {
+  return tours.map((t) => ({ stepId: t.id }));
+}

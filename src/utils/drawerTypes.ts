@@ -1,30 +1,35 @@
-interface ContentItem {
-  text: string | null;
-  highlightText?: string;
-  animated?: boolean;
-  variant?: 'code' | 'button' | 'animated';
-  onClick?: () => void;
+export interface HighlightText {
+  text: string;
+  simulator: "status" | "config" | "logs" | "terminal";
 }
 
-interface VisualizationContentItem extends ContentItem {
+export interface ContentItem {
+  text: string | null;
+  highlightText?: HighlightText;
+  variant?: "code" | "button";
+  link?: string;
+  style?: React.CSSProperties;
+}
+
+export interface VisualizationContentItem extends ContentItem {
   src: string;
   alt: string;
 }
 
-interface ContentBlock {
+export interface ContentBlock {
   title: string | null;
-  variant?: 'default' | 'list';
+  variant?: "default" | "list" | "visualization";
   items?: Array<ContentItem | VisualizationContentItem>;
 }
 
-interface SubStep {
+export interface SubStep {
   id: string;
   title?: string;
   content?: ContentBlock;
-  visualizationModal?: true;
+  visualizationModal?: boolean;
 }
 
-interface Step {
+export interface Step {
   id: string;
   title?: string;
   substeps?: Array<SubStep>;
@@ -40,5 +45,12 @@ export interface Tours {
 }
 
 export interface DrawerConfig {
+  tours: Tours[];
+}
+
+export interface HomeConfig {
+  id: string;
+  title: string;
+  subtitle: string;
   tours: Tours[];
 }

@@ -8,6 +8,9 @@ import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
 import { TreeItem } from "../TreeItem";
 import { StepNavButtons } from "./StepNavButtons";
+import type { Tours } from "../../utils/drawerTypes";
+import { SubStep as SubStepTreeItem } from "./Steps/SubStep";
+import type { SubStep } from "../../utils/drawerTypes";
 
 const NavDrawerBodyStyles = css({
   padding: "8px 0",
@@ -18,27 +21,27 @@ const NavDrawerBodyStyles = css({
   marginBottom: "24px",
 });
 
-const NavTreeSubStepStyles = css({
-  [`& .${treeItemClasses.groupTransition}`]: {
-    marginTop: "8px",
-    borderLeft: `1px solid rgba(111, 111, 111, 0.50)`,
-    padding: "8px 16px 0 16px",
-  },
-  [`& .${treeItemClasses.iconContainer} > svg`]: {
-    padding: "4px",
-  },
-});
-
 const BodyScrollContainer = css({
   maxHeight: `100%`,
   overflowY: "auto",
   overflowX: "hidden",
 });
 
-export function Body() {
-  const { inTour, drawerItems, handleDrawerItemClick, expandedDrawerItems } =
-    useGetDrawerContent();
+type BodyProps = {
+  inTour: boolean;
+  drawerItems: Tours;
+  handleDrawerItemClick: (itemId: string) => void;
+  expandedDrawerItems: string[];
+};
 
+// TODO: All borked, need fixed
+
+export function Body({
+  inTour,
+  drawerItems,
+  handleDrawerItemClick,
+  expandedDrawerItems,
+}: BodyProps) {
   return (
     <Box sx={css([BodyScrollContainer])}>
       {!inTour && (
@@ -48,7 +51,7 @@ export function Body() {
           </Typography>
         </Box>
       )}
-      <Box sx={css([NavDrawerBodyStyles])} className="drawer-body">
+      {/* <Box sx={css([NavDrawerBodyStyles])} className="drawer-body">
         <SimpleTreeView
           slots={{
             expandIcon: ArrowRightIcon,
@@ -67,29 +70,16 @@ export function Body() {
                 slotProps={slotProps}
               >
                 {subSteps
-                  ? subSteps.map(
-                      ({
-                        itemId: id,
-                        label: subStepLabel,
-                        content: subStepContent,
-                      }) => (
-                        <TreeItem
-                          key={id}
-                          sx={NavTreeSubStepStyles}
-                          itemId={id}
-                          label={subStepLabel}
-                        >
-                          {subStepContent}
-                          <StepNavButtons />
-                        </TreeItem>
-                      )
-                    )
+                  ? subSteps.map((substep: SubStep) => (
+                      <SubStepTreeItem {...substep} />
+                    ))
                   : content}
+                <StepNavButtons />
               </TreeItem>
             )
           )}
         </SimpleTreeView>
-      </Box>
+      </Box> */}
     </Box>
   );
 }

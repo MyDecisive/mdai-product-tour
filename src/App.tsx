@@ -21,6 +21,8 @@ import {
   staticFilterNoCommentConfigContentGroups,
 } from "./views/Logs/configSamples/configContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
+import tours from "./views/drawer-config.yaml?raw";
+import { parseYaml } from "./utils/loadTourConfigs";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
@@ -190,6 +192,9 @@ function App() {
   // const frames =
   //   tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
   // const targetState = tourConfig[0].steps[0].substeps[0].targetState;
+
+  const parsedConfig = parseYaml(tours)
+  console.log("parsedConfig", parsedConfig);
 
   return (
     <Box

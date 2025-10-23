@@ -8,15 +8,16 @@ const tourConfigUrls =
   (import.meta.env.VITE_TOUR_CONFIG_URLS as string)?.split(",") || [];
 
 export async function loadAllTourConfigs(): Promise<TourEngine[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return Promise.all(tourConfigUrls.map((url) => loadTourConfig(url.trim())));
 }
-
 /**
  * Loads and parses a tour configuration from a GitHub URL
  */
 async function loadTourConfig(url: string): Promise<TourEngine> {
   try {
     const yamlContent = await fetchGitHubFile(url);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const config = parseYaml(yamlContent) as TourConfiguration;
 
     validateTourConfig(config);
@@ -31,7 +32,7 @@ async function loadTourConfig(url: string): Promise<TourEngine> {
 /**
  * Parses YAML string to object
  */
-function parseYaml(yamlString: string): unknown {
+export function parseYaml(yamlString: string): unknown {
   try {
     return parse(yamlString);
   } catch (error: unknown) {

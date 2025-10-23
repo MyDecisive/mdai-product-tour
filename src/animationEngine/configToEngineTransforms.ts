@@ -242,8 +242,21 @@ async function transformTourToEngineAnimation(
               updates: await transformConfig(frame.updates),
             };
           }
+          if (frame.simulator === SIMULATORS.LOGS) {
+            return {
+              ...frame,
+              updates: await transformLogs(frame.updates),
+            };
+          }
           return frame;
+        case FRAME_TYPES.stream:
+          return {
+            ...frame,
+            updates: await transformLogs(frame.updates),
+          };
         case FRAME_TYPES.scroll_to:
+        case FRAME_TYPES.pause:
+        case FRAME_TYPES.resume:
         default:
           return frame;
       }

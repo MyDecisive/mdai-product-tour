@@ -87,10 +87,30 @@ export declare namespace TourFrames {
     export type All = Add | ScrollTo;
   }
 
+  export namespace Logs {
+    export type Add = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.add,
+      TourLogSimTarget
+    >;
+    export type Stream = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.stream,
+      TourLogSimTarget
+    >;
+    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
+    export type Resume = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.resume
+    >;
+    export type All = Add | Stream | Pause | Resume;
+  }
+
   export type Any =
     | Config.All
     | Terminal.All
     | Status.All
+    | Logs.All
     | DelayFrame
     | ClearSimulatorsFrame;
 }

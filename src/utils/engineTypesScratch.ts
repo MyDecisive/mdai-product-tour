@@ -168,9 +168,29 @@ export declare namespace EngineFrames {
     export type ALL = Add | ScrollTo;
   }
 
+  export namespace Logs {
+    export type Add = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.add,
+      EngineLogsTarget
+    >;
+    export type Stream = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.stream,
+      EngineLogsTarget
+    >;
+    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
+    export type Resume = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.resume
+    >;
+    export type All = Add | Stream | Pause | Resume;
+  }
+
   export type Any =
     | Terminal.All
     | Status.All
+    | Logs.All
     | Config.ALL
     | DelayFrame
     | ClearSimulatorsFrame;

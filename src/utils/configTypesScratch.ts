@@ -33,10 +33,18 @@ export interface TourConfigSimTarget {
   activeTab?: string; // defaults to first file
 }
 
+export interface TourLogSimTarget {
+  logsSources?: string[]; // local files -- must be a log file in public/logs/
+  speed?: number; // defaults to 1000
+  errorLogsSource?: string; // local file -- must be a log file in public/logs/
+  errorFrequency?: number; // defaults to 0.1
+}
+
 export interface TourTargetState {
   terminal?: TourTerminalTarget[];
   status?: TourStatusTarget[];
   config?: TourConfigSimTarget;
+  logs?: TourLogSimTarget;
 }
 
 // ============================================================================
@@ -79,10 +87,31 @@ export declare namespace TourFrames {
     export type All = Add | ScrollTo;
   }
 
+  export namespace Logs {
+    export type Add = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.add,
+      Pick<TourLogSimTarget, "logsSources">
+    >;
+    export type Stream = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.stream,
+      TourLogSimTarget
+    >;
+    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
+    export type Resume = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.resume,
+      TourLogSimTarget
+    >;
+    export type All = Add | Stream | Pause | Resume;
+  }
+
   export type Any =
     | Config.All
     | Terminal.All
     | Status.All
+    | Logs.All
     | DelayFrame
     | ClearSimulatorsFrame;
 }

@@ -1,13 +1,19 @@
+import {
+  createNextLog,
+  selectErrorPropLog,
+  shouldInjectError,
+} from "../hooks/useGetLogsSimulatorContent";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import { deepMergeWith } from "../utils/deepMergeWith";
 import type {
   EngineFrames,
+  EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
   LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
-import type { DeepPartial, SimulatorType } from "../utils/types";
+import type { DeepPartial, LogRecord, SimulatorType } from "../utils/types";
 import { POD_NAME_DELIM } from "./configToEngineTransforms";
 
 export interface EngineCallbacks {
@@ -30,6 +36,10 @@ export class AnimationEngineInstance {
 
   private podsToRemove: Set<PodId> = new Set();
   private podRemovalTimer: NodeJS.Timeout | null = null;
+
+  private logsIntervalRef: NodeJS.Timeout | null = null;
+  private logsCurrentIndex: number = 0;
+  private logsCycleCount: number = 0;
 
   constructor(
     actions: EngineFrames.Any[],
@@ -83,6 +93,11 @@ export class AnimationEngineInstance {
     this.timeouts = [];
     this.podAnimationResolvers.clear();
     this.currentActionResolver = null;
+    if (this.logsIntervalRef) {
+      clearInterval(this.logsIntervalRef);
+    }
+    this.logsCurrentIndex = 0;
+    this.logsCycleCount = 0;
   }
 
   private async executeAction(action: EngineFrames.Any): Promise<void> {
@@ -107,6 +122,7 @@ export class AnimationEngineInstance {
           this.currentActionResolver = resolve;
         })
       : Promise.resolve();
+    // TODO: Find a DRYer way to do this
     switch (action.type) {
       case FRAME_TYPES.enter_command:
         this.updateState({ [action.simulator]: action.updates }, true);
@@ -115,10 +131,23 @@ export class AnimationEngineInstance {
         this.addStatusPods(action.updates);
         break;
       case FRAME_TYPES.add:
+        if (action.simulator === SIMULATORS.LOGS) {
+          this.updateState({ [action.simulator]: action.updates }, true);
+          break;
+        }
         this.updateState({ [action.simulator]: action.updates });
         break;
       case FRAME_TYPES.scroll_to:
         this.manageScrollTo(action.updates);
+        break;
+      case FRAME_TYPES.pause:
+        this.logsPause();
+        break;
+      case FRAME_TYPES.stream:
+        this.logsStream(action.updates);
+        break;
+      case FRAME_TYPES.resume:
+        this.logsStream(action.updates, true);
         break;
     }
 
@@ -342,6 +371,51 @@ export class AnimationEngineInstance {
     }
 
     this.onToggleShowingChange((relevantGroup as LineGroup).groupId);
+  }
+  // ----------------------------------------------------------------------------
+  // Logs sim methods
+  // ----------------------------------------------------------------------------
+  private logsStream(
+    { records, speed, errorRecords, errorFrequency }: EngineLogsTarget,
+    resume?: boolean
+  ): void {
+    if (this.logsIntervalRef) {
+      clearInterval(this.logsIntervalRef);
+    }
+    if (!resume) {
+      this.logsCycleCount = 0;
+      this.logsCurrentIndex = 0;
+    }
+
+    this.logsIntervalRef = setInterval(() => {
+      const logs = this.currentState.logs || { records: [] };
+
+      let nextLog: LogRecord;
+      if (shouldInjectError(errorRecords.length > 0, errorFrequency)) {
+        const propLog = selectErrorPropLog(errorRecords);
+        nextLog = createNextLog(propLog, null, null);
+      } else {
+        const logIndex = this.logsCurrentIndex % records.length;
+        const propLog = records[logIndex];
+        nextLog = createNextLog(propLog, this.logsCycleCount, logIndex);
+
+        this.logsCurrentIndex++;
+        if (this.logsCurrentIndex >= records.length) {
+          this.logsCycleCount++;
+          this.logsCurrentIndex = 0;
+        }
+      }
+
+      logs.records = [...logs.records, nextLog];
+      this.updateState({ logs });
+    }, speed);
+  }
+
+  private logsPause(): void {
+    if (this.logsIntervalRef) {
+      clearInterval(this.logsIntervalRef);
+      this.logsIntervalRef = null;
+    }
   }
   // ----------------------------------------------------------------------------
   // Generic/Helper methods

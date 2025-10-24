@@ -191,7 +191,7 @@ export type FrameType = (typeof FRAME_TYPES)[Exclude<
 >];
 export type SimulatorType = (typeof SIMULATORS)[Exclude<
   keyof typeof SIMULATORS,
-  "BANNER" | "LOGS"
+  "BANNER"
 >];
 export type PodStatusType = (typeof STATUS)[keyof typeof STATUS];
 

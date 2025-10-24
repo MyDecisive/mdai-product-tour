@@ -8,6 +8,7 @@ import type {
   SubstepConfig,
   TourConfigSimTarget,
   TourFrames,
+  TourLogSimTarget,
   TourStatusTarget,
   TourTargetState,
   TourTerminalTarget,
@@ -18,6 +19,7 @@ import type {
   EngineConfigTarget,
   EngineFileConfig,
   EngineFrames,
+  EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
   EngineTerminalTarget,
@@ -25,6 +27,9 @@ import type {
   PodId,
 } from "../utils/engineTypesScratch";
 import { fetchGitHubFile } from "../utils/fetchRawGithubFile";
+import type { LogRecord } from "../utils/types";
+import { braidLogs } from "../views/Logs/tailLogs/braidLogs";
+import { parseRawLogFileToLogLines } from "../views/Logs/tailLogs/parseRawLogs";
 import { createTerminalContent } from "../views/Logs/terminal/behavior";
 
 // ============================================================================
@@ -172,6 +177,43 @@ async function transformConfig(
 }
 
 // ============================================================================
+// LOGS SIMULATOR TRANSFORMS
+// ============================================================================
+
+async function loadLogsTextFile(fileName: string): Promise<LogRecord[]> {
+  const res = await fetch(`/logs/${fileName}`);
+  if (!res.ok) {
+    throw new Error(`Failed to load log file: ${fileName}`);
+  }
+
+  const text = await res.text();
+  return parseRawLogFileToLogLines(text);
+}
+
+async function transformLogs({
+  logsSources = [],
+  speed,
+  errorFrequency,
+  errorLogsSource,
+}: TourLogSimTarget): Promise<EngineLogsTarget> {
+  const engineSpeed = speed ?? 1000;
+  const engineErrorFrequency = errorFrequency ?? 0.1;
+
+  const logRecordsByFile = await Promise.all(logsSources.map(loadLogsTextFile));
+
+  const errorLogs = errorLogsSource
+    ? await loadLogsTextFile(errorLogsSource)
+    : [];
+
+  return {
+    records: braidLogs(...logRecordsByFile),
+    speed: engineSpeed,
+    errorFrequency: engineErrorFrequency,
+    errorRecords: errorLogs,
+  };
+}
+
+// ============================================================================
 // TRANSFORMS FOR ANIMATION
 // ============================================================================
 
@@ -202,8 +244,21 @@ async function transformTourToEngineAnimation(
               updates: await transformConfig(frame.updates),
             };
           }
+          if (frame.simulator === SIMULATORS.LOGS) {
+            return {
+              ...frame,
+              updates: await transformLogs(frame.updates),
+            };
+          }
           return frame;
+        case FRAME_TYPES.stream:
+        case FRAME_TYPES.resume:
+          return {
+            ...frame,
+            updates: await transformLogs(frame.updates),
+          };
         case FRAME_TYPES.scroll_to:
+        case FRAME_TYPES.pause:
         default:
           return frame;
       }
@@ -225,6 +280,7 @@ async function transformTourToEngineState(
       ? transformStatus(tour.status, contextId, true)
       : undefined,
     config: tour.config ? await transformConfig(tour.config) : undefined,
+    logs: tour.logs ? await transformLogs(tour.logs) : undefined,
   };
 }
 

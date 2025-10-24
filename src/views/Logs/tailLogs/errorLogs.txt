@@ -1,0 +1,5 @@
+2025-10-23T14:12:45.219Z    error    api@v0.118.0/client.go:87    Failed to connect to external API    {"endpoint": "https://dev.api.local/v1/data", "retryCount": 3}
+2025-10-23T14:12:50.782Z    error    db@v0.118.0/connection.go:203    Database query timeout after 30s    {"query": "SELECT * FROM users WHERE active = true", "duration": "30s"}
+2025-10-23T14:13:02.144Z    error    server@v0.118.0/handler.go:56    Invalid JSON in request body    {"route": "/api/upload", "client": "192.168.1.45"}
+2025-10-23T14:13:17.921Z    warn    gateway@v0.118.0/middleware.go:134    Rate limit exceeded for client    {"client": "192.168.1.100", "limit": "100 req/min"}
+2025-10-23T14:13:25.512Z    error    telemetry@v0.118.0/exporter.go:62    Failed to send telemetry data    {"destination": "collector.dev:4317", "reason": "connection refused"}

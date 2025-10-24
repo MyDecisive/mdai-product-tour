@@ -20,6 +20,7 @@ import {
   staticFilterNoCommentChanges,
   staticFilterNoCommentConfigContentGroups,
 } from "./views/Logs/configSamples/configContent";
+import { serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
 
 /** hard coded stuff for dev */
@@ -53,6 +54,17 @@ const previousState: EngineTargetState = {
 };
 
 const frames: EngineFrames.Any[] = [
+  {
+    type: FRAME_TYPES.add,
+    simulator: SIMULATORS.LOGS,
+    updates: {
+      records: serviceLogs.map((log, index) => ({
+        ...log,
+        timestamp: new Date().toISOString(),
+        id: `log-message-${index}`,
+      })),
+    },
+  },
   {
     type: FRAME_TYPES.enter_command,
     simulator: SIMULATORS.TERMINAL,

@@ -1,24 +1,22 @@
 import rawCollectorLogs from "./collectorLogs.txt?raw";
+import rawErrorLogs from "./errorLogs.txt?raw";
 import rawNoisyServiceLogs from "./noisyServiceLogs.txt?raw";
 import rawServiceLogs from "./serviceLogs.txt?raw";
 import rawXtraNoisyServiceLogs from "./xtraNoisyServiceLogs.txt?raw";
 
 import type { LogRecord } from "../../../utils/types";
 import { braidLogs } from "./braidLogs";
-import { parseRawCollectorLogs, parseRawServiceLogs } from "./parseRawLogs";
+import { parseRawLogFileToLogLines } from "./parseRawLogs";
 
-export const errorLogs: LogRecord[] = [
-  { message: "Failed to connect to external API", level: "error" },
-  { message: "Database query timeout after 30s", level: "error" },
-  { message: "Invalid JSON in request body", level: "error" },
-  { message: "Rate limit exceeded for client 192.168.1.100", level: "warn" },
-];
+export const errorLogs: LogRecord[] = parseRawLogFileToLogLines(rawErrorLogs);
 
-export const serviceLogs: LogRecord[] = parseRawServiceLogs(rawServiceLogs);
+export const serviceLogs: LogRecord[] =
+  parseRawLogFileToLogLines(rawServiceLogs);
 
-const noisyServiceLogs: LogRecord[] = parseRawServiceLogs(rawNoisyServiceLogs);
+const noisyServiceLogs: LogRecord[] =
+  parseRawLogFileToLogLines(rawNoisyServiceLogs);
 
-const xtraNoisyServiceLogs: LogRecord[] = parseRawServiceLogs(
+const xtraNoisyServiceLogs: LogRecord[] = parseRawLogFileToLogLines(
   rawXtraNoisyServiceLogs
 );
 
@@ -29,4 +27,4 @@ export const braidedLogs: LogRecord[] = braidLogs(
 );
 
 export const collectorLogs: LogRecord[] =
-  parseRawCollectorLogs(rawCollectorLogs);
+  parseRawLogFileToLogLines(rawCollectorLogs);

@@ -4,6 +4,7 @@ import type {
   ClearSimulatorsFrame,
   DelayFrame,
   Frame,
+  LogRecord,
   PodStatusType,
   TerminalTypedOptions,
 } from "./types";
@@ -43,6 +44,7 @@ export interface EngineTargetState {
   terminal?: EngineTerminalTarget;
   status?: EngineStatusTarget;
   config?: EngineConfigTarget;
+  logs?: EngineLogsTarget;
 }
 
 // ----------------------------------------------------------------------------
@@ -115,10 +117,21 @@ export interface EngineConfigTarget {
   showingChange: Set<string>; // groupIds
 }
 
+// ----------------------------------------------------------------------------
+// Logs
+// ----------------------------------------------------------------------------
+
+export interface EngineLogsTarget {
+  records: LogRecord[];
+  speed: number;
+  errorRecords: LogRecord[];
+  errorFrequency: number;
+}
+
 // ============================================================================
 // ENGINE ANIMATION FRAMES
 // ============================================================================
-
+// TODO: Explore a DRYer way to declare these and the correllaries for the Tour configuration
 export declare namespace EngineFrames {
   export namespace Terminal {
     export type EnterCommand = Frame<
@@ -155,9 +168,30 @@ export declare namespace EngineFrames {
     export type ALL = Add | ScrollTo;
   }
 
+  export namespace Logs {
+    export type Add = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.add,
+      Pick<EngineLogsTarget, "records">
+    >;
+    export type Stream = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.stream,
+      EngineLogsTarget
+    >;
+    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
+    export type Resume = Frame<
+      typeof SIMULATORS.LOGS,
+      typeof FRAME_TYPES.resume,
+      EngineLogsTarget
+    >;
+    export type All = Add | Stream | Pause | Resume;
+  }
+
   export type Any =
     | Terminal.All
     | Status.All
+    | Logs.All
     | Config.ALL
     | DelayFrame
     | ClearSimulatorsFrame;

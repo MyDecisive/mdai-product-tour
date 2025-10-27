@@ -35,7 +35,7 @@ export interface Step {
   substeps?: Array<SubStep>;
 }
 
-export interface Tours {
+export interface Tour {
   id: string;
   title: string;
   subtitle?: string;
@@ -45,12 +45,13 @@ export interface Tours {
 }
 
 export interface DrawerConfig {
-  tours: Tours[];
+  tours: Tour[];
+  home: HomeConfig[];
 }
 
 export interface HomeConfig {
   id: string;
   title: string;
   subtitle: string;
-  tours: Tours[];
+  tours: Tour[];
 }

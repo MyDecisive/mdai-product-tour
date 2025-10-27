@@ -1,16 +1,19 @@
+import { useState } from "react";
 import { css } from "@emotion/react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
-import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
-import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
 import { TreeItem } from "../TreeItem";
-import { StepNavButtons } from "./StepNavButtons";
-import type { Tours } from "../../utils/drawerTypes";
+import type {
+  DrawerConfig,
+  Step,
+  SubStep,
+  Tour,
+} from "../../utils/drawerTypes";
 import { SubStep as SubStepTreeItem } from "./Steps/SubStep";
-import type { SubStep } from "../../utils/drawerTypes";
+import { InfoBox } from "../InfoBox";
 
 const NavDrawerBodyStyles = css({
   padding: "8px 0",
@@ -21,6 +24,12 @@ const NavDrawerBodyStyles = css({
   marginBottom: "24px",
 });
 
+export const subLabelStyles = css({
+  color: "#8A38F5",
+  fontStyle: "italic",
+  fontFamily: "Inter",
+});
+
 const BodyScrollContainer = css({
   maxHeight: `100%`,
   overflowY: "auto",
@@ -28,20 +37,21 @@ const BodyScrollContainer = css({
 });
 
 type BodyProps = {
-  inTour: boolean;
-  drawerItems: Tours;
-  handleDrawerItemClick: (itemId: string) => void;
-  expandedDrawerItems: string[];
+  inTour?: boolean;
+  drawerItems?: DrawerConfig;
+  expandedDrawerItems?: string[];
 };
 
-// TODO: All borked, need fixed
+export function Body({ inTour, drawerItems, expandedDrawerItems }: BodyProps) {
+  const [isTour, setIsTour] = useState(false);
+  const [tourSteps, setTourSteps] = useState<Tour | null>(null);
+  console.log(drawerItems, isTour, tourSteps);
 
-export function Body({
-  inTour,
-  drawerItems,
-  handleDrawerItemClick,
-  expandedDrawerItems,
-}: BodyProps) {
+  function handleDrawerItemSelect(item: Tour) {
+    setTourSteps(item);
+    setIsTour(true);
+  }
+
   return (
     <Box sx={css([BodyScrollContainer])}>
       {!inTour && (
@@ -51,35 +61,96 @@ export function Body({
           </Typography>
         </Box>
       )}
-      {/* <Box sx={css([NavDrawerBodyStyles])} className="drawer-body">
+      <Box sx={css([NavDrawerBodyStyles])} className="drawer-body">
         <SimpleTreeView
           slots={{
             expandIcon: ArrowRightIcon,
             collapseIcon: ArrowDropDownIcon,
           }}
           expandedItems={expandedDrawerItems}
-          onItemClick={handleDrawerItemClick}
         >
-          {drawerItems.map(
-            ({ itemId, label, content, slotProps, subSteps }) => (
-              <TreeItem
-                key={itemId}
-                topLevel
-                itemId={itemId}
-                label={label}
-                slotProps={slotProps}
-              >
-                {subSteps
-                  ? subSteps.map((substep: SubStep) => (
-                      <SubStepTreeItem {...substep} />
-                    ))
-                  : content}
-                <StepNavButtons />
-              </TreeItem>
-            )
-          )}
+          {!isTour
+            ? drawerItems?.tours.map(
+                ({
+                  id,
+                  title,
+                  subtitle,
+                  steps,
+                  coming_soon,
+                  buttonText,
+                }: Tour) => (
+                  <TreeItem
+                    key={id}
+                    topLevel
+                    itemId={id}
+                    label={title}
+                    slotProps={{
+                      label: {
+                        style: { textTransform: "uppercase" },
+                        ...(coming_soon ? { subLabel: subtitle } : {}),
+                      },
+                    }}
+                  >
+                    {!coming_soon && (
+                      <InfoBox>
+                        {subtitle && <Typography>{subtitle}</Typography>}
+                        {buttonText && (
+                          <>
+                            <br />
+                            <div
+                              style={{
+                                display: "flex",
+                                width: "100%",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Button
+                                size="medium"
+                                onClick={() =>
+                                  handleDrawerItemSelect({
+                                    id,
+                                    title,
+                                    subtitle,
+                                    steps,
+                                    coming_soon,
+                                    buttonText,
+                                  })
+                                }
+                              >
+                                {buttonText}
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </InfoBox>
+                    )}
+                  </TreeItem>
+                )
+              )
+            : tourSteps &&
+              tourSteps?.steps?.map(({ id, title, substeps }: Step) => (
+                <TreeItem key={id} topLevel itemId={id} label={title}>
+                  {substeps
+                    ? substeps?.map(
+                        ({
+                          id,
+                          title,
+                          content,
+                          visualizationModal,
+                        }: SubStep) => (
+                          <SubStepTreeItem
+                            id={id}
+                            title={title}
+                            content={content}
+                            visualizationModal={visualizationModal}
+                          />
+                        )
+                      )
+                    : null}
+                </TreeItem>
+              ))}
         </SimpleTreeView>
-      </Box> */}
+      </Box>
     </Box>
   );
 }

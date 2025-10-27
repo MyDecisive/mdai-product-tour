@@ -3,10 +3,15 @@ import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import { Body } from "./Body";
 import { Header } from "./Header";
+import type { DrawerConfig } from "../../utils/drawerTypes";
 
 export const drawerWidth = 400;
 
-export function NavDrawer() {
+type NavDrawerProps = {
+  drawerContent?: DrawerConfig;
+};
+
+export function NavDrawer({ drawerContent }: NavDrawerProps) {
   return (
     <Drawer
       sx={css([
@@ -28,7 +33,7 @@ export function NavDrawer() {
     >
       <Header />
       <Divider />
-      <Body />
+      <Body drawerItems={drawerContent} />
     </Drawer>
   );
 }

@@ -22,8 +22,8 @@ import {
 } from "./views/Logs/configSamples/configContent";
 import { serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
-import tours from "./views/drawer-config.yaml?raw";
-import { parseYaml } from "./utils/loadTourConfigs";
+import drawerConfig from "./views/drawer-config.yaml";
+import type { Tours } from "./utils/drawerTypes";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
@@ -205,8 +205,8 @@ function App() {
   //   tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
   // const targetState = tourConfig[0].steps[0].substeps[0].targetState;
 
-  const parsedConfig = parseYaml(tours)
-  console.log("parsedConfig", parsedConfig);
+  // const parsedConfig = parseYaml(tours);
+  // console.log("parsedConfig", parsedConfig);
 
   return (
     <Box
@@ -227,7 +227,7 @@ function App() {
         }}
       >
         <WelcomeModal />
-        <NavDrawer />
+        <NavDrawer drawerContent={drawerConfig} />
         <Box
           sx={{
             flexGrow: 1,

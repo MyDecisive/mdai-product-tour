@@ -1,7 +1,7 @@
 home: 
-  id: home
-  title: MyDecisive.ai Demo
-  subtitle: Ready to play? Select a use case and let's roll.
+  - id: home
+    title: MyDecisive.ai Demo
+    subtitle: Ready to play? Select a use case and let's roll.
 
 tours:
   - id: logs
@@ -103,7 +103,7 @@ tours:
                   alt: Prefilter Visualization
 
       - id: step3
-        title: ""
+        title: "Step 3: Kick back and let our system shine..."
         substeps:
           - id: step3_add
             title: Sprinkle in some variables

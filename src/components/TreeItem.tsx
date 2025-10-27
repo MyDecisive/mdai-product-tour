@@ -34,7 +34,7 @@ function TopLevelLabel(props: TopLevelLabelProps) {
         {label || children}
       </Typography>
       {subLabel && (
-        <Typography sx={css([subLabelStyles])}>Coming soon</Typography>
+        <Typography sx={css([subLabelStyles])}>{subLabel}</Typography>
       )}
     </Box>
   );

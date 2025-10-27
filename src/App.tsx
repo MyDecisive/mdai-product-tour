@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { transformStatus } from "./animationEngine/configToEngineTransforms";
 import "./App.css";
 import {
@@ -12,10 +13,13 @@ import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
 import { createChangeMap } from "./hooks/useGetConfigSimulatorContent/utils";
 import { FRAME_TYPES, SIMULATORS } from "./utils/constants";
+import type { DrawerConfig } from "./utils/drawerTypes";
 import type {
   EngineFrames,
   EngineTargetState,
 } from "./utils/engineTypesScratch";
+import { parseYaml } from "./utils/loadTourConfigs";
+import tours from "./views/drawer-config.yaml?raw";
 import {
   staticFilterNoCommentChanges,
   staticFilterNoCommentConfigContentGroups,
@@ -202,6 +206,110 @@ function App() {
   // const frames =
   //   tourConfig[0].steps[0].substeps[0].frames || ([] as EngineFrames.Any[]);
   // const targetState = tourConfig[0].steps[0].substeps[0].targetState;
+
+  const parsedConfig = parseYaml(tours) as DrawerConfig;
+  console.log("parsedConfig", parsedConfig);
+
+  const parsedTours = parsedConfig.tours; // TODO: Transforms on fetch
+
+  const [tourIndex, setTourIndex] = useState<number>(-1);
+  const [stepIndex, setStepIndex] = useState<number>(-1);
+  const [subStepIndex, setSubStepIndex] = useState<number>(-1);
+
+  const currentTour = useMemo(() => {
+    return parsedTours[tourIndex];
+  }, [parsedTours, tourIndex]);
+
+  // This would get passed to the drawer as the onItemClick handler
+  const handleSelectStep = useCallback(
+    (itemId: string) => {
+      // NavTree itemIds are `${stepIndex}.${subStepIndex}`
+      const [stepIndexString, subStepIndexString] = itemId.split(".");
+
+      const selectedStepIdx = parseInt(stepIndexString);
+
+      if (subStepIndexString) {
+        const selectedSubStepIdx = parseInt(subStepIndexString);
+        const isToggle = subStepIndex === selectedSubStepIdx;
+
+        setSubStepIndex(isToggle ? -1 : selectedSubStepIdx);
+        return;
+      }
+
+      const isToggle = stepIndex === selectedStepIdx;
+      setStepIndex(isToggle ? -1 : selectedStepIdx);
+      setSubStepIndex(-1);
+    },
+    [subStepIndex, stepIndex]
+  );
+
+  const handleNext = useCallback(() => {
+    if (!currentTour) return;
+
+    const currentStepData = currentTour.steps[stepIndex];
+
+    if (
+      currentStepData?.subSteps &&
+      subStepIndex < currentStepData.subSteps.length - 1
+    ) {
+      setSubStepIndex(subStepIndex + 1);
+      return;
+    }
+
+    if (stepIndex < currentTour.steps.length - 1) {
+      const nextStep = currentTour.steps[stepIndex + 1];
+      setStepIndex(stepIndex + 1);
+      setSubStepIndex(nextStep.subSteps?.length ? 0 : -1);
+      return;
+    }
+
+    setTourIndex(-1);
+    setStepIndex(-1);
+    setSubStepIndex(-1);
+  }, [currentTour, stepIndex, subStepIndex]);
+
+  const handlePrevious = useCallback(() => {
+    if (!currentTour) return;
+
+    if (subStepIndex > 0) {
+      setSubStepIndex(subStepIndex - 1);
+      return;
+    }
+
+    if (stepIndex > 0) {
+      setStepIndex(stepIndex - 1);
+      const prevStepData = currentTour.steps[stepIndex - 1];
+
+      setSubStepIndex(
+        prevStepData?.subSteps ? prevStepData.subSteps.length - 1 : -1
+      );
+      return;
+    }
+
+    setTourIndex(-1);
+    setStepIndex(-1);
+    setSubStepIndex(-1);
+  }, [stepIndex, subStepIndex, currentTour]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!currentTour) {
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          handleNext();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          handlePrevious();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentTour, handleNext, handlePrevious]);
 
   return (
     <Box

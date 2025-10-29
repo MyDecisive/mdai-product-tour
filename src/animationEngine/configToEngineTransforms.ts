@@ -227,17 +227,17 @@ async function transformTourToEngineAnimation(
         frame.waitForComplete = true;
       }
       switch (frame.type) {
-        case FRAME_TYPES.add_services:
+        case FRAME_TYPES.ADD_SERVICES:
           return {
             ...frame,
             updates: transformStatus(frame.updates, contextId),
           };
-        case FRAME_TYPES.enter_command:
+        case FRAME_TYPES.ENTER_COMMAND:
           return {
             ...frame,
             updates: transformTerminal(frame.updates),
           };
-        case FRAME_TYPES.add:
+        case FRAME_TYPES.ADD:
           if (frame.simulator === SIMULATORS.CONFIG) {
             return {
               ...frame,
@@ -251,14 +251,14 @@ async function transformTourToEngineAnimation(
             };
           }
           return frame;
-        case FRAME_TYPES.stream:
-        case FRAME_TYPES.resume:
+        case FRAME_TYPES.STREAM:
+        case FRAME_TYPES.RESUME:
           return {
             ...frame,
             updates: await transformLogs(frame.updates),
           };
-        case FRAME_TYPES.scroll_to:
-        case FRAME_TYPES.pause:
+        case FRAME_TYPES.SCROLL_TO:
+        case FRAME_TYPES.PAUSE:
         default:
           return frame;
       }

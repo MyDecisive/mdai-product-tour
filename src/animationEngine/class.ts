@@ -101,12 +101,12 @@ export class AnimationEngineInstance {
   }
 
   private async executeAction(action: EngineFrames.Any): Promise<void> {
-    if (action.type === FRAME_TYPES.delay) {
+    if (action.type === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
       return;
     }
 
-    if (action.type === FRAME_TYPES.clear) {
+    if (action.type === FRAME_TYPES.CLEAR) {
       // TODO: Should this have its own method to set a state node to undefined?
       this.updateState(createClearState(action.simulators));
       return;
@@ -124,29 +124,29 @@ export class AnimationEngineInstance {
       : Promise.resolve();
     // TODO: Find a DRYer way to do this
     switch (action.type) {
-      case FRAME_TYPES.enter_command:
+      case FRAME_TYPES.ENTER_COMMAND:
         this.updateState({ [action.simulator]: action.updates }, true);
         break;
-      case FRAME_TYPES.add_services:
+      case FRAME_TYPES.ADD_SERVICES:
         this.addStatusPods(action.updates);
         break;
-      case FRAME_TYPES.add:
+      case FRAME_TYPES.ADD:
         if (action.simulator === SIMULATORS.LOGS) {
           this.updateState({ [action.simulator]: action.updates }, true);
           break;
         }
         this.updateState({ [action.simulator]: action.updates });
         break;
-      case FRAME_TYPES.scroll_to:
+      case FRAME_TYPES.SCROLL_TO:
         this.manageScrollTo(action.updates);
         break;
-      case FRAME_TYPES.pause:
+      case FRAME_TYPES.PAUSE:
         this.logsPause();
         break;
-      case FRAME_TYPES.stream:
+      case FRAME_TYPES.STREAM:
         this.logsStream(action.updates);
         break;
-      case FRAME_TYPES.resume:
+      case FRAME_TYPES.RESUME:
         this.logsStream(action.updates, true);
         break;
     }

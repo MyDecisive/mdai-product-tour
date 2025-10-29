@@ -209,11 +209,11 @@ export type Frame<
   : BaseFrame & { simulator: S; type: T; updates: U };
 
 export interface DelayFrame extends BaseFrame {
-  type: typeof FRAME_TYPES.delay;
+  type: typeof FRAME_TYPES.DELAY;
   duration: number;
 }
 
 export interface ClearSimulatorsFrame extends BaseFrame {
-  type: typeof FRAME_TYPES.clear;
+  type: typeof FRAME_TYPES.CLEAR;
   simulators: SimulatorType[];
 }

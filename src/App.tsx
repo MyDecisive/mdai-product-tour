@@ -66,7 +66,7 @@ const frames: EngineFrames.Any[] = [
     },
   },
   {
-    type: FRAME_TYPES.enter_command,
+    type: FRAME_TYPES.ENTER_COMMAND,
     simulator: SIMULATORS.TERMINAL,
     updates: {
       strings: startLogsTerminalContent,
@@ -74,7 +74,7 @@ const frames: EngineFrames.Any[] = [
     waitForComplete: true,
   },
   {
-    type: FRAME_TYPES.add_services,
+    type: FRAME_TYPES.ADD_SERVICES,
     simulator: SIMULATORS.STATUS,
     updates: transformStatus(
       [
@@ -89,7 +89,7 @@ const frames: EngineFrames.Any[] = [
     waitForComplete: true,
   },
   {
-    type: FRAME_TYPES.add,
+    type: FRAME_TYPES.ADD,
     simulator: SIMULATORS.CONFIG,
     updates: {
       files: {
@@ -115,12 +115,12 @@ const frames: EngineFrames.Any[] = [
     waitForComplete: false,
   },
   {
-    type: FRAME_TYPES.delay,
+    type: FRAME_TYPES.DELAY,
     duration: 1000,
     waitForComplete: true,
   },
   {
-    type: FRAME_TYPES.scroll_to,
+    type: FRAME_TYPES.SCROLL_TO,
     simulator: SIMULATORS.CONFIG,
     updates: {
       fileName: "otel_ref.yaml",
@@ -129,7 +129,7 @@ const frames: EngineFrames.Any[] = [
     waitForComplete: true,
   },
   {
-    type: FRAME_TYPES.scroll_to,
+    type: FRAME_TYPES.SCROLL_TO,
     simulator: SIMULATORS.CONFIG,
     updates: {
       fileName: "otel_ref.yaml",

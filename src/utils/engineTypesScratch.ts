@@ -1,9 +1,6 @@
 import type { ContentConfig } from "./configTypesScratch";
-import type { FRAME_TYPES, SIMULATORS } from "./constants";
 import type {
-  ClearSimulatorsFrame,
-  DelayFrame,
-  Frame,
+  EngineFrames,
   LogRecord,
   PodStatusType,
   TerminalTypedOptions,
@@ -33,7 +30,7 @@ export interface EngineSubstep {
   subLabel?: string;
   content: ContentConfig;
   targetState: EngineTargetState;
-  frames?: EngineFrames.Any[];
+  frames?: EngineFrames["Any"][];
 }
 
 // ============================================================================
@@ -126,73 +123,4 @@ export interface EngineLogsTarget {
   speed: number;
   errorRecords: LogRecord[];
   errorFrequency: number;
-}
-
-// ============================================================================
-// ENGINE ANIMATION FRAMES
-// ============================================================================
-// TODO: Explore a DRYer way to declare these and the correllaries for the Tour configuration
-export declare namespace EngineFrames {
-  export namespace Terminal {
-    export type EnterCommand = Frame<
-      typeof SIMULATORS.TERMINAL,
-      typeof FRAME_TYPES.enter_command,
-      EngineTerminalTarget
-    >;
-    export type All = EnterCommand;
-  }
-
-  export namespace Status {
-    export type AddServices = Frame<
-      typeof SIMULATORS.STATUS,
-      typeof FRAME_TYPES.add_services,
-      EngineStatusTarget
-    >;
-    export type All = AddServices;
-  }
-
-  export namespace Config {
-    export type Add = Frame<
-      typeof SIMULATORS.CONFIG,
-      typeof FRAME_TYPES.add,
-      EngineConfigTarget
-    >;
-    export type ScrollTo = Frame<
-      typeof SIMULATORS.CONFIG,
-      typeof FRAME_TYPES.scroll_to,
-      {
-        fileName: string;
-        line: number;
-      }
-    >;
-    export type ALL = Add | ScrollTo;
-  }
-
-  export namespace Logs {
-    export type Add = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.add,
-      Pick<EngineLogsTarget, "records">
-    >;
-    export type Stream = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.stream,
-      EngineLogsTarget
-    >;
-    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
-    export type Resume = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.resume,
-      EngineLogsTarget
-    >;
-    export type All = Add | Stream | Pause | Resume;
-  }
-
-  export type Any =
-    | Terminal.All
-    | Status.All
-    | Logs.All
-    | Config.ALL
-    | DelayFrame
-    | ClearSimulatorsFrame;
 }

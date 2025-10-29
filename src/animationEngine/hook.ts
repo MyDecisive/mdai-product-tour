@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { STATUS } from "../utils/constants";
+import type { EngineTargetState, PodId } from "../utils/engineTypesScratch";
 import type {
   EngineFrames,
-  EngineTargetState,
-  PodId,
-} from "../utils/engineTypesScratch";
-import type { PodStatusType, SimulatorType } from "../utils/types";
+  PodStatusType,
+  SimulatorType,
+} from "../utils/types";
 import { AnimationEngineInstance } from "./class";
 
 export interface AnimationEngineState {
@@ -28,7 +28,7 @@ export interface AnimationEngineControls {
 
 export function useAnimationEngine(
   targetState: EngineTargetState,
-  frames: EngineFrames.Any[],
+  frames: EngineFrames["Any"][],
   previousState: EngineTargetState,
   onCompleteCallback: () => void
 ): [AnimationEngineState, AnimationEngineControls] {

@@ -12,16 +12,14 @@ import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
 import { createChangeMap } from "./hooks/useGetConfigSimulatorContent/utils";
 import { FRAME_TYPES, SIMULATORS } from "./utils/constants";
-import type {
-  EngineFrames,
-  EngineTargetState,
-} from "./utils/engineTypesScratch";
+import type { EngineTargetState } from "./utils/engineTypesScratch";
 import {
   staticFilterNoCommentChanges,
   staticFilterNoCommentConfigContentGroups,
 } from "./views/Logs/configSamples/configContent";
 import { serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
+import type { EngineFrames } from "./utils/types";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
@@ -53,9 +51,9 @@ const previousState: EngineTargetState = {
   },
 };
 
-const frames: EngineFrames.Any[] = [
+const frames: EngineFrames["Any"][] = [
   {
-    type: FRAME_TYPES.add,
+    type: FRAME_TYPES.ADD,
     simulator: SIMULATORS.LOGS,
     updates: {
       records: serviceLogs.map((log, index) => ({

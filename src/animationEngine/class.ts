@@ -6,14 +6,18 @@ import {
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import { deepMergeWith } from "../utils/deepMergeWith";
 import type {
-  EngineFrames,
   EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
   LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
-import type { DeepPartial, LogRecord, SimulatorType } from "../utils/types";
+import type {
+  DeepPartial,
+  EngineFrames,
+  LogRecord,
+  SimulatorType,
+} from "../utils/types";
 import { POD_NAME_DELIM } from "./configToEngineTransforms";
 
 export interface EngineCallbacks {
@@ -23,7 +27,7 @@ export interface EngineCallbacks {
 }
 
 export class AnimationEngineInstance {
-  private actions: EngineFrames.Any[];
+  private actions: EngineFrames["Any"][];
   private startState: EngineTargetState;
   private targetState: EngineTargetState;
   private callbacks: EngineCallbacks;
@@ -42,7 +46,7 @@ export class AnimationEngineInstance {
   private logsCycleCount: number = 0;
 
   constructor(
-    actions: EngineFrames.Any[],
+    actions: EngineFrames["Any"][],
     startState: EngineTargetState,
     targetState: EngineTargetState,
     callbacks: EngineCallbacks
@@ -100,7 +104,7 @@ export class AnimationEngineInstance {
     this.logsCycleCount = 0;
   }
 
-  private async executeAction(action: EngineFrames.Any): Promise<void> {
+  private async executeAction(action: EngineFrames["Any"]): Promise<void> {
     if (action.type === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
       return;

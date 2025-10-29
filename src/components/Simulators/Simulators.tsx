@@ -2,20 +2,18 @@ import { Box, Button, Grid } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useAnimationEngine } from "../../animationEngine/hook";
 import { SIMULATORS } from "../../utils/constants";
-import type {
-  EngineFrames,
-  EngineTargetState,
-} from "../../utils/engineTypesScratch";
+import type { EngineTargetState } from "../../utils/engineTypesScratch";
 import { Config } from "./Config";
 import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
 import { Terminal } from "./Terminal";
+import type { EngineFrames } from "../../utils/types";
 
 interface SimulatorsProps {
   targetState: EngineTargetState;
   previousState: EngineTargetState;
-  frames: EngineFrames.Any[];
+  frames: EngineFrames["Any"][];
   onComplete: () => void;
 }
 

@@ -2,6 +2,18 @@ import type { TreeItemSlotProps } from "@mui/x-tree-view";
 import type { JSX, RefObject } from "react";
 import type { TypedOptions } from "typed.js";
 import { FRAME_TYPES, ITEM_IDS, SIMULATORS, STATUS } from "../utils/constants";
+import type {
+  TourConfigSimTarget,
+  TourLogSimTarget,
+  TourStatusTarget,
+  TourTerminalTarget,
+} from "./configTypesScratch";
+import type {
+  EngineConfigTarget,
+  EngineLogsTarget,
+  EngineStatusTarget,
+  EngineTerminalTarget,
+} from "./engineTypesScratch";
 
 export type View = string;
 export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
@@ -217,3 +229,96 @@ export interface ClearSimulatorsFrame extends BaseFrame {
   type: typeof FRAME_TYPES.CLEAR;
   simulators: SimulatorType[];
 }
+
+type FrameConfig<TourUpdates, EngineUpdates> = {
+  tour: TourUpdates;
+  engine: EngineUpdates;
+};
+
+// This is the source of truth for available frames
+type SimulatorFrameConfigs = {
+  [SIMULATORS.TERMINAL]: {
+    EnterCommand: FrameConfig<TourTerminalTarget[], EngineTerminalTarget>;
+  };
+  [SIMULATORS.STATUS]: {
+    AddServices: FrameConfig<TourStatusTarget[], EngineStatusTarget>;
+  };
+  [SIMULATORS.CONFIG]: {
+    Add: FrameConfig<TourConfigSimTarget, EngineConfigTarget>;
+    ScrollTo: FrameConfig<
+      { fileName: string; line: number },
+      { fileName: string; line: number }
+    >;
+  };
+  [SIMULATORS.LOGS]: {
+    Add: FrameConfig<
+      Pick<TourLogSimTarget, "logsSources">,
+      Pick<EngineLogsTarget, "records">
+    >;
+    Stream: FrameConfig<TourLogSimTarget, EngineLogsTarget>;
+    Pause: FrameConfig<undefined, undefined>;
+    Resume: FrameConfig<TourLogSimTarget, EngineLogsTarget>;
+  };
+};
+
+type SnakeToPascal<S extends string> = S extends `${infer Head}_${infer Tail}`
+  ? `${Capitalize<Lowercase<Head>>}${SnakeToPascal<Tail>}`
+  : Capitalize<Lowercase<S>>;
+
+type FrameTypeMap = {
+  [K in keyof typeof FRAME_TYPES as SnakeToPascal<K>]: (typeof FRAME_TYPES)[K];
+};
+
+type FrameTypeFor<Name extends PropertyKey> = Name extends keyof FrameTypeMap
+  ? Extract<FrameTypeMap[Name & keyof FrameTypeMap], FrameType>
+  : never;
+
+type ModeKey = "tour" | "engine";
+type ModePayload<
+  SimName extends keyof SimulatorFrameConfigs,
+  FrameName extends keyof SimulatorFrameConfigs[SimName],
+  M extends ModeKey
+> = SimulatorFrameConfigs[SimName][FrameName] extends Record<M, infer V>
+  ? V
+  : never;
+
+type CommonFrameNames<SimName extends keyof SimulatorFrameConfigs> = Extract<
+  keyof SimulatorFrameConfigs[SimName],
+  keyof FrameTypeMap
+>;
+
+type GenerateFrameTypes<
+  Mode extends ModeKey,
+  SimName extends keyof SimulatorFrameConfigs
+> = {
+  [FrameName in CommonFrameNames<SimName>]: Frame<
+    Extract<SimName, SimulatorType>,
+    FrameTypeFor<FrameName>,
+    ModePayload<SimName, FrameName, Mode>
+  >;
+} & {
+  All: {
+    [FrameName in CommonFrameNames<SimName>]: Frame<
+      Extract<SimName, SimulatorType>,
+      FrameTypeFor<FrameName>,
+      ModePayload<SimName, FrameName, Mode>
+    >;
+  }[CommonFrameNames<SimName>];
+};
+
+type GenerateNamespace<Mode extends "tour" | "engine"> = {
+  [SimName in keyof SimulatorFrameConfigs]: GenerateFrameTypes<Mode, SimName>;
+} & {
+  Any:
+    | {
+        [SimName in keyof SimulatorFrameConfigs]: GenerateFrameTypes<
+          Mode,
+          SimName
+        >["All"];
+      }[keyof SimulatorFrameConfigs]
+    | DelayFrame
+    | ClearSimulatorsFrame;
+};
+
+export type TourFrames = GenerateNamespace<"tour">;
+export type EngineFrames = GenerateNamespace<"engine">;

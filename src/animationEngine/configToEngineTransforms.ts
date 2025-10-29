@@ -7,7 +7,6 @@ import {
 import type {
   SubstepConfig,
   TourConfigSimTarget,
-  TourFrames,
   TourLogSimTarget,
   TourStatusTarget,
   TourTargetState,
@@ -18,7 +17,6 @@ import type {
   ActivePodMap,
   EngineConfigTarget,
   EngineFileConfig,
-  EngineFrames,
   EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
@@ -27,7 +25,7 @@ import type {
   PodId,
 } from "../utils/engineTypesScratch";
 import { fetchGitHubFile } from "../utils/fetchRawGithubFile";
-import type { LogRecord } from "../utils/types";
+import type { EngineFrames, LogRecord, TourFrames } from "../utils/types";
 import { braidLogs } from "../views/Logs/tailLogs/braidLogs";
 import { parseRawLogFileToLogLines } from "../views/Logs/tailLogs/parseRawLogs";
 import { createTerminalContent } from "../views/Logs/terminal/behavior";
@@ -218,9 +216,9 @@ async function transformLogs({
 // ============================================================================
 
 async function transformTourToEngineAnimation(
-  animation: TourFrames.Any[],
+  animation: TourFrames["Any"][],
   contextId: string
-): Promise<EngineFrames.Any[]> {
+): Promise<EngineFrames["Any"][]> {
   return Promise.all(
     animation.map(async (frame) => {
       if (frame.waitForComplete === undefined) {
@@ -292,7 +290,7 @@ export async function transformSubstepConfigToInstanceArgs(
   substep: SubstepConfig
 ): Promise<{
   targetState: EngineTargetState;
-  frames: EngineFrames.Any[];
+  frames: EngineFrames["Any"][];
 }> {
   const targetState = await transformTourToEngineState(
     substep.targetState,

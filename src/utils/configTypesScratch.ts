@@ -1,10 +1,4 @@
-import type { FRAME_TYPES, SIMULATORS } from "./constants";
-import type {
-  ClearSimulatorsFrame,
-  DelayFrame,
-  Frame,
-  LineChangeBlock,
-} from "./types";
+import { type LineChangeBlock, type TourFrames } from "./types";
 
 // ============================================================================
 // TOUR CONFIG TARGET STATES
@@ -48,75 +42,6 @@ export interface TourTargetState {
 }
 
 // ============================================================================
-// CONFIG ANIMATION FRAMES
-// ============================================================================
-
-export declare namespace TourFrames {
-  export namespace Terminal {
-    export type EnterCommand = Frame<
-      typeof SIMULATORS.TERMINAL,
-      typeof FRAME_TYPES.enter_command,
-      TourTerminalTarget[]
-    >;
-    export type All = EnterCommand;
-  }
-
-  export namespace Status {
-    export type AddServices = Frame<
-      typeof SIMULATORS.STATUS,
-      typeof FRAME_TYPES.add_services,
-      TourStatusTarget[]
-    >;
-    export type All = AddServices;
-  }
-
-  export namespace Config {
-    export type Add = Frame<
-      typeof SIMULATORS.CONFIG,
-      typeof FRAME_TYPES.add,
-      TourConfigSimTarget
-    >;
-    export type ScrollTo = Frame<
-      typeof SIMULATORS.CONFIG,
-      typeof FRAME_TYPES.scroll_to,
-      {
-        fileName: string;
-        line: number;
-      }
-    >;
-    export type All = Add | ScrollTo;
-  }
-
-  export namespace Logs {
-    export type Add = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.add,
-      Pick<TourLogSimTarget, "logsSources">
-    >;
-    export type Stream = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.stream,
-      TourLogSimTarget
-    >;
-    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
-    export type Resume = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.resume,
-      TourLogSimTarget
-    >;
-    export type All = Add | Stream | Pause | Resume;
-  }
-
-  export type Any =
-    | Config.All
-    | Terminal.All
-    | Status.All
-    | Logs.All
-    | DelayFrame
-    | ClearSimulatorsFrame;
-}
-
-// ============================================================================
 // TOUR CONFIG STRUCTURE
 // ============================================================================
 export interface TourConfiguration {
@@ -139,7 +64,7 @@ export interface SubstepConfig {
   subLabel?: string;
   content: ContentConfig;
   targetState: TourTargetState;
-  animation?: TourFrames.Any[];
+  animation?: TourFrames["Any"][];
 }
 
 // ============================================================================
@@ -167,5 +92,5 @@ interface ListItemConfig {
 // Directive for what happens when list item is clicked
 interface ItemClickDirective {
   simulator: "config" | "terminal" | "status" | "logs";
-  action: TourFrames.Any;
+  action: TourFrames["Any"];
 }

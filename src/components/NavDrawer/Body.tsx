@@ -6,14 +6,10 @@ import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { TreeItem } from "../TreeItem";
-import type {
-  DrawerConfig,
-  Step,
-  SubStep,
-  Tour,
-} from "../../utils/drawerTypes";
+import type { Step, SubStep, Tour } from "../../utils/drawerTypes";
 import { SubStep as SubStepTreeItem } from "./Steps/SubStep";
 import { InfoBox } from "../InfoBox";
+import { useDemoContext } from "../../hooks/useDemoContext";
 
 const NavDrawerBodyStyles = css({
   padding: "8px 0",
@@ -36,25 +32,14 @@ const BodyScrollContainer = css({
   overflowX: "hidden",
 });
 
-type BodyProps = {
-  inTour?: boolean;
-  drawerItems?: DrawerConfig;
-  expandedDrawerItems?: string[];
-};
-
-export function Body({ inTour, drawerItems, expandedDrawerItems }: BodyProps) {
-  const [isTour, setIsTour] = useState(false);
-  const [tourSteps, setTourSteps] = useState<Tour | null>(null);
-  console.log(drawerItems, isTour, tourSteps);
-
-  function handleDrawerItemSelect(item: Tour) {
-    setTourSteps(item);
-    setIsTour(true);
-  }
+export function Body() {
+  const DemoContext = useDemoContext();
+  const isTour = DemoContext.navigationState.tour !== "";
+  console.log(DemoContext.drawerItems, DemoContext.expandedDrawerItems, isTour);
 
   return (
     <Box sx={css([BodyScrollContainer])}>
-      {!inTour && (
+      {!isTour && (
         <Box sx={{ padding: "10px 4px 10px 8px" }}>
           <Typography>
             Ready to play? Select a use case and let's roll.
@@ -67,22 +52,27 @@ export function Body({ inTour, drawerItems, expandedDrawerItems }: BodyProps) {
             expandIcon: ArrowRightIcon,
             collapseIcon: ArrowDropDownIcon,
           }}
-          expandedItems={expandedDrawerItems}
+          expandedItems={DemoContext.expandedDrawerItems}
+          onItemClick={DemoContext.handleTreeItemClick}
         >
           {!isTour
-            ? drawerItems?.tours.map(
-                ({
-                  id,
-                  title,
-                  subtitle,
-                  steps,
-                  coming_soon,
-                  buttonText,
-                }: Tour) => (
+            ? DemoContext.drawerItems?.map(
+                (
+                  {
+                    id,
+                    title,
+                    subtitle,
+                    steps,
+                    coming_soon,
+                    buttonText,
+                    onTourSelect,
+                  }: Tour,
+                  index
+                ) => (
                   <TreeItem
                     key={id}
                     topLevel
-                    itemId={id}
+                    itemId={`${index}`}
                     label={title}
                     slotProps={{
                       label: {
@@ -91,7 +81,7 @@ export function Body({ inTour, drawerItems, expandedDrawerItems }: BodyProps) {
                       },
                     }}
                   >
-                    {!coming_soon && (
+                    {!coming_soon && onTourSelect && (
                       <InfoBox>
                         {subtitle && <Typography>{subtitle}</Typography>}
                         {buttonText && (
@@ -104,19 +94,7 @@ export function Body({ inTour, drawerItems, expandedDrawerItems }: BodyProps) {
                                 justifyContent: "center",
                               }}
                             >
-                              <Button
-                                size="medium"
-                                onClick={() =>
-                                  handleDrawerItemSelect({
-                                    id,
-                                    title,
-                                    subtitle,
-                                    steps,
-                                    coming_soon,
-                                    buttonText,
-                                  })
-                                }
-                              >
+                              <Button size="medium" onClick={onTourSelect}>
                                 {buttonText}
                               </Button>
                             </div>
@@ -127,28 +105,27 @@ export function Body({ inTour, drawerItems, expandedDrawerItems }: BodyProps) {
                   </TreeItem>
                 )
               )
-            : tourSteps &&
-              tourSteps?.steps?.map(({ id, title, substeps }: Step) => (
-                <TreeItem key={id} topLevel itemId={id} label={title}>
-                  {substeps
-                    ? substeps?.map(
-                        ({
-                          id,
-                          title,
-                          content,
-                          visualizationModal,
-                        }: SubStep) => (
-                          <SubStepTreeItem
-                            id={id}
-                            title={title}
-                            content={content}
-                            visualizationModal={visualizationModal}
-                          />
+            : DemoContext.drawerItems?.map(
+                ({ id, title, substeps }: Step, index) => (
+                  <TreeItem key={id} topLevel itemId={`${index}`} label={title}>
+                    {substeps
+                      ? substeps?.map(
+                          (
+                            { title, content, visualizationModal }: SubStep,
+                            idx
+                          ) => (
+                            <SubStepTreeItem
+                              id={`${index}-${idx}`}
+                              title={title}
+                              content={content}
+                              visualizationModal={visualizationModal}
+                            />
+                          )
                         )
-                      )
-                    : null}
-                </TreeItem>
-              ))}
+                      : null}
+                  </TreeItem>
+                )
+              )}
         </SimpleTreeView>
       </Box>
     </Box>

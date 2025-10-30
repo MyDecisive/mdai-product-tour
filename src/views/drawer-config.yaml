@@ -1,7 +1,7 @@
-home: 
-  - id: home
-    title: MyDecisive.ai Demo
-    subtitle: Ready to play? Select a use case and let's roll.
+# home: 
+#   - id: home
+#     title: MyDecisive.ai Demo
+#     subtitle: Ready to play? Select a use case and let's roll.
 
 tours:
   - id: logs
@@ -25,21 +25,25 @@ tours:
               items:
                 - text: Multiple tools in one unified view--making it easy to see how MyDecisive works.
                 - highlightText: 
-                  - text: "IDE Simulator:"
+                    text: "IDE Simulator:"
                     simulator: "config"
                   text: Tweak and control SmartHub through its config files.
+                  variant: list
                 - highlightText: 
-                  - text: "Terminal Simulator:"
+                    text: "Terminal Simulator:"
                     simulator: terminal
                   text: Deploy changes to SmartHub like a pro.
+                  variant: list
                 - highlightText: 
-                  - text: "Status Simulator:"
+                    text: "Status Simulator:"
                     simulator: status
                   text: Keep an eye on running SmartHub processes and components.
+                  variant: list  
                 - highlightText: 
-                  - text: "Tail logs Simulator:"
+                    text: "Tail logs Simulator:"
                     simulator: logs
                   text: Watch SmartHub's logs stream by in real time.
+                  variant: list
                 - text: You can also navigate through the steps with your left and right arrow keys.
 
       - id: step1

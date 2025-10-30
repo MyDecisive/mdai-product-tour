@@ -14,11 +14,11 @@ const ListItemStyles: React.CSSProperties = {
   justifyContent: "flex-start",
 };
 
-const BulletStyle: React.CSSProperties = {
-  fontWeight: 700,
-  paddingLeft: "4px",
-  paddingRight: "4px",
-};
+// const BulletStyle: React.CSSProperties = {
+//   fontWeight: 700,
+//   paddingLeft: "4px",
+//   paddingRight: "4px",
+// };
 
 const TitleStyles: React.CSSProperties = {
   fontWeight: 700,
@@ -42,7 +42,7 @@ export function ContentBlock({
           <List>
             {items.map((item, index) => (
               <ListItem key={index} sx={ListItemStyles}>
-                <Item style={BulletStyle} {...(item as ContentItem)} />
+                <Item {...(item as ContentItem)} />
               </ListItem>
             ))}
           </List>

@@ -30,9 +30,9 @@ export type ViewStep = { stepId: StepItemId; subStepIds?: StepItemId[] };
 export type ViewStepOrder = ViewStep[];
 
 export interface NavigationState {
-  view: View;
-  step?: StepItemId;
-  subStep?: StepItemId;
+  tour: string;
+  step?: string;
+  subStep?: string;
   bigContentModal?: BigContentModalType;
 }
 

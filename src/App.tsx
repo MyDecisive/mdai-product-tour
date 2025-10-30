@@ -22,8 +22,6 @@ import {
 } from "./views/Logs/configSamples/configContent";
 import { serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
-import drawerConfig from "./views/drawer-config.yaml";
-import type { Tours } from "./utils/drawerTypes";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
@@ -227,7 +225,7 @@ function App() {
         }}
       >
         <WelcomeModal />
-        <NavDrawer drawerContent={drawerConfig} />
+        <NavDrawer />
         <Box
           sx={{
             flexGrow: 1,

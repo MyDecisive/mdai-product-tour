@@ -1,12 +1,12 @@
-export interface HighlightText {
+export type HighlightText = {
   text: string;
   simulator: "status" | "config" | "logs" | "terminal";
-}
+};
 
 export interface ContentItem {
-  text: string | null;
+  text: string;
   highlightText?: HighlightText;
-  variant?: "code" | "button";
+  variant?: "code" | "button" | "list";
   link?: string;
   style?: React.CSSProperties;
 }

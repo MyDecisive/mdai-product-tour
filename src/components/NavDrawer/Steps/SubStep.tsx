@@ -21,7 +21,6 @@ export function SubStep({
   content,
   visualizationModal = false,
 }: SubStep) {
-  console.log("Rendering SubStep:", id, title);
   return (
     <>
       <TreeItem

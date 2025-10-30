@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { css } from "@emotion/react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
@@ -6,7 +5,7 @@ import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { TreeItem } from "../TreeItem";
-import type { Step, SubStep, Tour } from "../../utils/drawerTypes";
+import type { Step, SubStep } from "../../utils/drawerTypes";
 import { SubStep as SubStepTreeItem } from "./Steps/SubStep";
 import { InfoBox } from "../InfoBox";
 import { useDemoContext } from "../../hooks/useDemoContext";
@@ -32,10 +31,20 @@ const BodyScrollContainer = css({
   overflowX: "hidden",
 });
 
+type DrawerItemsProps = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  substeps?: Step[] | SubStep[];
+  coming_soon?: boolean;
+  buttonText?: string;
+  onTourSelect?: () => void;
+};
+
 export function Body() {
   const DemoContext = useDemoContext();
+
   const isTour = DemoContext.navigationState.tour !== "";
-  console.log(DemoContext.drawerItems, DemoContext.expandedDrawerItems, isTour);
 
   return (
     <Box sx={css([BodyScrollContainer])}>
@@ -55,77 +64,71 @@ export function Body() {
           expandedItems={DemoContext.expandedDrawerItems}
           onItemClick={DemoContext.handleTreeItemClick}
         >
-          {!isTour
-            ? DemoContext.drawerItems?.map(
-                (
-                  {
-                    id,
-                    title,
-                    subtitle,
-                    steps,
-                    coming_soon,
-                    buttonText,
-                    onTourSelect,
-                  }: Tour,
-                  index
-                ) => (
-                  <TreeItem
-                    key={id}
-                    topLevel
-                    itemId={`${index}`}
-                    label={title}
-                    slotProps={{
-                      label: {
-                        style: { textTransform: "uppercase" },
-                        ...(coming_soon ? { subLabel: subtitle } : {}),
-                      },
-                    }}
-                  >
-                    {!coming_soon && onTourSelect && (
-                      <InfoBox>
-                        {subtitle && <Typography>{subtitle}</Typography>}
-                        {buttonText && (
-                          <>
-                            <br />
-                            <div
-                              style={{
-                                display: "flex",
-                                width: "100%",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <Button size="medium" onClick={onTourSelect}>
-                                {buttonText}
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </InfoBox>
-                    )}
-                  </TreeItem>
-                )
-              )
-            : DemoContext.drawerItems?.map(
-                ({ id, title, substeps }: Step, index) => (
-                  <TreeItem key={id} topLevel itemId={`${index}`} label={title}>
-                    {substeps
-                      ? substeps?.map(
-                          (
-                            { title, content, visualizationModal }: SubStep,
-                            idx
-                          ) => (
-                            <SubStepTreeItem
-                              id={`${index}-${idx}`}
-                              title={title}
-                              content={content}
-                              visualizationModal={visualizationModal}
-                            />
-                          )
+          {DemoContext.drawerItems &&
+            DemoContext.drawerItems?.map(
+              (
+                {
+                  id,
+                  title,
+                  subtitle,
+                  substeps,
+                  coming_soon,
+                  buttonText,
+                  onTourSelect,
+                }: DrawerItemsProps,
+                index: number
+              ) => (
+                <TreeItem
+                  key={id}
+                  topLevel
+                  itemId={`${index}`}
+                  label={title}
+                  slotProps={{
+                    label: {
+                      style: { textTransform: "uppercase" },
+                      ...(coming_soon ? { subLabel: subtitle } : {}),
+                    },
+                  }}
+                >
+                  {!coming_soon && onTourSelect && (
+                    <InfoBox>
+                      {subtitle && <Typography>{subtitle}</Typography>}
+                      {buttonText && (
+                        <>
+                          <br />
+                          <div
+                            style={{
+                              display: "flex",
+                              width: "100%",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Button size="medium" onClick={onTourSelect}>
+                              {buttonText}
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </InfoBox>
+                  )}
+                  {substeps
+                    ? substeps?.map(
+                        (
+                          { title, content, visualizationModal }: SubStep,
+                          idx
+                        ) => (
+                          <SubStepTreeItem
+                            id={`${index}-${idx}`}
+                            title={title}
+                            content={content}
+                            visualizationModal={visualizationModal}
+                          />
                         )
-                      : null}
-                  </TreeItem>
-                )
-              )}
+                      )
+                    : null}
+                </TreeItem>
+              )
+            )}
         </SimpleTreeView>
       </Box>
     </Box>

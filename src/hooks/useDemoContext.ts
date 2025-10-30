@@ -5,15 +5,19 @@ import type {
 } from "../animationEngine/hook";
 import type { NavigationState } from "../utils/types";
 
-export interface DemoConfig {
+export interface DemoContextValue {
+  navigationState: NavigationState;
   animationEngineState: AnimationEngineState;
   animationEngineControls: AnimationEngineControls;
-  navigationState: NavigationState;
   loadingState: boolean;
   errorState: string | null;
+  expandedDrawerItems: string[];
+  handleTreeItemClick: (event: never, id: string) => void;
 }
 
-export const DemoContext = createContext<DemoConfig | undefined>(undefined);
+export const DemoContext = createContext<DemoContextValue | undefined>(
+  undefined
+);
 
 export const useDemoContext = () => {
   const demoItems = useContext(DemoContext);

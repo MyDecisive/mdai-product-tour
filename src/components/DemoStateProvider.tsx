@@ -20,7 +20,7 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
   const [tour, setTour] = useState("");
   const [step, setStep] = useState(-1);
   const [subStep, setSubStep] = useState(-1);
-  const [loadingState, setLoadingState] = useState(true);
+  const [loadingState, setLoadingState] = useState<boolean>(true);
   const [errorState, setErrorState] = useState<string | null>(null);
 
   //   useEffect(() => {
@@ -42,7 +42,6 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
   }, []);
 
   const onTourSelect = (selectedTour: string) => {
-    console.log("selectedTour", selectedTour);
     setTour(selectedTour);
     setStep(-1);
     setSubStep(-1);
@@ -54,7 +53,7 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
       expanded.push(`${step}`);
     }
     if (subStep !== -1) {
-      expanded.push(`${subStep}`);
+      expanded.push(`${step}-${subStep}`);
     }
     return expanded;
   }, [step, subStep]);
@@ -75,31 +74,29 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
       );
     } else {
       const selectedTour = drawerConfig?.tours.find((t) => t.id === tour);
-      console.log(selectedTour);
       if (!selectedTour) return [];
       return (
-        selectedTour?.steps.map((step) => ({
+        selectedTour?.steps?.map((step) => ({
           id: step.id,
           title: step.title,
-          substeps: step.substeps,
+          substeps: step.substeps?.filter((ss) => !ss.visualizationModal),
         })) || []
       );
     }
   }, [drawerConfig, tour]);
 
   const handleTreeItemClick = useCallback(
-    (_, stepId: string) => {
+    (_: never, stepId: string) => {
       const [stepIndexString, subStepIndexString] = stepId.split("-");
       const selectedStepIndex = parseInt(stepIndexString);
       if (subStepIndexString !== undefined) {
         const selectedSubStepIndex = parseInt(subStepIndexString);
-        const isToggle = selectedStepIndex === subStep;
+        const isToggle = selectedSubStepIndex === subStep;
         setSubStep(isToggle ? -1 : selectedSubStepIndex);
         return;
       }
       const isToggle = selectedStepIndex === step;
       setStep(isToggle ? -1 : selectedStepIndex);
-      setSubStep(-1);
     },
     [step, subStep]
   );
@@ -113,7 +110,11 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
 
   const contextValue = useMemo(() => {
     return {
-      navigationState: { tour, step, subStep },
+      navigationState: {
+        tour,
+        step: step.toString(),
+        subStep: subStep.toString(),
+      },
       animationEngineState,
       animationEngineControls,
       loadingState,

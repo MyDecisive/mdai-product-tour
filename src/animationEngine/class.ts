@@ -111,8 +111,7 @@ export class AnimationEngineInstance {
     }
 
     if (action.type === FRAME_TYPES.CLEAR) {
-      // TODO: Should this have its own method to set a state node to undefined?
-      this.updateState(createClearState(action.simulators));
+      this.clearStatePerSimulator(action.simulators);
       return;
     }
 
@@ -448,47 +447,19 @@ export class AnimationEngineInstance {
     this.callbacks.onStateChange(this.currentState);
   }
 
+  private clearStatePerSimulator(simulators: SimulatorType[]) {
+    this.currentState = Object.fromEntries(
+      Object.entries(this.currentState || {}).filter(
+        ([k]) => !simulators.includes(k as SimulatorType)
+      )
+    );
+    this.callbacks.onStateChange(this.currentState);
+  }
+
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => {
       const timeout = setTimeout(resolve, ms);
       this.timeouts.push(timeout);
     });
   }
-}
-
-export function createClearState(
-  simulators: SimulatorType[]
-): EngineTargetState {
-  const fullEmptyState: EngineTargetState = {
-    [SIMULATORS.STATUS]: {
-      activePods: {},
-      podOrder: [],
-    },
-    [SIMULATORS.TERMINAL]: {
-      strings: [],
-    },
-    [SIMULATORS.CONFIG]: {
-      files: {},
-      activeTab: "",
-      showingToggle: new Set<string>(),
-      showingChange: new Set<string>(),
-    },
-  };
-
-  const emptyState: Partial<EngineTargetState> = {};
-
-  simulators.forEach((sim) => {
-    // this makes typescript happy, but makes me sad
-    if (sim === SIMULATORS.STATUS) {
-      emptyState[sim] = fullEmptyState[sim];
-    }
-    if (sim === SIMULATORS.CONFIG) {
-      emptyState[sim] = fullEmptyState[sim];
-    }
-    if (sim === SIMULATORS.TERMINAL) {
-      emptyState[sim] = fullEmptyState[sim];
-    }
-  });
-
-  return emptyState;
 }

@@ -12,10 +12,13 @@ export function Config(
     onAnimationComplete: (sim?: SimulatorType) => void;
   }
 ) {
-  const { onSetActiveTab, activeTab, showingToggle, onToggleShowingChange } =
-    props;
-  const { tabContents, groupsShowingChange, pulsedGroups } =
-    useGetConfigSimulatorContent(props);
+  const { onSetActiveTab, activeTab, showingToggle } = props;
+  const {
+    tabContents,
+    groupsShowingChange,
+    pulsedGroups,
+    handleToggleShowingChange,
+  } = useGetConfigSimulatorContent(props);
 
   const handleChange = useCallback(
     (_: React.SyntheticEvent, newValue: string) => {
@@ -44,7 +47,7 @@ export function Config(
           pulsedGroups={pulsedGroups}
           groupsShowingChanges={groupsShowingChange}
           groupsShowingToggle={showingToggle}
-          toggleGroupShowingChange={onToggleShowingChange}
+          toggleGroupShowingChange={handleToggleShowingChange}
           changeMap={tab.changeMap}
         />
       ))}

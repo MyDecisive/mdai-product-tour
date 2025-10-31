@@ -9,19 +9,25 @@ export function useGetConfigSimulatorContent({
   activeTab,
   showingChange,
   onAnimationComplete,
+  onToggleShowingChange,
 }: EngineConfigTarget & {
   onSetActiveTab: (tabName: string) => void;
   onAnimationComplete: (sim?: SimulatorType) => void;
+  onToggleShowingChange: (groupId: string) => void;
 }) {
   const { pulsedGroups, addPulsedGroup } = usePulsedGroup();
 
-  const { groupsShowingChange, makeSetContainerRef } =
-    useManageScrollToAndToggle({
-      activeTab,
-      showingChange,
-      onAnimationComplete,
-      addPulsedGroup,
-    });
+  const {
+    groupsShowingChange,
+    makeSetContainerRef,
+    handleToggleShowingChange,
+  } = useManageScrollToAndToggle({
+    activeTab,
+    showingChange,
+    onAnimationComplete,
+    addPulsedGroup,
+    onToggleShowingChange,
+  });
 
   const tabContents = useMemo(() => {
     return Object.values(files).map((file) => ({
@@ -35,5 +41,6 @@ export function useGetConfigSimulatorContent({
     activeTab,
     groupsShowingChange,
     pulsedGroups,
+    handleToggleShowingChange,
   };
 }

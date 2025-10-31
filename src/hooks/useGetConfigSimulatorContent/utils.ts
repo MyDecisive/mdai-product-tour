@@ -111,27 +111,28 @@ export const extractRelevantSections = (
 )[] => {
   if (!changes?.length || !lines.length) return [];
 
-  const relevantLineNos = new Set<number>();
+  const changeLineNos = new Set<number>();
+  const contextLineNos = new Set<number>();
 
   changes.forEach(({ start, end, changeLines }) => {
     const changeEnd = determineChangeEnd(end, changeLines.length, lines.length);
 
     // Add changed lines and their parents
     for (let i = start; i <= changeEnd; i++) {
-      relevantLineNos.add(i);
-      findYamlParents(lines, i).forEach((p) => relevantLineNos.add(p));
+      changeLineNos.add(i);
+      findYamlParents(lines, i).forEach((p) => contextLineNos.add(p));
     }
 
     // Add context lines
     const contextStart = Math.max(1, start - contextSpacing);
     const contextEnd = Math.min(lines.length, changeEnd + contextSpacing);
     for (let i = contextStart; i <= contextEnd; i++) {
-      if (lines[i - 1]?.trim()) relevantLineNos.add(i);
+      if (lines[i - 1]?.trim()) contextLineNos.add(i);
     }
   });
 
   // Build sections
-  const allLineNos = Array.from(relevantLineNos);
+  const allLineNos = new Set([...changeLineNos, ...contextLineNos]);
   const sortedLineNos = Array.from(allLineNos).sort((a, b) => a - b);
   const sections: ReturnType<typeof extractRelevantSections> = [];
   let groupStart = sortedLineNos[0];
@@ -141,20 +142,29 @@ export const extractRelevantSections = (
     const oneHigherThanPreviousLineNo = sortedLineNos[i - 1] + 1;
     const isConsecutiveLineNo =
       sortedLineNos[i] === oneHigherThanPreviousLineNo;
+
     if (isConsecutiveLineNo) {
-      // keep building the section
-      groupLineNos.push(sortedLineNos[i]);
-    } else {
-      // section is complete, add it, a gap, and restart
-      sections.push({
-        type: "group",
-        start: groupStart,
-        lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
-      });
-      sections.push({ type: "gap", lineNo: oneHigherThanPreviousLineNo });
-      groupStart = sortedLineNos[i];
-      groupLineNos = [groupStart];
+      const isSameTypeAsPreviousLine =
+        changeLineNos.has(sortedLineNos[i]) ===
+        changeLineNos.has(sortedLineNos[i - 1]);
+      if (isSameTypeAsPreviousLine) {
+        // keep building the section
+        groupLineNos.push(sortedLineNos[i]);
+        continue;
+      }
     }
+
+    // section is complete, add it, a gap, and restart
+    sections.push({
+      type: "group",
+      start: groupStart,
+      lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
+    });
+    if (!isConsecutiveLineNo) {
+      sections.push({ type: "gap", lineNo: oneHigherThanPreviousLineNo });
+    }
+    groupStart = sortedLineNos[i];
+    groupLineNos = [groupStart];
   }
 
   // Add the last group from the mutable variables.

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { SimulatorType } from "../../utils/types";
 import { useScrollAnimation } from "./useScrollAnimation";
 
@@ -25,11 +25,13 @@ export function useManageScrollToAndToggle({
   showingChange,
   onAnimationComplete,
   addPulsedGroup,
+  onToggleShowingChange,
 }: {
   activeTab?: string;
   showingChange: Set<string>;
   onAnimationComplete: (sim?: SimulatorType) => void;
   addPulsedGroup: (groupId: string) => void;
+  onToggleShowingChange: (groupId: string) => void;
 }) {
   const { scrollToAndToggle, makeSetContainerRef } = useScrollAnimation(
     addPulsedGroup,
@@ -37,6 +39,24 @@ export function useManageScrollToAndToggle({
   );
 
   const prevTogglesRef = useRef<Set<string>>(showingChange);
+
+  const handleToggleShowingChange = useCallback(
+    (groupId: string) => {
+      const newTogglesRef = new Set(prevTogglesRef.current);
+      if (newTogglesRef.has(groupId)) {
+        newTogglesRef.delete(groupId);
+
+        prevTogglesRef.current = newTogglesRef;
+      } else {
+        newTogglesRef.add(groupId);
+
+        prevTogglesRef.current = newTogglesRef;
+      }
+
+      onToggleShowingChange(groupId);
+    },
+    [onToggleShowingChange]
+  );
 
   useEffect(() => {
     let scrollPromise: (Promise<void> & { cancel?: () => void }) | undefined;
@@ -71,6 +91,7 @@ export function useManageScrollToAndToggle({
 
   return {
     makeSetContainerRef,
+    handleToggleShowingChange,
     groupsShowingChange: prevTogglesRef.current,
   };
 }

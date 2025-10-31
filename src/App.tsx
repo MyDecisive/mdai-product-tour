@@ -13,18 +13,31 @@ import { drawerWidth } from "./components/NavDrawer/NavDrawer";
 import { createChangeMap } from "./hooks/useGetConfigSimulatorContent/utils";
 import { FRAME_TYPES, SIMULATORS } from "./utils/constants";
 import type { EngineTargetState } from "./utils/engineTypesScratch";
+import type { EngineFrames } from "./utils/types";
 import {
   staticFilterNoCommentChanges,
   staticFilterNoCommentConfigContentGroups,
 } from "./views/Logs/configSamples/configContent";
 import { serviceLogs } from "./views/Logs/tailLogs/tailLogsContent";
 import { startLogsTerminalContent } from "./views/Logs/terminal/terminalContent";
-import type { EngineFrames } from "./utils/types";
 
 /** hard coded stuff for dev */
 const previousState: EngineTargetState = {
   terminal: {
     strings: [],
+  },
+  config: {
+    files: {
+      "otel_ref.yaml": {
+        url: "https://github.com/DecisiveAI/mdai-labs/blob/main/otel/otel_ref.yaml",
+        fileName: "otel_ref.yaml",
+        changeMap: createChangeMap(staticFilterNoCommentChanges),
+        groups: staticFilterNoCommentConfigContentGroups,
+      },
+    },
+    showingToggle: new Set<string>(),
+    showingChange: new Set<string>(),
+    activeTab: "otel_ref.yaml",
   },
   status: {
     activePods: {
@@ -150,7 +163,7 @@ const targetState: EngineTargetState = {
       },
     },
     showingToggle: new Set<string>([
-      "otel_ref.yaml-95-102",
+      "otel_ref.yaml-99-100",
       "otel_ref.yaml-73-78",
     ]),
     showingChange: new Set<string>(),

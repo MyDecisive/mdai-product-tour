@@ -235,75 +235,70 @@ type FrameConfig<TourUpdates, EngineUpdates> = {
   engine: EngineUpdates;
 };
 
+export type ConfigSimScrollTarget = {
+  fileName: string;
+  line: number;
+};
+
 // This is the source of truth for available frames
-type SimulatorFrameConfigs = {
+export type SimulatorFrameConfigs = {
   [SIMULATORS.TERMINAL]: {
-    EnterCommand: FrameConfig<TourTerminalTarget[], EngineTerminalTarget>;
+    [FRAME_TYPES.ENTER_COMMAND]: FrameConfig<
+      TourTerminalTarget[],
+      EngineTerminalTarget
+    >;
   };
   [SIMULATORS.STATUS]: {
-    AddServices: FrameConfig<TourStatusTarget[], EngineStatusTarget>;
+    [FRAME_TYPES.ADD_SERVICES]: FrameConfig<
+      TourStatusTarget[],
+      EngineStatusTarget
+    >;
   };
   [SIMULATORS.CONFIG]: {
-    Add: FrameConfig<TourConfigSimTarget, EngineConfigTarget>;
-    ScrollTo: FrameConfig<
-      { fileName: string; line: number },
-      { fileName: string; line: number }
+    [FRAME_TYPES.ADD]: FrameConfig<TourConfigSimTarget, EngineConfigTarget>;
+    [FRAME_TYPES.SCROLL_TO]: FrameConfig<
+      ConfigSimScrollTarget,
+      ConfigSimScrollTarget
     >;
   };
   [SIMULATORS.LOGS]: {
-    Add: FrameConfig<
+    [FRAME_TYPES.ADD]: FrameConfig<
       Pick<TourLogSimTarget, "logsSources">,
       Pick<EngineLogsTarget, "records">
     >;
-    Stream: FrameConfig<TourLogSimTarget, EngineLogsTarget>;
-    Pause: FrameConfig<undefined, undefined>;
-    Resume: FrameConfig<TourLogSimTarget, EngineLogsTarget>;
+    [FRAME_TYPES.STREAM]: FrameConfig<TourLogSimTarget, EngineLogsTarget>;
+    [FRAME_TYPES.PAUSE]: FrameConfig<undefined, undefined>;
+    [FRAME_TYPES.RESUME]: FrameConfig<TourLogSimTarget, EngineLogsTarget>;
   };
 };
 
-type SnakeToPascal<S extends string> = S extends `${infer Head}_${infer Tail}`
-  ? `${Capitalize<Lowercase<Head>>}${SnakeToPascal<Tail>}`
-  : Capitalize<Lowercase<S>>;
-
-type FrameTypeMap = {
-  [K in keyof typeof FRAME_TYPES as SnakeToPascal<K>]: (typeof FRAME_TYPES)[K];
-};
-
-type FrameTypeFor<Name extends PropertyKey> = Name extends keyof FrameTypeMap
-  ? Extract<FrameTypeMap[Name & keyof FrameTypeMap], FrameType>
-  : never;
-
 type ModeKey = "tour" | "engine";
+
 type ModePayload<
   SimName extends keyof SimulatorFrameConfigs,
-  FrameName extends keyof SimulatorFrameConfigs[SimName],
+  FrameTypeName extends keyof SimulatorFrameConfigs[SimName],
   M extends ModeKey
-> = SimulatorFrameConfigs[SimName][FrameName] extends Record<M, infer V>
+> = SimulatorFrameConfigs[SimName][FrameTypeName] extends Record<M, infer V>
   ? V
   : never;
-
-type CommonFrameNames<SimName extends keyof SimulatorFrameConfigs> = Extract<
-  keyof SimulatorFrameConfigs[SimName],
-  keyof FrameTypeMap
->;
 
 type GenerateFrameTypes<
   Mode extends ModeKey,
   SimName extends keyof SimulatorFrameConfigs
 > = {
-  [FrameName in CommonFrameNames<SimName>]: Frame<
+  [FType in keyof SimulatorFrameConfigs[SimName]]: Frame<
     Extract<SimName, SimulatorType>,
-    FrameTypeFor<FrameName>,
-    ModePayload<SimName, FrameName, Mode>
+    Extract<FType, FrameType>,
+    ModePayload<SimName, FType, Mode>
   >;
 } & {
   All: {
-    [FrameName in CommonFrameNames<SimName>]: Frame<
+    [FType in keyof SimulatorFrameConfigs[SimName]]: Frame<
       Extract<SimName, SimulatorType>,
-      FrameTypeFor<FrameName>,
-      ModePayload<SimName, FrameName, Mode>
+      Extract<FType, FrameType>,
+      ModePayload<SimName, FType, Mode>
     >;
-  }[CommonFrameNames<SimName>];
+  }[keyof SimulatorFrameConfigs[SimName]];
 };
 
 type GenerateNamespace<Mode extends "tour" | "engine"> = {
@@ -322,3 +317,28 @@ type GenerateNamespace<Mode extends "tour" | "engine"> = {
 
 export type TourFrames = GenerateNamespace<"tour">;
 export type EngineFrames = GenerateNamespace<"engine">;
+
+type FrameHandler<
+  SimName extends keyof SimulatorFrameConfigs,
+  FType extends keyof SimulatorFrameConfigs[SimName]
+> = SimulatorFrameConfigs[SimName][FType] extends FrameConfig<
+  unknown,
+  infer EngineUpdates
+>
+  ? (
+      frame: Frame<
+        Extract<SimName, SimulatorType>,
+        Extract<FType, FrameType>,
+        EngineUpdates
+      >
+    ) => void
+  : never;
+
+export type SimulatorHandlerMap = {
+  [SimName in keyof SimulatorFrameConfigs]: {
+    [FType in keyof SimulatorFrameConfigs[SimName]]: FrameHandler<
+      SimName,
+      FType
+    >;
+  };
+};

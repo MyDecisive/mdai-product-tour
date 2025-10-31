@@ -4,21 +4,30 @@ import {
   shouldInjectError,
 } from "../hooks/useGetLogsSimulatorContent";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
-import { deepMergeWith } from "../utils/deepMergeWith";
 import type {
   EngineLogsTarget,
-  EngineStatusTarget,
   EngineTargetState,
   LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
 import type {
-  DeepPartial,
   EngineFrames,
   LogRecord,
+  PodStatusType,
+  SimulatorHandlerMap,
   SimulatorType,
 } from "../utils/types";
 import { POD_NAME_DELIM } from "./configToEngineTransforms";
+import {
+  addConfigTarget,
+  addLogsRecords,
+  addStatusPods,
+  addTerminalStrings,
+  removeStatusPods,
+  setConfigActiveTab,
+  toggleConfigShowingChange,
+  updatePodStatus,
+} from "./frameStateMergeStrategies";
 
 export interface EngineCallbacks {
   onStateChange: (state: EngineTargetState) => void;
@@ -104,6 +113,63 @@ export class AnimationEngineInstance {
     this.logsCycleCount = 0;
   }
 
+  private readonly frameHandlers: SimulatorHandlerMap = {
+    [SIMULATORS.TERMINAL]: {
+      [FRAME_TYPES.ENTER_COMMAND]: (frame) => {
+        this.updateState(addTerminalStrings, frame.updates);
+      },
+    },
+    [SIMULATORS.STATUS]: {
+      [FRAME_TYPES.ADD_SERVICES]: (frame) => {
+        this.updateState(addStatusPods, frame.updates);
+        void this.statusAnimateStartup();
+      },
+    },
+    [SIMULATORS.CONFIG]: {
+      [FRAME_TYPES.ADD]: (frame) => {
+        this.updateState(addConfigTarget, frame.updates);
+      },
+      [FRAME_TYPES.SCROLL_TO]: (frame) => {
+        const config = this.currentState.config;
+        const { fileName, line } = frame.updates;
+        if (!config || !config.files[fileName]) {
+          return;
+        }
+
+        const file = config.files[fileName];
+
+        const { groupId } = (file.groups.find((grp) => {
+          const isLineGroup = grp.type === "group";
+          if (!isLineGroup) {
+            return;
+          }
+          return grp.start <= line && line <= grp.end;
+        }) || {}) as LineGroup;
+
+        if (!groupId) {
+          return;
+        }
+
+        this.onSetActiveTab(fileName);
+        this.onToggleShowingChange(groupId);
+      },
+    },
+    [SIMULATORS.LOGS]: {
+      [FRAME_TYPES.ADD]: (frame) => {
+        this.updateState(addLogsRecords, frame.updates);
+      },
+      [FRAME_TYPES.STREAM]: (frame) => {
+        this.logsStream(frame.updates);
+      },
+      [FRAME_TYPES.PAUSE]: () => {
+        this.logsPause();
+      },
+      [FRAME_TYPES.RESUME]: (frame) => {
+        this.logsStream(frame.updates, true);
+      },
+    },
+  };
+
   private async executeAction(action: EngineFrames["Any"]): Promise<void> {
     if (action.type === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
@@ -125,33 +191,15 @@ export class AnimationEngineInstance {
           this.currentActionResolver = resolve;
         })
       : Promise.resolve();
-    // TODO: Find a DRYer way to do this
-    switch (action.type) {
-      case FRAME_TYPES.ENTER_COMMAND:
-        this.updateState({ [action.simulator]: action.updates }, true);
-        break;
-      case FRAME_TYPES.ADD_SERVICES:
-        this.addStatusPods(action.updates);
-        break;
-      case FRAME_TYPES.ADD:
-        if (action.simulator === SIMULATORS.LOGS) {
-          this.updateState({ [action.simulator]: action.updates }, true);
-          break;
-        }
-        this.updateState({ [action.simulator]: action.updates });
-        break;
-      case FRAME_TYPES.SCROLL_TO:
-        this.manageScrollTo(action.updates);
-        break;
-      case FRAME_TYPES.PAUSE:
-        this.logsPause();
-        break;
-      case FRAME_TYPES.STREAM:
-        this.logsStream(action.updates);
-        break;
-      case FRAME_TYPES.RESUME:
-        this.logsStream(action.updates, true);
-        break;
+
+    const simHandlers =
+      this.frameHandlers[action.simulator as keyof typeof this.frameHandlers];
+    const handler = simHandlers?.[action.type as keyof typeof simHandlers] as
+      | ((frame: typeof action) => void)
+      | undefined;
+
+    if (handler) {
+      handler(action);
     }
 
     await waitForCompletion;
@@ -160,26 +208,6 @@ export class AnimationEngineInstance {
   // ----------------------------------------------------------------------------
   // Status sim methods
   // ----------------------------------------------------------------------------
-
-  private addStatusPods({
-    activePods: newPods,
-    podOrder: newPodOrder,
-  }: EngineStatusTarget): void {
-    const currentStatus = this.currentState.status || {
-      activePods: {},
-      podOrder: [],
-    };
-    const status = { ...currentStatus };
-
-    this.updateState({
-      status: {
-        activePods: { ...status.activePods, ...newPods },
-        podOrder: [...status.podOrder, ...newPodOrder],
-      },
-    });
-
-    void this.statusAnimateStartup();
-  }
 
   private statusPodReachedRunning(podId: PodId): void {
     const activePods = this.currentState.status!.activePods;
@@ -203,56 +231,25 @@ export class AnimationEngineInstance {
     });
 
     if (replacementPod) {
-      // Mark the old pod for shutdown
-      const status = { ...this.currentState.status };
-      status.activePods![replacementPod.id].status = STATUS.terminating;
-      this.updateState({ status });
+      this.onPodStatusChange(replacementPod.id, STATUS.terminating);
     }
   }
 
-  private scheduleRemoval(podId: PodId): void {
+  private schedulePodRemoval(podId: PodId): void {
     this.podsToRemove.add(podId);
 
     if (this.podRemovalTimer) {
       clearTimeout(this.podRemovalTimer);
     }
 
-    // TODO: make this removal timer respond to the number of pods to remove
     this.podRemovalTimer = setTimeout(() => {
-      this.executeRemovals();
-    }, 1000);
+      this.executePodRemovals();
+    }, 1000 - this.podsToRemove.size * 100);
   }
 
-  private executeRemovals(): void {
-    const status = this.currentState.status;
-    if (!status || this.podsToRemove.size === 0) {
-      return;
-    }
-
-    const newPodOrder = status.podOrder.filter(
-      (id) => !this.podsToRemove.has(id)
-    );
-    const newActivePods = { ...status.activePods };
-
-    this.podsToRemove.forEach((podId) => {
-      delete newActivePods[podId];
-    });
-
-    // updateState only handles additions and merges, we have to do this
-    // in order to perform the removals correctly.
-    // TODO: Create a generic `removeFromState` method
-    this.currentState = {
-      ...this.currentState,
-      status: {
-        podOrder: newPodOrder,
-        activePods: newActivePods,
-      },
-    };
-
-    this.callbacks.onStateChange(this.currentState);
-
+  private executePodRemovals(): void {
+    this.updateState<Set<string>>(removeStatusPods, this.podsToRemove);
     this.podsToRemove.clear();
-    this.podRemovalTimer = null;
   }
 
   private async statusAnimateStartup(): Promise<void> {
@@ -275,28 +272,27 @@ export class AnimationEngineInstance {
     await Promise.all(animationPromises);
   }
 
-  public onPodStatusChange(
-    podId: PodId,
-    newStatus: (typeof STATUS)[keyof typeof STATUS]
-  ): void {
-    const status = { ...this.currentState.status! };
-    status.activePods[podId].status = newStatus;
-    if (newStatus === STATUS.crashLoopBackoff) {
-      status.activePods[podId].restartCount =
-        status.activePods[podId].restartCount + 1;
-    }
-    this.updateState({ status });
+  public onPodStatusChange(podId: PodId, newStatus: PodStatusType): void {
+    const incrementRestarts = newStatus === STATUS.crashLoopBackoff;
+    this.updateState<{
+      podId: string;
+      status: PodStatusType;
+      incrementRestarts: boolean;
+    }>(updatePodStatus, {
+      podId,
+      status: newStatus,
+      incrementRestarts,
+    });
 
     if (newStatus === STATUS.running) {
       this.statusPodReachedRunning(podId);
-
       const resolver = this.podAnimationResolvers.get(podId);
       if (resolver) {
         resolver();
         this.podAnimationResolvers.delete(podId);
       }
     } else if (newStatus === STATUS.shutdown) {
-      void this.scheduleRemoval(podId);
+      void this.schedulePodRemoval(podId);
     }
   }
 
@@ -304,77 +300,13 @@ export class AnimationEngineInstance {
   // Config sim methods
   // ----------------------------------------------------------------------------
   public onSetActiveTab(tabName: string) {
-    const config = this.currentState.config;
-    if (!config || !config.files[tabName]) {
-      return;
-    }
-
-    this.updateState({
-      config: {
-        ...config,
-        activeTab: tabName,
-      },
-    });
+    this.updateState<string>(setConfigActiveTab, tabName);
   }
 
-  public onToggleShowingChange(groupId: string) {
-    const config = this.currentState.config;
-    if (!config) {
-      return;
-    }
-
-    const newConfig = { ...config };
-    newConfig.showingChange = new Set(newConfig.showingChange);
-    if (!newConfig.showingToggle.has(groupId)) {
-      newConfig.showingToggle = new Set(newConfig.showingToggle);
-      newConfig.showingToggle.add(groupId);
-    }
-    if (newConfig.showingChange.has(groupId)) {
-      newConfig.showingChange.delete(groupId);
-    } else {
-      newConfig.showingChange.add(groupId);
-    }
-
-    this.currentState = {
-      ...this.currentState,
-      config: newConfig,
-    };
-
-    this.callbacks.onStateChange(this.currentState);
+  public onToggleShowingChange(groupId: string): void {
+    this.updateState<string>(toggleConfigShowingChange, groupId);
   }
 
-  private manageScrollTo({
-    fileName,
-    line,
-  }: {
-    fileName: string;
-    line: number;
-  }) {
-    const config = this.currentState.config;
-    if (!config || !config.files[fileName]) {
-      return;
-    }
-
-    if (config.activeTab !== fileName) {
-      this.onSetActiveTab(fileName);
-    }
-
-    const file = config.files[fileName];
-
-    const relevantGroup = file.groups.find((grp) => {
-      const isLineGroup = grp.type === "group";
-      if (!isLineGroup) {
-        return;
-      }
-      return grp.start <= line && line <= grp.end;
-    });
-
-    if (!relevantGroup) {
-      return;
-    }
-
-    this.onToggleShowingChange((relevantGroup as LineGroup).groupId);
-  }
   // ----------------------------------------------------------------------------
   // Logs sim methods
   // ----------------------------------------------------------------------------
@@ -391,8 +323,6 @@ export class AnimationEngineInstance {
     }
 
     this.logsIntervalRef = setInterval(() => {
-      const logs = this.currentState.logs || { records: [] };
-
       let nextLog: LogRecord;
       if (shouldInjectError(errorRecords.length > 0, errorFrequency)) {
         const propLog = selectErrorPropLog(errorRecords);
@@ -409,8 +339,9 @@ export class AnimationEngineInstance {
         }
       }
 
-      logs.records = [...logs.records, nextLog];
-      this.updateState({ logs });
+      this.updateState<{ records: LogRecord[] }>(addLogsRecords, {
+        records: [nextLog],
+      });
     }, speed);
   }
 
@@ -423,27 +354,15 @@ export class AnimationEngineInstance {
   // ----------------------------------------------------------------------------
   // Generic/Helper methods
   // ----------------------------------------------------------------------------
-  private updateState(
-    updates: DeepPartial<EngineTargetState>,
-    appendArrays?: boolean
+  private updateState<T>(
+    updateFn: (
+      currentState: EngineTargetState,
+      updates: T
+    ) => EngineTargetState,
+    updates: T
   ): void {
-    if (appendArrays) {
-      this.currentState = deepMergeWith(
-        this.currentState,
-        updates,
-        (a: unknown, b: unknown) => {
-          if (Array.isArray(a)) {
-            if (Array.isArray(b)) {
-              return [...(a as unknown[]), ...(b as unknown[])];
-            }
-            return [...(a as unknown[]), b];
-          }
-          return undefined;
-        }
-      );
-    } else {
-      this.currentState = deepMergeWith(this.currentState, updates);
-    }
+    const newState = updateFn(this.currentState, updates);
+    this.currentState = newState;
     this.callbacks.onStateChange(this.currentState);
   }
 

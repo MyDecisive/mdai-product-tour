@@ -158,9 +158,9 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
                 >
                   <Box
                     sx={{
-                      color: highlight
-                        ? "text.disabled" // TODO: Clean up these color tokens so this declaration isn't such a head scratcher
-                        : "var(--mdai-text-disabled)",
+                      ...(highlight && {
+                        color: "text.disabled",
+                      }),
                       textAlign: "right",
                     }}
                   >

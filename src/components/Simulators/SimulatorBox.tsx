@@ -44,7 +44,7 @@ export function SimulatorBox({
           borderRadius: "4px",
           background: "#393939",
           position: "relative",
-          border: `2px solid ${active ? "#B062C2" : "#393939"}`,
+          border: `3px solid ${active ? "#EA80FC" : "#393939"}`,
           ...innerStyles,
         }}
       >

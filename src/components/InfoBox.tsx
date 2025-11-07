@@ -3,9 +3,10 @@ import Box from "@mui/material/Box";
 import { Fragment, type ReactNode } from "react";
 
 const InfoBoxStyles = css({
-  border: "2px solid #B062C2",
+  border: "3px solid #EA80FC",
   borderRadius: "4px",
   padding: "16px",
+  marginRight: "18px",
   fontWeight: 400,
   cursor: "default",
 });

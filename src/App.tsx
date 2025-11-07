@@ -1,12 +1,6 @@
 import { Box } from "@mui/material";
 import "./App.css";
-import {
-  Banner,
-  Footer,
-  NavDrawer,
-  Simulators,
-  WelcomeModal,
-} from "./components";
+import { Banner, Footer, NavDrawer, Simulators } from "./components";
 import { BigContentModal } from "./components/BigContentModal/BigContentModal";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
 
@@ -29,7 +23,6 @@ function App() {
           overflow: "hidden",
         }}
       >
-        <WelcomeModal />
         <NavDrawer />
         <Box
           sx={{

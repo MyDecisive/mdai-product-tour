@@ -294,7 +294,7 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: [],
+        services: step2StartingSvcs,
       },
       logs: {
         logRecords: [],
@@ -333,6 +333,7 @@ export const PANEL_STATE: StepDefinitions = {
           },
         },
       }),
+      createAnimationAction({}, 1500),
       createAnimationAction(
         {
           config: {
@@ -374,7 +375,7 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: [],
+        services: step2StartingSvcs,
       },
       logs: {
         logRecords: [],

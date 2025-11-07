@@ -38,7 +38,7 @@ export const DEFAULT_ANIMATION_STEP_DURATION = 1500;
 export const LOGS_DEFAULT_STEPS: NavigationState = {
   view: Logs,
   step: ITEM_IDS.introduction,
-  subStep: ITEM_IDS.introduction_meet,
+  subStep: ITEM_IDS.introduction_consolidated,
 };
 
 const DEFAULT_NAV_STATE: NavigationState = {

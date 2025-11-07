@@ -13,6 +13,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   --mdai-text-disabled: rgba(255, 255, 255, 0.38);
+  --purple-A100: #ea80fc;
 }
 
 body {

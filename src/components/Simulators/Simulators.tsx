@@ -1,4 +1,4 @@
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Link, Stack, Typography } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { ConfigText } from "./Config";
@@ -6,8 +6,10 @@ import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
 import { Terminal } from "./Terminal";
+import { useHighlander } from "../../hooks/useHighlander";
 
 export function Simulators() {
+  const { actions } = useHighlander();
   const {
     inTour,
     panelState: { config, terminal, status, logs },
@@ -40,7 +42,6 @@ export function Simulators() {
       <Box
         className="simulators-container"
         sx={{
-          display: inTour ? "block" : "none",
           flexGrow: 1,
           padding: "24px",
         }}
@@ -97,7 +98,31 @@ export function Simulators() {
               </SimulatorBox>
             </Grid>
           </Grid>
-        ) : null}
+        ) : (
+          <Stack alignItems="center" height={"100%"} mt={27}>
+            <Stack
+              gap={4}
+              alignItems="center"
+              maxWidth={1000}
+              textAlign={"center"}
+            >
+              <Typography variant="h2">
+                Welcome to MyDecisive.ai demo
+              </Typography>
+              <Typography variant="h4" maxWidth={800}>
+                See how you can save money using our SmartHub. Get instant
+                control over your telemetry data.
+              </Typography>
+              <Typography variant="h4">
+                Try out{" "}
+                <Link onClick={actions.START_LOGS_DEMO}>
+                  Dynamic Log Filtering
+                </Link>{" "}
+                demo now!
+              </Typography>
+            </Stack>
+          </Stack>
+        )}
       </Box>
     </Box>
   );

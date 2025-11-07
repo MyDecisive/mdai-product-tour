@@ -109,13 +109,16 @@ export function Simulators() {
               <Typography variant="h2">
                 Welcome to MyDecisive.ai demo
               </Typography>
-              <Typography variant="h4" maxWidth={800}>
+              <Typography variant="h5" maxWidth={700}>
                 See how you can save money using our SmartHub. Get instant
                 control over your telemetry data.
               </Typography>
-              <Typography variant="h4">
+              <Typography variant="h5">
                 Try out{" "}
-                <Link onClick={actions.START_LOGS_DEMO}>
+                <Link
+                  onClick={actions.START_LOGS_DEMO}
+                  sx={{ color: "#EA80FC !important", textDecoration: "none" }}
+                >
                   Dynamic Log Filtering
                 </Link>{" "}
                 demo now!

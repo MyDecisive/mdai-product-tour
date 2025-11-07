@@ -24,7 +24,7 @@ export const theme = createTheme({
       paper: "#393939",
     },
     primary: {
-      main: "#B062C2",
+      main: "#8E24AA",
       contrastText: "#000000",
     },
     secondary: {
@@ -63,9 +63,6 @@ export const theme = createTheme({
           "&&.Mui-selected": {
             color: "var(--purple-A100)",
           },
-        },
-        selected: {
-          color: "var(--purple-A100)",
         },
       },
     },

@@ -21,7 +21,7 @@ type TopLevelLabelProps = {
 };
 
 export const subLabelStyles = css({
-  color: "#8A38F5",
+  color: "#9E9E9E",
   fontStyle: "italic",
   fontFamily: "Inter",
 });

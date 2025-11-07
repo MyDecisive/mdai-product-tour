@@ -222,12 +222,12 @@ function DataStarts() {
       </Button>{" "}
       Window).{" "}
       <Box sx={{ overflowX: "auto" }}>
-        <pre style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</pre>
+        <pre style={{ color: "#83ACDE" }}>{`./mdai-kind.sh logs`}</pre>
       </Box>
       {"and then"}
       <Box sx={{ overflowX: "auto" }}>
         <pre
-          style={{ color: "#B062C2" }}
+          style={{ color: "#83ACDE" }}
         >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</pre>
       </Box>
       to open the floodgates. <br />
@@ -322,15 +322,19 @@ function TakeNote() {
           sx={[ListItemStyles, { mb: 1 }, { cursor: "pointer" }]}
         >
           <Typography>
-            In line 78 of the OTEL_REF.YAML file, you define a rule that says
-            drop logs from “service4321”.
+            In <span style={{ color: "#B062C2" }}>line 78</span> of the
+            OTEL_REF.YAML file, you define a rule that says drop logs from
+            “service4321”.
           </Typography>
         </ListItem>
         <ListItem
           onClick={makeOnListItemClick(100)}
           sx={[ListItemStyles, { mb: 1 }, { cursor: "pointer" }]}
         >
-          <Typography>In line 100 you enable this filter rule.</Typography>
+          <Typography>
+            In <span style={{ color: "#B062C2" }}>line 100</span> you enable
+            this filter rule.
+          </Typography>
         </ListItem>
         <ListItem sx={[ListItemStyles, { mb: 1 }]}>
           <Typography>
@@ -368,13 +372,13 @@ function AddA() {
       {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
       <List>
         <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
-          <pre style={{ width: "100%", overflowX: "auto", color: "#B062C2" }}>
+          <pre style={{ width: "100%", overflowX: "auto", color: "#83ACDE" }}>
             kubectl apply -f mdai/hub/hub_ref.yaml
           </pre>
           updates your MDAI hub
         </ListItem>
         <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
-          <pre style={{ width: "100%", overflowX: "auto", color: "#B062C2" }}>
+          <pre style={{ width: "100%", overflowX: "auto", color: "#83ACDE" }}>
             kubectl apply -f otel/otel_ref.yaml
           </pre>
           puts the variable to use in your OTel collector
@@ -537,7 +541,7 @@ export const stepItemsMap: StepItemMap = {
     label: "Step 2: Drop unwanted data",
   },
   [ITEM_IDS.step3]: {
-    label: "Step 3: Dynamic OTEL==>Power-User Mode",
+    label: "Step 3: Dynamic OTEL → Power-User Mode",
   },
 
   [ITEM_IDS.introduction_meet]: {

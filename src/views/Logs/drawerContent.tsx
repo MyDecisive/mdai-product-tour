@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
-import { Box, Button, Link, List, ListItem, Typography } from "@mui/material";
-import type { ReactNode } from "react";
+import { Box, Button, List, ListItem, Typography } from "@mui/material";
+import type { MouseEvent, ReactNode } from "react";
 import { useGetPanelContent } from "../../hooks/useGetPanelContent";
 import { useHighlander } from "../../hooks/useHighlander";
 import { ITEM_IDS } from "../../utils/constants";
@@ -10,6 +10,15 @@ import type {
   ViewTreeItemProps,
 } from "../../utils/types";
 import { hydrateViewTreeitems } from "../common";
+
+const InlineButtonStyles = css({
+  padding: 0,
+  textTransform: "none",
+  lineHeight: "24px",
+  fontWeight: 400,
+  fontSize: "1rem",
+  minWidth: 0,
+});
 
 const SubStepStyles = css({
   borderRadius: "4px",
@@ -177,8 +186,8 @@ function UnifiedView() {
 }
 
 function DataStarts() {
-  const handleClick = () => {
-    const statusSimBox = document.getElementsByClassName("status");
+  const makeHandleClick = (component: string) => () => {
+    const statusSimBox = document.getElementsByClassName(component);
     if (statusSimBox.length > 0) {
       const element = statusSimBox[0] as HTMLElement;
       const computedStyles = getComputedStyle(element);
@@ -188,6 +197,7 @@ function DataStarts() {
       element.style.transition = "border-color 0.5s ease";
       element.style.borderColor = "#B062C2";
 
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
       setTimeout(() => {
         element.style.borderColor = oldBorderColor;
       }, 1000);
@@ -199,8 +209,18 @@ function DataStarts() {
     }
   };
   return (
-    <SubStepContent title="Simulate the log stream">
-      Starting with the MDAI cluster already running, run{" "}
+    <SubStepContent>
+      We'll start the synthetic services in our K8S cluster. This will generate
+      the data we need to use, as the MyDecisive SmartHub is currently running
+      but idle (see{" "}
+      <Button
+        onClick={makeHandleClick("status")}
+        variant="text"
+        sx={InlineButtonStyles}
+      >
+        Status
+      </Button>{" "}
+      Window).{" "}
       <Box sx={{ overflowX: "auto" }}>
         <pre style={{ color: "#B062C2" }}>{`./mdai-kind.sh logs`}</pre>
       </Box>
@@ -211,22 +231,25 @@ function DataStarts() {
         >{`helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml`}</pre>
       </Box>
       to open the floodgates. <br />
-      <br /> Watch the SmartHub come alive in the{" "}
+      <br />
+      Now, we start Fluentd containers to stream logs from services like
+      "service1234" and "service4321.” The{" "}
       <Button
-        onClick={handleClick}
+        onClick={makeHandleClick("status")}
         variant="text"
-        sx={{
-          padding: 0,
-          textTransform: "none",
-          fontWeight: 400,
-          fontSize: "1rem",
-        }}
+        sx={InlineButtonStyles}
       >
-        Status Simulator Window
+        Status
       </Button>{" "}
-      <br />
-      <br />
-      Heads up: you’ll get to see the results in the next step
+      window will confirm the container start, and the{" "}
+      <Button
+        onClick={makeHandleClick("tail-logs")}
+        variant="text"
+        sx={InlineButtonStyles}
+      >
+        Tail Logs
+      </Button>{" "}
+      window will show the incoming log data.
     </SubStepContent>
   );
 }
@@ -242,27 +265,44 @@ function SeeResults() {
 function ConfigureStatus() {
   return (
     <SubStepContent title="Your data, your rules">
-      OpenTelemetry static filters give you control and freedom--forever at no
-      cost, no added vendor charges.
+      The big deal? We only edited the OTEL configuration, and MyDecisive's
+      SmartHub automatically deployed the new logic. The cluster also adjusted
+      to support the new pipelines without losing any data.
     </SubStepContent>
   );
 }
 
 function TakeNote() {
-  const onListItemClick = () => {
-    const configContainer = document.getElementById("otel_ref.yaml-tabpanel");
-    if (configContainer) {
-      const el =
-        configContainer?.querySelector<HTMLDivElement>(`[data-line="78"]`);
-      if (el) {
-        const containerRect = configContainer.getBoundingClientRect();
+  const { actions } = useHighlander();
+  const makeOnListItemClick = (lineNo: number) => {
+    return () => {
+      const configContainer = document.getElementById("otel_ref.yaml-tabpanel");
+      if (!configContainer) return;
+
+      if (configContainer.hidden) {
+        actions.SET_ACTIVE_TAB("otel_ref.yaml");
+
+        setTimeout(() => {
+          continueWithScroll();
+        }, 400);
+      } else {
+        continueWithScroll();
+      }
+
+      function continueWithScroll() {
+        const el = configContainer!.querySelector<HTMLDivElement>(
+          `[data-line="${lineNo}"]`
+        );
+        if (!el) return;
+
+        const containerRect = configContainer!.getBoundingClientRect();
         const elementRect = el.getBoundingClientRect();
         const scrollTarget =
-          configContainer.scrollTop +
+          configContainer!.scrollTop +
           (elementRect.top - containerRect.top) -
           24;
 
-        configContainer.scrollTo({ top: scrollTarget, behavior: "smooth" });
+        configContainer!.scrollTo({ top: scrollTarget, behavior: "smooth" });
         setTimeout(() => {
           el.style.animation = "backgroundPulse 1s ease-out forwards";
 
@@ -271,30 +311,32 @@ function TakeNote() {
           }, 999);
         }, 200);
       }
-    }
+    };
   };
 
   return (
-    <SubStepContent title="We’ve got the heavy lifting covered, so working with your logs is a breeze.">
+    <SubStepContent>
       <List>
         <ListItem
-          onClick={onListItemClick}
-          sx={[ListItemStyles, { cursor: "pointer" }]}
+          onClick={makeOnListItemClick(78)}
+          sx={[ListItemStyles, { mb: 1 }, { cursor: "pointer" }]}
         >
-          <Typography sx={BulletStyle}>1.</Typography>
           <Typography>
-            In this example, Service4321 is just part of the generated data.
-            They are some random service names like you might have.
+            In line 78 of the OTEL_REF.YAML file, you define a rule that says
+            drop logs from “service4321”.
           </Typography>
         </ListItem>
         <ListItem
-          onClick={onListItemClick}
-          sx={[ListItemStyles, { cursor: "pointer" }]}
+          onClick={makeOnListItemClick(100)}
+          sx={[ListItemStyles, { mb: 1 }, { cursor: "pointer" }]}
         >
-          <Typography sx={BulletStyle}>2.</Typography>
+          <Typography>In line 100 you enable this filter rule.</Typography>
+        </ListItem>
+        <ListItem sx={[ListItemStyles, { mb: 1 }]}>
           <Typography>
-            “mdai_service” is a variable--yep, a little bit of magic. Hang
-            tight, you’ll learn more about variables in just a minute.
+            We are now actively dropping all logs from service4321, which saves
+            you money. The downside is that this approach uses basic, static
+            OTEL, which is suboptimal.
           </Typography>
         </ListItem>
       </List>
@@ -304,9 +346,9 @@ function TakeNote() {
 
 function ExploreThe() {
   return (
-    <SubStepContent title="OTEL’s online!">
-      Your collector is running in the SmartHub, and the dashboards confirm:
-      Service4321 are filtered out.
+    <SubStepContent title="Static Filtration is online!">
+      You’re now running OTEL and K8S like a devops boss. Service4321 is being
+      filtered out but let’s do better.
     </SubStepContent>
   );
 }
@@ -343,14 +385,40 @@ function AddA() {
 }
 
 function TakeNote2() {
+  const makeHandleClick =
+    (component: string) => (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      const statusSimBox = document.getElementsByClassName(component);
+      if (statusSimBox.length > 0) {
+        const element = statusSimBox[0] as HTMLElement;
+        const computedStyles = getComputedStyle(element);
+        const oldTransition = computedStyles.transition;
+        const oldBorderColor = computedStyles.borderColor;
+
+        element.style.transition = "border-color 0.5s ease";
+        element.style.borderColor = "#B062C2";
+
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => {
+          element.style.borderColor = oldBorderColor;
+        }, 1000);
+        setTimeout(() => {
+          element.style.transition = oldTransition;
+        }, 1500);
+      } else {
+        console.warn(`No element with class '${component}' found.`);
+      }
+    };
   const { actions } = useHighlander();
-  const makeOnListItemClick = (lineNo: number) => {
+  const makeOnListItemClick = (fileName: string, lineNo: number) => {
     return () => {
-      const configContainer = document.getElementById("hub_ref.yaml-tabpanel");
+      const configContainer = document.getElementById(
+        `${fileName}.yaml-tabpanel`
+      );
       if (!configContainer) return;
 
       if (configContainer.hidden) {
-        actions.SET_ACTIVE_TAB("hub_ref.yaml");
+        actions.SET_ACTIVE_TAB(`${fileName}.yaml`);
 
         setTimeout(() => {
           continueWithScroll();
@@ -388,39 +456,72 @@ function TakeNote2() {
   return (
     <SubStepContent title="What’s happening in the config file? ">
       <List>
-        <ListItem
-          sx={[ListItemStyles, { cursor: "pointer" }]}
-          onClick={makeOnListItemClick(43)}
-        >
+        <ListItem sx={[ListItemStyles]}>
           <Typography sx={BulletStyle}>1.</Typography>
           <Typography>
-            Top talkers: Services that log more than your budget can handle are
-            called your top talkers. We store them in a variable called
-            "service_list".
+            We are now working with two areas in the{" "}
+            <Button
+              onClick={makeHandleClick("config")}
+              variant="text"
+              sx={InlineButtonStyles}
+            >
+              Config
+            </Button>{" "}
+            window: OTEL and dynamic variables.
           </Typography>
         </ListItem>
         <ListItem
           sx={[ListItemStyles, { cursor: "pointer" }]}
-          onClick={makeOnListItemClick(11)}
+          onClick={makeOnListItemClick("hub_ref", 11)}
         >
           <Typography sx={BulletStyle}>2.</Typography>
           <Typography>
-            Easy reference: Your code only needs to reference "service_list". We
-            handle the heavy lifting—dynamically computing top loggers and
-            keeping the variable updated continuously.
+            Select HUB_REF.YAML. Line 11 defines a dynamic "noisy" service
+            filter (replacing the static service4321 drop).
           </Typography>
         </ListItem>
         <ListItem
           sx={[ListItemStyles, { cursor: "pointer" }]}
-          onClick={makeOnListItemClick(81)}
+          onClick={makeOnListItemClick("hub_ref", 44)}
         >
           <Typography sx={BulletStyle}>3.</Typography>
           <Typography>
-            Config-controlled behavior: The "service_list" computation itself is
-            managed via configuration too. Learn more <Link>here.</Link>
+            Line 44 contains the PromQL query that sets the "noisy" threshold
+            and duration.
+          </Typography>
+        </ListItem>
+        <ListItem sx={[ListItemStyles]}>
+          <Typography sx={BulletStyle}>4.</Typography>
+          <Typography>
+            Check OTEL_REF.YAML (Lines{" "}
+            <Button
+              onClick={makeOnListItemClick("otel_ref", 77)}
+              variant="text"
+              sx={InlineButtonStyles}
+            >
+              77
+            </Button>{" "}
+            &{" "}
+            <Button
+              onClick={makeOnListItemClick("otel_ref", 99)}
+              variant="text"
+              sx={InlineButtonStyles}
+            >
+              99
+            </Button>
+            ) to see how these variables make OTEL dynamic.
+          </Typography>
+        </ListItem>
+        <ListItem sx={[ListItemStyles]}>
+          <Typography sx={BulletStyle}>5.</Typography>
+          <Typography>
+            The key: The SmartHub detects log volume and configuration changes
+            and adjusts the cluster configuration instantly to meet your budget.
           </Typography>
         </ListItem>
       </List>
+
+      <Typography>This is dynamic, real-time observability control.</Typography>
     </SubStepContent>
   );
 }
@@ -436,7 +537,7 @@ export const stepItemsMap: StepItemMap = {
     label: "Step 2: Drop unwanted data",
   },
   [ITEM_IDS.step3]: {
-    label: "Step 3: Kick back and let our system shine...",
+    label: "Step 3: Dynamic OTEL==>Power-User Mode",
   },
 
   [ITEM_IDS.introduction_meet]: {
@@ -493,8 +594,8 @@ export const STEP_ORDER: ViewStepOrder = [
   {
     stepId: ITEM_IDS.introduction,
     subStepIds: [
-      ITEM_IDS.introduction_meet,
       ITEM_IDS.introduction_consolidated,
+      ITEM_IDS.introduction_meet,
     ],
   },
   {

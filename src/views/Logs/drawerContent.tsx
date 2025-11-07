@@ -115,8 +115,7 @@ function UnifiedView() {
               style={{
                 fontWeight: 700,
                 ...(config?.active && {
-                  color: "#000000",
-                  backgroundColor: "#B062C2",
+                  color: "#EA80FC",
                 }),
               }}
             >
@@ -132,8 +131,7 @@ function UnifiedView() {
               style={{
                 fontWeight: 700,
                 ...(terminal?.active && {
-                  color: "#000000",
-                  backgroundColor: "#B062C2",
+                  color: "#EA80FC",
                 }),
               }}
             >
@@ -149,8 +147,7 @@ function UnifiedView() {
               style={{
                 fontWeight: 700,
                 ...(status?.active && {
-                  color: "#000000",
-                  backgroundColor: "#B062C2",
+                  color: "#EA80FC",
                 }),
               }}
             >
@@ -166,8 +163,7 @@ function UnifiedView() {
               style={{
                 fontWeight: 700,
                 ...(logs?.active && {
-                  color: "#000000",
-                  backgroundColor: "#B062C2",
+                  color: "#EA80FC",
                 }),
               }}
             >

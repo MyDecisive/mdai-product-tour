@@ -102,6 +102,9 @@ export const theme = createTheme({
         outlined: {
           borderWidth: "2px",
         },
+        text: {
+          color: "#EA80FC",
+        },
       },
     },
     MuiTreeItem: {

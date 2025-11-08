@@ -20,6 +20,7 @@ export const ITEM_IDS = {
   step1_results: "step1_results",
   step2_configure: "step2_configure",
   step2_take: "step2_take",
+  step2_results: "step2_results",
   step2_explore: "step2_explore",
   step2_visualize: "step2_visualize",
   step3_add: "step3_add",

@@ -228,7 +228,7 @@ function DataStarts() {
       </Box>
       to open the floodgates. <br />
       <br />
-      Now, we start Fluentd containers to stream logs from services like
+      Next, we start Fluentd containers to stream logs from services like
       "service1234" and "service4321.” The{" "}
       <Button
         onClick={makeHandleClick("status")}
@@ -261,9 +261,9 @@ function SeeResults() {
 function ConfigureStatus() {
   return (
     <SubStepContent title="Your data, your rules">
-      The big deal? We only edited the OTEL configuration, and MyDecisive's
-      SmartHub automatically deployed the new logic. The cluster also adjusted
-      to support the new pipelines without losing any data.
+      We only edited the OTEL configuration, and MyDecisive's SmartHub
+      automatically deployed the new logic. The cluster also adjusted to support
+      the new pipelines without losing any data.
     </SubStepContent>
   );
 }
@@ -353,6 +353,10 @@ function ExploreThe() {
   );
 }
 
+function Results2() {
+  return <SubStepContent title="">{""}</SubStepContent>;
+}
+
 function VisualizeThe2() {
   return (
     <SubStepContent title="Nice work on the filters!">
@@ -365,8 +369,13 @@ function VisualizeThe2() {
 function AddA() {
   return (
     <SubStepContent>
-      {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
+      {`We are now working with two areas in the "Config" window: OTEL and dynamic variables.`}
       <List>
+        <ListItem sx={[ListItemStyles]}>
+          Select HUB_REF.YAML. Line 49 defines a dynamic "noisy" service filter
+          (replacing the static service4321 drop).
+        </ListItem>
+
         <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
           <pre style={{ width: "100%", overflowX: "auto", color: "#83ACDE" }}>
             kubectl apply -f mdai/hub/hub_ref.yaml
@@ -553,7 +562,7 @@ export const stepItemsMap: StepItemMap = {
     content: <UnifiedView />,
   },
   [ITEM_IDS.step1_data]: {
-    label: "Data Starts to Flow",
+    label: "Generate synthethic log data",
     content: <DataStarts />,
   },
   [ITEM_IDS.step1_results]: {
@@ -562,15 +571,19 @@ export const stepItemsMap: StepItemMap = {
   },
   [ITEM_IDS.step2_configure]: {
     label: "Configure static filters",
-    content: <ConfigureStatus />,
-  },
-  [ITEM_IDS.step2_take]: {
-    label: "Take Note",
     content: <TakeNote />,
   },
-  [ITEM_IDS.step2_explore]: {
-    label: "Explore the running system",
+  [ITEM_IDS.step2_take]: {
+    label: "Static Filtration is online!",
     content: <ExploreThe />,
+  },
+  [ITEM_IDS.step2_explore]: {
+    label: "The big deal?",
+    content: <ConfigureStatus />,
+  },
+  [ITEM_IDS.step2_results]: {
+    label: "See Results!",
+    content: <Results2 />,
   },
   [ITEM_IDS.step2_visualize]: {
     label: "See the results",
@@ -608,6 +621,7 @@ export const STEP_ORDER: ViewStepOrder = [
       ITEM_IDS.step2_configure,
       ITEM_IDS.step2_take,
       ITEM_IDS.step2_explore,
+      ITEM_IDS.step2_results,
     ],
   },
   {

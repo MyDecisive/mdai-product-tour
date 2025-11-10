@@ -228,7 +228,7 @@ function DataStarts() {
       </Box>
       to open the floodgates. <br />
       <br />
-      Now, we start Fluentd containers to stream logs from services like
+      Next, we start Fluentd containers to stream logs from services like
       "service1234" and "service4321.” The{" "}
       <Button
         onClick={makeHandleClick("status")}
@@ -261,9 +261,9 @@ function SeeResults() {
 function ConfigureStatus() {
   return (
     <SubStepContent title="Your data, your rules">
-      The big deal? We only edited the OTEL configuration, and MyDecisive's
-      SmartHub automatically deployed the new logic. The cluster also adjusted
-      to support the new pipelines without losing any data.
+      We only edited the OTEL configuration, and MyDecisive's SmartHub
+      automatically deployed the new logic. The cluster also adjusted to support
+      the new pipelines without losing any data.
     </SubStepContent>
   );
 }
@@ -553,7 +553,7 @@ export const stepItemsMap: StepItemMap = {
     content: <UnifiedView />,
   },
   [ITEM_IDS.step1_data]: {
-    label: "Data Starts to Flow",
+    label: "Generate synthethic log data",
     content: <DataStarts />,
   },
   [ITEM_IDS.step1_results]: {
@@ -562,15 +562,15 @@ export const stepItemsMap: StepItemMap = {
   },
   [ITEM_IDS.step2_configure]: {
     label: "Configure static filters",
-    content: <ConfigureStatus />,
-  },
-  [ITEM_IDS.step2_take]: {
-    label: "Take Note",
     content: <TakeNote />,
   },
-  [ITEM_IDS.step2_explore]: {
-    label: "Explore the running system",
+  [ITEM_IDS.step2_take]: {
+    label: "Static Filtration is online!",
     content: <ExploreThe />,
+  },
+  [ITEM_IDS.step2_explore]: {
+    label: "The big deal?",
+    content: <ConfigureStatus />,
   },
   [ITEM_IDS.step2_visualize]: {
     label: "See the results",

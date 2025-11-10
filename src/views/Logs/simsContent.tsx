@@ -31,7 +31,6 @@ import {
 import { braidedLogs, collectorLogs } from "./tailLogs/tailLogsContent";
 import {
   applyConfigTerminalContent,
-  applyConfigTerminalContent3add,
   portForwardTerminalContent,
   startLogsTerminalContent,
 } from "./terminal/terminalContent";
@@ -349,34 +348,6 @@ export const PANEL_STATE: StepDefinitions = {
             },
           },
         },
-      }),
-      createAnimationAction({
-        config: {
-          active: false,
-          files: {},
-        },
-        terminal: {
-          active: true,
-          typedOptions: applyConfigTerminalContent3add,
-        },
-      }),
-      createAnimationAction({
-        terminal: {
-          active: false,
-        },
-        status: {
-          active: true,
-          services: step2UpdateSvcs,
-        },
-      }),
-      createAnimationAction({
-        status: {
-          active: false,
-        },
-        logs: {
-          logRecords: collectorLogs,
-        },
-        banner: filterOn,
       }),
     ],
   },

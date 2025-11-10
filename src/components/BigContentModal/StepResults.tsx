@@ -19,7 +19,7 @@ export const stepVizMap = {
     content:
       "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money.",
   },
-  [ITEM_IDS.step2_results]: {
+  [ITEM_IDS.step2_explore]: {
     src: preFilter,
     alt: "Prefilter Visualization",
     style: {

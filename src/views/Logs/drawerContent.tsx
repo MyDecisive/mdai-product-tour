@@ -353,10 +353,6 @@ function ExploreThe() {
   );
 }
 
-function Results2() {
-  return <SubStepContent title="">{""}</SubStepContent>;
-}
-
 function VisualizeThe2() {
   return (
     <SubStepContent title="Nice work on the filters!">
@@ -369,13 +365,8 @@ function VisualizeThe2() {
 function AddA() {
   return (
     <SubStepContent>
-      {`We are now working with two areas in the "Config" window: OTEL and dynamic variables.`}
+      {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
       <List>
-        <ListItem sx={[ListItemStyles]}>
-          Select HUB_REF.YAML. Line 49 defines a dynamic "noisy" service filter
-          (replacing the static service4321 drop).
-        </ListItem>
-
         <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
           <pre style={{ width: "100%", overflowX: "auto", color: "#83ACDE" }}>
             kubectl apply -f mdai/hub/hub_ref.yaml
@@ -581,10 +572,6 @@ export const stepItemsMap: StepItemMap = {
     label: "The big deal?",
     content: <ConfigureStatus />,
   },
-  [ITEM_IDS.step2_results]: {
-    label: "See Results!",
-    content: <Results2 />,
-  },
   [ITEM_IDS.step2_visualize]: {
     label: "See the results",
     content: <VisualizeThe2 />,
@@ -621,7 +608,6 @@ export const STEP_ORDER: ViewStepOrder = [
       ITEM_IDS.step2_configure,
       ITEM_IDS.step2_take,
       ITEM_IDS.step2_explore,
-      ITEM_IDS.step2_results,
     ],
   },
   {

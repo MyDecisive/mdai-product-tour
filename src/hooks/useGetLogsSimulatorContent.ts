@@ -38,6 +38,11 @@ function createNextLog(
     id: createNextLogId(cycleCount, logIndex),
   };
 }
+type CurrentLogsSimulatorState = {
+  displayedLogs: LogRecord[];
+  cycleCount: number;
+  currentIndex: number;
+};
 
 export function useGetLogsSimulatorContent() {
   const animationIndex = useSelector(selectAnimationIndex);
@@ -51,14 +56,26 @@ export function useGetLogsSimulatorContent() {
     contextLabel = "",
   } = logs as LogSimulatorProps;
 
-  const [displayedLogs, setDisplayedLogs] = useState<LogRecord[]>([]);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [cycleCount, setCycleCount] = useState<number>(0);
+  const [state, setState] = useState<CurrentLogsSimulatorState>({
+    displayedLogs: [],
+    cycleCount: 0,
+    currentIndex: 0,
+  });
   const [workingContext, setWorkingContext] = useState<string>(contextLabel);
   const [workDone, setWorkDone] = useState<boolean>(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setState((prev) => {
+      return {
+        ...prev,
+        currentIndex: 0,
+        cycleCount: prev.cycleCount + 1,
+      };
+    });
+  }, [logRecords]);
 
   useEffect(() => {
     if (isPaused) {
@@ -69,30 +86,45 @@ export function useGetLogsSimulatorContent() {
       return;
     }
 
-    if (logRecords.length === 0) return;
+    if (logRecords.length === 0) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
 
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     intervalRef.current = setInterval(() => {
-      setDisplayedLogs((prev) => {
+      setState((prev) => {
         let nextLog: LogRecord;
+        let newIndex = prev.currentIndex;
+        let newCycleCount = prev.cycleCount;
+
         if (shouldInjectError(!!errorLogs.length, errorFrequency)) {
           const propLog = selectErrorPropLog(errorLogs);
           nextLog = createNextLog(propLog, null, null);
         } else {
-          const logIndex = currentIndex % logRecords.length;
+          const logIndex = prev.currentIndex % logRecords.length;
           const propLog = selectPropLog(logRecords, logIndex);
-          nextLog = createNextLog(propLog, cycleCount, logIndex);
+          nextLog = createNextLog(propLog, prev.cycleCount, logIndex);
 
-          setCurrentIndex((prevIndex) => {
-            const newIndex = prevIndex + 1;
-            if (newIndex >= logRecords.length) {
-              setCycleCount((prev) => prev + 1);
-              return 0;
-            }
-            return newIndex;
-          });
+          newIndex = prev.currentIndex + 1;
+          if (newIndex >= logRecords.length) {
+            newCycleCount = prev.cycleCount + 1;
+            newIndex = 0;
+          }
         }
 
-        return [...prev, nextLog];
+        const returnVal = {
+          displayedLogs: [...prev.displayedLogs, nextLog],
+          currentIndex: newIndex,
+          cycleCount: newCycleCount,
+        };
+
+        return returnVal;
       });
     }, speed);
 
@@ -101,27 +133,21 @@ export function useGetLogsSimulatorContent() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [
-    logRecords,
-    speed,
-    errorLogs,
-    errorFrequency,
-    isPaused,
-    currentIndex,
-    cycleCount,
-  ]);
+  }, [logRecords, speed, errorLogs, errorFrequency, isPaused]);
 
   useEffect(() => {
     if (!workDone && logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  }, [displayedLogs, workDone]);
+  }, [state.displayedLogs, workDone]);
 
   useEffect(() => {
     if (animationIndex === -1 || contextLabel !== workingContext) {
-      setDisplayedLogs([]);
-      setCurrentIndex(0);
-      setCycleCount(0);
+      setState({
+        displayedLogs: [],
+        cycleCount: 0,
+        currentIndex: 0,
+      });
 
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -135,6 +161,6 @@ export function useGetLogsSimulatorContent() {
   return {
     logContainerRef,
     contextLabel,
-    displayedLogs,
+    displayedLogs: state.displayedLogs,
   };
 }

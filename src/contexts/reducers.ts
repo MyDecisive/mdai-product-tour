@@ -164,7 +164,7 @@ function deriveNextStepNavState({
       }
 
       if (bigContentModal === "results") {
-        if (subStep === ITEM_IDS.step3_take && step === ITEM_IDS.step3) {
+        if (subStep === ITEM_IDS.step3_kick && step === ITEM_IDS.step3) {
           return {
             view: Home,
             bigContentModal: "finished",

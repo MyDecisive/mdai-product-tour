@@ -346,7 +346,7 @@ function TakeNote() {
 
 function ExploreThe() {
   return (
-    <SubStepContent title="Static Filtration is online!">
+    <SubStepContent>
       You’re now running OTEL and K8S like a devops boss. Service4321 is being
       filtered out but let’s do better.
     </SubStepContent>
@@ -362,29 +362,19 @@ function VisualizeThe2() {
   );
 }
 
-function AddA() {
+function KickTheCluster() {
   return (
     <SubStepContent>
-      {`Variables == smarter data streams.  Use these commands to add one to your configuration file now:`}
-      <List>
-        <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
-          <pre style={{ width: "100%", overflowX: "auto", color: "#83ACDE" }}>
-            kubectl apply -f mdai/hub/hub_ref.yaml
-          </pre>
-          updates your MDAI hub
-        </ListItem>
-        <ListItem sx={[ListItemStyles, { flexDirection: "column" }]}>
-          <pre style={{ width: "100%", overflowX: "auto", color: "#83ACDE" }}>
-            kubectl apply -f otel/otel_ref.yaml
-          </pre>
-          puts the variable to use in your OTel collector
-        </ListItem>
-      </List>
+      We use a command-line tool (kubectl) to dynamically configure the system.
+      Now, our smart central controller (SmartHub) automatically manages and
+      adjusts the logging volume from services based on how much data they're
+      sending, using a configurable, real-time threshold.
+      {/* Check the "Event Bus" in the "Tail logs" window. The SmartHub is now actively controlling log volume, ensuring services 4321 and 1234 stay within their assigned budget. */}
     </SubStepContent>
   );
 }
 
-function TakeNote2() {
+function SprinkleVariables() {
   const makeHandleClick =
     (component: string) => (e: MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
@@ -476,8 +466,9 @@ function TakeNote2() {
         >
           <Typography sx={BulletStyle}>2.</Typography>
           <Typography>
-            Select HUB_REF.YAML. Line 11 defines a dynamic "noisy" service
-            filter (replacing the static service4321 drop).
+            Select HUB_REF.YAML.{" "}
+            <span style={{ color: "#B062C2" }}>Line 11</span> defines a dynamic
+            "noisy" service filter (replacing the static service4321 drop).
           </Typography>
         </ListItem>
         <ListItem
@@ -486,8 +477,8 @@ function TakeNote2() {
         >
           <Typography sx={BulletStyle}>3.</Typography>
           <Typography>
-            Line 44 contains the PromQL query that sets the "noisy" threshold
-            and duration.
+            <span style={{ color: "#B062C2" }}>Line 49</span> contains the
+            PromQL query that sets the "noisy" threshold and duration.
           </Typography>
         </ListItem>
         <ListItem sx={[ListItemStyles]}>
@@ -576,13 +567,13 @@ export const stepItemsMap: StepItemMap = {
     label: "See the results",
     content: <VisualizeThe2 />,
   },
-  [ITEM_IDS.step3_add]: {
+  [ITEM_IDS.step3_sprinkle]: {
     label: "Sprinkle in some variables.",
-    content: <AddA />,
+    content: <SprinkleVariables />,
   },
-  [ITEM_IDS.step3_take]: {
-    label: "Take Note",
-    content: <TakeNote2 />,
+  [ITEM_IDS.step3_kick]: {
+    label: "Kick the cluster one last time",
+    content: <KickTheCluster />,
   },
   [ITEM_IDS.step3_vizualize]: {
     label: "Vizualize The Results",
@@ -612,7 +603,7 @@ export const STEP_ORDER: ViewStepOrder = [
   },
   {
     stepId: ITEM_IDS.step3,
-    subStepIds: [ITEM_IDS.step3_add, ITEM_IDS.step3_take],
+    subStepIds: [ITEM_IDS.step3_sprinkle, ITEM_IDS.step3_kick],
   },
 ];
 

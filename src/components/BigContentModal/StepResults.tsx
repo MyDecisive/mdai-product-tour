@@ -29,7 +29,7 @@ export const stepVizMap = {
     content:
       "You are cutting down the noise big-time. One hitch--Service4321 are missing from Datadog. Don’t worry, we’ll get it right together.",
   },
-  [ITEM_IDS.step3_take]: {
+  [ITEM_IDS.step3_kick]: {
     src: postfilter,
     alt: "Postfilter Visualization",
     style: {
@@ -105,7 +105,7 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
             variant="contained"
             onClick={() => {
               actions.GO_NEXT_STEP();
-              if (subStep !== ITEM_IDS.step3_take) {
+              if (subStep !== ITEM_IDS.step3_kick) {
                 handleClose();
               }
             }}

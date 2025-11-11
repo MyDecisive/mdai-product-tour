@@ -23,7 +23,7 @@ export const STATUS = {
   shutdown,
 } as const;
 
-const POD_ERROR_RATE = 0.15;
+const POD_ERROR_RATE = 0.01;
 
 export function getNextStatus(currentStatus: StatusString) {
   switch (currentStatus) {

@@ -49,14 +49,36 @@ export const portForwardTerminalContent: TerminalTypedOptions[] = (
 
 const applyOtelConfig = ["kubectl apply -f otel/otel_ref.yaml"];
 
-const applyConfigOutput = [
+const applyOtelConfigOutput = [
   "^450opentelemetrycollector.opentelemetry.io/gateway created",
+];
+
+const applyHubConfig = ["kubectl apply -f mdai/hub/hub_ref.yaml"];
+
+const applyHubConfigOutput = [
+  "^450mdaihub.hub.mydecisive.ai/mdaihub-sample configured",
 ];
 
 export const applyConfigTerminalContent: TerminalTypedOptions[] = (
   [] as TerminalTypedOptions[]
 ).concat(
   createTerminalContent(applyOtelConfig),
-  createTerminalContent(applyConfigOutput, "terminal"),
+  createTerminalContent(applyOtelConfigOutput, "terminal"),
+  createTerminalContent([""])
+);
+
+export const applyHubTerminalContent3add: TerminalTypedOptions[] = (
+  [] as TerminalTypedOptions[]
+).concat(
+  createTerminalContent(applyHubConfig),
+  createTerminalContent(applyHubConfigOutput, "terminal"),
+  createTerminalContent([""])
+);
+
+export const applyOTelTerminalContent3add: TerminalTypedOptions[] = (
+  [] as TerminalTypedOptions[]
+).concat(
+  createTerminalContent(applyOtelConfig),
+  createTerminalContent(applyOtelConfigOutput, "terminal"),
   createTerminalContent([""])
 );

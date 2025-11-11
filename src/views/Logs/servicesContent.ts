@@ -92,3 +92,29 @@ export const step2UpdateSvcs: Service[] = [
     replicas: 5,
   },
 ];
+
+/** step 3 */
+
+export const step3StartingSvcs = [
+  {
+    namespace: "mdai",
+    name: "mdai-operator-controller-manager-65955fb98b",
+    skipStartup: true,
+  },
+  ...step2StartingSvcs,
+];
+
+export const step3UpdateHub: Service[] = [
+  {
+    namespace: "mdai",
+    name: "mdai-operator-controller-manager-65955fb98b",
+  },
+];
+
+export const step3UpdateCollector: Service[] = [
+  {
+    namespace: "mdai",
+    name: "gateway-collector",
+    replicas: 5,
+  },
+];

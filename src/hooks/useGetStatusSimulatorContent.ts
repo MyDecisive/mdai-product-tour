@@ -122,6 +122,7 @@ export function useGetStatusSimulatorContent() {
         nextActivePods[prevPod.replacing] = {
           ...nextActivePods[prevPod.replacing],
           beingReplaced: true,
+          status: STATUS.terminating,
         };
       }
       return nextActivePods;
@@ -138,9 +139,10 @@ export function useGetStatusSimulatorContent() {
   }, []);
 
   useEffect(() => {
-    const pods = Object.values(activePods).filter((pod) => !pod.skipStartup);
+    const pods = Object.values(activePods);
     const allStabilized =
-      pods.length > 0 && pods.every((pod) => pod.status === "Running");
+      pods.length > 0 &&
+      pods.every((pod) => pod.status === "Running" && !pod.beingReplaced);
     if (allStabilized && !isShowingPreviousContent) {
       setWorkDone(true);
       actions.INCREMENT_ANIMATION();

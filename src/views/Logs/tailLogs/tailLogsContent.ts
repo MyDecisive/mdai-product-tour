@@ -22,7 +22,7 @@ const xtraNoisyServiceLogs: LogRecord[] = parseRawServiceLogs(
   rawXtraNoisyServiceLogs
 );
 
-export const braidedLogs: LogRecord[] = braidLogs(
+export const braidedLogsAll: LogRecord[] = braidLogs(
   serviceLogs,
   noisyServiceLogs,
   xtraNoisyServiceLogs
@@ -30,3 +30,8 @@ export const braidedLogs: LogRecord[] = braidLogs(
 
 export const collectorLogs: LogRecord[] =
   parseRawCollectorLogs(rawCollectorLogs);
+
+export const braidedLogsServiceAndNoisy: LogRecord[] = braidLogs(
+  serviceLogs,
+  noisyServiceLogs
+);

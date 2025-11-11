@@ -27,10 +27,20 @@ import {
   startingServices,
   step2StartingSvcs,
   step2UpdateSvcs,
+  step3StartingSvcs,
+  step3UpdateCollector,
+  step3UpdateHub,
 } from "./servicesContent";
-import { braidedLogs, collectorLogs } from "./tailLogs/tailLogsContent";
+import {
+  braidedLogsAll,
+  braidedLogsServiceAndNoisy,
+  collectorLogs,
+  serviceLogs,
+} from "./tailLogs/tailLogsContent";
 import {
   applyConfigTerminalContent,
+  applyHubTerminalContent3add,
+  applyOTelTerminalContent3add,
   portForwardTerminalContent,
   startLogsTerminalContent,
 } from "./terminal/terminalContent";
@@ -171,7 +181,7 @@ export const PANEL_STATE: StepDefinitions = {
           },
           logs: {
             active: true,
-            logRecords: braidedLogs,
+            logRecords: braidedLogsAll,
             speed: 50,
             isPaused: false,
             contextLabel: fluentDServices.map((svc) => svc.name).join(" - "),
@@ -238,7 +248,7 @@ export const PANEL_STATE: StepDefinitions = {
             },
           },
         },
-        1500
+        2500
       ),
       createAnimationAction({
         config: {
@@ -259,18 +269,27 @@ export const PANEL_STATE: StepDefinitions = {
           services: step2UpdateSvcs,
         },
       }),
+      createAnimationAction(
+        {
+          status: {
+            active: false,
+          },
+          logs: {
+            active: true,
+            logRecords: collectorLogs,
+          },
+          banner: filterOn,
+        },
+        500
+      ),
       createAnimationAction({
-        status: {
+        logs: {
           active: false,
         },
-        logs: {
-          logRecords: collectorLogs,
-        },
-        banner: filterOn,
       }),
     ],
   },
-  [ITEM_IDS.step3_add]: {
+  [ITEM_IDS.step3_sprinkle]: {
     initialState: {
       config: step3HubConfig,
       terminal: {
@@ -282,7 +301,7 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: step2StartingSvcs,
+        services: step3StartingSvcs,
       },
       logs: {
         logRecords: [],
@@ -351,9 +370,12 @@ export const PANEL_STATE: StepDefinitions = {
       }),
     ],
   },
-  [ITEM_IDS.step3_take]: {
+  [ITEM_IDS.step3_kick]: {
     initialState: {
-      config: step3HubConfig,
+      config: {
+        ...step3HubConfig,
+        activeFileTitle: "otel_ref.yaml",
+      },
       terminal: {
         typedOptions: [
           {
@@ -363,14 +385,128 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: step2StartingSvcs,
+        services: step3StartingSvcs,
       },
       logs: {
         logRecords: [],
         isPaused: true,
       },
-      banner: dynamicFilterOn,
+      banner: filterOn,
     },
-    animations: [],
+    animations: [
+      createAnimationAction({
+        terminal: {
+          active: true,
+          typedOptions: applyHubTerminalContent3add,
+        },
+      }),
+      createAnimationAction({
+        terminal: {
+          active: false,
+        },
+        status: {
+          active: true,
+          services: step3UpdateHub,
+        },
+      }),
+      createAnimationAction({
+        status: {
+          active: false,
+        },
+        terminal: {
+          active: true,
+          typedOptions: applyOTelTerminalContent3add,
+        },
+      }),
+      createAnimationAction({
+        terminal: {
+          active: false,
+        },
+        status: {
+          active: true,
+          services: step3UpdateCollector,
+        },
+      }),
+      createAnimationAction(
+        {
+          status: {
+            active: false,
+          },
+          logs: {
+            active: true,
+            isPaused: false,
+            logRecords: braidedLogsAll,
+            contextLabel: `${fluentDServices
+              .map((svc) => svc.name)
+              .join(" - ")} -- records received`,
+            speed: 20,
+          },
+        },
+        800
+      ),
+      createAnimationAction(
+        {
+          logs: {
+            isPaused: false,
+            logRecords: [
+              {
+                level: "INFO",
+                message:
+                  "**** SMART HUB EVENT **** records from 'service4321' too noisy, filtering ",
+              },
+              ...braidedLogsServiceAndNoisy,
+            ],
+            speed: 60,
+          },
+        },
+        1200
+      ),
+      createAnimationAction(
+        {
+          banner: dynamicFilterOn,
+          logs: {
+            isPaused: false,
+            logRecords: [
+              {
+                level: "INFO",
+                message:
+                  "**** SMART HUB EVENT **** records from 'service1234' too noisy, filtering ",
+              },
+              ...serviceLogs,
+            ],
+            speed: 150,
+          },
+        },
+        3200
+      ),
+      createAnimationAction(
+        {
+          logs: {
+            isPaused: false,
+            logRecords: [
+              {
+                level: "INFO",
+                message:
+                  "**** SMART HUB EVENT **** records from 'service4321' below threshold, removing from filter ",
+              },
+              {
+                level: "INFO",
+                message:
+                  "**** SMART HUB EVENT **** records from 'service1234' below threshold, removing from filter ",
+              },
+              ...braidedLogsAll,
+            ],
+            speed: 100,
+          },
+        },
+        2400
+      ),
+      createAnimationAction({
+        logs: {
+          active: false,
+          isPaused: true,
+        },
+      }),
+    ],
   },
 };

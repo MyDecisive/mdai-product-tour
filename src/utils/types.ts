@@ -1,6 +1,7 @@
-import type { RefObject } from "react";
+import type { TreeItemSlotProps } from "@mui/x-tree-view";
+import type { JSX, RefObject } from "react";
 import type { TypedOptions } from "typed.js";
-import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
+import { FRAME_TYPES, ITEM_IDS, SIMULATORS, STATUS } from "../utils/constants";
 import type {
   ContentBlock,
   TourConfigSimTarget,
@@ -22,6 +23,28 @@ export type BigContentModalContentProps = {
   handleClose: () => void;
 };
 
+export type View = string;
+export type StepItemId = (typeof ITEM_IDS)[keyof typeof ITEM_IDS];
+
+export interface ViewTreeItem {
+  label: string;
+  content?: JSX.Element | null;
+  slotProps?: TreeItemSlotProps & { label?: { subLabel?: string } };
+}
+
+export interface ViewTreeItemProps extends ViewTreeItem {
+  itemId: StepItemId;
+  subSteps?: Omit<ViewTreeItemProps, "subSteps">[];
+}
+
+export type StepItemMap = Record<StepItemId, ViewTreeItem>;
+
+export type ViewStep = { stepId: StepItemId; subStepIds?: StepItemId[] };
+
+export type ViewStepOrder = ViewStep[];
+
+export type AnimationState = number;
+
 export interface NavigationState {
   tour: string;
   step: number;
@@ -40,6 +63,13 @@ export type SimulatorBoxProps = {
   ref?: RefObject<HTMLDivElement | null>;
 };
 
+export interface Service {
+  name: string;
+  namespace: string;
+  replicas?: number;
+  skipStartup?: boolean;
+  noSuffix?: boolean;
+}
 export interface LogRecord {
   message?: string;
   content?: string;
@@ -61,8 +91,110 @@ export interface BannerTargetState {
   logsFiltered: number;
 }
 
+export interface ConfigTextProps {
+  files: Record<string, FileConfig>;
+  activeFileTitle?: string;
+}
+
+export type LineToggles = Record<number, boolean>;
+export interface FileConfig {
+  text?: string;
+  changes?: LineChangeBlock[];
+  href?: string;
+  initialLineToggles?: LineToggles;
+  showToggleButtons?: boolean;
+}
+
+export interface TextGroup {
+  lines: ProcessedLine[];
+  startLineNo: number;
+  endLineNo: number;
+  isChangeBlock: boolean;
+  isGap?: boolean;
+}
+
+export interface ConfigSimulatorTabContent {
+  title: string;
+  href?: string;
+  textGroups: TextGroup[];
+  pulsedLines: Set<number>;
+  showToggleButtons: boolean | undefined;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  toggleLineValue: (lineNos: number[]) => void;
+}
+
+export type ProcessedLine = {
+  lineNo: number;
+  content: string;
+  isHighlighted: boolean;
+  hasChange?: boolean;
+  newValue?: string;
+  showingNewValue?: boolean;
+  isGap?: boolean;
+};
+
 export interface TerminalTypedOptions extends TypedOptions {
   prompt?: string;
+}
+
+export interface TerminalTypedProps {
+  typedOptions?: TerminalTypedOptions[];
+  style?: React.CSSProperties;
+  className?: string;
+  contextLabel?: string;
+}
+
+export interface StatusProps {
+  contextLabel?: string;
+  services?: Service[];
+}
+
+export interface LogSimulatorProps {
+  logRecords?: LogRecord[];
+  speed?: number;
+  errorLogs?: LogRecord[];
+  errorFrequency?: number;
+  isPaused?: boolean;
+  contextLabel?: string;
+}
+
+type WithPanelState<T> = T & {
+  active?: boolean;
+};
+
+export interface SimulatorPanelState {
+  config: WithPanelState<ConfigTextProps> | null;
+  terminal: WithPanelState<TerminalTypedProps> | null;
+  status: WithPanelState<StatusProps> | null;
+  logs: WithPanelState<LogSimulatorProps> | null;
+  banner: InfoBannerProps | null;
+}
+
+export interface AnimationAction {
+  type: "state_update" | "delay";
+  delay?: number;
+  stateChanges?: DeepPartial<SimulatorPanelState>;
+}
+
+export interface StepDefinition {
+  initialState: SimulatorPanelState;
+  animations: AnimationAction[];
+}
+
+export type StepDefinitions = Record<StepItemId, StepDefinition>;
+
+export type InfoBannerProps = {
+  percentText?: string;
+  showPercentFiltered?: boolean;
+  logs: {
+    sentToVendor: number;
+    filtered: number;
+  };
+};
+export interface TourState {
+  navigation: NavigationState;
+  animationIndex: number;
+  activeTab?: string;
 }
 
 export type DeepPartial<T> = Partial<{

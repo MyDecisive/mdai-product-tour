@@ -145,20 +145,6 @@ export const PANEL_STATE: StepDefinitions = {
           services: logGenServices,
         },
       }),
-      createAnimationAction(
-        {
-          status: { active: false },
-          logs: {
-            contextLabel: logGenServices.map((svc) => svc.name).join(" - "),
-            active: true,
-            logRecords: braidedLogs,
-            speed: 50,
-            isPaused: false,
-          },
-          banner: filterOff,
-        },
-        5000
-      ),
       createAnimationAction({
         logs: {
           active: false,
@@ -185,6 +171,8 @@ export const PANEL_STATE: StepDefinitions = {
           },
           logs: {
             active: true,
+            logRecords: braidedLogs,
+            speed: 50,
             isPaused: false,
             contextLabel: fluentDServices.map((svc) => svc.name).join(" - "),
           },
@@ -294,7 +282,7 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: [],
+        services: step2StartingSvcs,
       },
       logs: {
         logRecords: [],
@@ -333,6 +321,7 @@ export const PANEL_STATE: StepDefinitions = {
           },
         },
       }),
+      createAnimationAction({}, 1500),
       createAnimationAction(
         {
           config: {
@@ -374,7 +363,7 @@ export const PANEL_STATE: StepDefinitions = {
         ],
       },
       status: {
-        services: [],
+        services: step2StartingSvcs,
       },
       logs: {
         logRecords: [],

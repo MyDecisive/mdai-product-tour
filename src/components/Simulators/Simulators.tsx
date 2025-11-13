@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Grid, Button, Link, Stack, Typography } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useAnimationEngine } from "../../animationEngine/hook";
 import { SIMULATORS } from "../../utils/constants";
@@ -66,7 +66,6 @@ export function Simulators({
         className="simulators-container"
         sx={{
           display: "block",
-          // display: inTour ? "block" : "none",
           flexGrow: 1,
           padding: "24px",
         }}
@@ -152,6 +151,31 @@ export function Simulators({
             </SimulatorBox>
           </Grid>
         </Grid>
+
+        <Stack alignItems="center" height={"100%"} mt={27}>
+          <Stack
+            gap={4}
+            alignItems="center"
+            maxWidth={1000}
+            textAlign={"center"}
+          >
+            <Typography variant="h2">Welcome to MyDecisive.ai demo</Typography>
+            <Typography variant="h5" maxWidth={700}>
+              See how you can save money using our SmartHub. Get instant control
+              over your telemetry data.
+            </Typography>
+            <Typography variant="h5">
+              Try out{" "}
+              <Link
+                onClick={() => {}}
+                sx={{ color: "#EA80FC !important", textDecoration: "none" }}
+              >
+                Dynamic Log Filtering
+              </Link>{" "}
+              demo now!
+            </Typography>
+          </Stack>
+        </Stack>
       </Box>
     </Box>
   );

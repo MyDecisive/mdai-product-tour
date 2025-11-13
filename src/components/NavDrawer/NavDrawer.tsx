@@ -20,6 +20,7 @@ export function NavDrawer() {
             height: "100%",
             boxSizing: "border-box",
             position: "relative",
+            backgroundColor: "#000000",
           },
         },
       ])}

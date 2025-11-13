@@ -1,9 +1,7 @@
-import type { FRAME_TYPES, SIMULATORS } from "./constants";
-import type {
-  ClearSimulatorsFrame,
-  DelayFrame,
-  Frame,
-  LineChangeBlock,
+import {
+  type BannerTargetState,
+  type LineChangeBlock,
+  type TourFrames,
 } from "./types";
 
 // ============================================================================
@@ -45,75 +43,7 @@ export interface TourTargetState {
   status?: TourStatusTarget[];
   config?: TourConfigSimTarget;
   logs?: TourLogSimTarget;
-}
-
-// ============================================================================
-// CONFIG ANIMATION FRAMES
-// ============================================================================
-
-export declare namespace TourFrames {
-  export namespace Terminal {
-    export type EnterCommand = Frame<
-      typeof SIMULATORS.TERMINAL,
-      typeof FRAME_TYPES.enter_command,
-      TourTerminalTarget[]
-    >;
-    export type All = EnterCommand;
-  }
-
-  export namespace Status {
-    export type AddServices = Frame<
-      typeof SIMULATORS.STATUS,
-      typeof FRAME_TYPES.add_services,
-      TourStatusTarget[]
-    >;
-    export type All = AddServices;
-  }
-
-  export namespace Config {
-    export type Add = Frame<
-      typeof SIMULATORS.CONFIG,
-      typeof FRAME_TYPES.add,
-      TourConfigSimTarget
-    >;
-    export type ScrollTo = Frame<
-      typeof SIMULATORS.CONFIG,
-      typeof FRAME_TYPES.scroll_to,
-      {
-        fileName: string;
-        line: number;
-      }
-    >;
-    export type All = Add | ScrollTo;
-  }
-
-  export namespace Logs {
-    export type Add = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.add,
-      Pick<TourLogSimTarget, "logsSources">
-    >;
-    export type Stream = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.stream,
-      TourLogSimTarget
-    >;
-    export type Pause = Frame<typeof SIMULATORS.LOGS, typeof FRAME_TYPES.pause>;
-    export type Resume = Frame<
-      typeof SIMULATORS.LOGS,
-      typeof FRAME_TYPES.resume,
-      TourLogSimTarget
-    >;
-    export type All = Add | Stream | Pause | Resume;
-  }
-
-  export type Any =
-    | Config.All
-    | Terminal.All
-    | Status.All
-    | Logs.All
-    | DelayFrame
-    | ClearSimulatorsFrame;
+  banner?: BannerTargetState;
 }
 
 // ============================================================================
@@ -123,49 +53,52 @@ export interface TourConfiguration {
   id: string;
   version: string;
   title: string;
+  subtitle?: string;
   description?: string;
-  steps: StepConfig[];
+  steps?: StepConfig[];
+  coming_soon?: boolean;
+  buttonText?: string;
+  default_open?: boolean;
 }
 
-interface StepConfig {
+export interface StepConfig {
   id: string;
-  label: string;
-  substeps: SubstepConfig[];
+  title: string;
+  subSteps: SubStepConfig[];
 }
 
-export interface SubstepConfig {
+export interface SubStepConfig {
   id: string;
-  label: string;
-  subLabel?: string;
-  content: ContentConfig;
-  targetState: TourTargetState;
-  animation?: TourFrames.Any[];
+  title?: string;
+  content?: ContentBlock;
+  visualizationModal?: boolean;
+  initialState?: TourTargetState;
+  animation?: TourFrames["Any"][];
 }
 
 // ============================================================================
 // DRAWER CONTENT CONFIG
 // ============================================================================
-export type ContentConfig = TextContentConfig | ListContentConfig;
-
-interface TextContentConfig {
-  type: "text";
-  title?: string;
-  text: string; // Supports <code>...</code> and <highlight:simulator>...</highlight>
+export interface ContentBlock {
+  title: string | null;
+  variant?: "default" | "list" | "visualization";
+  items?: Array<ContentItem | VisualizationContentItem>;
 }
 
-interface ListContentConfig {
-  type: "list";
-  title?: string;
-  items: ListItemConfig[];
+export interface ContentItem {
+  text: string;
+  highlightText?: HighlightText;
+  variant?: "code" | "button" | "list";
+  link?: string;
+  style?: React.CSSProperties;
 }
 
-interface ListItemConfig {
-  text: string; // Supports <code>...</code> and <highlight:simulator>...</highlight>
-  onItemClick?: ItemClickDirective;
+export interface VisualizationContentItem extends ContentItem {
+  src: string;
+  alt: string;
 }
 
-// Directive for what happens when list item is clicked
-interface ItemClickDirective {
-  simulator: "config" | "terminal" | "status" | "logs";
-  action: TourFrames.Any;
-}
+export type HighlightText = {
+  text: string;
+  simulator: "status" | "config" | "logs" | "terminal";
+};

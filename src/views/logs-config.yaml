@@ -276,7 +276,7 @@ steps:
           items:
             - text: "1. We are now working with two areas in the Config window: OTEL and dynamic variables."
             - text: '2. Select HUB.YAML. Line 11 defines a dynamic "noisy" service filter (replacing the static service4321 drop).'
-            - text: '3. Line 49</span> contains the PromQL query that sets the "noisy" threshold and duration.'
+            - text: '3. Line 49 contains the PromQL query that sets the "noisy" threshold and duration.'
             - text: "4. Check OTEL.YAML (Lines 54 & 99) to see how these variables make OTEL dynamic."
             - text: "5. The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
         initialState:

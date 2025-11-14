@@ -1,0 +1,425 @@
+import {
+  addConfigTarget,
+  addLogsRecords,
+  addStatusPods,
+  addTerminalStrings,
+  scrollToConfigLine,
+  updateBannerState,
+} from "../animationEngine/frameStateMergeStrategies";
+import {
+  braidLogs,
+  createChangeMap,
+  createConfigContentGroups,
+  createTerminalContent,
+  extractRelevantSections,
+  parseRawLogFileToLogLines,
+  rawLinesFromText,
+} from "../animationEngine/transformHelpers";
+import type {
+  SubStepConfig,
+  TourConfigSimTarget,
+  TourLogSimTarget,
+  TourStatusTarget,
+  TourTargetState,
+  TourTerminalTarget,
+} from "./configTypesScratch";
+import {
+  DEFAULT_ANIMATION_STEP_DURATION,
+  FRAME_TYPES,
+  SIMULATORS,
+  STATUS,
+} from "./constants";
+import type {
+  ActivePodMap,
+  EngineConfigTarget,
+  EngineFileConfig,
+  EngineLogsTarget,
+  EngineStatusTarget,
+  EngineTargetState,
+  EngineTerminalTarget,
+  LineGroup,
+  PodId,
+} from "./engineTypesScratch";
+import { fetchGitHubFile } from "./fetchRawGithubFile";
+import type {
+  EngineFrames,
+  LogRecord,
+  SimulatorStateBuilderMap,
+  TourFrames,
+} from "./types";
+
+// ============================================================================
+// TERMINAL SIMULATOR TRANSFORMS
+// ============================================================================
+
+function transformTerminal(
+  terminalTargets: TourTerminalTarget[]
+): EngineTerminalTarget {
+  const strings = terminalTargets.flatMap(({ input, outputs = [] }) =>
+    createTerminalContent([input]).concat(
+      createTerminalContent(outputs, "terminal")
+    )
+  );
+
+  strings.push(createTerminalContent([""])[0]);
+  return {
+    strings,
+  };
+}
+
+// ============================================================================
+// STATUS SIMULATOR TRANSFORMS
+// ============================================================================
+
+const CTXID_DELIM = "@";
+const REPLICA_DELIM = "^";
+
+function createServiceKey(svc: TourStatusTarget, ctxId: string) {
+  return `${svc.name}-${svc.namespace || "default"}${REPLICA_DELIM}${
+    svc.replicas || 1
+  }${CTXID_DELIM}${ctxId}`;
+}
+
+function createPodId(svc: TourStatusTarget, replicaNo: number, ctxId: string) {
+  return `${svc.name}-${svc.namespace}${REPLICA_DELIM}${replicaNo}${CTXID_DELIM}${ctxId}`;
+}
+
+const SUFFIX_LENGTH = 5;
+
+function createServiceNameSuffix() {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+  return Array.from(
+    { length: SUFFIX_LENGTH },
+    () => chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
+}
+
+export const POD_NAME_DELIM = "-";
+
+function createPodName(service: TourStatusTarget): string {
+  return service.noSuffix
+    ? service.name
+    : `${service.name}${POD_NAME_DELIM}${createServiceNameSuffix()}`;
+}
+
+function transformStatus(
+  configServices: TourStatusTarget[],
+  contextId: string,
+  isStateTransform?: boolean
+): EngineStatusTarget {
+  const activePods: ActivePodMap = {};
+  const podOrder: PodId[] = [];
+
+  configServices.forEach((service) => {
+    const replicas = service.replicas || 1;
+    service.namespace = service.namespace || "default";
+
+    const serviceKey = createServiceKey(service, contextId);
+
+    for (let replicaNo = 1; replicaNo <= replicas; replicaNo++) {
+      const podId = createPodId(service, replicaNo, contextId);
+
+      activePods[podId] = {
+        id: podId,
+        name: createPodName(service),
+        namespace: service.namespace,
+        status: isStateTransform ? STATUS.running : STATUS.pending,
+        parentServiceKey: serviceKey,
+        replicaNo,
+        restartCount: 0,
+      };
+
+      podOrder.push(podId);
+    }
+  });
+
+  return { activePods, podOrder };
+}
+
+// ============================================================================
+// CONFIG SIMULATOR TRANSFORMS
+// ============================================================================
+
+async function transformConfig(
+  configSimTarget: TourConfigSimTarget
+): Promise<EngineConfigTarget> {
+  const fileEntries = await Promise.all(
+    configSimTarget.files.map(async ({ fileName, url, changes }) => {
+      const name = fileName ?? url.split("/").at(-1) ?? "unknown";
+      const lineChanges = changes || [];
+
+      const fileContents = await fetchGitHubFile(url);
+      const rawLines = rawLinesFromText(fileContents);
+
+      const changeMap = createChangeMap(lineChanges);
+      const sections = extractRelevantSections(rawLines, lineChanges);
+
+      const groups = createConfigContentGroups(name, sections, changeMap);
+
+      const engConf: EngineFileConfig = {
+        fileName: name,
+        url,
+        changeMap,
+        groups,
+      };
+
+      return [name, engConf] as const;
+    })
+  );
+
+  const files = Object.fromEntries(fileEntries);
+  const activeTab =
+    configSimTarget.activeTab ??
+    configSimTarget.files[0]?.fileName ??
+    configSimTarget.files[0]?.url.split("/").at(-1) ??
+    "";
+
+  const showingChange = new Set(
+    fileEntries.flatMap(([, conf]) =>
+      conf.groups
+        .filter((g): g is LineGroup => g.type === "group" && g.isChangeBlock)
+        .map((g) => g.groupId)
+    )
+  );
+
+  return {
+    files,
+    activeTab,
+    showingToggle: new Set<string>(),
+    showingChange,
+  };
+}
+
+// ============================================================================
+// LOGS SIMULATOR TRANSFORMS
+// ============================================================================
+
+async function loadLogsTextFile(fileName: string): Promise<LogRecord[]> {
+  const res = await fetch(`/logs/${fileName}`);
+  if (!res.ok) {
+    throw new Error(`Failed to load log file: ${fileName}`);
+  }
+
+  const text = await res.text();
+  return parseRawLogFileToLogLines(text);
+}
+
+async function transformLogs({
+  logsSources = [],
+  speed,
+  errorFrequency,
+  errorLogsSource,
+  duration,
+}: TourLogSimTarget & { duration?: number }): Promise<
+  EngineLogsTarget & { duration: number }
+> {
+  const engineSpeed = speed ?? 1000;
+  const engineErrorFrequency = errorFrequency ?? 0.1;
+
+  const logRecordsByFile = await Promise.all(logsSources.map(loadLogsTextFile));
+
+  const errorLogs = errorLogsSource
+    ? await loadLogsTextFile(errorLogsSource)
+    : [];
+
+  return {
+    records: braidLogs(...logRecordsByFile),
+    speed: engineSpeed,
+    errorFrequency: engineErrorFrequency,
+    errorRecords: errorLogs,
+    duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+  };
+}
+
+// ============================================================================
+// TRANSFORMS FOR ANIMATION
+// ============================================================================
+
+async function transformTourToEngineAnimation(
+  animation: TourFrames["Any"][],
+  contextId: string
+): Promise<EngineFrames["Any"][]> {
+  return Promise.all(
+    animation.map(async (frame) => {
+      if (
+        frame.waitForComplete === undefined &&
+        (!("simulator" in frame) || frame.simulator !== SIMULATORS.BANNER)
+      ) {
+        frame.waitForComplete = true;
+      }
+      switch (frame.type) {
+        case FRAME_TYPES.ACTIVATE:
+          return {
+            ...frame,
+            duration: frame.duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+          };
+        case FRAME_TYPES.ADD_SERVICES:
+          return {
+            ...frame,
+            updates: transformStatus(frame.updates, contextId),
+          };
+        case FRAME_TYPES.ENTER_COMMAND:
+          return {
+            ...frame,
+            updates: transformTerminal(frame.updates),
+          };
+        case FRAME_TYPES.ADD:
+          if (frame.simulator === SIMULATORS.CONFIG) {
+            return {
+              ...frame,
+              updates: await transformConfig(frame.updates),
+            };
+          }
+          if (frame.simulator === SIMULATORS.LOGS) {
+            return {
+              ...frame,
+              updates: await transformLogs(frame.updates),
+            };
+          }
+          return frame;
+        case FRAME_TYPES.STREAM:
+          return {
+            ...frame,
+            updates: await transformLogs(frame.updates),
+          };
+        case FRAME_TYPES.SCROLL_TO:
+        case FRAME_TYPES.PAUSE:
+        default:
+          return frame;
+      }
+    })
+  );
+}
+
+// ============================================================================
+// FRAMES TO TARGET STATE
+// ============================================================================
+
+function createEmptyEngineTargetState(): EngineTargetState {
+  return {
+    terminal: {
+      strings: [],
+    },
+    status: {
+      activePods: {},
+      podOrder: [],
+    },
+    logs: {
+      records: [],
+      speed: 500,
+      errorRecords: [],
+      errorFrequency: 0.1,
+    },
+    config: {
+      files: {},
+      activeTab: "",
+      showingChange: new Set(),
+      showingToggle: new Set(),
+    },
+  };
+}
+
+const stateBuilders: SimulatorStateBuilderMap = {
+  [SIMULATORS.TERMINAL]: {
+    [FRAME_TYPES.ENTER_COMMAND]: addTerminalStrings,
+  },
+  [SIMULATORS.STATUS]: {
+    [FRAME_TYPES.ADD_SERVICES]: addStatusPods,
+  },
+  [SIMULATORS.CONFIG]: {
+    [FRAME_TYPES.ADD]: addConfigTarget,
+    [FRAME_TYPES.SCROLL_TO]: scrollToConfigLine,
+  },
+  [SIMULATORS.LOGS]: {
+    [FRAME_TYPES.ADD]: addLogsRecords,
+    [FRAME_TYPES.STREAM]: addLogsRecords,
+    // PAUSE doesn't update state directly
+  },
+  [SIMULATORS.BANNER]: {
+    [FRAME_TYPES.UPDATE]: updateBannerState,
+  },
+};
+
+function builtTargetStateFromEngineAnimation(
+  frames: EngineFrames["Any"][]
+): EngineTargetState {
+  return frames.reduce((state, frame) => {
+    if (
+      frame.type === FRAME_TYPES.DELAY ||
+      frame.type === FRAME_TYPES.ACTIVATE
+    ) {
+      return state;
+    }
+
+    if (frame.type === FRAME_TYPES.CLEAR) {
+      return createEmptyEngineTargetState();
+    }
+
+    const sim = frame.simulator;
+
+    const simBuilders = stateBuilders[sim];
+    const builder = simBuilders?.[frame.type as keyof typeof simBuilders] as
+      | ((state: EngineTargetState, updates: unknown) => EngineTargetState)
+      | undefined;
+
+    return builder ? builder(state, frame.updates) : state;
+  }, createEmptyEngineTargetState());
+}
+
+// ============================================================================
+// TRANSFORMS INITIAL STATE
+// ============================================================================
+
+async function transformTourToEngineState(
+  tour: TourTargetState,
+  contextId: string
+): Promise<EngineTargetState> {
+  return {
+    terminal: tour.terminal ? transformTerminal(tour.terminal) : undefined,
+    status: tour.status
+      ? transformStatus(tour.status, contextId, true)
+      : undefined,
+    config: tour.config ? await transformConfig(tour.config) : undefined,
+    logs: tour.logs ? await transformLogs(tour.logs) : undefined,
+    banner: tour.banner,
+  };
+}
+
+// ============================================================================
+// TRANSFORMS THE CONFIG STEP
+// ============================================================================
+
+export async function transformSubStepConfigToInstanceArgs(
+  subStep: SubStepConfig
+): Promise<{
+  initialState?: EngineTargetState;
+  targetState?: EngineTargetState;
+  animation?: EngineFrames["Any"][];
+}> {
+  const returnVal: {
+    initialState?: EngineTargetState;
+    targetState?: EngineTargetState;
+    animation?: EngineFrames["Any"][];
+  } = {};
+  if (subStep.animation && subStep.animation.length > 0) {
+    const frames = await transformTourToEngineAnimation(
+      subStep.animation || [],
+      subStep.id
+    );
+
+    const targetState = builtTargetStateFromEngineAnimation(frames);
+
+    returnVal.animation = frames;
+    returnVal.targetState = targetState;
+  }
+
+  if (subStep.initialState) {
+    const transformedInitial = await transformTourToEngineState(
+      subStep.initialState,
+      subStep.id
+    );
+    returnVal.initialState = transformedInitial;
+  }
+  return returnVal;
+}

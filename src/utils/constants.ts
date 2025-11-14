@@ -55,22 +55,22 @@ export const DEFAULT_TOUR_STATE: TourState = {
 
 // new stuff below
 export const FRAME_TYPES = {
-  type: "type",
-  enter_command: "enter_command",
-  clear: "clear",
-  switch_file: "switch_file",
-  scroll_to: "scroll_to",
-  highlight_lines: "highlight_lines",
-  toggle_line: "toggle_line",
-  add_services: "add_services",
-  update_service: "update_service",
-  animate_startup: "animate_startup",
-  add: "add",
-  stream: "stream",
-  pause: "pause",
-  resume: "resume",
-  update: "update",
-  delay: "delay",
+  ACTIVATE: "activate",
+  TYPE: "type",
+  ENTER_COMMAND: "enter_command",
+  CLEAR: "clear",
+  SWITCH_FILE: "switch_file",
+  SCROLL_TO: "scroll_to",
+  HIGHLIGHT_LINES: "highlight_lines",
+  TOGGLE_LINE: "toggle_line",
+  ADD_SERVICES: "add_services",
+  UPDATE_SERVICE: "update_service",
+  ANIMATE_STARTUP: "animate_startup",
+  ADD: "add",
+  STREAM: "stream",
+  PAUSE: "pause",
+  UPDATE: "update",
+  DELAY: "delay",
 } as const;
 
 export const SIMULATORS = {

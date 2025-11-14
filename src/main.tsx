@@ -3,19 +3,15 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { DemoStateProvider } from "./components/DemoStateProvider";
-import { HighlanderProvider } from "./components/HighlanderProvider";
 import "./index.css";
-import { DEFAULT_TOUR_STATE } from "./utils/constants";
 import { theme } from "./utils/styles";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <HighlanderProvider initialState={DEFAULT_TOUR_STATE}>
-        <DemoStateProvider>
-          <App />
-        </DemoStateProvider>
-      </HighlanderProvider>
+      <DemoStateProvider>
+        <App />
+      </DemoStateProvider>
     </ThemeProvider>
   </StrictMode>
 );

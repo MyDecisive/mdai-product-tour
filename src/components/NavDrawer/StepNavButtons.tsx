@@ -19,13 +19,13 @@ const NavButtonBoxStyles = css({
 export function StepNavButtons() {
   const {
     isShowingPreviousContent,
+    showPlayButton,
+    nextButtonText,
+    handleClickPlay,
     handleNextButtonClick,
     handlePrevButtonClick,
     handleResetButtonClick,
-    showPlayButton,
-    handleClickPlay,
     nextButtonDisabled,
-    nextButtonText,
   } = useNavButtonHandlers();
 
   return (
@@ -45,7 +45,11 @@ export function StepNavButtons() {
           Prev
         </Button>
         {showPlayButton ? (
-          <Button variant="contained" onClick={handleClickPlay}>
+          <Button
+            variant="contained"
+            disabled={nextButtonDisabled}
+            onClick={handleClickPlay}
+          >
             <PlayCircleFilled />
           </Button>
         ) : (

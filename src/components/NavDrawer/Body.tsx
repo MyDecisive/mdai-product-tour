@@ -4,10 +4,10 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
-import { treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
-import { TreeItem } from "../TreeItem";
-import { StepNavButtons } from "./StepNavButtons";
+import type { StepItem, TourSelectionItem } from "../../utils/types";
+import { StepWithSubSteps } from "./Steps/StepWithSubSteps";
+import { TourSelect } from "./Steps/TourSelect";
 
 const NavDrawerBodyStyles = css({
   padding: "8px 0",
@@ -18,15 +18,10 @@ const NavDrawerBodyStyles = css({
   marginBottom: "24px",
 });
 
-const NavTreeSubStepStyles = css({
-  [`& .${treeItemClasses.groupTransition}`]: {
-    marginTop: "8px",
-    borderLeft: `1px solid rgba(111, 111, 111, 0.50)`,
-    padding: "8px 16px 0 16px",
-  },
-  [`& .${treeItemClasses.iconContainer} > svg`]: {
-    padding: "4px",
-  },
+export const subLabelStyles = css({
+  color: "#8A38F5",
+  fontStyle: "italic",
+  fontFamily: "Inter",
 });
 
 const BodyScrollContainer = css({
@@ -36,7 +31,7 @@ const BodyScrollContainer = css({
 });
 
 export function Body() {
-  const { inTour, drawerItems, handleDrawerItemClick, expandedDrawerItems } =
+  const { inTour, drawerItems, expandedDrawerItemIds, handleTreeItemClick } =
     useGetDrawerContent();
 
   return (
@@ -54,40 +49,17 @@ export function Body() {
             expandIcon: ArrowRightIcon,
             collapseIcon: ArrowDropDownIcon,
           }}
-          expandedItems={expandedDrawerItems}
-          onItemClick={handleDrawerItemClick}
+          expandedItems={expandedDrawerItemIds}
+          onItemClick={handleTreeItemClick}
         >
-          {drawerItems.map(
-            ({ itemId, label, content, slotProps, subSteps }) => (
-              <TreeItem
-                key={itemId}
-                topLevel
-                itemId={itemId}
-                label={label}
-                slotProps={slotProps}
-              >
-                {subSteps
-                  ? subSteps.map(
-                      ({
-                        itemId: id,
-                        label: subStepLabel,
-                        content: subStepContent,
-                      }) => (
-                        <TreeItem
-                          key={id}
-                          sx={NavTreeSubStepStyles}
-                          itemId={id}
-                          label={subStepLabel}
-                        >
-                          {subStepContent}
-                          <StepNavButtons />
-                        </TreeItem>
-                      )
-                    )
-                  : content}
-              </TreeItem>
-            )
-          )}
+          {drawerItems &&
+            (inTour
+              ? drawerItems.map((item) => (
+                  <StepWithSubSteps key={item.id} {...(item as StepItem)} />
+                ))
+              : drawerItems.map((item) => (
+                  <TourSelect key={item.id} {...(item as TourSelectionItem)} />
+                )))}
         </SimpleTreeView>
       </Box>
     </Box>

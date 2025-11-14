@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STATUS } from "../utils/constants";
+import type { EngineTargetState, PodId } from "../utils/engineTypesScratch";
 import type {
   EngineFrames,
-  EngineTargetState,
-  PodId,
-} from "../utils/engineTypesScratch";
-import type { PodStatusType, SimulatorType } from "../utils/types";
+  PodStatusType,
+  SimulatorType,
+} from "../utils/types";
 import { AnimationEngineInstance } from "./class";
 
 export interface AnimationEngineState {
@@ -16,8 +16,8 @@ export interface AnimationEngineState {
 
 export interface AnimationEngineControls {
   // generic
-  reset: (str?: string) => void; // Reset to previous substep's target state and replay
-  play: (str?: string) => void; // Begin animations
+  reset: (str?: string) => void; // Reset to previous subStep's target state and replay
+  play: () => void; // Begin animations
   advanceAnimation: (sim?: SimulatorType) => void; // Signal that current action is complete
   // status sim
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
@@ -28,7 +28,7 @@ export interface AnimationEngineControls {
 
 export function useAnimationEngine(
   targetState: EngineTargetState,
-  frames: EngineFrames.Any[],
+  frames: EngineFrames["Any"][],
   previousState: EngineTargetState,
   onCompleteCallback: () => void
 ): [AnimationEngineState, AnimationEngineControls] {
@@ -37,7 +37,7 @@ export function useAnimationEngine(
   const [statusState, setStatusState] = useState(previousState.status);
   const [configState, setConfigState] = useState(previousState.config);
   const [logsState, setLogsState] = useState(previousState.logs);
-  // const [bannerState, setBannerState] = useState(previousState.banner);
+  const [bannerState, setBannerState] = useState(previousState.banner);
   const [activeSimulator, setActiveSimulator] = useState<Set<SimulatorType>>(
     new Set()
   );
@@ -51,7 +51,7 @@ export function useAnimationEngine(
     setStatusState((prev) => (state.status !== prev ? state.status : prev));
     setConfigState((prev) => (state.config !== prev ? state.config : prev));
     setLogsState((prev) => (state.logs !== prev ? state.logs : prev));
-    // setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
+    setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
   }, []);
 
   const handleSetActiveSimulator = useCallback((sim: SimulatorType | null) => {
@@ -102,54 +102,49 @@ export function useAnimationEngine(
     handleSetActiveSimulator,
   ]);
 
-  const controls: AnimationEngineControls = {
-    play: useCallback(() => {
-      if (!isPlaying) {
-        setIsPlaying(true);
-        void engineRef.current?.play();
-      }
-    }, [isPlaying]),
+  const controls = useMemo<AnimationEngineControls>(
+    () => ({
+      play: () => {
+        if (!isPlaying) {
+          setIsPlaying(true);
+          void engineRef.current?.play();
+        }
+      },
 
-    reset: useCallback(() => {
-      if (!isPlaying) {
-        engineRef.current?.reset();
-        setIsPlaying(false);
-      }
-    }, [isPlaying]),
+      reset: () => {
+        if (!isPlaying) {
+          engineRef.current?.reset();
+          setIsPlaying(false);
+        }
+      },
 
-    advanceAnimation: useCallback(
-      (caller?: SimulatorType) => {
+      advanceAnimation: (caller?: SimulatorType) => {
         if (!isPlaying) return;
-
         if (caller) {
           handleSetActiveSimulator(caller);
         }
         engineRef.current?.advanceAnimation();
       },
-      [isPlaying, handleSetActiveSimulator]
-    ),
 
-    onPodStatusChange: useCallback(
-      (podId: PodId, newStatus: (typeof STATUS)[keyof typeof STATUS]) => {
+      onPodStatusChange: (
+        podId: PodId,
+        newStatus: (typeof STATUS)[keyof typeof STATUS]
+      ) => {
         if (!isPlaying) return;
         engineRef.current?.onPodStatusChange(podId, newStatus);
       },
-      [isPlaying]
-    ),
 
-    onSetActiveTab: useCallback(
-      (tabName: string) => {
+      onSetActiveTab: (tabName: string) => {
         if (!isPlaying) return;
         engineRef.current?.onSetActiveTab(tabName);
       },
-      [isPlaying]
-    ),
 
-    onToggleShowingChange: useCallback((groupId: string) => {
-      // no early return b/c this is only used for the manual button click
-      engineRef.current?.onToggleShowingChange(groupId);
-    }, []),
-  };
+      onToggleShowingChange: (groupId: string) => {
+        engineRef.current?.onToggleShowingChange(groupId);
+      },
+    }),
+    [isPlaying, handleSetActiveSimulator]
+  );
 
   return [
     {
@@ -159,7 +154,7 @@ export function useAnimationEngine(
         status: statusState,
         logs: logsState,
         config: configState,
-        // banner: bannerState,
+        banner: bannerState,
       },
       activeSimulator,
     },

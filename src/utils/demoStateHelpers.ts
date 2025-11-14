@@ -118,13 +118,17 @@ export function getCurrentEngineData(
 
   let prevTargetState: EngineTargetState = emptyEngineData.prevTargetState;
 
-  for (let i = step; i >= 0; i--) {
-    for (let j = subStep - 1; j >= 0; j--) {
-      const previous = currentTour.steps[i].subSteps[j];
-      if (previous.targetState) {
-        prevTargetState = previous.targetState;
+  if (currentSubStep.initialState) {
+    prevTargetState = currentSubStep.initialState;
+  } else {
+    for (let i = step; i >= 0; i--) {
+      for (let j = subStep - 1; j >= 0; j--) {
+        const previous = currentTour.steps[i].subSteps[j];
+        if (previous.targetState) {
+          prevTargetState = previous.targetState;
 
-        break;
+          break;
+        }
       }
     }
   }

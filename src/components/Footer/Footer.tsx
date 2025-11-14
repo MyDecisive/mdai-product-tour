@@ -1,9 +1,10 @@
+import { Box, Link, Stack, Typography } from "@mui/material";
+import { useCallback } from "react";
 import GitHubIcon from "../../assets/github-icon.svg";
 import LinkedInIcon from "../../assets/linkedIn-icon.png";
-import Logo from "../../assets/smol-logo.svg";
 import LogoText from "../../assets/mydecisive-ai-logo-text.svg";
-import { Box, Link, Stack, Typography } from "@mui/material";
-import { useHighlander } from "../../hooks/useHighlander";
+import Logo from "../../assets/smol-logo.svg";
+import { useDemoContext } from "../../hooks/useDemoContext";
 
 const linkStyles = {
   textDecoration: "none",
@@ -12,7 +13,11 @@ const linkStyles = {
 };
 
 export const Footer = () => {
-  const { actions } = useHighlander();
+  const { setNavState } = useDemoContext();
+
+  const openContactModal = useCallback(() => {
+    setNavState({ bigContentModal: "contact" });
+  }, [setNavState]);
 
   return (
     <Box
@@ -85,10 +90,7 @@ export const Footer = () => {
           rowGap="20px"
           mb="4px"
         >
-          <Link
-            sx={linkStyles}
-            onClick={() => actions.OPEN_BIG_CONTENT_MODAL("contact")}
-          >
+          <Link sx={linkStyles} onClick={openContactModal}>
             Need Help?
           </Link>
           <Link
@@ -108,12 +110,11 @@ export const Footer = () => {
             Community Engagement
           </Link>
         </Stack>
-        <Stack
-          rowGap="12px"
-          order={{ xs: 1, sm: 99 }}
-          alignItems={"flex-end"}
-        >
-          <Stack direction={"row"} columnGap={{xs: "8px", sm: "16px", md: "24px" }}>
+        <Stack rowGap="12px" order={{ xs: 1, sm: 99 }} alignItems={"flex-end"}>
+          <Stack
+            direction={"row"}
+            columnGap={{ xs: "8px", sm: "16px", md: "24px" }}
+          >
             <Link
               href="https://github.com/orgs/DecisiveAI/repositories?type=public"
               rel="noopener noreferrer"

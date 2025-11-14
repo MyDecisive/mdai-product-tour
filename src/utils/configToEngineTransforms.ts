@@ -10,6 +10,7 @@ import {
   braidLogs,
   createChangeMap,
   createConfigContentGroups,
+  createLogRecord,
   createTerminalContent,
   extractRelevantSections,
   parseRawLogFileToLogLines,
@@ -205,15 +206,16 @@ async function loadLogsTextFile(fileName: string): Promise<LogRecord[]> {
   return parseRawLogFileToLogLines(text);
 }
 
-async function transformLogs({
-  logsSources = [],
-  speed,
-  errorFrequency,
-  errorLogsSource,
-  duration,
-}: TourLogSimTarget & { duration?: number }): Promise<
-  EngineLogsTarget & { duration: number }
-> {
+async function transformLogs(
+  {
+    logsSources = [],
+    speed,
+    errorFrequency,
+    errorLogsSource,
+    duration,
+  }: TourLogSimTarget & { duration?: number },
+  prepLogRecordsForState?: boolean
+): Promise<EngineLogsTarget & { duration: number }> {
   const engineSpeed = speed ?? 1000;
   const engineErrorFrequency = errorFrequency ?? 0.1;
 
@@ -223,8 +225,22 @@ async function transformLogs({
     ? await loadLogsTextFile(errorLogsSource)
     : [];
 
+  const records = braidLogs(...logRecordsByFile);
+
+  if (prepLogRecordsForState) {
+    return {
+      records: records.map((log, index) =>
+        createLogRecord(log, -1, index, false)
+      ),
+      speed: engineSpeed,
+      errorFrequency: engineErrorFrequency,
+      errorRecords: errorLogs,
+      duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+    };
+  }
+
   return {
-    records: braidLogs(...logRecordsByFile),
+    records,
     speed: engineSpeed,
     errorFrequency: engineErrorFrequency,
     errorRecords: errorLogs,
@@ -297,27 +313,18 @@ async function transformTourToEngineAnimation(
 // ============================================================================
 
 function createEmptyEngineTargetState(): EngineTargetState {
-  return {
-    terminal: {
-      strings: [],
-    },
-    status: {
-      activePods: {},
-      podOrder: [],
-    },
-    logs: {
-      records: [],
-      speed: 500,
-      errorRecords: [],
-      errorFrequency: 0.1,
-    },
-    config: {
-      files: {},
-      activeTab: "",
-      showingChange: new Set(),
-      showingToggle: new Set(),
-    },
-  };
+  return {};
+}
+
+function addLogRecordsForState(
+  state: EngineTargetState,
+  updates: Pick<EngineLogsTarget, "records">
+): EngineTargetState {
+  const stateReadyLogsRecords = updates.records.map((log, index) =>
+    createLogRecord(log, -1, index, false)
+  );
+
+  return addLogsRecords(state, { records: stateReadyLogsRecords });
 }
 
 const stateBuilders: SimulatorStateBuilderMap = {
@@ -325,15 +332,33 @@ const stateBuilders: SimulatorStateBuilderMap = {
     [FRAME_TYPES.ENTER_COMMAND]: addTerminalStrings,
   },
   [SIMULATORS.STATUS]: {
-    [FRAME_TYPES.ADD_SERVICES]: addStatusPods,
+    [FRAME_TYPES.ADD_SERVICES]: (
+      state: EngineTargetState,
+      updates: EngineStatusTarget
+    ) => {
+      const targetStateUpdates = Object.entries(updates.activePods).reduce(
+        (accum, [key, value]) => {
+          accum[key] = {
+            ...value,
+            status: STATUS.running,
+          };
+          return accum;
+        },
+        {} as ActivePodMap
+      );
+      return addStatusPods(state, {
+        ...updates,
+        activePods: targetStateUpdates,
+      });
+    },
   },
   [SIMULATORS.CONFIG]: {
     [FRAME_TYPES.ADD]: addConfigTarget,
     [FRAME_TYPES.SCROLL_TO]: scrollToConfigLine,
   },
   [SIMULATORS.LOGS]: {
-    [FRAME_TYPES.ADD]: addLogsRecords,
-    [FRAME_TYPES.STREAM]: addLogsRecords,
+    [FRAME_TYPES.ADD]: addLogRecordsForState,
+    [FRAME_TYPES.STREAM]: addLogRecordsForState,
     // PAUSE doesn't update state directly
   },
   [SIMULATORS.BANNER]: {
@@ -342,7 +367,8 @@ const stateBuilders: SimulatorStateBuilderMap = {
 };
 
 function builtTargetStateFromEngineAnimation(
-  frames: EngineFrames["Any"][]
+  frames: EngineFrames["Any"][],
+  initialState?: EngineTargetState
 ): EngineTargetState {
   return frames.reduce((state, frame) => {
     if (
@@ -364,7 +390,7 @@ function builtTargetStateFromEngineAnimation(
       | undefined;
 
     return builder ? builder(state, frame.updates) : state;
-  }, createEmptyEngineTargetState());
+  }, initialState ?? createEmptyEngineTargetState());
 }
 
 // ============================================================================
@@ -381,7 +407,7 @@ async function transformTourToEngineState(
       ? transformStatus(tour.status, contextId, true)
       : undefined,
     config: tour.config ? await transformConfig(tour.config) : undefined,
-    logs: tour.logs ? await transformLogs(tour.logs) : undefined,
+    logs: tour.logs ? await transformLogs(tour.logs, true) : undefined,
     banner: tour.banner,
   };
 }
@@ -402,17 +428,6 @@ export async function transformSubStepConfigToInstanceArgs(
     targetState?: EngineTargetState;
     animation?: EngineFrames["Any"][];
   } = {};
-  if (subStep.animation && subStep.animation.length > 0) {
-    const frames = await transformTourToEngineAnimation(
-      subStep.animation || [],
-      subStep.id
-    );
-
-    const targetState = builtTargetStateFromEngineAnimation(frames);
-
-    returnVal.animation = frames;
-    returnVal.targetState = targetState;
-  }
 
   if (subStep.initialState) {
     const transformedInitial = await transformTourToEngineState(
@@ -421,5 +436,21 @@ export async function transformSubStepConfigToInstanceArgs(
     );
     returnVal.initialState = transformedInitial;
   }
+
+  if (subStep.animation && subStep.animation.length > 0) {
+    const frames = await transformTourToEngineAnimation(
+      subStep.animation || [],
+      subStep.id
+    );
+
+    const targetState = builtTargetStateFromEngineAnimation(
+      frames,
+      returnVal.initialState
+    );
+
+    returnVal.animation = frames;
+    returnVal.targetState = targetState;
+  }
+
   return returnVal;
 }

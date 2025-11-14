@@ -1,30 +1,35 @@
 import { useMemo } from "react";
-import { selectInTour, selectPanelState } from "../contexts/selectors";
-import { useSelector } from "./useSelector";
+import { useDemoContext } from "./useDemoContext";
 
 export function useGetInfoBannerContent() {
-  const { banner } = useSelector(selectPanelState);
-  const inTour = useSelector(selectInTour);
+  const {
+    engineState,
+    navigationState: { tour },
+  } = useDemoContext();
 
-  const { percentText, showPercentFiltered, logs = {} } = banner || {};
+  const inTour = tour !== "";
 
-  const { sentToVendor, filtered } = logs as {
-    sentToVendor: number;
-    filtered: number;
+  const { text, logsSent, logsFiltered } = engineState.currentSimulatorState
+    .banner || {
+    logsSent: 0,
+    logsFiltered: 0,
+    text: "",
   };
 
   const received = useMemo(() => {
-    return Math.round((sentToVendor + filtered) * 100) / 100;
-  }, [sentToVendor, filtered]);
+    return Math.round((logsSent + logsFiltered) * 100) / 100;
+  }, [logsSent, logsFiltered]);
   const percentFiltered = useMemo(() => {
-    return received > 0 ? Math.round((filtered / received) * 100) : 0;
-  }, [received, filtered]);
+    return received > 0 ? Math.round((logsFiltered / received) * 100) : 0;
+  }, [received, logsFiltered]);
+
+  const showPercentFiltered = logsSent !== 0;
 
   return {
-    percentText,
+    text,
     received,
-    sentToVendor,
-    filtered,
+    logsSent,
+    logsFiltered,
     showPercentFiltered,
     percentFiltered,
     inTour,

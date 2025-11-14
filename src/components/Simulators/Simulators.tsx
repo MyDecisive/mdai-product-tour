@@ -1,36 +1,15 @@
-import { Box, Grid, Button, Link, Stack, Typography } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useEffect, useRef } from "react";
-import { useAnimationEngine } from "../../animationEngine/hook";
+import { useDemoContext } from "../../hooks/useDemoContext";
 import { SIMULATORS } from "../../utils/constants";
-import type {
-  EngineFrames,
-  EngineTargetState,
-} from "../../utils/engineTypesScratch";
 import { Config } from "./Config";
 import { LogsSimulator } from "./Logs";
 import { SimulatorBox } from "./SimulatorBox";
 import { Status } from "./Status";
 import { Terminal } from "./Terminal";
 
-interface SimulatorsProps {
-  targetState: EngineTargetState;
-  previousState: EngineTargetState;
-  frames: EngineFrames.Any[];
-  onComplete: () => void;
-}
-
-export function Simulators({
-  targetState,
-  previousState,
-  frames,
-  onComplete,
-}: SimulatorsProps) {
-  const [engineState, engineControls] = useAnimationEngine(
-    targetState,
-    frames,
-    previousState,
-    onComplete
-  );
+export function Simulators() {
+  const { engineState, engineControls } = useDemoContext();
 
   const simContainerParentRef = useRef<HTMLDivElement | null>(null);
 
@@ -58,10 +37,6 @@ export function Simulators({
       sx={{ flexGrow: 1, overflow: "auto", scrollBehavior: "smooth" }}
       ref={simContainerParentRef}
     >
-      <Button onClick={() => engineControls.reset("button press")}>
-        reset
-      </Button>
-      <Button onClick={() => engineControls.play("button press")}>play</Button>
       <Box
         className="simulators-container"
         sx={{
@@ -138,7 +113,7 @@ export function Simulators({
           <Grid size={6.5}>
             <SimulatorBox
               title="Tail Logs"
-              // active={engineState.activeSimulator.has(SIMULATORS.LOGS)}
+              active={engineState.activeSimulator.has(SIMULATORS.LOGS)}
               innerStyles={{
                 padding: "24px 14px 16px 14px",
                 boxSizing: "border-box",
@@ -151,31 +126,6 @@ export function Simulators({
             </SimulatorBox>
           </Grid>
         </Grid>
-
-        <Stack alignItems="center" height={"100%"} mt={27}>
-          <Stack
-            gap={4}
-            alignItems="center"
-            maxWidth={1000}
-            textAlign={"center"}
-          >
-            <Typography variant="h2">Welcome to MyDecisive.ai demo</Typography>
-            <Typography variant="h5" maxWidth={700}>
-              See how you can save money using our SmartHub. Get instant control
-              over your telemetry data.
-            </Typography>
-            <Typography variant="h5">
-              Try out{" "}
-              <Link
-                onClick={() => {}}
-                sx={{ color: "#EA80FC !important", textDecoration: "none" }}
-              >
-                Dynamic Log Filtering
-              </Link>{" "}
-              demo now!
-            </Typography>
-          </Stack>
-        </Stack>
       </Box>
     </Box>
   );

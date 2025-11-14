@@ -1,8 +1,11 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import { SIMULATORS } from "../utils/constants";
-import { parseTypedJsString } from "../utils/strings";
 import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
+
+function parseTypedJsString(str: string) {
+  return str.replaceAll(/`/gi, "").replaceAll(/\^\d+/gi, "");
+}
 
 // TODO: Move these prop types to a types file
 interface TerminalProps {

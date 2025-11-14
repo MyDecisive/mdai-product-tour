@@ -6,6 +6,29 @@ import type {
   TerminalTypedOptions,
 } from "../utils/types";
 
+function createLogId(
+  cycleCount: number,
+  index: number,
+  isError?: boolean
+): string {
+  return isError
+    ? `error-${Date.now()}-${Math.random()}`
+    : `log-${cycleCount}-${index}`;
+}
+
+export function createLogRecord(
+  propLog: LogRecord,
+  cycleCount: number,
+  index: number,
+  isError?: boolean
+): LogRecord {
+  return {
+    ...propLog,
+    timestamp: new Date().toISOString(),
+    id: createLogId(cycleCount, index, isError),
+  };
+}
+
 export function braidLogs(...logArrays: LogRecord[][]): LogRecord[] {
   const result: LogRecord[] = [];
   const indices = Array.from({ length: logArrays.length }, () => 0);

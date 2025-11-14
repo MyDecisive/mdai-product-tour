@@ -1,7 +1,5 @@
-import { type FunctionComponent } from "react";
-import { selectNavigation } from "../../contexts/selectors";
-import { useHighlander } from "../../hooks/useHighlander";
-import { useSelector } from "../../hooks/useSelector";
+import { useCallback, type FunctionComponent } from "react";
+import { useDemoContext } from "../../hooks/useDemoContext";
 import type {
   BigContentModalContentProps,
   BigContentModalType,
@@ -20,9 +18,14 @@ const MODAL_CONTENT: Record<
 };
 
 export function useGetBigContentModalContent() {
-  const { bigContentModal } = useSelector(selectNavigation);
-  const { actions } = useHighlander();
-  const handleClose = actions.CLOSE_BIG_CONTENT_MODAL;
+  const {
+    navigationState: { bigContentModal },
+    setNavState,
+  } = useDemoContext();
+
+  const handleClose = useCallback(() => {
+    setNavState({ bigContentModal: null });
+  }, [setNavState]);
 
   if (!bigContentModal) {
     return {

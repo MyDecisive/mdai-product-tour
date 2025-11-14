@@ -1,15 +1,34 @@
-import { selectDrawerHeaderText, selectInTour } from "../contexts/selectors";
-import { useHighlander } from "./useHighlander";
-import { useSelector } from "./useSelector";
+import { useCallback, useMemo } from "react";
+import { useDemoContext } from "./useDemoContext";
 
 export function useGetDrawerHeaderProps() {
-  const { actions } = useHighlander();
-  const drawerHeaderText = useSelector(selectDrawerHeaderText);
-  const inTour = useSelector(selectInTour);
+  const {
+    tourConfigs,
+    setNavState,
+    navigationState: { tour },
+  } = useDemoContext();
+
+  const inTour = tour !== "";
+
+  const handleExitTour = useCallback(() => {
+    setNavState({
+      tour: "",
+      step: -1,
+      subStep: -1,
+    });
+  }, [setNavState]);
+
+  const drawerHeaderText = useMemo(() => {
+    const currentTour = tourConfigs?.find((t) => t.id === tour);
+    if (!currentTour) {
+      return "MyDecisive.ai Demo";
+    }
+    return currentTour.title;
+  }, [tourConfigs, tour]);
 
   return {
     inTour,
     drawerHeaderText,
-    handleBackButtonClick: actions.GO_BACK,
+    handleBackButtonClick: handleExitTour,
   };
 }

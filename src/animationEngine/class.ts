@@ -1,8 +1,3 @@
-import {
-  createNextLog,
-  selectErrorPropLog,
-  shouldInjectError,
-} from "../hooks/useGetLogsSimulatorContent";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import { deepMergeWith } from "../utils/deepMergeWith";
 import type {
@@ -15,6 +10,11 @@ import type {
 } from "../utils/engineTypesScratch";
 import type { DeepPartial, LogRecord, SimulatorType } from "../utils/types";
 import { POD_NAME_DELIM } from "./configToEngineTransforms";
+import {
+  createNextLog,
+  selectErrorPropLog,
+  shouldInjectError,
+} from "./transformHelpers";
 
 export interface EngineCallbacks {
   onStateChange: (state: EngineTargetState) => void;

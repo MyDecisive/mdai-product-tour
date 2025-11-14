@@ -313,27 +313,7 @@ async function transformTourToEngineAnimation(
 // ============================================================================
 
 function createEmptyEngineTargetState(): EngineTargetState {
-  return {
-    terminal: {
-      strings: [],
-    },
-    status: {
-      activePods: {},
-      podOrder: [],
-    },
-    logs: {
-      records: [],
-      speed: 500,
-      errorRecords: [],
-      errorFrequency: 0.1,
-    },
-    config: {
-      files: {},
-      activeTab: "",
-      showingChange: new Set(),
-      showingToggle: new Set(),
-    },
-  };
+  return {};
 }
 
 function addLogRecordsForState(

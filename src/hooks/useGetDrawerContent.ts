@@ -62,6 +62,7 @@ export function useGetDrawerContent() {
     handleClickPlay,
     handleNextButtonClick,
     handlePrevButtonClick,
+    hidePrevButton,
   } = useNavButtonHandlers();
 
   useEffect(() => {
@@ -78,7 +79,9 @@ export function useGetDrawerContent() {
           }
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          handlePrevButtonClick();
+          if (!hidePrevButton) {
+            handlePrevButtonClick();
+          }
         }
       }
     };
@@ -95,6 +98,7 @@ export function useGetDrawerContent() {
     handleClickPlay,
     handleNextButtonClick,
     handlePrevButtonClick,
+    hidePrevButton,
   ]);
 
   return {

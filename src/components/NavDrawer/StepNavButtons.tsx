@@ -26,6 +26,7 @@ export function StepNavButtons() {
     handlePrevButtonClick,
     handleResetButtonClick,
     nextButtonDisabled,
+    hidePrevButton,
   } = useNavButtonHandlers();
 
   return (
@@ -41,9 +42,11 @@ export function StepNavButtons() {
         </Button>
       )}
       <Box sx={NavButtonBoxStyles}>
-        <Button variant="text" onClick={handlePrevButtonClick}>
-          Prev
-        </Button>
+        {!hidePrevButton && (
+          <Button variant="text" onClick={handlePrevButtonClick}>
+            Prev
+          </Button>
+        )}
         {showPlayButton ? (
           <Button
             variant="contained"

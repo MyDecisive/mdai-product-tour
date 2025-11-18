@@ -37,6 +37,10 @@ export function useNavButtonHandlers() {
     return "See Results";
   }, [currentSubStep]);
 
+  const hidePrevButton = useMemo(() => {
+    return navigationState.subStep === 0 && navigationState.step === 0;
+  }, [navigationState]);
+
   const handleClickPlay = engineControls.play;
 
   const handleResetButtonClick = useCallback(() => {
@@ -64,6 +68,7 @@ export function useNavButtonHandlers() {
     handlePrevButtonClick,
     handleResetButtonClick,
     nextButtonDisabled,
+    hidePrevButton,
   };
 }
 

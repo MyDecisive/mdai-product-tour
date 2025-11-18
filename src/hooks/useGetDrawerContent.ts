@@ -12,6 +12,7 @@ export function useGetDrawerContent() {
     tourConfigs,
     setNavState,
     navigationState: { tour, step, subStep },
+    engineControls,
   } = useDemoContext();
 
   const inTour = tour !== "";
@@ -51,9 +52,10 @@ export function useGetDrawerContent() {
 
   const handleTreeItemClick = useCallback(
     (_: MouseEvent, stepId: string) => {
+      engineControls.reset();
       onTreeItemClick(stepId, step, subStep, setNavState);
     },
-    [step, subStep, setNavState]
+    [step, subStep, setNavState, engineControls]
   );
 
   const {

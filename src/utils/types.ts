@@ -63,6 +63,7 @@ export interface BannerTargetState {
 
 export interface TerminalTypedOptions extends TypedOptions {
   prompt?: string;
+  printed: boolean;
 }
 
 export type DeepPartial<T> = Partial<{

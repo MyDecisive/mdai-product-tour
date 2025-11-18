@@ -103,7 +103,13 @@ export function Simulators() {
               {engineState.currentSimulatorState.terminal != null && (
                 <Terminal
                   onAnimationComplete={engineControls.advanceAnimation}
-                  playing={engineState.isPlaying} // TODO: put sim play state in sim state node?
+                  onTerminalContentPrinted={
+                    engineControls.onTerminalContentPrinted
+                  }
+                  playing={
+                    engineState.isPlaying &&
+                    engineState.activeSimulator.has(SIMULATORS.TERMINAL)
+                  }
                   state={engineState?.currentSimulatorState?.terminal?.strings}
                 />
               )}

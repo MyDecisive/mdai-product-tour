@@ -98,13 +98,10 @@ function determineLogFormat(logString: string) {
   if (serviceParts.length === 6) {
     return "serviceLogs";
   }
-  const errorOrcollectorParts = logString.split(/\s+/);
-  if (errorOrcollectorParts.length === 4) {
-    return "collectorLogs";
-  }
-
-  if (errorOrcollectorParts.length === 5) {
-    return "errorLogs";
+  const errorOrcollectorParts = logString.split(/\s{3,}/);
+  if (errorOrcollectorParts.length > 3) {
+    const hasErrors = logString.split(" error ").length > 1;
+    return hasErrors ? "errorLogs" : "collectorLogs";
   }
 
   return "unknown";
@@ -134,7 +131,7 @@ function serviceLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
 function collectorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
   return logStrings.reduce((acc, line) => {
     // Parse format: timestamp    level    component    json_data
-    const parts = line.split(/\s+/);
+    const parts = line.split(/\s{3,}/);
 
     if (parts.length < 4) {
       console.warn("Invalid structured log format:", line);

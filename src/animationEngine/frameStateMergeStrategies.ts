@@ -412,13 +412,35 @@ export function addLogsRecords(
 
 export function addTerminalStrings(
   currentState: EngineTargetState,
-  { strings }: Pick<EngineTerminalTarget, "strings">
+  { strings }: EngineTerminalTarget
 ): EngineTargetState {
   return appendToArray<"terminal", EngineTerminalTarget, "strings">(
     currentState,
     "terminal",
     "strings",
     strings
+  );
+}
+
+export function setTerminalContentPrinted(
+  currentState: EngineTargetState,
+  index: number
+) {
+  const terminalContent = currentState.terminal!.strings;
+
+  const printedTerminalContent = terminalContent.map((str, idx) =>
+    idx === index
+      ? {
+          ...str,
+          printed: true,
+        }
+      : str
+  );
+
+  return mergeIntoSimulator<"terminal", EngineTerminalTarget>(
+    currentState,
+    "terminal",
+    { strings: printedTerminalContent }
   );
 }
 

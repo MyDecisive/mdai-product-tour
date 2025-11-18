@@ -24,6 +24,8 @@ export interface AnimationEngineControls {
   // config sim
   onSetActiveTab: (tabName: string) => void;
   onToggleShowingChange: (groupId: string) => void;
+  // terminal sim:
+  onTerminalContentPrinted: (index: number) => void;
 }
 
 export function useAnimationEngine(
@@ -112,10 +114,8 @@ export function useAnimationEngine(
       },
 
       reset: () => {
-        if (!isPlaying) {
-          engineRef.current?.reset();
-          setIsPlaying(false);
-        }
+        engineRef.current?.reset();
+        setIsPlaying(false);
       },
 
       advanceAnimation: (caller?: SimulatorType) => {
@@ -141,6 +141,10 @@ export function useAnimationEngine(
 
       onToggleShowingChange: (groupId: string) => {
         engineRef.current?.onToggleShowingChange(groupId);
+      },
+
+      onTerminalContentPrinted: (index: number) => {
+        engineRef.current?.setTerminalContentPrinted(index);
       },
     }),
     [isPlaying, handleSetActiveSimulator]

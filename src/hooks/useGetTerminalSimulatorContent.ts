@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
+import { createTerminalContent } from "../animationEngine/transformHelpers";
 import { SIMULATORS } from "../utils/constants";
 import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
 
-function parseTypedJsString(str: string) {
+export function parseTypedJsString(str: string) {
   return str.replaceAll(/`/gi, "").replaceAll(/\^\d+/gi, "");
 }
 
@@ -12,132 +13,102 @@ interface TerminalProps {
   state: TerminalTypedOptions[] | null | undefined;
   playing: boolean;
   onAnimationComplete: (sim?: SimulatorType) => void;
+  onTerminalContentPrinted: (index: number) => void;
 }
 
 export function useGetTerminalSimulatorContent({
   state,
   playing,
   onAnimationComplete,
+  onTerminalContentPrinted,
 }: TerminalProps) {
-  const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
-  const typedInstancesRef = useRef<(Typed | null)[]>([]);
+  const activeElementRef = useRef<HTMLPreElement | null>(null);
+  const typedInstanceRef = useRef<Typed | null>(null);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!state || state?.length === 0) {
-      typedInstancesRef.current.forEach((typed) => {
-        if (typed) {
-          typed.destroy();
-        }
-      });
-      typedInstancesRef.current = [];
+    if (!state || state.length === 0) {
+      typedInstanceRef.current?.destroy();
+      typedInstanceRef.current = null;
       return;
     }
 
-    state.forEach((options, index) => {
-      const element = elementsRef.current[index];
-      if (element) {
-        const originalOnComplete = options.onComplete?.bind(options);
+    const currentIndex = state.findIndex((opt) => !opt.printed);
+    if (currentIndex === -1 || !activeElementRef.current) return;
 
-        const wrappedOptions = {
-          ...options,
-          onBegin: (typed: Typed) => {
-            if (!playing) {
-              typed.stop();
-              if (options.strings) {
-                element.innerHTML = options.strings
-                  .map(parseTypedJsString)
-                  .join("\n");
-              }
-            }
-          },
-          preStringTyped: (_: number, typed: Typed) => {
-            if (typed.cursor) {
-              typed.cursor.style.display = "none";
-            }
-          },
-          onTypingPaused: (_: number, typed: Typed) => {
-            if (typed.cursor && options.showCursor) {
-              typed.cursor.style.display = "inline-block";
-              typed.cursor.classList.add("typed-cursor--blink");
-            }
-          },
-          onTypingResumed: (_: number, typed: Typed) => {
-            if (typed.cursor) {
-              typed.cursor.style.display = "none";
-            }
-          },
-          onComplete: (typed: Typed) => {
-            if (originalOnComplete) {
-              originalOnComplete(typed);
-            }
+    const options = state[currentIndex];
+    const isLast = currentIndex === state.length - 1;
 
-            if (typed.cursor) {
-              if (index !== state.length - 1) {
-                typed.cursor.style.display = "none";
-              }
-              if (index === state.length - 1 && options.showCursor) {
-                typed.cursor.style.display = "inline-block";
-              }
-            }
-
-            const nextIndex = index + 1;
-            if (nextIndex < state.length) {
-              const nextTyped = typedInstancesRef.current[nextIndex];
-              const nextEle = elementsRef.current[nextIndex];
-              if (nextEle && nextEle.style.display === "none") {
-                nextEle.style.display = "inline-block";
-                nextEle.parentElement!.style.height = "20px";
-              }
-              if (nextTyped && nextTyped.cursor) {
-                nextTyped.cursor.style.display = "inline-block";
-                nextTyped.start();
-              }
-            }
-            if (index === state.length - 1) {
-              onAnimationComplete(SIMULATORS.TERMINAL);
-            }
-          },
-        };
-
-        const typed = new Typed(element, wrappedOptions);
-
-        if (index === 0) {
-          if (typed.cursor) {
-            typed.cursor.style.display = playing ? "inline-block" : "none";
-          }
-          element.parentElement!.style.height = "20px";
-        } else {
+    typedInstanceRef.current?.destroy();
+    typedInstanceRef.current = new Typed(activeElementRef.current, {
+      ...options,
+      onBegin: (typed: Typed) => {
+        if (!playing) {
           typed.stop();
-          element.style.display = playing ? "none" : "inline-block";
-          if (typed.cursor) {
-            typed.cursor.style.display = "none";
+          if (options.strings) {
+            activeElementRef.current!.innerHTML = options.strings
+              .map(parseTypedJsString)
+              .join("\n");
           }
         }
-        typedInstancesRef.current[index] = typed;
-      }
+      },
+      preStringTyped: (_: number, typed: Typed) => {
+        if (typed.cursor) {
+          typed.cursor.style.display = "none";
+        }
+      },
+      onTypingPaused: (_: number, typed: Typed) => {
+        if (typed.cursor && options.showCursor) {
+          typed.cursor.style.display = "inline-block";
+          typed.cursor.classList.add("typed-cursor--blink");
+        }
+      },
+      onTypingResumed: (_: number, typed: Typed) => {
+        if (typed.cursor) {
+          typed.cursor.style.display = "none";
+        }
+      },
+      onComplete: (typed: Typed) => {
+        options.onComplete?.(typed);
+        onTerminalContentPrinted(currentIndex);
+
+        if (isLast) {
+          onAnimationComplete(SIMULATORS.TERMINAL);
+        }
+      },
     });
 
+    if (!playing) {
+      typedInstanceRef.current.stop();
+    }
+
     return () => {
-      typedInstancesRef.current.forEach((typed) => {
-        if (typed) {
-          typed.destroy();
-        }
-      });
-      typedInstancesRef.current = [];
+      typedInstanceRef.current?.destroy();
+      typedInstanceRef.current = null;
     };
-  }, [state, onAnimationComplete, playing]);
+  }, [state, playing, onAnimationComplete, onTerminalContentPrinted]);
 
   useEffect(() => {
     if (playing && containerElementRef.current) {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
+    if (!playing) {
+      typedInstanceRef.current?.stop();
+    }
   }, [playing]);
 
+  const currentItem = state?.find((opt) => !opt.printed);
+  const completedItems = state?.filter((opt) => opt.printed) ?? [];
+
+  if (!currentItem) {
+    completedItems.push(createTerminalContent([""], true)[0]);
+  }
+
   return {
-    typedOptions: state ?? [],
-    elementsRef,
+    completedItems,
+    currentItem,
+    activeElementRef,
     containerElementRef,
   };
 }

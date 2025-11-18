@@ -20,6 +20,7 @@ import {
   removeStatusPods,
   scrollToConfigLine,
   setConfigActiveTab,
+  setTerminalContentPrinted,
   toggleConfigShowingChange,
   updateBannerState,
   updatePodStatus,
@@ -192,6 +193,14 @@ export class AnimationEngineInstance {
   }
 
   // ----------------------------------------------------------------------------
+  // Terminal sim methods
+  // ----------------------------------------------------------------------------
+
+  public setTerminalContentPrinted(index: number) {
+    this.updateState(setTerminalContentPrinted, index);
+  }
+
+  // ----------------------------------------------------------------------------
   // Status sim methods
   // ----------------------------------------------------------------------------
 
@@ -256,6 +265,7 @@ export class AnimationEngineInstance {
     });
 
     await Promise.all(animationPromises);
+    // TODO: See if this promise.all await can replace the `allStabilized` useEffect in `useGetStatusSimulatorContent`
   }
 
   public onPodStatusChange(podId: PodId, newStatus: PodStatusType): void {

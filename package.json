@@ -27,6 +27,7 @@
     "yaml": "^2.8.1"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.13.5",
     "@eslint/js": "^9.33.0",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
     "@testing-library/jest-dom": "^6.8.0",

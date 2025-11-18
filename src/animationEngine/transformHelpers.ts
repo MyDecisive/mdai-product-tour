@@ -242,18 +242,21 @@ const terminalExecutionBehavior: Partial<TerminalTypedOptions> = {
 
 export function createTerminalContent(
   strings: string[],
+  printed: boolean,
   behavior?: string
 ): TerminalTypedOptions[] {
   if (behavior === "terminal") {
     return [
       {
         ...terminalExecutionBehavior,
-        strings: ["<br/>"],
+        strings: ["\n"],
+        printed,
       },
     ].concat(
       strings.map((string) => ({
         ...terminalExecutionBehavior,
         strings: [string],
+        printed,
       }))
     );
   }
@@ -261,6 +264,7 @@ export function createTerminalContent(
   return [
     {
       ...userEntryBehavior,
+      printed,
       strings: strings.map(
         (str) => `\`${userEntryBehavior.prompt}\` ^850${str}`
       ),

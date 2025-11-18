@@ -54,15 +54,15 @@ import type {
 // ============================================================================
 
 function transformTerminal(
-  terminalTargets: TourTerminalTarget[]
+  terminalTargets: TourTerminalTarget[],
+  printed: boolean
 ): EngineTerminalTarget {
   const strings = terminalTargets.flatMap(({ input, outputs = [] }) =>
-    createTerminalContent([input]).concat(
-      createTerminalContent(outputs, "terminal")
+    createTerminalContent([input], printed).concat(
+      createTerminalContent(outputs, printed, "terminal")
     )
   );
 
-  strings.push(createTerminalContent([""])[0]);
   return {
     strings,
   };
@@ -278,7 +278,7 @@ async function transformTourToEngineAnimation(
         case FRAME_TYPES.ENTER_COMMAND:
           return {
             ...frame,
-            updates: transformTerminal(frame.updates),
+            updates: transformTerminal(frame.updates, false),
           };
         case FRAME_TYPES.ADD:
           if (frame.simulator === SIMULATORS.CONFIG) {
@@ -329,7 +329,15 @@ function addLogRecordsForState(
 
 const stateBuilders: SimulatorStateBuilderMap = {
   [SIMULATORS.TERMINAL]: {
-    [FRAME_TYPES.ENTER_COMMAND]: addTerminalStrings,
+    [FRAME_TYPES.ENTER_COMMAND]: (
+      state: EngineTargetState,
+      updates: EngineTerminalTarget
+    ) => {
+      const updatesPrinted = {
+        strings: updates.strings.map((str) => ({ ...str, printed: true })),
+      };
+      return addTerminalStrings(state, updatesPrinted);
+    },
   },
   [SIMULATORS.STATUS]: {
     [FRAME_TYPES.ADD_SERVICES]: (
@@ -402,7 +410,9 @@ async function transformTourToEngineState(
   contextId: string
 ): Promise<EngineTargetState> {
   return {
-    terminal: tour.terminal ? transformTerminal(tour.terminal) : undefined,
+    terminal: tour.terminal
+      ? transformTerminal(tour.terminal, true)
+      : undefined,
     status: tour.status
       ? transformStatus(tour.status, contextId, true)
       : undefined,

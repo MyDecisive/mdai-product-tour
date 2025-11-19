@@ -13,6 +13,7 @@ import {
   createLogRecord,
   createTerminalContent,
   extractRelevantSections,
+  findReplacementPod,
   parseRawLogFileToLogLines,
   rawLinesFromText,
 } from "../animationEngine/transformHelpers";
@@ -348,17 +349,30 @@ const stateBuilders: SimulatorStateBuilderMap = {
     ) => {
       const targetStateUpdates = Object.entries(updates.activePods).reduce(
         (accum, [key, value]) => {
+          const replacementPod = findReplacementPod(
+            value,
+            state.status?.activePods || {}
+          );
+          if (replacementPod) {
+            return accum;
+          }
+
           accum[key] = {
             ...value,
             status: STATUS.running,
           };
+
           return accum;
         },
         {} as ActivePodMap
       );
+
       return addStatusPods(state, {
         ...updates,
         activePods: targetStateUpdates,
+        podOrder: updates.podOrder.filter(
+          (podId) => !!targetStateUpdates[podId]
+        ),
       });
     },
   },

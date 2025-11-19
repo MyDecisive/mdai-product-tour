@@ -1,4 +1,3 @@
-import { POD_NAME_DELIM } from "../utils/configToEngineTransforms";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
   EngineLogsTarget,
@@ -25,7 +24,7 @@ import {
   updateBannerState,
   updatePodStatus,
 } from "./frameStateMergeStrategies";
-import { createLogRecord } from "./transformHelpers";
+import { createLogRecord, findReplacementPod } from "./transformHelpers";
 
 export interface EngineCallbacks {
   onStateChange: (state: EngineTargetState) => void;
@@ -208,22 +207,7 @@ export class AnimationEngineInstance {
     const activePods = this.currentState.status!.activePods;
     const pod = activePods[podId];
 
-    const replacementPod = Object.values(activePods).find((active) => {
-      const differentPodSource =
-        active.parentServiceKey !== pod.parentServiceKey;
-      const sameNamespace = active.namespace === pod.namespace;
-
-      const podNameDelimIdx = active.name.lastIndexOf(POD_NAME_DELIM);
-
-      const sameService = pod.name.startsWith(
-        active.name.substring(0, podNameDelimIdx)
-      );
-      const activeIsRunning = active.status === STATUS.running;
-
-      return (
-        differentPodSource && sameNamespace && sameService && activeIsRunning
-      );
-    });
+    const replacementPod = findReplacementPod(pod, activePods);
 
     if (replacementPod) {
       this.onPodStatusChange(replacementPod.id, STATUS.terminating);

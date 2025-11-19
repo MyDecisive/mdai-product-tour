@@ -1,5 +1,11 @@
-import { CURSOR_CHAR, TERMINAL_PROMPT } from "../utils/constants";
-import type { ConfigContent, ConfigLine } from "../utils/engineTypesScratch";
+import { POD_NAME_DELIM } from "../utils/configToEngineTransforms";
+import { CURSOR_CHAR, STATUS, TERMINAL_PROMPT } from "../utils/constants";
+import type {
+  ActivePod,
+  ActivePodMap,
+  ConfigContent,
+  ConfigLine,
+} from "../utils/engineTypesScratch";
 import type {
   LineChangeBlock,
   LogRecord,
@@ -448,3 +454,25 @@ export const extractRelevantSections = (
 
   return sections;
 };
+
+export function findReplacementPod(
+  currentPod: ActivePod,
+  activePods: ActivePodMap
+): ActivePod | undefined {
+  return Object.values(activePods).find((active) => {
+    const differentPodSource =
+      active.parentServiceKey !== currentPod.parentServiceKey;
+    const sameNamespace = active.namespace === currentPod.namespace;
+
+    const podNameDelimIdx = active.name.lastIndexOf(POD_NAME_DELIM);
+
+    const sameService = currentPod.name.startsWith(
+      active.name.substring(0, podNameDelimIdx)
+    );
+    const activeIsRunning = active.status === STATUS.running;
+
+    return (
+      differentPodSource && sameNamespace && sameService && activeIsRunning
+    );
+  });
+}

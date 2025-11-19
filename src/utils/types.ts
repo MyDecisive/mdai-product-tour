@@ -144,7 +144,7 @@ export type SimulatorFrameConfigs = {
   [SIMULATORS.LOGS]: {
     [FRAME_TYPES.ADD]: FrameConfig<
       Pick<TourLogSimTarget, "logsSources">,
-      Pick<EngineLogsTarget, "records">
+      EngineLogsTarget & { duration: number }
     >;
     [FRAME_TYPES.STREAM]: FrameConfig<
       TourLogSimTarget & { duration?: number },

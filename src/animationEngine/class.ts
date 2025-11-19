@@ -362,7 +362,6 @@ export class AnimationEngineInstance {
 
     const emitOne = () => {
       const nextLog = this.getNextLog(records, errorRecords, errorFrequency);
-
       this.updateState<{ records: LogRecord[] }>(addLogsRecords, {
         records: [nextLog],
       });
@@ -377,9 +376,8 @@ export class AnimationEngineInstance {
         this.logsIntervalRef = null;
       }
       this.logsStopTimeoutRef = null;
+      this.advanceAnimation();
     }, duration);
-
-    this.advanceAnimation();
   }
 
   private logsPause(): void {

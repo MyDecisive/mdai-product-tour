@@ -300,7 +300,7 @@ steps:
                   - start: 43
                     end: 54
                     changeLines:
-                      - "       SWAP OUT FOR THE"
+                      - "     # SWAP OUT FOR THE"
                       - "       filter/static-non-crit-services:"
                       - "         error_mode: ignore"
                       - "         logs:"

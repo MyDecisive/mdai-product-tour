@@ -147,17 +147,13 @@ function collectorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
     const [, level, component, ...jsonParts] = parts;
     const jsonString = jsonParts.join(" ");
 
-    try {
-      const message = `${component}: ${jsonString}`;
+    const message = `${component}: ${jsonString}`;
 
-      acc.push({
-        level: level.toUpperCase() as LogRecord["level"],
-        message,
-      });
-    } catch (e) {
-      console.warn(`Failed to parse JSON in log: ${line}`, e);
-      return acc;
-    }
+    acc.push({
+      level: level.toUpperCase() as LogRecord["level"],
+      message,
+    });
+
     return acc;
   }, [] as LogRecord[]);
 }
@@ -175,17 +171,13 @@ function errorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
     const [, level, component, msg, ...jsonParts] = parts;
     const jsonString = jsonParts.join(" ");
 
-    try {
-      const message = `${component}: ${msg} ${jsonString}`;
+    const message = `${component}: ${msg} ${jsonString}`;
 
-      acc.push({
-        level: level.toUpperCase() as LogRecord["level"],
-        message,
-      });
-    } catch (e) {
-      console.warn(`Failed to parse JSON in log: ${line}`, e);
-      return acc;
-    }
+    acc.push({
+      level: level.toUpperCase() as LogRecord["level"],
+      message,
+    });
+
     return acc;
   }, [] as LogRecord[]);
 }

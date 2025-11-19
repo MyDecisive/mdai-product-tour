@@ -324,7 +324,7 @@ function addLogRecordsForState(
   updates: EngineLogsTarget & { duration: number }
 ): EngineTargetState {
   const stateReadyLogsRecords = updates.records
-    .slice(0, Math.ceil(updates.duration / updates.speed))
+    .slice(0, Math.max(Math.ceil(updates.duration / updates.speed), 60))
     .map((log, index) => createLogRecord(log, -1, index, false));
 
   return addLogsRecords(state, { records: stateReadyLogsRecords });

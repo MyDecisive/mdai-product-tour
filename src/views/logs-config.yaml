@@ -246,7 +246,7 @@ steps:
               logsSources:
                 - collectorLogs.txt
               speed: 100
-              duration: 500
+              duration: 3000
       - id: 2-b
         title: Static Filtration is online!
         content:

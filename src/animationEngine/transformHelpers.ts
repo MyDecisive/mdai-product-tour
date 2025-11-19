@@ -221,7 +221,7 @@ export function createNextLog(
 
 const userEntryBehavior: Partial<TerminalTypedOptions> = {
   prompt: TERMINAL_PROMPT,
-  typeSpeed: 70,
+  typeSpeed: 85,
   backSpeed: 150,
   cursorChar: CURSOR_CHAR,
   showCursor: true,

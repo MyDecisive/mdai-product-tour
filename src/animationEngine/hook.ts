@@ -135,7 +135,6 @@ export function useAnimationEngine(
       },
 
       onSetActiveTab: (tabName: string) => {
-        if (!isPlaying) return;
         engineRef.current?.onSetActiveTab(tabName);
       },
 

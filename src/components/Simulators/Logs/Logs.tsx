@@ -4,11 +4,12 @@ import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorCo
 import type { EngineLogsTarget } from "../../../utils/engineTypesScratch";
 import { LogRow } from "./LogRow";
 
-export const LogsSimulator: React.FC<EngineLogsTarget> = ({ records }) => {
-  const { logContainerRef } = useGetLogsSimulatorContent();
+export const LogsSimulator: React.FC<
+  Pick<EngineLogsTarget, "records"> & { playing: boolean }
+> = ({ records, playing }) => {
+  const { logContainerRef } = useGetLogsSimulatorContent({ records, playing });
   return (
     <>
-      {/* <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel> */}
       <Box
         className="log-rows-container"
         ref={logContainerRef}

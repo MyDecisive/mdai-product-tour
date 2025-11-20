@@ -127,7 +127,13 @@ export function Simulators() {
               }}
             >
               {engineState.currentSimulatorState.logs != null && (
-                <LogsSimulator {...engineState.currentSimulatorState.logs} />
+                <LogsSimulator
+                  {...engineState.currentSimulatorState.logs}
+                  playing={
+                    engineState.isPlaying &&
+                    engineState.activeSimulator.has(SIMULATORS.LOGS)
+                  }
+                />
               )}
             </SimulatorBox>
           </Grid>

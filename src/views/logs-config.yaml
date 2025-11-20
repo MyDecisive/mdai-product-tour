@@ -245,8 +245,8 @@ steps:
             updates:
               logsSources:
                 - collectorLogs.txt
-              speed: 100
-              duration: 500
+              speed: 85
+              duration: 3000
       - id: 2-b
         title: Static Filtration is online!
         content:

@@ -117,10 +117,12 @@ function transformStatus(
     const replicas = service.replicas || 1;
     service.namespace = service.namespace || "default";
 
-    const serviceKey = createServiceKey(service, contextId);
+    const ctxId = `${isStateTransform ? "state" : "frame"}.${contextId}`;
+
+    const serviceKey = createServiceKey(service, ctxId);
 
     for (let replicaNo = 1; replicaNo <= replicas; replicaNo++) {
-      const podId = createPodId(service, replicaNo, contextId);
+      const podId = createPodId(service, replicaNo, ctxId);
 
       activePods[podId] = {
         id: podId,

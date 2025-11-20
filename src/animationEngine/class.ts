@@ -377,9 +377,8 @@ export class AnimationEngineInstance {
         this.logsIntervalRef = null;
       }
       this.logsStopTimeoutRef = null;
+      this.advanceAnimation();
     }, duration);
-
-    this.advanceAnimation();
   }
 
   private logsPause(): void {

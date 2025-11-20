@@ -13,6 +13,7 @@ import {
   createLogRecord,
   createTerminalContent,
   extractRelevantSections,
+  findReplacementPod,
   parseRawLogFileToLogLines,
   rawLinesFromText,
 } from "../animationEngine/transformHelpers";
@@ -116,10 +117,12 @@ function transformStatus(
     const replicas = service.replicas || 1;
     service.namespace = service.namespace || "default";
 
-    const serviceKey = createServiceKey(service, contextId);
+    const ctxId = `${isStateTransform ? "state" : "frame"}.${contextId}`;
+
+    const serviceKey = createServiceKey(service, ctxId);
 
     for (let replicaNo = 1; replicaNo <= replicas; replicaNo++) {
-      const podId = createPodId(service, replicaNo, contextId);
+      const podId = createPodId(service, replicaNo, ctxId);
 
       activePods[podId] = {
         id: podId,
@@ -346,17 +349,30 @@ const stateBuilders: SimulatorStateBuilderMap = {
     ) => {
       const targetStateUpdates = Object.entries(updates.activePods).reduce(
         (accum, [key, value]) => {
+          const replacementPod = findReplacementPod(
+            value,
+            state.status?.activePods || {}
+          );
+          if (replacementPod) {
+            return accum;
+          }
+
           accum[key] = {
             ...value,
             status: STATUS.running,
           };
+
           return accum;
         },
         {} as ActivePodMap
       );
+
       return addStatusPods(state, {
         ...updates,
         activePods: targetStateUpdates,
+        podOrder: updates.podOrder.filter(
+          (podId) => !!targetStateUpdates[podId]
+        ),
       });
     },
   },

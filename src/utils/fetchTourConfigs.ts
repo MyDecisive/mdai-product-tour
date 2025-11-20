@@ -12,7 +12,7 @@ import type { NavigationState } from "./types";
 const tourConfigUrls =
   (import.meta.env.VITE_TOUR_CONFIG_URLS as string)?.split(",") || [];
 
-export async function loadAllTourConfigs(): Promise<TourEngine[]> {
+export async function fetchAllTourConfigs(): Promise<TourEngine[]> {
   return Promise.all(tourConfigUrls.map((url) => loadTourConfig(url.trim())));
 }
 

@@ -277,6 +277,13 @@ export const createChangeMap = (
       const lineNo = block.start + index;
       changeMap.set(lineNo, oldValue);
     });
+
+    if (block.start != null && block.end) {
+      for (let i = block.start; i < block.end + 1; i++) {
+        if (changeMap.get(i)) continue;
+        changeMap.set(i, "");
+      }
+    }
   });
 
   return changeMap;

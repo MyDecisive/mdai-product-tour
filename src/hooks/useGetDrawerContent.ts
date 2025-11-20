@@ -12,6 +12,7 @@ export function useGetDrawerContent() {
     tourConfigs,
     setNavState,
     navigationState: { tour, step, subStep },
+    engineControls,
   } = useDemoContext();
 
   const inTour = tour !== "";
@@ -51,9 +52,10 @@ export function useGetDrawerContent() {
 
   const handleTreeItemClick = useCallback(
     (_: MouseEvent, stepId: string) => {
+      engineControls.reset();
       onTreeItemClick(stepId, step, subStep, setNavState);
     },
-    [step, subStep, setNavState]
+    [step, subStep, setNavState, engineControls]
   );
 
   const {
@@ -62,6 +64,7 @@ export function useGetDrawerContent() {
     handleClickPlay,
     handleNextButtonClick,
     handlePrevButtonClick,
+    hidePrevButton,
   } = useNavButtonHandlers();
 
   useEffect(() => {
@@ -78,7 +81,9 @@ export function useGetDrawerContent() {
           }
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          handlePrevButtonClick();
+          if (!hidePrevButton) {
+            handlePrevButtonClick();
+          }
         }
       }
     };
@@ -95,6 +100,7 @@ export function useGetDrawerContent() {
     handleClickPlay,
     handleNextButtonClick,
     handlePrevButtonClick,
+    hidePrevButton,
   ]);
 
   return {

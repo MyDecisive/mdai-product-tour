@@ -1,9 +1,9 @@
 import { Box, Link, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
-import GitHubIcon from "../../assets/github-icon.svg";
-import LinkedInIcon from "../../assets/linkedIn-icon.png";
-import LogoText from "../../assets/mydecisive-ai-logo-text.svg";
-import Logo from "../../assets/smol-logo.svg";
+import GitHubIcon from "../../assets/logos/github-icon.svg";
+import LinkedInIcon from "../../assets/logos/linkedIn-icon.png";
+import LogoText from "../../assets/logos/mydecisive-ai-logo-text.svg";
+import Logo from "../../assets/logos/smol-logo.svg";
 import { useDemoContext } from "../../hooks/useDemoContext";
 
 const linkStyles = {

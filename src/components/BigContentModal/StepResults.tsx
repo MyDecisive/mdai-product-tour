@@ -3,6 +3,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
 import type { VisualizationContentItem } from "../../utils/configTypesScratch";
 import type { EngineSubStep } from "../../utils/engineTypesScratch";
+import { getVideoUrl } from "../../utils/getAssets";
 
 const ButtonContainerStyles = css({
   display: "flex",
@@ -107,7 +108,7 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
         >
           <video
             ref={videoTagRef}
-            src={src}
+            src={getVideoUrl(src)}
             style={style}
             controls={false}
             autoPlay

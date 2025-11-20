@@ -43,6 +43,7 @@ import type {
   PodId,
 } from "./engineTypesScratch";
 import { fetchGitHubFile } from "./fetchRawGithubFile";
+import { getLogFile } from "./getAssets";
 import type {
   EngineFrames,
   LogRecord,
@@ -199,17 +200,12 @@ async function transformConfig(
 // LOGS SIMULATOR TRANSFORMS
 // ============================================================================
 
-async function loadLogsTextFile(fileName: string): Promise<LogRecord[]> {
-  const res = await fetch(`/logs/${fileName}`);
-  if (!res.ok) {
-    throw new Error(`Failed to load log file: ${fileName}`);
-  }
-
-  const text = await res.text();
+function loadLogsTextFile(fileName: string): LogRecord[] {
+  const text = getLogFile(fileName);
   return parseRawLogFileToLogLines(text);
 }
 
-async function transformLogs(
+function transformLogs(
   {
     logsSources = [],
     speed,
@@ -218,15 +214,13 @@ async function transformLogs(
     duration,
   }: TourLogSimTarget & { duration?: number },
   prepLogRecordsForState?: boolean
-): Promise<EngineLogsTarget & { duration: number }> {
+): EngineLogsTarget & { duration: number } {
   const engineSpeed = speed ?? 1000;
   const engineErrorFrequency = errorFrequency ?? 0.1;
 
-  const logRecordsByFile = await Promise.all(logsSources.map(loadLogsTextFile));
+  const logRecordsByFile = logsSources.map(loadLogsTextFile);
 
-  const errorLogs = errorLogsSource
-    ? await loadLogsTextFile(errorLogsSource)
-    : [];
+  const errorLogs = errorLogsSource ? loadLogsTextFile(errorLogsSource) : [];
 
   const records = braidLogs(...logRecordsByFile);
 
@@ -293,14 +287,14 @@ async function transformTourToEngineAnimation(
           if (frame.simulator === SIMULATORS.LOGS) {
             return {
               ...frame,
-              updates: await transformLogs(frame.updates),
+              updates: transformLogs(frame.updates),
             };
           }
           return frame;
         case FRAME_TYPES.STREAM:
           return {
             ...frame,
-            updates: await transformLogs(frame.updates),
+            updates: transformLogs(frame.updates),
           };
         case FRAME_TYPES.SCROLL_TO:
         case FRAME_TYPES.PAUSE:
@@ -445,7 +439,7 @@ async function transformTourToEngineState(
       ? transformStatus(tour.status, contextId, true)
       : undefined,
     config: tour.config ? await transformConfig(tour.config) : undefined,
-    logs: tour.logs ? await transformLogs(tour.logs, true) : undefined,
+    logs: tour.logs ? transformLogs(tour.logs, true) : undefined,
     banner: tour.banner,
   };
 }

@@ -9,7 +9,7 @@ import { useAnimationEngine } from "../animationEngine/hook.ts";
 import { DemoContext } from "../hooks/useDemoContext.ts";
 import { getCurrentEngineData } from "../utils/demoStateHelpers.ts";
 import type { TourEngine } from "../utils/engineTypesScratch.ts";
-import { loadAllTourConfigs } from "../utils/loadTourConfigs.ts";
+import { fetchAllTourConfigs } from "../utils/fetchTourConfigs.ts";
 import type { NavigationState } from "../utils/types.ts";
 
 interface DemoStateProviderProps {
@@ -35,7 +35,7 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
 
   useEffect(() => {
     setLoadingState(true);
-    loadAllTourConfigs()
+    fetchAllTourConfigs()
       .then((configs) => {
         setTourConfigs(configs);
         const defaultOpenTourTreeItemIndex = configs.findIndex(

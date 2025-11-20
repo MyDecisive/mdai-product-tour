@@ -1,5 +1,5 @@
 import { Box, Button, css, List, ListItem, Typography } from "@mui/material";
-import FullLogo from "../../assets/full_logo.svg";
+import FullLogo from "../../assets/logos/full_logo.svg";
 import type { BigContentModalContentProps } from "../../utils/types";
 import { ContactForm } from "./ContactForm";
 

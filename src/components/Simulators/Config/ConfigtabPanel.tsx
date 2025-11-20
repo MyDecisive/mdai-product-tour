@@ -65,11 +65,12 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
         <Box
           sx={{
             position: "sticky",
-            width: "100%",
-            display: "flex",
             top: 0,
             right: 0,
+            width: "100%",
+            display: "flex",
             justifyContent: "flex-end",
+            zIndex: 1,
           }}
         >
           <Link

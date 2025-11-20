@@ -1,5 +1,17 @@
 const SCROLL_PADDING_TOP = 24;
 
+function groupDoesNotNeedScrollPadding(
+  groupContainerRect: DOMRect | undefined,
+  containerRect: DOMRect
+) {
+  return (
+    groupContainerRect &&
+    (Math.abs(groupContainerRect.height - containerRect.height) <
+      SCROLL_PADDING_TOP ||
+      groupContainerRect.height > containerRect.height)
+  );
+}
+
 export const calculateScrollTarget = (
   containerRef: HTMLDivElement | null,
   lineNo: number
@@ -12,6 +24,12 @@ export const calculateScrollTarget = (
 
   const containerRect = containerRef.getBoundingClientRect();
   const elementRect = el.getBoundingClientRect();
+
+  const groupContainerRect = el.parentElement?.getBoundingClientRect();
+
+  if (groupDoesNotNeedScrollPadding(groupContainerRect, containerRect)) {
+    return containerRef.scrollTop + (elementRect.top - containerRect.top);
+  }
 
   return (
     containerRef.scrollTop +

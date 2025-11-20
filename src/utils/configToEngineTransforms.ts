@@ -377,7 +377,19 @@ const stateBuilders: SimulatorStateBuilderMap = {
     },
   },
   [SIMULATORS.CONFIG]: {
-    [FRAME_TYPES.ADD]: addConfigTarget,
+    [FRAME_TYPES.ADD]: (
+      state: EngineTargetState,
+      updates: EngineConfigTarget
+    ) => {
+      if (updates.showingChange.size > 0) {
+        return addConfigTarget(state, {
+          ...updates,
+          showingToggle: updates.showingChange,
+          showingChange: updates.showingToggle || new Set<string>(),
+        });
+      }
+      return addConfigTarget(state, updates);
+    },
     [FRAME_TYPES.SCROLL_TO]: scrollToConfigLine,
   },
   [SIMULATORS.LOGS]: {

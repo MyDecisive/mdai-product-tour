@@ -1,5 +1,6 @@
 import {
   type BannerTargetState,
+  type ContentItem,
   type LineChangeBlock,
   type TourFrames,
 } from "./types";
@@ -70,7 +71,7 @@ export interface StepConfig {
 export interface SubStepConfig {
   id: string;
   title?: string;
-  content?: ContentBlock;
+  content?: ContentBlock[];
   visualizationModal?: boolean;
   initialState?: TourTargetState;
   animation?: TourFrames["Any"][];
@@ -80,19 +81,15 @@ export interface SubStepConfig {
 // DRAWER CONTENT CONFIG
 // ============================================================================
 export interface ContentBlock {
-  title: string | null;
-  variant?: "default" | "list" | "visualization";
-  items?: Array<ContentItem | VisualizationContentItem>;
+  title?: string;
+  variant?: "default" | "list";
+  items: TourContentItem[];
 }
 
-export interface ContentItem {
-  text: string;
-  highlightText?: HighlightText;
-  variant?: "code" | "button" | "list";
-  link?: string;
-  style?: React.CSSProperties;
+export interface TourContentItem extends ContentItem {
+  actions?: TourFrames["Any"][];
+  onClick?: TourFrames["Any"]; // Item-level click handler
 }
-
 export interface VisualizationContentItem extends ContentItem {
   src: string;
   alt: string;

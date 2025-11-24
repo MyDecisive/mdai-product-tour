@@ -1,6 +1,9 @@
 import { Box, List, ListItem, Typography } from "@mui/material";
 import { useDemoContext } from "../../../hooks/useDemoContext";
-import type { EngineContentBlock } from "../../../utils/engineTypesScratch";
+import type {
+  EngineContentBlock,
+  EngineContentItem,
+} from "../../../utils/engineTypesScratch";
 import { MarkupText } from "./Markup";
 
 const ListItemStyles: React.CSSProperties = {
@@ -26,6 +29,8 @@ export function ContentBlock({ variant, title, items }: EngineContentBlock) {
   const { onTriggerFrame } = engineControls;
   const { activeSimulator } = engineState;
 
+  const typeCastItems = items as EngineContentItem[];
+
   return (
     <Box
       sx={{
@@ -45,7 +50,7 @@ export function ContentBlock({ variant, title, items }: EngineContentBlock) {
       <Typography component={"span"}>
         {variant === "list" ? (
           <List>
-            {items.map(({ onClick, bullet, ...rest }, index) => (
+            {typeCastItems.map(({ onClick, bullet, ...rest }, index) => (
               <ListItem
                 key={index}
                 sx={[
@@ -65,9 +70,9 @@ export function ContentBlock({ variant, title, items }: EngineContentBlock) {
           </List>
         ) : (
           <>
-            {items &&
-              items.length > 0 &&
-              items.map((item, index) => (
+            {typeCastItems &&
+              typeCastItems.length > 0 &&
+              typeCastItems.map((item, index) => (
                 <MarkupText
                   key={index}
                   {...item}

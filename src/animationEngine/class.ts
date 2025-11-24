@@ -149,7 +149,7 @@ export class AnimationEngineInstance {
     },
   };
 
-  private async executeAction(action: EngineFrames["Any"]): Promise<void> {
+  public async executeAction(action: EngineFrames["Any"]): Promise<void> {
     if (action.type === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
       return;

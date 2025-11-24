@@ -15,8 +15,8 @@ export function StepWithSubSteps({ itemId, title, subSteps }: StepItem) {
           },
         }}
       >
-        {subSteps.map(({ title, content, itemId }) => (
-          <SubStep key={itemId} id={itemId} title={title} content={content} />
+        {subSteps.map((subStep) => (
+          <SubStep key={subStep.itemId} {...subStep} />
         ))}
       </TreeItem>
     </>

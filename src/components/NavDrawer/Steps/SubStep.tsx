@@ -1,8 +1,8 @@
-import { TreeItem, treeItemClasses } from "@mui/x-tree-view";
 import { css } from "@emotion/react";
-import type { SubStep } from "../../../utils/drawerTypes";
-import { ContentBlock } from "./Content";
+import { TreeItem, treeItemClasses } from "@mui/x-tree-view";
+import type { SubStepItem } from "../../../utils/types";
 import { StepNavButtons } from "../StepNavButtons";
+import { ContentBlock } from "./Content";
 
 const NavTreeSubStepStyles = css({
   [`& .${treeItemClasses.groupTransition}`]: {
@@ -15,26 +15,23 @@ const NavTreeSubStepStyles = css({
   },
 });
 
-export function SubStep({
-  id,
-  title,
-  content,
-  visualizationModal = false,
-}: SubStep) {
+export function SubStep({ itemId, title, content }: SubStepItem) {
   return (
     <>
       <TreeItem
-        key={id}
+        key={itemId}
         sx={NavTreeSubStepStyles}
-        itemId={id}
-        label={title && !visualizationModal ? title : ""}
+        itemId={itemId}
+        label={title ? title : ""}
       >
-        {content && (
-          <ContentBlock
-            contentBlock={content}
-            visualization={visualizationModal}
-          />
-        )}
+        {content &&
+          content.length &&
+          content.map((block, index) => (
+            <ContentBlock
+              {...block}
+              key={`${block.title}-${block.variant}-${index}`}
+            />
+          ))}
         <StepNavButtons />
       </TreeItem>
     </>

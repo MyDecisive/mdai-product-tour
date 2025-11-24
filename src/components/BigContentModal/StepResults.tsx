@@ -1,9 +1,12 @@
 import { Box, Button, css, Typography } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
-import type { VisualizationContentItem } from "../../utils/configTypesScratch";
-import type { EngineSubStep } from "../../utils/engineTypesScratch";
+import type {
+  EngineContentItem,
+  EngineSubStep,
+} from "../../utils/engineTypesScratch";
 import { getVideoUrl } from "../../utils/getAssets";
+import type { VisualizationContentItem } from "../../utils/types";
 
 const ButtonContainerStyles = css({
   display: "flex",
@@ -12,22 +15,47 @@ const ButtonContainerStyles = css({
   paddingTop: "12px",
 });
 
+function isVisualization(
+  item: EngineContentItem | VisualizationContentItem
+): item is VisualizationContentItem {
+  return (
+    "src" in item &&
+    "alt" in item &&
+    typeof item.src === "string" &&
+    typeof item.alt === "string"
+  );
+}
+
 function currentDrawerItemToVizModalData(
   currentDrawerItem: EngineSubStep | undefined
 ) {
   if (
     !currentDrawerItem ||
     !currentDrawerItem?.visualizationModal ||
-    !currentDrawerItem.content?.items?.[0]
+    !currentDrawerItem.content?.length
   ) {
     return undefined;
   }
 
-  const title = currentDrawerItem.content.title;
+  const firstBlockWithTitle = currentDrawerItem.content.find(
+    (block) => !!block.title
+  );
+
+  if (!firstBlockWithTitle) {
+    return undefined;
+  }
+  const visualizationContent = firstBlockWithTitle.items.find(isVisualization);
+
+  if (!visualizationContent) {
+    return undefined;
+  }
+  const title = firstBlockWithTitle.title;
 
   return {
     title,
-    ...currentDrawerItem.content.items[0],
+    text: visualizationContent.text,
+    src: visualizationContent.src,
+    alt: visualizationContent.alt,
   } as VisualizationContentItem & { title: string | null };
 }
 
@@ -63,7 +91,7 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
     return null;
   }
 
-  const { src, alt, style, title, text } = resultsProps;
+  const { src, alt, title, text } = resultsProps;
 
   return (
     <>
@@ -109,7 +137,6 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
           <video
             ref={videoTagRef}
             src={getVideoUrl(src)}
-            style={style}
             controls={false}
             autoPlay
             muted

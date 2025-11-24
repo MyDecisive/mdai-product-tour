@@ -6,6 +6,7 @@ import type {
   NavigationState,
   PodStatusType,
   TerminalTypedOptions,
+  VisualizationContentItem,
 } from "./types";
 
 // ============================================================================
@@ -45,7 +46,7 @@ export interface EngineSubStep {
 export interface EngineContentBlock {
   title?: string;
   variant?: "default" | "list";
-  items: EngineContentItem[];
+  items: (EngineContentItem | VisualizationContentItem)[];
 }
 
 export interface EngineContentItem extends ContentItem {

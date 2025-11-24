@@ -276,3 +276,8 @@ export interface ContentItem {
   text: string;
   bullet?: string;
 }
+
+export interface VisualizationContentItem extends ContentItem {
+  src: string;
+  alt: string;
+}

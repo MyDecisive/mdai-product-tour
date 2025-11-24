@@ -90,10 +90,6 @@ export interface TourContentItem extends ContentItem {
   actions?: TourFrames["Any"][];
   onClick?: TourFrames["Any"]; // Item-level click handler
 }
-export interface VisualizationContentItem extends ContentItem {
-  src: string;
-  alt: string;
-}
 
 export type HighlightText = {
   text: string;

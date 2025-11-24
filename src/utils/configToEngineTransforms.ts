@@ -20,6 +20,7 @@ import {
 import type {
   SubStepConfig,
   TourConfigSimTarget,
+  TourContentItem,
   TourLogSimTarget,
   TourStatusTarget,
   TourTargetState,
@@ -34,6 +35,8 @@ import {
 import type {
   ActivePodMap,
   EngineConfigTarget,
+  EngineContentBlock,
+  EngineContentItem,
   EngineFileConfig,
   EngineLogsTarget,
   EngineStatusTarget,
@@ -448,32 +451,34 @@ async function transformTourToEngineState(
 // TRANSFORMS THE CONFIG STEP
 // ============================================================================
 
-export async function transformSubStepConfigToInstanceArgs(
-  subStep: SubStepConfig
-): Promise<{
+export async function transformSubStepConfigToInstanceArgs({
+  initialState,
+  id,
+  animation,
+  content,
+}: SubStepConfig): Promise<{
   initialState?: EngineTargetState;
   targetState?: EngineTargetState;
   animation?: EngineFrames["Any"][];
+  content?: EngineContentBlock[];
 }> {
   const returnVal: {
     initialState?: EngineTargetState;
     targetState?: EngineTargetState;
     animation?: EngineFrames["Any"][];
+    content?: EngineContentBlock[];
   } = {};
 
-  if (subStep.initialState) {
+  if (initialState) {
     const transformedInitial = await transformTourToEngineState(
-      subStep.initialState,
-      subStep.id
+      initialState,
+      id
     );
     returnVal.initialState = transformedInitial;
   }
 
-  if (subStep.animation && subStep.animation.length > 0) {
-    const frames = await transformTourToEngineAnimation(
-      subStep.animation || [],
-      subStep.id
-    );
+  if (animation && animation.length > 0) {
+    const frames = await transformTourToEngineAnimation(animation || [], id);
 
     const targetState = builtTargetStateFromEngineAnimation(
       frames,
@@ -484,5 +489,70 @@ export async function transformSubStepConfigToInstanceArgs(
     returnVal.targetState = targetState;
   }
 
+  if (content && content.length) {
+    if (
+      content.some(({ items = [] }) =>
+        items.some((item) => item.actions || item.onClick)
+      )
+    ) {
+      const updatedContent = await Promise.all(
+        content.map(async (c) => {
+          if (c.items && c.items.length) {
+            const transformedItems = await Promise.all(
+              c.items?.map(async (item) => {
+                const returnItem =
+                  await transformContentItemToEngineContentItem(item, id);
+
+                return returnItem;
+              })
+            );
+
+            return {
+              ...c,
+              items: transformedItems,
+            };
+          }
+          return {
+            ...c,
+          } as EngineContentBlock;
+        })
+      );
+
+      returnVal.content = updatedContent;
+    } else {
+      returnVal.content = [...content] as EngineContentBlock[];
+    }
+  }
+
   return returnVal;
+}
+
+async function transformContentItemToEngineContentItem(
+  content: TourContentItem,
+  contextId: string
+): Promise<EngineContentItem> {
+  const { onClick, actions, ...rest } = content;
+
+  let transformedOnClick: EngineFrames["Any"] | undefined;
+  let transformedActions: EngineFrames["Any"][] | undefined;
+
+  if (onClick) {
+    const [result] = await transformTourToEngineAnimation([onClick], contextId);
+    transformedOnClick = result;
+  }
+
+  if (actions) {
+    transformedActions = await transformTourToEngineAnimation(
+      actions,
+      contextId
+    );
+  }
+
+  const result: EngineContentItem = {
+    ...rest,
+    ...(transformedOnClick && { onClick: transformedOnClick }),
+    ...(transformedActions && { actions: transformedActions }),
+  };
+
+  return result;
 }

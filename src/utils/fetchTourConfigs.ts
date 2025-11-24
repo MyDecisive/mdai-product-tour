@@ -5,7 +5,11 @@ import type {
   SubStepConfig,
   TourConfiguration,
 } from "./configTypesScratch";
-import type { EngineSubStep, TourEngine } from "./engineTypesScratch";
+import type {
+  EngineContentBlock,
+  EngineSubStep,
+  TourEngine,
+} from "./engineTypesScratch";
 import { fetchGitHubFile } from "./fetchRawGithubFile";
 import type { NavigationState } from "./types";
 
@@ -93,8 +97,12 @@ async function transformParsedTourConfigToInstanceArgs(
     (config?.steps || []).map(async (step, stepIndex, stepsArr) => {
       const transformedSubSteps = await Promise.all(
         step?.subSteps?.map(async (subStep, subStepIndex, subStepsArr) => {
-          const { initialState, animation, ...engineCompatibleSubStep } =
-            subStep;
+          const {
+            initialState,
+            animation,
+            content,
+            ...engineCompatibleSubStep
+          } = subStep;
 
           const nextSubStep = createNextNavState(
             config.id,
@@ -111,7 +119,15 @@ async function transformParsedTourConfigToInstanceArgs(
             subStepsArr
           );
 
-          if (initialState || (animation && animation.length > 0)) {
+          if (
+            (content &&
+              content.length &&
+              content.some(({ items = [] }) =>
+                items.some((item) => item.actions || item.onClick)
+              )) ||
+            initialState ||
+            (animation && animation.length > 0)
+          ) {
             const transformed = await transformSubStepConfigToInstanceArgs(
               subStep
             );
@@ -127,6 +143,7 @@ async function transformParsedTourConfigToInstanceArgs(
           }
           return {
             ...engineCompatibleSubStep,
+            content: content as EngineContentBlock[],
             nextSubStep,
             previousSubStep,
           };

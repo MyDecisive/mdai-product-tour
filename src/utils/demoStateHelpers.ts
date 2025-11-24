@@ -83,7 +83,10 @@ export function onTreeItemClick(
     return;
   }
   const isToggle = selectedStepIndex === step;
-  setNavState({ step: isToggle ? -1 : selectedStepIndex });
+  setNavState({
+    step: isToggle ? -1 : selectedStepIndex,
+    subStep: isToggle ? -1 : 0,
+  });
 }
 
 const emptyEngineData = {

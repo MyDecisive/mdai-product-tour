@@ -24,53 +24,46 @@ steps:
             simulator: logs
             duration: 1500
         content:
-          title: Consolidated tools
-          variant: list
-          items:
-            - text: Multiple tools in one unified view--making it easy to see how MyDecisive works.
-            - highlightText:
-                text: "IDE Simulator:"
-                simulator: "config"
-              text: Tweak and control SmartHub through its config files
-              variant: list
-            - highlightText:
-                text: "Terminal Simulator:"
-                simulator: terminal
-              text: Deploy changes to SmartHub like a pro
-              variant: list
-            - highlightText:
-                text: "Status Simulator:"
-                simulator: status
-              text: Keep an eye on running SmartHub processes and components
-              variant: list
-            - highlightText:
-                text: "Tail logs Simulator:"
-                simulator: logs
-              text: Watch SmartHub's logs stream by in real time
-              variant: list
-            - text: You can also navigate through the steps with your left and right arrow keys.
+          - title: Consolidated tools
+            items:
+              - text: Multiple tools in one unified view--making it easy to see how MyDecisive works.
+          - variant: list
+            items:
+              - bullet: "1."
+                text: <highlight:config>IDE Simulator:</highlight> Tweak and control SmartHub through its config files
+              - text: <highlight:terminal>Terminal Simulator:</highlight> Deploy changes to SmartHub like a pro
+                bullet: "2."
+              - bullet: "3."
+                text: <highlight:status>Status Simulator:</highlight> Keep an eye on running SmartHub processes and components
+              - bullet: "4."
+                text: <highlight:logs>Tail logs Simulator:</highlight> Watch SmartHub's logs stream by in real time
+          - items:
+              - text: You can also navigate through the steps with your left and right arrow keys.
       - id: 0-b
         title: Meet Dynamic Log Filtering
         content:
-          items:
-            - text: "Big bills? Not cool. Dynamic Log Filtering helps you slash up to 90% of your Datadog or New Relic spend. Here’s how, in three painless steps."
+          - items:
+              - text: "Big bills? Not cool. Dynamic Log Filtering helps you slash up to 90% of your Datadog or New Relic spend. Here’s how, in three painless steps."
 
   - id: "1"
     title: "Step 1: Get the data flowing"
     subSteps:
       - id: 1-a
-        title: Data Starts to Flow
+        title: Generate synthethic log data
         content:
-          title: Generate synthethic log data
-          items:
-            - text: We'll start the synthetic services in our K8S cluster. This will generate the data we need to use, as the MyDecisive SmartHub is currently running but idle (see "Status Window").
-            - text: "./mdai-kind.sh logs"
-              variant: code
-            - text: and then
-            - text: "helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml"
-              variant: code
-            - text: to open the floodgates.
-            - text: Next, we start Fluentd containers to stream logs from services like "service1234" and "service4321.” The "Status Window" will confirm the container start, and the "Tail Logs" window will show the incoming log data.
+          - items:
+              - text: |
+                  We'll start the synthetic services in our K8S cluster. This will generate the data we need to use, as the MyDecisive SmartHub is currently running but idle (see <button:0>Status</button> window). <code>./mdai-kind.sh logs</code>and then <code>helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml</code>to open the floodgates.
+
+                  Next, we start Fluentd containers to stream logs from services like "service1234" and "service4321.” The <button:1>Status</button> window will confirm the container start, and the <button:2>Tail Logs</button> window will show the incoming log data.
+
+                actions:
+                  - type: activate
+                    simulator: status
+                  - type: activate
+                    simulator: status
+                  - type: activate
+                    simulator: logs
         initialState:
           status:
             - namespace: "mdai"
@@ -163,11 +156,11 @@ steps:
       - id: 1-b
         visualizationModal: true
         content:
-          title: See the results!
-          items:
-            - text: "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money."
-              src: logs-example.mp4
-              alt: Logs Visualization
+          - title: See the results!
+            items:
+              - text: "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money."
+                src: logs-example.mp4
+                alt: Logs Visualization
 
   - id: "2"
     title: "Step 2: Drop unwanted data"
@@ -175,10 +168,23 @@ steps:
       - id: 2-a
         title: Configure static filters
         content:
-          items:
-            - text: In line 78 of the OTEL_REF.YAML file, you define a rule that says drop logs from “service4321”.
-            - text: In line 100 you enable this filter rule.
-            - text: We are now actively dropping all logs from service4321, which saves you money. The downside is that this approach uses basic, static OTEL, which is suboptimal.
+          - variant: list
+            items:
+              - text: In <emphasize>line 39</emphasize> of the OTEL.YAML file, you define a rule that says drop logs from “service4321”.
+                onClick:
+                  type: scroll_to
+                  simulator: config
+                  updates:
+                    fileName: otel.yaml
+                    line: 39
+              - text: In <emphasize>line 65</emphasize> you enable this filter rule.
+                onClick:
+                  type: scroll_to
+                  simulator: config
+                  updates:
+                    fileName: otel.yaml
+                    line: 65
+              - text: We are now actively dropping all logs from service4321, which saves you money. The downside is that this approach uses basic, static OTEL, which is suboptimal.
         initialState:
           config:
             files:
@@ -250,21 +256,22 @@ steps:
       - id: 2-b
         title: Static Filtration is online!
         content:
-          title: You’re now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let’s do better
+          - items:
+              - text: You’re now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let’s do better
       - id: 2-c
         title: The big deal?
         content:
-          title: Your data, your rules
-          items:
-            - text: "We only edited the OTEL configuration, and MyDecisive's SmartHub automatically deployed the new logic. The cluster also adjusted to support the new pipelines without losing any data."
+          - title: Your data, your rules
+            items:
+              - text: We only edited the OTEL configuration, and MyDecisive's SmartHub automatically deployed the new logic. The cluster also adjusted to support the new pipelines without losing any data.
       - id: 2-d
         visualizationModal: true
         content:
-          title: Nice work on the filters!
-          items:
-            - text: You are cutting down the noise big-time. One hitch--Service4321 is missing from Datadog. Don’t worry, we’ll get it right together.
-              src: filter-example.mp4
-              alt: Prefilter Visualization
+          - title: Nice work on the filters!
+            items:
+              - text: You are cutting down the noise big-time. One hitch--Service4321 is missing from Datadog. Don’t worry, we’ll get it right together.
+                src: filter-example.mp4
+                alt: Prefilter Visualization
 
   - id: "3"
     title: "Step 3: Dynamic OTEL → Power-User Mode"
@@ -272,13 +279,47 @@ steps:
       - id: 3-a
         title: Sprinkle in some variables
         content:
-          title: What’s happening in the config file?
-          items:
-            - text: "1. We are now working with two areas in the Config window: OTEL and dynamic variables."
-            - text: '2. Select HUB.YAML. Line 11 defines a dynamic "noisy" service filter (replacing the static service4321 drop).'
-            - text: '3. Line 49 contains the PromQL query that sets the "noisy" threshold and duration.'
-            - text: "4. Check OTEL.YAML (Lines 54 & 99) to see how these variables make OTEL dynamic."
-            - text: "5. The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
+          - title: What’s happening in the config file?
+            variant: list
+            items:
+              - bullet: "1."
+                text: "We are now working with two areas in the <button:0>Config</button> window: OTEL and dynamic variables."
+                actions:
+                  - type: activate
+                    simulator: config
+              - bullet: "2."
+                text: 'Select HUB.YAML. <button:0>Line 11</button> defines a dynamic "noisy" service filter (replacing the static service4321 drop).'
+                actions:
+                  - type: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: hub.yaml
+                      line: 11
+
+              - bullet: "3."
+                text: '<button:0>Line 49</button> contains the PromQL query that sets the "noisy" threshold and duration.'
+                actions:
+                  - type: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: hub.yaml
+                      line: 49
+              - bullet: "4."
+                text: "Check OTEL.YAML (Lines <button:0>54</button> & <button:1>99</button>) to see how these variables make OTEL dynamic."
+                actions:
+                  - type: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 54
+                  - type: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 99
+              - bullet: "5."
+                text: "The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
+          - text: This is dynamic, real-time observaility control.
         initialState:
           config:
             files:
@@ -367,9 +408,8 @@ steps:
       - id: 3-b
         title: Kick the cluster one last time
         content:
-          title: What’s happening in the config file?
-          items:
-            - text: "We use a command-line tool (kubectl) to dynamically configure the system. Now, our smart central controller (SmartHub) automatically manages and adjusts the logging volume from services based on how much data they're sending, using a configurable, real-time threshold."
+          - items:
+              - text: "We use a command-line tool (kubectl) to dynamically configure the system. Now, our smart central controller (SmartHub) automatically manages and adjusts the logging volume from services based on how much data they're sending, using a configurable, real-time threshold."
         animation:
           - type: enter_command
             simulator: terminal

@@ -2,7 +2,6 @@ import type { RefObject } from "react";
 import type { TypedOptions } from "typed.js";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
-  ContentBlock,
   TourConfigSimTarget,
   TourLogSimTarget,
   TourStatusTarget,
@@ -10,6 +9,7 @@ import type {
 } from "./configTypesScratch";
 import type {
   EngineConfigTarget,
+  EngineContentBlock,
   EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
@@ -265,9 +265,19 @@ export interface StepItem {
   subSteps: SubStepItem[];
 }
 
-interface SubStepItem {
+export interface SubStepItem {
   id: string;
   itemId: string;
   title?: string;
-  content?: ContentBlock;
+  content?: EngineContentBlock[];
+}
+
+export interface ContentItem {
+  text: string;
+  bullet?: string;
+}
+
+export interface VisualizationContentItem extends ContentItem {
+  src: string;
+  alt: string;
 }

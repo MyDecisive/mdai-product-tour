@@ -1,11 +1,12 @@
-import type { ContentBlock } from "./configTypesScratch";
 import type {
   BannerTargetState,
+  ContentItem,
   EngineFrames,
   LogRecord,
   NavigationState,
   PodStatusType,
   TerminalTypedOptions,
+  VisualizationContentItem,
 } from "./types";
 
 // ============================================================================
@@ -24,7 +25,7 @@ export interface TourEngine {
   default_open?: boolean;
 }
 
-interface EngineStep {
+export interface EngineStep {
   id: string;
   title?: string;
   subSteps: EngineSubStep[];
@@ -33,13 +34,24 @@ interface EngineStep {
 export interface EngineSubStep {
   id: string;
   title?: string;
-  content?: ContentBlock;
+  content?: EngineContentBlock[];
   visualizationModal?: boolean;
   initialState?: EngineTargetState;
   animation?: EngineFrames["Any"][];
   targetState?: EngineTargetState;
   previousSubStep: NavigationState;
   nextSubStep: NavigationState;
+}
+
+export interface EngineContentBlock {
+  title?: string;
+  variant?: "default" | "list";
+  items: (EngineContentItem | VisualizationContentItem)[];
+}
+
+export interface EngineContentItem extends ContentItem {
+  actions?: EngineFrames["Any"][];
+  onClick?: EngineFrames["Any"]; // Item-level click handler
 }
 
 // ============================================================================

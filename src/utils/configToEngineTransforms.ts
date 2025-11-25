@@ -450,7 +450,9 @@ async function transformTourToEngineState(
 // ============================================================================
 // TRANSFORMS THE CONFIG STEP
 // ============================================================================
-
+// TODO: include previous targetState so subSteps targetState can accumulate
+//       will require refactoring `transformParsedTourConfigToInstanceArgs` to
+//       have access to previously converted subSteps.
 export async function transformSubStepConfigToInstanceArgs({
   initialState,
   id,

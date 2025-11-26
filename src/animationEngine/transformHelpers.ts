@@ -75,7 +75,6 @@ export function braidLogs(...logArrays: LogRecord[][]): LogRecord[] {
 
   return result;
 }
-
 export function parseRawLogFileToLogLines(rawLogString: string): LogRecord[] {
   const logStrings = rawLogString
     .trim()
@@ -96,10 +95,22 @@ export function parseRawLogFileToLogLines(rawLogString: string): LogRecord[] {
     return errorLogStringsToLogRecords(logStrings);
   }
 
+  if (logFormat === "kubernetesLogs") {
+    return kubernetesLogStringsToLogRecords(logStrings);
+  }
+
   return [];
 }
 
 function determineLogFormat(logString: string) {
+  // Check for kubernetes format first
+  if (
+    logString.includes("kubernetes.var.log.containers") &&
+    logString.includes(": {")
+  ) {
+    return "kubernetesLogs";
+  }
+
   const serviceParts = logString.split(" - ");
   if (serviceParts.length === 6) {
     return "serviceLogs";
@@ -177,6 +188,37 @@ function errorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
       level: level.toUpperCase() as LogRecord["level"],
       message,
     });
+
+    return acc;
+  }, [] as LogRecord[]);
+}
+
+function kubernetesLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
+  return logStrings.reduce((acc, line) => {
+    // Parse format: timestamp kubernetes.path: {json}
+    const beginningOfLine = line.indexOf("kubernetes");
+
+    if (beginningOfLine === -1) {
+      console.warn("Invalid kubernetes log format:", line);
+      return acc;
+    }
+
+    try {
+      const message = line.slice(beginningOfLine);
+      const levelMatch = message.match(/"level":"([a-zA-Z]+)"/);
+
+      if (!levelMatch) {
+        console.warn("No level found in log", line);
+        return acc;
+      }
+      acc.push({
+        level: levelMatch[1],
+        message,
+      });
+    } catch (e) {
+      console.warn("Failed to parse kubernetes log JSON:", line);
+      console.error("error parsing k8s log line: ", e);
+    }
 
     return acc;
   }, [] as LogRecord[]);

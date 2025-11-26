@@ -1,5 +1,5 @@
 id: logs
-version: 0.0.1
+version: 0.9.0
 title: Dynamic Log Filtering
 subtitle: Ready to see how it works?
 buttonText: Fire it up
@@ -70,23 +70,26 @@ steps:
               name: "prometheus-kube-prometheus-stack-prometheus-0"
               noSuffix: true
             - namespace: "mdai"
-              name: "opentelemetry-operator-6d8ddbdc4d"
-            - namespace: "mdai"
-              name: "mdaihub-sample-observer-collector-6ccb6ffd94"
+              name: "opentelemetry-operator-744c8c4b5"
             - namespace: "mdai"
               name: "mdai-valkey-primary-0"
               noSuffix: true
             - namespace: "mdai"
-              name: "mdai-rabbitmq-0"
-              noSuffix: true
+              name: "mdai-s3-logs-reader-5dbdc65fcc"
             - namespace: "mdai"
-              name: "mdai-prometheus-node-exporter-ntxbv"
+              name: "mdai-prometheus-node-exporter"
             - namespace: "mdai"
               name: "mdai-operator-controller-manager-65955fb98b"
             - namespace: "mdai"
-              name: "mdai-kube-state-metrics-6cd9fd8458"
+              name: "mdai-nats-box-bf684c889"
             - namespace: "mdai"
-              name: "mdai-grafana-84bb594f6c"
+              name: "mdai-nats-0"
+            - namespace: "mdai"
+              name: "mdai-nats-1"
+            - namespace: "mdai"
+              name: "mdai-nats-2"
+            - namespace: "mdai"
+              name: "mdai-kube-state-metrics-6cd9fd8458"
             - namespace: "mdai"
               name: "mdai-gateway-5df8b6f749"
             - namespace: "mdai"
@@ -104,29 +107,40 @@ steps:
           - type: enter_command
             simulator: terminal
             updates:
-              - input: "./mdai-kind.sh logs"
+              # TODO: allow outputs only terminal commands & break this frame up with
+              #       smaller add_services frames
+              - input: "mdai use-case data_filtration --version 0.9.0 --workflow basic"
                 outputs:
-                  - "^700🧪 Deploying synthetic log generators...^450"
-                  - "deployment.apps/mdai-logger-xnoisy created"
-                  - "deployment.apps/mdai-logger-noisy created^450"
-                  - "deployment.apps/mdai-logger created"
-                  - "^500✅ Log generators deployed"
+                  - "^700✅ Prerequisites OK"
+                  - "^450👉 use-case 'data_filtration': resolved data file: ./mock-data/data_filtration.yaml"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/basic/otel.yaml -n mdai"
+                  - "^450opentelemetrycollector.opentelemetry.io/gateway created"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/basic/hub.yaml -n mdai"
+                  - "Warning: variables are not specified"
+                  - "Warning: no `PrometheusAlerts` provided; MdaiHub will not setup alerts"
+                  - "Warning: no `Rules` provided; MdaiHub will perform no actions"
+                  - "^600mdaihub.hub.mydecisive.ai/mdaihub-ddf created"
+                  - "+ kubectl  apply -f ./mock-data/data_filtration.yaml -n mdai"
+                  - "^300configmap/mdai-logger-settings created"
+                  - "^900deployment.apps/mdai-logger-bundle created"
           - type: add_services
             simulator: status
             updates:
               - namespace: "mdai"
-                name: "mdai-logger-xnoisy-6f986cf574"
-                replicas: 2
-              - namespace: "mdai"
-                name: "mdai-logger-noisy-5d4cc79cf8"
-                replicas: 2
-              - namespace: "mdai"
-                name: "mdai-logger-68b7cc7f48"
-                replicas: 2
+                name: "gateway-collector-64dc799dcb"
+              - namespace: "synthetics"
+                name: "mdai-logger-bundle-8584566955"
+          - type: stream
+            simulator: logs
+            updates:
+              logsSources:
+                - serviceLogsBasic.txt
+              speed: 50
+              duration: 3000
           - type: enter_command
             simulator: terminal
             updates:
-              - input: "helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml"
+              - input: "helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./mock-data/configs/loggen_fluent.yaml"
                 outputs:
                   - "Release 'fluent' does not exist. Installing it now.^450"
                   - "NAME: fluent"
@@ -148,11 +162,9 @@ steps:
             simulator: logs
             updates:
               logsSources:
-                - serviceLogs.txt
-                - noisyServiceLogs.txt
-                - xtraNoisyServiceLogs.txt
+                - fluentLogsBasic.txt
               speed: 50
-              duration: 5000
+              duration: 3000
       - id: 1-b
         visualizationModal: true
         content:

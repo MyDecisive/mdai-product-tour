@@ -246,9 +246,21 @@ steps:
           - type: enter_command
             simulator: terminal
             updates:
-              - input: "kubectl apply -f otel/otel_ref.yaml"
+              - input: "mdai use_case data_filtration --version 0.9.0 --workflow static"
                 outputs:
-                  - "^450opentelemetrycollector.opentelemetry.io/gateway created"
+                  - "^700✅ Prerequisites OK"
+                  - "^450👉 use-case 'data_filtration': resolved data file: ./mock-data/data_filtration.yaml"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/static/otel.yaml -n mdai"
+                  - "^450opentelemetrycollector.opentelemetry.io/gateway configured"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/static/hub.yaml -n mdai"
+                  - "Warning: variables are not specified"
+                  - "Warning: no `PrometheusAlerts` provided; MdaiHub will not setup alerts"
+                  - "Warning: no `Rules` provided; MdaiHub will perform no actions"
+                  - "^600mdaihub.hub.mydecisive.ai/mdaihub-compliance created"
+                  - "+ kubectl  apply -f ./mock-data/data_filtration.yaml -n synthetics"
+                  - "configmap/mdai-logger-settings unchanged"
+                  - "^300deployment.apps/mdai-logger-bundle unchanged"
+                  - "^900✅ use-case 'data_filtration': applied"
           - type: add_services
             simulator: status
             updates:

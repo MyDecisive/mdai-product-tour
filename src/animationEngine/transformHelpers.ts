@@ -158,7 +158,7 @@ function collectorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
     const [, level, component, ...jsonParts] = parts;
     const jsonString = jsonParts.join(" ");
 
-    const message = `${component}: ${jsonString}`;
+    const message = `${component} ${jsonString}`;
 
     acc.push({
       level: level.toUpperCase() as LogRecord["level"],

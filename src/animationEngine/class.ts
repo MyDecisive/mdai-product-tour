@@ -363,6 +363,7 @@ export class AnimationEngineInstance {
         this.logsIntervalRef = null;
       }
       this.logsStopTimeoutRef = null;
+      this.callbacks.onActiveSimulatorChange(SIMULATORS.LOGS);
       this.advanceAnimation();
     }, duration);
   }

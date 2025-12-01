@@ -158,6 +158,10 @@ steps:
             simulator: status
             updates:
               - name: "fluent-fluentd"
+          - type: clear
+            simulators:
+              - logs
+            waitForComplete: false
           - type: stream
             simulator: logs
             updates:

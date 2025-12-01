@@ -65,29 +65,29 @@ function parseAndRender(
         );
       },
     },
-    {
-      // <link:0>text</link>
-      regex: /<link:(\d+)>([^<]+)<\/link>/g,
-      render: (match: RegExpMatchArray, key: number) => {
-        const actionIndex = parseInt(match[1], 10);
-        const content = match[2];
-        return (
-          <Typography
-            key={key}
-            component="span"
-            onClick={() => handleActionClick(actionIndex)}
-            sx={{
-              color: "#B062C2",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": { color: "#EA80FC" },
-            }}
-          >
-            {content}
-          </Typography>
-        );
-      },
-    },
+    // {
+    //   // <link:0>text</link>
+    //   regex: /<link:(\d+)>([^<]+)<\/link>/g,
+    //   render: (match: RegExpMatchArray, key: number) => {
+    //     const actionIndex = parseInt(match[1], 10);
+    //     const content = match[2];
+    //     return (
+    //       <Typography
+    //         key={key}
+    //         component="span"
+    //         onClick={() => handleActionClick(actionIndex)}
+    //         sx={{
+    //           color: "#B062C2",
+    //           cursor: "pointer",
+    //           textDecoration: "underline",
+    //           "&:hover": { color: "#EA80FC" },
+    //         }}
+    //       >
+    //         {content}
+    //       </Typography>
+    //     );
+    //   },
+    // },
     {
       // <highlight:simulator>text</highlight>
       regex: /<highlight:(\w+)>([^<]+)<\/highlight>/g,
@@ -128,7 +128,9 @@ function parseAndRender(
       // <bold>text</bold>
       regex: /<bold>([^<]+)<\/bold>/g,
       render: (match: RegExpMatchArray, key: number) => (
-        <strong key={key}>{match[1]}</strong>
+        <span style={{ fontWeight: 700 }} key={key}>
+          {match[1]}
+        </span>
       ),
     },
     {

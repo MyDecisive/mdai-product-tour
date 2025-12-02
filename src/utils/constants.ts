@@ -3,6 +3,7 @@ export const contactAPIEndpoint = import.meta.env.VITE_CONTACT_API_URL;
 
 export const TERMINAL_PROMPT = "eng@local-terminal > ";
 export const CURSOR_CHAR = "█";
+export const POD_NAME_DELIM = "-";
 
 export const DEFAULT_ANIMATION_STEP_DURATION = 1500;
 

@@ -1,5 +1,9 @@
-import { POD_NAME_DELIM } from "../utils/configToEngineTransforms";
-import { CURSOR_CHAR, STATUS, TERMINAL_PROMPT } from "../utils/constants";
+import {
+  CURSOR_CHAR,
+  POD_NAME_DELIM,
+  STATUS,
+  TERMINAL_PROMPT,
+} from "../utils/constants";
 import type {
   ActivePod,
   ActivePodMap,

@@ -10,6 +10,7 @@ import type {
 import {
   DEFAULT_ANIMATION_STEP_DURATION,
   FRAME_TYPES,
+  POD_NAME_DELIM,
   SIMULATORS,
   STATUS,
 } from "./constants";
@@ -103,8 +104,6 @@ function createServiceNameSuffix() {
     () => chars[Math.floor(Math.random() * chars.length)]
   ).join("");
 }
-
-export const POD_NAME_DELIM = "-";
 
 function createPodName(service: TourStatusTarget): string {
   return service.noSuffix

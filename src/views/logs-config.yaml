@@ -13,16 +13,16 @@ steps:
         animation:
           - type: activate
             simulator: config
-            duration: 1500
+            duration: 2250
           - type: activate
             simulator: terminal
-            duration: 1500
+            duration: 2250
           - type: activate
             simulator: status
-            duration: 1500
+            duration: 2250
           - type: activate
             simulator: logs
-            duration: 1500
+            duration: 2250
         content:
           - title: Consolidated tools
             items:

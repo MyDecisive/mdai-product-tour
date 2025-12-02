@@ -1,24 +1,3 @@
-import {
-  addConfigTarget,
-  addLogsRecords,
-  addStatusPods,
-  addTerminalStrings,
-  combineTargetStates,
-  scrollToConfigLine,
-  setLogsContextLabel,
-  updateBannerState,
-} from "../animationEngine/frameStateMergeStrategies";
-import {
-  braidLogs,
-  createChangeMap,
-  createConfigContentGroups,
-  createLogRecord,
-  createTerminalContent,
-  extractRelevantSections,
-  findReplacementPod,
-  parseRawLogFileToLogLines,
-  rawLinesFromText,
-} from "../animationEngine/transformHelpers";
 import type {
   SubStepConfig,
   TourConfigSimTarget,
@@ -49,7 +28,28 @@ import type {
   PodId,
 } from "./engineTypesScratch";
 import { fetchGitHubFile } from "./fetchRawGithubFile";
+import {
+  addConfigTarget,
+  addLogsRecords,
+  addStatusPods,
+  addTerminalStrings,
+  combineTargetStates,
+  scrollToConfigLine,
+  setLogsContextLabel,
+  updateBannerState,
+} from "./frameStateMergeStrategies";
 import { getLogFile } from "./getAssets";
+import {
+  braidLogs,
+  createChangeMap,
+  createConfigContentGroups,
+  createLogRecord,
+  createTerminalContent,
+  extractRelevantSections,
+  findReplacementPod,
+  parseRawLogFileToLogLines,
+  rawLinesFromText,
+} from "./transformHelpers";
 import type {
   EngineFrames,
   LogRecord,

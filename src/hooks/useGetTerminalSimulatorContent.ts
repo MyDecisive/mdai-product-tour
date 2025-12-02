@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
-import { createTerminalContent } from "../animationEngine/transformHelpers";
 import { SIMULATORS } from "../utils/constants";
+import { createTerminalContent } from "../utils/transformHelpers";
 import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
 
 export function parseTypedJsString(str: string) {

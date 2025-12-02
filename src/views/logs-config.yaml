@@ -278,7 +278,7 @@ steps:
             simulator: logs
             updates:
               logsSources:
-                - collectorLogs.txt
+                - collectorLogsStatic.txt
               speed: 85
               duration: 3000
       - id: 2-b

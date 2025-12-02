@@ -412,7 +412,11 @@ function builtTargetStateFromEngineAnimation(
     }
 
     if (frame.type === FRAME_TYPES.CLEAR) {
-      return createEmptyEngineTargetState();
+      const clearedState = { ...state };
+      frame.simulators.forEach((sim) => {
+        clearedState[sim] = undefined;
+      });
+      return clearedState;
     }
 
     const sim = frame.simulator;

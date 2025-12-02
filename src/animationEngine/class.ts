@@ -161,6 +161,8 @@ export class AnimationEngineInstance {
     }
 
     const { simulator } = action;
+    // TODO: figure out how to ignore or omit advanceAnimation calls when
+    // waitForComplete = false
     if (action.waitForComplete) {
       this.callbacks.onActiveSimulatorChange(simulator);
     }
@@ -361,6 +363,7 @@ export class AnimationEngineInstance {
         this.logsIntervalRef = null;
       }
       this.logsStopTimeoutRef = null;
+      this.callbacks.onActiveSimulatorChange(SIMULATORS.LOGS);
       this.advanceAnimation();
     }, duration);
   }

@@ -33,19 +33,22 @@ export function StyledRow({
     >
       <Typography
         sx={{
-          flex: "1 1 12%",
+          flex: "1 1 13%",
 
           fontFamily:
             'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
           fontSize: 13,
           lineHeight: 1.5,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
         {namespace}
       </Typography>
       <Typography
         sx={{
-          flex: "1 1 58%",
+          flex: "1 1 57%",
 
           fontFamily:
             'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',

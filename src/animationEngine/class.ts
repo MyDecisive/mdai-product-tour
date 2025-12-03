@@ -19,6 +19,7 @@ import {
   removeStatusPods,
   scrollToConfigLine,
   setConfigActiveTab,
+  setLogsContextLabel,
   setTerminalContentPrinted,
   toggleConfigShowingChange,
   updateBannerState,
@@ -328,6 +329,7 @@ export class AnimationEngineInstance {
     errorRecords,
     errorFrequency,
     duration,
+    contextLabel,
   }: EngineLogsTarget & { duration: number }): void {
     if (this.logsIntervalRef) {
       clearInterval(this.logsIntervalRef);
@@ -345,6 +347,8 @@ export class AnimationEngineInstance {
     if (!records || records.length === 0 || duration <= 0 || speed <= 0) {
       return;
     }
+
+    this.updateState<string | undefined>(setLogsContextLabel, contextLabel);
 
     const emitOne = () => {
       const nextLog = this.getNextLog(records, errorRecords, errorFrequency);

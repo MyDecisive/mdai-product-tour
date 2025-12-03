@@ -4,6 +4,7 @@ import {
   addStatusPods,
   addTerminalStrings,
   scrollToConfigLine,
+  setLogsContextLabel,
   updateBannerState,
 } from "../animationEngine/frameStateMergeStrategies";
 import {
@@ -215,6 +216,7 @@ function transformLogs(
     errorFrequency,
     errorLogsSource,
     duration,
+    contextLabel,
   }: TourLogSimTarget & { duration?: number },
   prepLogRecordsForState?: boolean
 ): EngineLogsTarget & { duration: number } {
@@ -227,24 +229,26 @@ function transformLogs(
 
   const records = braidLogs(...logRecordsByFile);
 
+  const returnObj: Omit<ReturnType<typeof transformLogs>, "records"> = {
+    speed: engineSpeed,
+    errorFrequency: engineErrorFrequency,
+    errorRecords: errorLogs,
+    duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+    contextLabel,
+  };
+
   if (prepLogRecordsForState) {
     return {
       records: records.map((log, index) =>
         createLogRecord(log, -1, index, false)
       ),
-      speed: engineSpeed,
-      errorFrequency: engineErrorFrequency,
-      errorRecords: errorLogs,
-      duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+      ...returnObj,
     };
   }
 
   return {
     records,
-    speed: engineSpeed,
-    errorFrequency: engineErrorFrequency,
-    errorRecords: errorLogs,
-    duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+    ...returnObj,
   };
 }
 
@@ -290,7 +294,7 @@ async function transformTourToEngineAnimation(
           if (frame.simulator === SIMULATORS.LOGS) {
             return {
               ...frame,
-              updates: transformLogs(frame.updates),
+              updates: transformLogs(frame.updates, true),
             };
           }
           return frame;
@@ -324,7 +328,9 @@ function addLogRecordsForState(
     .slice(0, Math.max(Math.ceil(updates.duration / updates.speed), 60))
     .map((log, index) => createLogRecord(log, -1, index, false));
 
-  return addLogsRecords(state, { records: stateReadyLogsRecords });
+  return addLogsRecords(setLogsContextLabel(state, updates.contextLabel), {
+    records: stateReadyLogsRecords,
+  });
 }
 
 const stateBuilders: SimulatorStateBuilderMap = {

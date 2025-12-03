@@ -2,14 +2,18 @@ import { Box } from "@mui/material";
 import React from "react";
 import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorContent";
 import type { EngineLogsTarget } from "../../../utils/engineTypesScratch";
+import { SimulatorContextLabel } from "../SimContextLabel";
 import { LogRow } from "./LogRow";
 
 export const LogsSimulator: React.FC<
-  Pick<EngineLogsTarget, "records"> & { playing: boolean }
-> = ({ records, playing }) => {
+  Pick<EngineLogsTarget, "records" | "contextLabel"> & { playing: boolean }
+> = ({ contextLabel, records, playing }) => {
   const { logContainerRef } = useGetLogsSimulatorContent({ records, playing });
   return (
     <>
+      {contextLabel && (
+        <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
+      )}
       <Box
         className="log-rows-container"
         ref={logContainerRef}

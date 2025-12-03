@@ -133,6 +133,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: mdai-logger-bundle-8584566955-xxxx
               logsSources:
                 - serviceLogsBasic.txt
               speed: 50
@@ -165,6 +166,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: gateway-collector-64dc799dcb-xxxx
               logsSources:
                 - collectorLogsBasic.txt
               speed: 1200
@@ -277,6 +279,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: gateway-collector-xxxxx
               logsSources:
                 - collectorLogsStatic.txt
               speed: 85
@@ -478,6 +481,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: gateway-collector-xxxxx
               logsSources:
                 - collectorLogsDynamic.txt
               speed: 40

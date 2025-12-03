@@ -471,11 +471,10 @@ steps:
                   - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/dynamic/observer.yaml -n mdai"
                   - "mdaiobserver.hub.mydecisive.ai/ddf created"
           - type: add_services
-            simulator:
+            simulator: status
             updates:
               - namespace: "mdai"
                 name: "ddf-mdai-observer-f4786d445"
-                replicas: 2
           - type: stream
             simulator: logs
             updates:

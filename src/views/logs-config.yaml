@@ -166,9 +166,9 @@ steps:
             simulator: logs
             updates:
               logsSources:
-                - fluentLogsBasic.txt
-              speed: 50
-              duration: 3000
+                - collectorLogsBasic.txt
+              speed: 1200
+              duration: 3600
       - id: 1-b
         visualizationModal: true
         content:

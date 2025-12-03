@@ -169,8 +169,8 @@ steps:
               contextLabel: gateway-collector-64dc799dcb-xxxx
               logsSources:
                 - collectorLogsBasic.txt
-              speed: 1200
-              duration: 3600
+              speed: 1000
+              duration: 4000
       - id: 1-b
         visualizationModal: true
         content:
@@ -225,7 +225,6 @@ steps:
           status:
             - namespace: "mdai"
               name: "gateway-collector"
-              replicas: 5
           banner:
             text: of log data filtered
             logsFiltered: 0
@@ -268,7 +267,6 @@ steps:
             updates:
               - namespace: "mdai"
                 name: "gateway-collector"
-                replicas: 5
           - type: update
             simulator: banner
             updates:
@@ -395,7 +393,6 @@ steps:
               name: "mdai-operator-controller-manager-65955fb98b"
             - namespace: "mdai"
               name: "gateway-collector"
-              replicas: 5
           banner:
             - text: of log data filtered
               logsFiltered: 24.51
@@ -464,7 +461,6 @@ steps:
                 name: "mdai-operator-controller-manager-65955fb98b"
               - namespace: "mdai"
                 name: "gateway-collector"
-                replicas: 5
           - type: enter_command
             simulator: terminal
             updates:
@@ -487,7 +483,7 @@ steps:
               speed: 40
               duration: 1600
 
-      - id: step3_visualize
+      - id: 3-c
         visualizationModal: true
         content:
           title: Visualize the results

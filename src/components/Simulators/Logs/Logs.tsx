@@ -18,7 +18,6 @@ export const LogsSimulator: React.FC<
         className="log-rows-container"
         ref={logContainerRef}
         sx={{
-          scrollBehavior: "smooth",
           overflowY: "auto",
           maxHeight: "350px",
           maxWidth: "100%",

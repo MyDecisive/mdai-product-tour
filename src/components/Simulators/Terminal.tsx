@@ -66,8 +66,8 @@ export function Terminal({
                 margin: 0,
                 lineHeight: "1.25rem",
                 display: "inline",
-                wordWrap: "break-word",
-                whiteSpace: "break-spaces",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap",
               }}
             >
               {item.strings?.map(parseTypedJsString).join("\n")}
@@ -93,8 +93,8 @@ export function Terminal({
                 margin: 0,
                 lineHeight: "1.25rem",
                 display: "inline",
-                wordWrap: "break-word",
-                whiteSpace: "break-spaces",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap",
               }}
             />
           </div>

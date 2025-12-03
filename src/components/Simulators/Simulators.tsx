@@ -55,7 +55,7 @@ export function Simulators() {
         >
           <Grid size={5} sx={{ overflow: "hidden" }}>
             <SimulatorBox
-              title="Config"
+              title="IDE"
               active={engineState.activeSimulator.has(SIMULATORS.CONFIG)}
             >
               {engineState.currentSimulatorState.config != null && (

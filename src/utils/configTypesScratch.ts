@@ -37,6 +37,7 @@ export interface TourLogSimTarget {
   speed?: number; // defaults to 1000
   errorLogsSource?: string; // local file -- must be a log file in public/logs/
   errorFrequency?: number; // defaults to 0.1
+  contextLabel?: string;
 }
 
 export interface TourTargetState {

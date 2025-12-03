@@ -145,4 +145,5 @@ export interface EngineLogsTarget {
   speed: number;
   errorRecords: LogRecord[];
   errorFrequency: number;
+  contextLabel?: string;
 }

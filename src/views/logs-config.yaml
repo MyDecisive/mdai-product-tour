@@ -13,16 +13,16 @@ steps:
         animation:
           - type: activate
             simulator: config
-            duration: 1500
+            duration: 2250
           - type: activate
             simulator: terminal
-            duration: 1500
+            duration: 2250
           - type: activate
             simulator: status
-            duration: 1500
+            duration: 2250
           - type: activate
             simulator: logs
-            duration: 1500
+            duration: 2250
         content:
           - title: Consolidated tools
             items:
@@ -133,6 +133,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: mdai-logger-bundle-8584566955-xxxx
               logsSources:
                 - serviceLogsBasic.txt
               speed: 50
@@ -165,10 +166,11 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: gateway-collector-64dc799dcb-xxxx
               logsSources:
-                - fluentLogsBasic.txt
-              speed: 50
-              duration: 3000
+                - collectorLogsBasic.txt
+              speed: 1000
+              duration: 4000
       - id: 1-b
         visualizationModal: true
         content:
@@ -223,7 +225,6 @@ steps:
           status:
             - namespace: "mdai"
               name: "gateway-collector"
-              replicas: 5
           banner:
             text: of log data filtered
             logsFiltered: 0
@@ -266,7 +267,6 @@ steps:
             updates:
               - namespace: "mdai"
                 name: "gateway-collector"
-                replicas: 5
           - type: update
             simulator: banner
             updates:
@@ -277,6 +277,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
+              contextLabel: gateway-collector-xxxxx
               logsSources:
                 - collectorLogsStatic.txt
               speed: 85
@@ -392,7 +393,6 @@ steps:
               name: "mdai-operator-controller-manager-65955fb98b"
             - namespace: "mdai"
               name: "gateway-collector"
-              replicas: 5
           banner:
             - text: of log data filtered
               logsFiltered: 24.51
@@ -461,7 +461,6 @@ steps:
                 name: "mdai-operator-controller-manager-65955fb98b"
               - namespace: "mdai"
                 name: "gateway-collector"
-                replicas: 5
           - type: enter_command
             simulator: terminal
             updates:
@@ -471,20 +470,20 @@ steps:
                   - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/dynamic/observer.yaml -n mdai"
                   - "mdaiobserver.hub.mydecisive.ai/ddf created"
           - type: add_services
-            simulator:
+            simulator: status
             updates:
               - namespace: "mdai"
                 name: "ddf-mdai-observer-f4786d445"
-                replicas: 2
           - type: stream
             simulator: logs
             updates:
+              contextLabel: gateway-collector-xxxxx
               logsSources:
                 - collectorLogsDynamic.txt
               speed: 40
               duration: 1600
 
-      - id: step3_visualize
+      - id: 3-c
         visualizationModal: true
         content:
           title: Visualize the results

@@ -398,6 +398,15 @@ export function addConfigTarget(
   return state;
 }
 
+export function setLogsContextLabel(
+  currentState: EngineTargetState,
+  contextLabel: string | undefined
+): EngineTargetState {
+  return mergeIntoSimulator<"logs", EngineLogsTarget>(currentState, "logs", {
+    contextLabel,
+  });
+}
+
 export function addLogsRecords(
   currentState: EngineTargetState,
   { records }: Pick<EngineLogsTarget, "records">

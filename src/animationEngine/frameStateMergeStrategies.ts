@@ -1,6 +1,7 @@
-import { SIMULATORS } from "../utils/constants";
+import { SIMULATORS, STATUS } from "../utils/constants";
 import type {
   ActivePod,
+  ActivePodMap,
   EngineConfigTarget,
   EngineFileConfig,
   EngineLogsTarget,
@@ -11,6 +12,7 @@ import type {
   PodId,
 } from "../utils/engineTypesScratch";
 import type { BannerTargetState, PodStatusType } from "../utils/types";
+import { findReplacementPod } from "./transformHelpers";
 
 // ============================================================================
 // TYPE-SAFE STATE TRANSFORMATION FUNCTIONS
@@ -496,4 +498,71 @@ export function updateBannerState(
     SIMULATORS.BANNER,
     update
   );
+}
+
+export function combineTargetStates(
+  first: EngineTargetState,
+  second: EngineTargetState
+): EngineTargetState {
+  const returnState: EngineTargetState = { ...first };
+
+  if (second.banner) {
+    returnState.banner = {
+      ...(returnState.banner || {}),
+      ...second.banner,
+    };
+  }
+
+  if (second.logs) {
+    // TODO: Doing a full replace here because of different logs contexts
+    returnState.logs = {
+      ...second.logs,
+    };
+  }
+
+  if (second.terminal) {
+    returnState.terminal = {
+      strings: [
+        ...(returnState.terminal?.strings || []),
+        ...second.terminal.strings.map((str) => ({ ...str, printed: true })),
+      ],
+    };
+  }
+
+  if (second.status) {
+    const secondStateActivePods = Object.entries(
+      second.status.activePods
+    ).reduce((accum, [key, value]) => {
+      // TODO: Should this even be present here? Do we _want_ to overwrite?
+      const replacementPod = findReplacementPod(
+        value,
+        returnState.status?.activePods || {}
+      );
+      if (replacementPod) {
+        return accum;
+      }
+
+      accum[key] = {
+        ...value,
+        status: STATUS.running,
+      };
+
+      return accum;
+    }, {} as ActivePodMap);
+    returnState.status = {
+      activePods: {
+        ...returnState.status?.activePods,
+        ...secondStateActivePods,
+      },
+      podOrder: second.status?.podOrder.filter(
+        (podId) => !!secondStateActivePods[podId]
+      ),
+    };
+  }
+
+  if (second.config) {
+    return addConfigTarget(returnState, second.config);
+  }
+
+  return returnState;
 }

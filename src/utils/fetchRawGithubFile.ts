@@ -1,3 +1,6 @@
+import type { TourConfiguration } from "./configTypesScratch";
+import { FRAME_TYPES, SIMULATORS } from "./constants";
+
 /**
  * Converts a GitHub file URL to its raw content URL
  * @param {string} url - GitHub file URL
@@ -16,6 +19,11 @@ function convertToRawUrl(url: string) {
  * @throws {Error} If the fetch fails
  */
 export async function fetchGitHubFile(url: string) {
+  // Check cache first
+  if (githubFileCache.has(url)) {
+    return githubFileCache.get(url)!;
+  }
+
   try {
     const rawUrl = convertToRawUrl(url);
     const response = await fetch(rawUrl);
@@ -34,4 +42,44 @@ export async function fetchGitHubFile(url: string) {
       }`
     );
   }
+}
+
+const githubFileCache = new Map<string, string>();
+
+export async function prefetchAllGitHubFiles(
+  config: TourConfiguration
+): Promise<void> {
+  const urlsToFetch = new Set<string>();
+
+  // Collect all unique GitHub URLs
+  for (const step of config?.steps || []) {
+    for (const subStep of step?.subSteps || []) {
+      subStep.initialState?.config?.files?.forEach((file) => {
+        urlsToFetch.add(file.url);
+      });
+
+      subStep.animation?.forEach((action) => {
+        if (
+          action.type === FRAME_TYPES.ADD &&
+          action.simulator === SIMULATORS.CONFIG &&
+          action.updates?.files
+        ) {
+          action.updates.files.forEach((file) => {
+            urlsToFetch.add(file.url);
+          });
+        }
+      });
+    }
+  }
+
+  await Promise.all(
+    Array.from(urlsToFetch).map((url) => prefetchGitHubFile(url))
+  );
+}
+
+async function prefetchGitHubFile(url: string): Promise<void> {
+  if (githubFileCache.has(url)) return;
+
+  const content = await fetchGitHubFile(url);
+  githubFileCache.set(url, content);
 }

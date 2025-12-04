@@ -222,13 +222,6 @@ steps:
                     changeLines:
                       - "#            filter/static-non-crit-services,"
             activeTab: otel.yaml
-          status:
-            - namespace: "mdai"
-              name: "gateway-collector"
-          banner:
-            text: of log data filtered
-            logsFiltered: 0
-            logsSent: 28.5
         animation:
           - type: scroll_to
             simulator: config
@@ -388,15 +381,6 @@ steps:
                       - "          filter/static-non-crit-services,"
                       - "          # filter/dynamic-non-crit-services,"
             activeTab: hub.yaml
-          status:
-            - namespace: "mdai"
-              name: "mdai-operator-controller-manager-65955fb98b"
-            - namespace: "mdai"
-              name: "gateway-collector"
-          banner:
-            - text: of log data filtered
-              logsFiltered: 24.51
-              logsSent: 3.99
         animation:
           - type: scroll_to
             simulator: config

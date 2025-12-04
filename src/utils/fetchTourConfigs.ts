@@ -6,11 +6,12 @@ import type {
   TourConfiguration,
 } from "./configTypesScratch";
 import type {
-  EngineContentBlock,
+  EngineStep,
   EngineSubStep,
+  EngineTargetState,
   TourEngine,
 } from "./engineTypesScratch";
-import { fetchGitHubFile } from "./fetchRawGithubFile";
+import { fetchGitHubFile, prefetchAllGitHubFiles } from "./fetchRawGithubFile";
 import type { NavigationState } from "./types";
 
 const tourConfigUrls =
@@ -93,69 +94,59 @@ function validateTourConfig(
 async function transformParsedTourConfigToInstanceArgs(
   config: TourConfiguration
 ): Promise<TourEngine> {
-  const transformedSteps = await Promise.all(
-    (config?.steps || []).map(async (step, stepIndex, stepsArr) => {
-      const transformedSubSteps = await Promise.all(
-        step?.subSteps?.map(async (subStep, subStepIndex, subStepsArr) => {
-          const {
-            initialState,
-            animation,
-            content,
-            ...engineCompatibleSubStep
-          } = subStep;
+  await prefetchAllGitHubFiles(config);
 
-          const nextSubStep = createNextNavState(
-            config.id,
-            stepIndex,
-            stepsArr,
-            subStepIndex,
-            subStepsArr
-          );
-          const previousSubStep = createPrevNavState(
-            config.id,
-            stepIndex,
-            stepsArr,
-            subStepIndex,
-            subStepsArr
-          );
+  let previousTargetState: EngineTargetState | undefined;
+  const transformedSteps: EngineStep[] = [];
 
-          if (
-            (content &&
-              content.length &&
-              content.some(({ items = [] }) =>
-                items.some((item) => item.actions || item.onClick)
-              )) ||
-            initialState ||
-            (animation && animation.length > 0)
-          ) {
-            const transformed = await transformSubStepConfigToInstanceArgs(
-              subStep
-            );
+  for (const step of config?.steps || []) {
+    const transformedSubSteps: EngineSubStep[] = [];
 
-            const converted: EngineSubStep = {
-              nextSubStep,
-              previousSubStep,
-              ...engineCompatibleSubStep,
-              ...transformed,
-            };
+    for (const [subStepIndex, subStep] of (step?.subSteps || []).entries()) {
+      const { id, title, visualizationModal } = subStep;
 
-            return converted;
-          }
-          return {
-            ...engineCompatibleSubStep,
-            content: content as EngineContentBlock[],
-            nextSubStep,
-            previousSubStep,
-          };
-        })
+      const stepIndex = transformedSteps.length;
+      const stepsArr = config.steps || [];
+      const subStepsArr = step.subSteps || [];
+
+      const nextSubStep = createNextNavState(
+        config.id,
+        stepIndex,
+        stepsArr,
+        subStepIndex,
+        subStepsArr
+      );
+      const previousSubStep = createPrevNavState(
+        config.id,
+        stepIndex,
+        stepsArr,
+        subStepIndex,
+        subStepsArr
       );
 
-      return {
-        ...step,
-        subSteps: transformedSubSteps,
-      };
-    })
-  );
+      const transformed = await transformSubStepConfigToInstanceArgs(
+        subStep,
+        previousTargetState
+      );
+
+      if (transformed.targetState) {
+        previousTargetState = transformed.targetState;
+      }
+      transformedSubSteps.push({
+        nextSubStep,
+        previousSubStep,
+        id,
+        title,
+        visualizationModal,
+        ...transformed,
+      });
+    }
+
+    transformedSteps.push({
+      ...step,
+      subSteps: transformedSubSteps,
+    });
+  }
 
   return {
     ...config,

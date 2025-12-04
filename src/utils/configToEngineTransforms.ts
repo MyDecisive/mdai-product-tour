@@ -3,6 +3,7 @@ import {
   addLogsRecords,
   addStatusPods,
   addTerminalStrings,
+  combineTargetStates,
   scrollToConfigLine,
   setLogsContextLabel,
   updateBannerState,
@@ -41,6 +42,7 @@ import type {
   EngineFileConfig,
   EngineLogsTarget,
   EngineStatusTarget,
+  EngineSubStep,
   EngineTargetState,
   EngineTerminalTarget,
   LineGroup,
@@ -398,7 +400,6 @@ const stateBuilders: SimulatorStateBuilderMap = {
   [SIMULATORS.LOGS]: {
     [FRAME_TYPES.ADD]: addLogRecordsForState,
     [FRAME_TYPES.STREAM]: addLogRecordsForState,
-    // PAUSE doesn't update state directly
   },
   [SIMULATORS.BANNER]: {
     [FRAME_TYPES.UPDATE]: updateBannerState,
@@ -460,33 +461,28 @@ async function transformTourToEngineState(
 // ============================================================================
 // TRANSFORMS THE CONFIG STEP
 // ============================================================================
-// TODO: include previous targetState so subSteps targetState can accumulate
-//       will require refactoring `transformParsedTourConfigToInstanceArgs` to
-//       have access to previously converted subSteps.
-export async function transformSubStepConfigToInstanceArgs({
-  initialState,
-  id,
-  animation,
-  content,
-}: SubStepConfig): Promise<{
-  initialState?: EngineTargetState;
-  targetState?: EngineTargetState;
-  animation?: EngineFrames["Any"][];
-  content?: EngineContentBlock[];
-}> {
-  const returnVal: {
-    initialState?: EngineTargetState;
-    targetState?: EngineTargetState;
-    animation?: EngineFrames["Any"][];
-    content?: EngineContentBlock[];
-  } = {};
+export async function transformSubStepConfigToInstanceArgs(
+  { initialState, id, animation, content }: SubStepConfig,
+  previousTargetState: EngineTargetState | undefined
+): Promise<
+  Pick<EngineSubStep, "initialState" | "targetState" | "animation" | "content">
+> {
+  const returnVal: Pick<
+    EngineSubStep,
+    "initialState" | "targetState" | "animation" | "content"
+  > = {
+    initialState: { ...previousTargetState },
+  };
 
   if (initialState) {
     const transformedInitial = await transformTourToEngineState(
       initialState,
       id
     );
-    returnVal.initialState = transformedInitial;
+    returnVal.initialState = combineTargetStates(
+      returnVal.initialState || {},
+      transformedInitial
+    );
   }
 
   if (animation && animation.length > 0) {

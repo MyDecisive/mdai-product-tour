@@ -72,7 +72,7 @@ export interface StepConfig {
 export interface SubStepConfig {
   id: string;
   title?: string;
-  content?: ContentBlock[];
+  content: ContentBlock[];
   visualizationModal?: boolean;
   initialState?: TourTargetState;
   animation?: TourFrames["Any"][];

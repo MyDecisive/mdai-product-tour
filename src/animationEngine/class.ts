@@ -200,6 +200,11 @@ export class AnimationEngineInstance {
 
   public setTerminalContentPrinted(index: number) {
     this.updateState(setTerminalContentPrinted, index);
+
+    if (this.currentState.terminal!.strings.every((str) => str.printed)) {
+      this.callbacks.onActiveSimulatorChange(SIMULATORS.TERMINAL);
+      this.advanceAnimation();
+    }
   }
 
   // ----------------------------------------------------------------------------

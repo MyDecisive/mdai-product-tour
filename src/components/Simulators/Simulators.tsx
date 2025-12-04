@@ -102,7 +102,6 @@ export function Simulators() {
             >
               {engineState.currentSimulatorState.terminal != null && (
                 <Terminal
-                  onAnimationComplete={engineControls.advanceAnimation}
                   onTerminalContentPrinted={
                     engineControls.onTerminalContentPrinted
                   }

@@ -3,6 +3,7 @@ import {
   addLogsRecords,
   addStatusPods,
   addTerminalStrings,
+  combineTargetStates,
   scrollToConfigLine,
   setLogsContextLabel,
   updateBannerState,
@@ -398,7 +399,6 @@ const stateBuilders: SimulatorStateBuilderMap = {
   [SIMULATORS.LOGS]: {
     [FRAME_TYPES.ADD]: addLogRecordsForState,
     [FRAME_TYPES.STREAM]: addLogRecordsForState,
-    // PAUSE doesn't update state directly
   },
   [SIMULATORS.BANNER]: {
     [FRAME_TYPES.UPDATE]: updateBannerState,
@@ -460,15 +460,10 @@ async function transformTourToEngineState(
 // ============================================================================
 // TRANSFORMS THE CONFIG STEP
 // ============================================================================
-// TODO: include previous targetState so subSteps targetState can accumulate
-//       will require refactoring `transformParsedTourConfigToInstanceArgs` to
-//       have access to previously converted subSteps.
-export async function transformSubStepConfigToInstanceArgs({
-  initialState,
-  id,
-  animation,
-  content,
-}: SubStepConfig): Promise<{
+export async function transformSubStepConfigToInstanceArgs(
+  { initialState, id, animation, content }: SubStepConfig,
+  previousTargetState: EngineTargetState | undefined
+): Promise<{
   initialState?: EngineTargetState;
   targetState?: EngineTargetState;
   animation?: EngineFrames["Any"][];
@@ -479,14 +474,19 @@ export async function transformSubStepConfigToInstanceArgs({
     targetState?: EngineTargetState;
     animation?: EngineFrames["Any"][];
     content?: EngineContentBlock[];
-  } = {};
+  } = {
+    initialState: { ...previousTargetState },
+  };
 
   if (initialState) {
     const transformedInitial = await transformTourToEngineState(
       initialState,
       id
     );
-    returnVal.initialState = transformedInitial;
+    returnVal.initialState = combineTargetStates(
+      returnVal.initialState || {},
+      transformedInitial
+    );
   }
 
   if (animation && animation.length > 0) {

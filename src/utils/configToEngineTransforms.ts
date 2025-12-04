@@ -42,6 +42,7 @@ import type {
   EngineFileConfig,
   EngineLogsTarget,
   EngineStatusTarget,
+  EngineSubStep,
   EngineTargetState,
   EngineTerminalTarget,
   LineGroup,
@@ -463,18 +464,13 @@ async function transformTourToEngineState(
 export async function transformSubStepConfigToInstanceArgs(
   { initialState, id, animation, content }: SubStepConfig,
   previousTargetState: EngineTargetState | undefined
-): Promise<{
-  initialState?: EngineTargetState;
-  targetState?: EngineTargetState;
-  animation?: EngineFrames["Any"][];
-  content?: EngineContentBlock[];
-}> {
-  const returnVal: {
-    initialState?: EngineTargetState;
-    targetState?: EngineTargetState;
-    animation?: EngineFrames["Any"][];
-    content?: EngineContentBlock[];
-  } = {
+): Promise<
+  Pick<EngineSubStep, "initialState" | "targetState" | "animation" | "content">
+> {
+  const returnVal: Pick<
+    EngineSubStep,
+    "initialState" | "targetState" | "animation" | "content"
+  > = {
     initialState: { ...previousTargetState },
   };
 

@@ -79,9 +79,12 @@ export function Simulators() {
                   activePods={
                     engineState.currentSimulatorState.status.activePods
                   }
+                  playing={
+                    engineState.isPlaying &&
+                    engineState.activeSimulator.has(SIMULATORS.STATUS)
+                  }
                   podOrder={engineState.currentSimulatorState.status.podOrder}
                   onPodStatusChange={engineControls.onPodStatusChange}
-                  onAnimationComplete={engineControls.advanceAnimation}
                 />
               )}
             </SimulatorBox>

@@ -43,7 +43,6 @@ export class AnimationEngineInstance {
   private isRunning = false;
   private timeouts: NodeJS.Timeout[] = [];
   private currentActionResolver: (() => void) | null = null;
-  private podAnimationResolvers: Map<PodId, () => void> = new Map();
 
   private podsToRemove: Set<PodId> = new Set();
   private podRemovalTimer: NodeJS.Timeout | null = null;
@@ -103,7 +102,6 @@ export class AnimationEngineInstance {
       clearTimeout(this.podRemovalTimer);
     }
     this.timeouts = [];
-    this.podAnimationResolvers.clear();
     this.currentActionResolver = null;
     if (this.logsIntervalRef) {
       clearInterval(this.logsIntervalRef);
@@ -121,7 +119,6 @@ export class AnimationEngineInstance {
     [SIMULATORS.STATUS]: {
       [FRAME_TYPES.ADD_SERVICES]: (frame) => {
         this.updateState(addStatusPods, frame.updates);
-        void this.statusAnimateStartup();
       },
     },
     [SIMULATORS.CONFIG]: {
@@ -211,6 +208,12 @@ export class AnimationEngineInstance {
   // Status sim methods
   // ----------------------------------------------------------------------------
 
+  private allPodsRunning(): boolean {
+    const pods = Object.values(this.currentState.status?.activePods || {});
+
+    return pods.length > 0 && pods.every((pod) => pod.status === "Running");
+  }
+
   private statusPodReachedRunning(podId: PodId): void {
     const activePods = this.currentState.status!.activePods;
     const pod = activePods[podId];
@@ -219,6 +222,9 @@ export class AnimationEngineInstance {
 
     if (replacementPod) {
       this.onPodStatusChange(replacementPod.id, STATUS.terminating);
+    } else if (this.allPodsRunning()) {
+      this.callbacks.onActiveSimulatorChange(SIMULATORS.STATUS);
+      this.advanceAnimation();
     }
   }
 
@@ -231,33 +237,16 @@ export class AnimationEngineInstance {
 
     this.podRemovalTimer = setTimeout(() => {
       this.executePodRemovals();
+      if (this.allPodsRunning()) {
+        this.callbacks.onActiveSimulatorChange(SIMULATORS.STATUS);
+        this.advanceAnimation();
+      }
     }, 1000 - this.podsToRemove.size * 100);
   }
 
   private executePodRemovals(): void {
     this.updateState<Set<string>>(removeStatusPods, this.podsToRemove);
     this.podsToRemove.clear();
-  }
-
-  private async statusAnimateStartup(): Promise<void> {
-    const podIds = this.currentState.status?.podOrder;
-    if (!podIds || podIds.length === 0) {
-      return;
-    }
-    const animationPromises = podIds.map((podId) => {
-      const pod = this.currentState.status!.activePods[podId];
-
-      if (pod.status === STATUS.running) {
-        return Promise.resolve();
-      }
-
-      return new Promise<void>((resolve) => {
-        this.podAnimationResolvers.set(podId, resolve);
-      });
-    });
-
-    await Promise.all(animationPromises);
-    // TODO: See if this promise.all await can replace the `allStabilized` useEffect in `useGetStatusSimulatorContent`
   }
 
   public onPodStatusChange(podId: PodId, newStatus: PodStatusType): void {
@@ -274,11 +263,6 @@ export class AnimationEngineInstance {
 
     if (newStatus === STATUS.running) {
       this.statusPodReachedRunning(podId);
-      const resolver = this.podAnimationResolvers.get(podId);
-      if (resolver) {
-        resolver();
-        this.podAnimationResolvers.delete(podId);
-      }
     } else if (newStatus === STATUS.shutdown) {
       void this.schedulePodRemoval(podId);
     }

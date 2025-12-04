@@ -5,7 +5,7 @@ import type { LogRecord } from "../../../utils/types";
 type LogRowProps = LogRecord;
 
 const formatTimestamp = (timestamp: string): string => {
-  return new Date(timestamp).toISOString().split("T")[1].split("Z")[0];
+  return new Date(timestamp).toISOString().split("T")[1].split(".")[0];
 };
 
 const getLogLevel = (log: LogRecord): string => {

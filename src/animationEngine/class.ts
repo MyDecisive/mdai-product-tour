@@ -4,13 +4,6 @@ import type {
   EngineTargetState,
   PodId,
 } from "../utils/engineTypesScratch";
-import type {
-  EngineFrames,
-  LogRecord,
-  PodStatusType,
-  SimulatorHandlerMap,
-  SimulatorType,
-} from "../utils/types";
 import {
   addConfigTarget,
   addLogsRecords,
@@ -24,8 +17,15 @@ import {
   toggleConfigShowingChange,
   updateBannerState,
   updatePodStatus,
-} from "./frameStateMergeStrategies";
-import { createLogRecord, findReplacementPod } from "./transformHelpers";
+} from "../utils/frameStateMergeStrategies";
+import { createLogRecord, findReplacementPod } from "../utils/transformHelpers";
+import type {
+  EngineFrames,
+  LogRecord,
+  PodStatusType,
+  SimulatorHandlerMap,
+  SimulatorType,
+} from "../utils/types";
 
 export interface EngineCallbacks {
   onStateChange: (state: EngineTargetState) => void;

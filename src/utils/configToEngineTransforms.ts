@@ -1,24 +1,3 @@
-import {
-  addConfigTarget,
-  addLogsRecords,
-  addStatusPods,
-  addTerminalStrings,
-  combineTargetStates,
-  scrollToConfigLine,
-  setLogsContextLabel,
-  updateBannerState,
-} from "../animationEngine/frameStateMergeStrategies";
-import {
-  braidLogs,
-  createChangeMap,
-  createConfigContentGroups,
-  createLogRecord,
-  createTerminalContent,
-  extractRelevantSections,
-  findReplacementPod,
-  parseRawLogFileToLogLines,
-  rawLinesFromText,
-} from "../animationEngine/transformHelpers";
 import type {
   SubStepConfig,
   TourConfigSimTarget,
@@ -31,6 +10,7 @@ import type {
 import {
   DEFAULT_ANIMATION_STEP_DURATION,
   FRAME_TYPES,
+  POD_NAME_DELIM,
   SIMULATORS,
   STATUS,
 } from "./constants";
@@ -49,7 +29,28 @@ import type {
   PodId,
 } from "./engineTypesScratch";
 import { fetchGitHubFile } from "./fetchRawGithubFile";
+import {
+  addConfigTarget,
+  addLogsRecords,
+  addStatusPods,
+  addTerminalStrings,
+  combineTargetStates,
+  scrollToConfigLine,
+  setLogsContextLabel,
+  updateBannerState,
+} from "./frameStateMergeStrategies";
 import { getLogFile } from "./getAssets";
+import {
+  braidLogs,
+  createChangeMap,
+  createConfigContentGroups,
+  createLogRecord,
+  createTerminalContent,
+  extractRelevantSections,
+  findReplacementPod,
+  parseRawLogFileToLogLines,
+  rawLinesFromText,
+} from "./transformHelpers";
 import type {
   EngineFrames,
   LogRecord,
@@ -103,8 +104,6 @@ function createServiceNameSuffix() {
     () => chars[Math.floor(Math.random() * chars.length)]
   ).join("");
 }
-
-export const POD_NAME_DELIM = "-";
 
 function createPodName(service: TourStatusTarget): string {
   return service.noSuffix

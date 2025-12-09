@@ -1,5 +1,9 @@
-import { POD_NAME_DELIM } from "../utils/configToEngineTransforms";
-import { CURSOR_CHAR, STATUS, TERMINAL_PROMPT } from "../utils/constants";
+import {
+  CURSOR_CHAR,
+  POD_NAME_DELIM,
+  STATUS,
+  TERMINAL_PROMPT,
+} from "../utils/constants";
 import type {
   ActivePod,
   ActivePodMap,
@@ -222,41 +226,6 @@ function kubernetesLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
 
     return acc;
   }, [] as LogRecord[]);
-}
-
-export function shouldInjectError(
-  hasErrorLogs: boolean,
-  errorFrequency: number
-) {
-  return hasErrorLogs && Math.random() < errorFrequency;
-}
-
-export function selectErrorPropLog(errorLogs: LogRecord[]) {
-  const randomErrorLogIdx = Math.floor(Math.random() * errorLogs.length);
-  return errorLogs[randomErrorLogIdx];
-}
-
-function numIsNull(arg: number | null) {
-  return arg == null;
-}
-
-function createNextLogId(cycleCount: number | null, logIndex: number | null) {
-  if (numIsNull(cycleCount) && numIsNull(logIndex)) {
-    return `error-${Date.now()}-${Math.random()}`;
-  }
-  return `log-${cycleCount}-${logIndex}`;
-}
-
-export function createNextLog(
-  propLog: LogRecord,
-  cycleCount: number | null,
-  logIndex: number | null
-) {
-  return {
-    ...propLog,
-    timestamp: new Date().toISOString(),
-    id: createNextLogId(cycleCount, logIndex),
-  };
 }
 
 const userEntryBehavior: Partial<TerminalTypedOptions> = {

@@ -3,29 +3,23 @@ import {
   parseTypedJsString,
   useGetTerminalSimulatorContent,
 } from "../../hooks/useGetTerminalSimulatorContent";
-import {
-  type SimulatorType,
-  type TerminalTypedOptions,
-} from "../../utils/types";
+import { type TerminalTypedOptions } from "../../utils/types";
 
 interface TerminalProps {
   state: TerminalTypedOptions[] | null | undefined;
   playing: boolean;
-  onAnimationComplete: (sim?: SimulatorType) => void;
   onTerminalContentPrinted: (index: number) => void;
 }
 
 export function Terminal({
   state,
   playing,
-  onAnimationComplete,
   onTerminalContentPrinted,
 }: TerminalProps) {
   const { completedItems, currentItem, activeElementRef, containerElementRef } =
     useGetTerminalSimulatorContent({
       state,
       playing,
-      onAnimationComplete,
       onTerminalContentPrinted,
     });
 

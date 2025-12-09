@@ -115,10 +115,11 @@ type FrameConfig<TourUpdates, EngineUpdates> = {
   engine: EngineUpdates;
 };
 
-export type ConfigSimScrollTarget = {
+export interface ConfigSimScrollTarget {
   fileName: string;
   line: number;
-};
+  scrollOnly?: boolean;
+}
 
 // This is the source of truth for available frames
 export type SimulatorFrameConfigs = {

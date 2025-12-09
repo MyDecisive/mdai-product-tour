@@ -2,6 +2,7 @@ import { SIMULATORS, STATUS } from "../utils/constants";
 import type {
   ActivePod,
   ActivePodMap,
+  EngineConfigSimScrollTarget,
   EngineConfigTarget,
   EngineFileConfig,
   EngineLogsTarget,
@@ -214,6 +215,76 @@ export function removeFromObject<
 // SPECIFIC STATE TRANSFORMATIONS (fully type-safe)
 // ============================================================================
 
+export function combineTargetStates(
+  first: EngineTargetState,
+  second: EngineTargetState
+): EngineTargetState {
+  const returnState: EngineTargetState = { ...first };
+
+  if (second.banner) {
+    returnState.banner = {
+      ...(returnState.banner || {}),
+      ...second.banner,
+    };
+  }
+
+  if (second.logs) {
+    // TODO: Doing a full replace here because of different logs contexts
+    returnState.logs = {
+      ...second.logs,
+    };
+  }
+
+  if (second.terminal) {
+    returnState.terminal = {
+      strings: [
+        ...(returnState.terminal?.strings || []),
+        ...second.terminal.strings.map((str) => ({ ...str, printed: true })),
+      ],
+    };
+  }
+
+  if (second.status) {
+    const secondStateActivePods = Object.entries(
+      second.status.activePods
+    ).reduce((accum, [key, value]) => {
+      // TODO: Should this even be present here? Do we _want_ to overwrite?
+      const replacementPod = findReplacementPod(
+        value,
+        returnState.status?.activePods || {}
+      );
+      if (replacementPod) {
+        return accum;
+      }
+
+      accum[key] = {
+        ...value,
+        status: STATUS.running,
+      };
+
+      return accum;
+    }, {} as ActivePodMap);
+    returnState.status = {
+      activePods: {
+        ...returnState.status?.activePods,
+        ...secondStateActivePods,
+      },
+      podOrder: second.status?.podOrder.filter(
+        (podId) => !!secondStateActivePods[podId]
+      ),
+    };
+  }
+
+  if (second.config) {
+    return addConfigTarget(returnState, second.config);
+  }
+
+  return returnState;
+}
+
+/**
+ * STATUS
+ */
 export function addStatusPods(
   currentState: EngineTargetState,
   updates: EngineStatusTarget
@@ -284,6 +355,9 @@ export function removeStatusPods(
   return state;
 }
 
+/**
+ * CONFIG
+ */
 export function setConfigActiveTab(
   currentState: EngineTargetState,
   tabName: string
@@ -319,10 +393,22 @@ export function toggleConfigShowingChange(
   );
 }
 
+export function toggleConfigPulseGroup(
+  currentState: EngineTargetState,
+  groupId: string
+): EngineTargetState {
+  return toggleInSet<"config", EngineConfigTarget, "pulsedGroups">(
+    currentState,
+    "config",
+    "pulsedGroups",
+    groupId
+  );
+}
+
 function mergeConfigSets(
   currentState: EngineTargetState,
   incomingSets: Partial<
-    Pick<EngineConfigTarget, "showingToggle" | "showingChange">
+    Pick<EngineConfigTarget, "showingToggle" | "showingChange" | "pulsedGroups">
   >
 ): EngineTargetState {
   const currentConfig = currentState.config;
@@ -337,6 +423,7 @@ function mergeConfigSets(
       showingChange: incomingSets.showingChange
         ? new Set(incomingSets.showingChange)
         : new Set(),
+      pulsedGroups: new Set(),
     };
 
     return mergeIntoSimulator<"config", EngineConfigTarget>(
@@ -354,6 +441,10 @@ function mergeConfigSets(
     currentConfig.showingChange,
     incomingSets.showingChange
   );
+  const combinedPulse = unionSets(
+    currentConfig.pulsedGroups,
+    incomingSets.pulsedGroups
+  );
 
   return mergeIntoSimulator<"config", EngineConfigTarget>(
     currentState,
@@ -361,6 +452,7 @@ function mergeConfigSets(
     {
       showingToggle: combinedToggle,
       showingChange: combinedChange,
+      pulsedGroups: combinedPulse,
     }
   );
 }
@@ -381,13 +473,15 @@ export function addConfigTarget(
   currentState: EngineTargetState,
   update: EngineConfigTarget
 ): EngineTargetState {
-  const { files, showingChange, showingToggle, activeTab } = update;
+  const { files, showingChange, showingToggle, activeTab, pulsedGroups } =
+    update;
   let state = addOrReplaceConfigFile(currentState, files);
 
   if (showingToggle || showingChange) {
     state = mergeConfigSets(state, {
       showingChange,
       showingToggle,
+      pulsedGroups,
     });
   }
 
@@ -400,58 +494,14 @@ export function addConfigTarget(
   return state;
 }
 
-export function setLogsContextLabel(
+export function setConfigScrollTarget(
   currentState: EngineTargetState,
-  contextLabel: string | undefined
+  activeScrollTarget: EngineConfigSimScrollTarget | undefined
 ): EngineTargetState {
-  return mergeIntoSimulator<"logs", EngineLogsTarget>(currentState, "logs", {
-    contextLabel,
-  });
-}
-
-export function addLogsRecords(
-  currentState: EngineTargetState,
-  { records }: Pick<EngineLogsTarget, "records">
-): EngineTargetState {
-  return appendToArray<"logs", EngineLogsTarget, "records">(
+  return mergeIntoSimulator<"config", EngineConfigTarget>(
     currentState,
-    "logs",
-    "records",
-    records
-  );
-}
-
-export function addTerminalStrings(
-  currentState: EngineTargetState,
-  { strings }: EngineTerminalTarget
-): EngineTargetState {
-  return appendToArray<"terminal", EngineTerminalTarget, "strings">(
-    currentState,
-    "terminal",
-    "strings",
-    strings
-  );
-}
-
-export function setTerminalContentPrinted(
-  currentState: EngineTargetState,
-  index: number
-) {
-  const terminalContent = currentState.terminal!.strings;
-
-  const printedTerminalContent = terminalContent.map((str, idx) =>
-    idx === index
-      ? {
-          ...str,
-          printed: true,
-        }
-      : str
-  );
-
-  return mergeIntoSimulator<"terminal", EngineTerminalTarget>(
-    currentState,
-    "terminal",
-    { strings: printedTerminalContent }
+    "config",
+    { activeScrollTarget }
   );
 }
 
@@ -489,6 +539,70 @@ export function scrollToConfigLine(
   return toggleConfigShowingChange(stateWithUpdatedActiveTab, groupId);
 }
 
+/**
+ * LOGS
+ */
+export function setLogsContextLabel(
+  currentState: EngineTargetState,
+  contextLabel: string | undefined
+): EngineTargetState {
+  return mergeIntoSimulator<"logs", EngineLogsTarget>(currentState, "logs", {
+    contextLabel,
+  });
+}
+
+export function addLogsRecords(
+  currentState: EngineTargetState,
+  { records }: Pick<EngineLogsTarget, "records">
+): EngineTargetState {
+  return appendToArray<"logs", EngineLogsTarget, "records">(
+    currentState,
+    "logs",
+    "records",
+    records
+  );
+}
+
+export function addTerminalStrings(
+  currentState: EngineTargetState,
+  { strings }: EngineTerminalTarget
+): EngineTargetState {
+  return appendToArray<"terminal", EngineTerminalTarget, "strings">(
+    currentState,
+    "terminal",
+    "strings",
+    strings
+  );
+}
+
+/**
+ * TERMINAL
+ */
+export function setTerminalContentPrinted(
+  currentState: EngineTargetState,
+  index: number
+) {
+  const terminalContent = currentState.terminal!.strings;
+
+  const printedTerminalContent = terminalContent.map((str, idx) =>
+    idx === index
+      ? {
+          ...str,
+          printed: true,
+        }
+      : str
+  );
+
+  return mergeIntoSimulator<"terminal", EngineTerminalTarget>(
+    currentState,
+    "terminal",
+    { strings: printedTerminalContent }
+  );
+}
+
+/**
+ * BANNER
+ */
 export function updateBannerState(
   currentState: EngineTargetState,
   update: BannerTargetState
@@ -498,71 +612,4 @@ export function updateBannerState(
     SIMULATORS.BANNER,
     update
   );
-}
-
-export function combineTargetStates(
-  first: EngineTargetState,
-  second: EngineTargetState
-): EngineTargetState {
-  const returnState: EngineTargetState = { ...first };
-
-  if (second.banner) {
-    returnState.banner = {
-      ...(returnState.banner || {}),
-      ...second.banner,
-    };
-  }
-
-  if (second.logs) {
-    // TODO: Doing a full replace here because of different logs contexts
-    returnState.logs = {
-      ...second.logs,
-    };
-  }
-
-  if (second.terminal) {
-    returnState.terminal = {
-      strings: [
-        ...(returnState.terminal?.strings || []),
-        ...second.terminal.strings.map((str) => ({ ...str, printed: true })),
-      ],
-    };
-  }
-
-  if (second.status) {
-    const secondStateActivePods = Object.entries(
-      second.status.activePods
-    ).reduce((accum, [key, value]) => {
-      // TODO: Should this even be present here? Do we _want_ to overwrite?
-      const replacementPod = findReplacementPod(
-        value,
-        returnState.status?.activePods || {}
-      );
-      if (replacementPod) {
-        return accum;
-      }
-
-      accum[key] = {
-        ...value,
-        status: STATUS.running,
-      };
-
-      return accum;
-    }, {} as ActivePodMap);
-    returnState.status = {
-      activePods: {
-        ...returnState.status?.activePods,
-        ...secondStateActivePods,
-      },
-      podOrder: second.status?.podOrder.filter(
-        (podId) => !!secondStateActivePods[podId]
-      ),
-    };
-  }
-
-  if (second.config) {
-    return addConfigTarget(returnState, second.config);
-  }
-
-  return returnState;
 }

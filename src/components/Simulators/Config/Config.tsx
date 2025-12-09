@@ -2,22 +2,26 @@ import { Tab, Tabs } from "@mui/material";
 import { useCallback } from "react";
 import { useGetConfigSimulatorContent } from "../../../hooks/useGetConfigSimulatorContent";
 import type { EngineConfigTarget } from "../../../utils/engineTypesScratch";
-import type { SimulatorType } from "../../../utils/types";
 import { ConfigTabPanel } from "./ConfigtabPanel";
 
 export function Config(
   props: EngineConfigTarget & {
     onSetActiveTab: (tabName: string) => void;
     onToggleShowingChange: (groupId: string) => void;
-    onAnimationComplete: (sim?: SimulatorType) => void;
+    onConfigScrollComplete: (scrollId: string) => void;
   }
 ) {
-  const { onSetActiveTab, activeTab, showingToggle, onToggleShowingChange } =
-    props;
-  const { tabContents, groupsShowingChange, pulsedGroups } =
-    useGetConfigSimulatorContent(props);
+  const {
+    onSetActiveTab,
+    activeTab,
+    showingToggle,
+    pulsedGroups,
+    onToggleShowingChange,
+    showingChange,
+  } = props;
+  const { tabContents } = useGetConfigSimulatorContent(props);
 
-  const handleChange = useCallback(
+  const handleTabChange = useCallback(
     (_: React.SyntheticEvent, newValue: string) => {
       onSetActiveTab(newValue);
     },
@@ -26,7 +30,7 @@ export function Config(
 
   return (
     <>
-      <Tabs value={activeTab} onChange={handleChange}>
+      <Tabs value={activeTab} onChange={handleTabChange}>
         {tabContents.map(({ fileName }) => (
           <Tab
             key={fileName}
@@ -42,7 +46,7 @@ export function Config(
           {...tab}
           active={activeTab === tab.fileName}
           pulsedGroups={pulsedGroups}
-          groupsShowingChanges={groupsShowingChange}
+          groupsShowingChanges={showingChange}
           groupsShowingToggle={showingToggle}
           toggleGroupShowingChange={onToggleShowingChange}
           changeMap={tab.changeMap}

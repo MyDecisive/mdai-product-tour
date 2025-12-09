@@ -1,5 +1,6 @@
 import type {
   BannerTargetState,
+  ConfigSimScrollTarget,
   ContentItem,
   EngineFrames,
   LogRecord,
@@ -129,11 +130,18 @@ export interface EngineFileConfig {
   changeMap: Map<number, string>; // from createChangeMap
 }
 
+export interface EngineConfigSimScrollTarget extends ConfigSimScrollTarget {
+  id: string;
+  groupId: string;
+}
+
 export interface EngineConfigTarget {
   files: Record<string, EngineFileConfig>;
   activeTab: string;
   showingToggle: Set<string>; // groupIds
   showingChange: Set<string>; // groupIds
+  pulsedGroups: Set<string>; // groupIds
+  activeScrollTarget?: EngineConfigSimScrollTarget;
 }
 
 // ----------------------------------------------------------------------------

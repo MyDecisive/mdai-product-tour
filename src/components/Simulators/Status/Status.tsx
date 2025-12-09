@@ -5,7 +5,7 @@ import type {
   EngineStatusTarget,
   PodId,
 } from "../../../utils/engineTypesScratch";
-import type { PodStatusType, SimulatorType } from "../../../utils/types";
+import type { PodStatusType } from "../../../utils/types";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
 
@@ -13,14 +13,14 @@ const HEADER_ROW_HEIGHT = 20;
 // TODO: Move these prop types to a types file
 export interface StatusSimulatorProps extends EngineStatusTarget {
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
-  onAnimationComplete: (sim?: SimulatorType) => void;
+  playing: boolean;
 }
 
 export const Status: FC<StatusSimulatorProps> = ({
   activePods,
   podOrder,
   onPodStatusChange,
-  onAnimationComplete,
+  playing,
 }: StatusSimulatorProps) => {
   const {
     services = [],
@@ -29,7 +29,7 @@ export const Status: FC<StatusSimulatorProps> = ({
   } = useGetStatusSimulatorContent({
     activePods,
     podOrder,
-    onAnimationComplete,
+    playing,
   });
 
   return (

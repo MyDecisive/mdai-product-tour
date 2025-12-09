@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
-import { SIMULATORS } from "../utils/constants";
 import { createTerminalContent } from "../utils/transformHelpers";
-import type { SimulatorType, TerminalTypedOptions } from "../utils/types";
+import type { TerminalTypedOptions } from "../utils/types";
 
 export function parseTypedJsString(str: string) {
   return str.replaceAll(/`/gi, "").replaceAll(/\^\d+/gi, "");
@@ -12,14 +11,12 @@ export function parseTypedJsString(str: string) {
 interface TerminalProps {
   state: TerminalTypedOptions[] | null | undefined;
   playing: boolean;
-  onAnimationComplete: (sim?: SimulatorType) => void;
   onTerminalContentPrinted: (index: number) => void;
 }
 
 export function useGetTerminalSimulatorContent({
   state,
   playing,
-  onAnimationComplete,
   onTerminalContentPrinted,
 }: TerminalProps) {
   const activeElementRef = useRef<HTMLPreElement | null>(null);
@@ -37,7 +34,6 @@ export function useGetTerminalSimulatorContent({
     if (currentIndex === -1 || !activeElementRef.current) return;
 
     const options = state[currentIndex];
-    const isLast = currentIndex === state.length - 1;
 
     typedInstanceRef.current?.destroy();
     typedInstanceRef.current = new Typed(activeElementRef.current, {
@@ -71,10 +67,6 @@ export function useGetTerminalSimulatorContent({
       onComplete: (typed: Typed) => {
         options.onComplete?.(typed);
         onTerminalContentPrinted(currentIndex);
-
-        if (isLast) {
-          onAnimationComplete(SIMULATORS.TERMINAL);
-        }
       },
     });
 
@@ -86,7 +78,7 @@ export function useGetTerminalSimulatorContent({
       typedInstanceRef.current?.destroy();
       typedInstanceRef.current = null;
     };
-  }, [state, playing, onAnimationComplete, onTerminalContentPrinted]);
+  }, [state, playing, onTerminalContentPrinted]);
 
   useEffect(() => {
     if (playing && containerElementRef.current) {

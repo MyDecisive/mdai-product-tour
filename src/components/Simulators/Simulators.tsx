@@ -63,7 +63,7 @@ export function Simulators() {
                   {...engineState.currentSimulatorState.config}
                   onSetActiveTab={engineControls.onSetActiveTab}
                   onToggleShowingChange={engineControls.onToggleShowingChange}
-                  onAnimationComplete={engineControls.advanceAnimation}
+                  onConfigScrollComplete={engineControls.onConfigScrollComplete}
                 />
               )}
             </SimulatorBox>
@@ -79,9 +79,12 @@ export function Simulators() {
                   activePods={
                     engineState.currentSimulatorState.status.activePods
                   }
+                  playing={
+                    engineState.isPlaying &&
+                    engineState.activeSimulator.has(SIMULATORS.STATUS)
+                  }
                   podOrder={engineState.currentSimulatorState.status.podOrder}
                   onPodStatusChange={engineControls.onPodStatusChange}
-                  onAnimationComplete={engineControls.advanceAnimation}
                 />
               )}
             </SimulatorBox>
@@ -102,7 +105,6 @@ export function Simulators() {
             >
               {engineState.currentSimulatorState.terminal != null && (
                 <Terminal
-                  onAnimationComplete={engineControls.advanceAnimation}
                   onTerminalContentPrinted={
                     engineControls.onTerminalContentPrinted
                   }

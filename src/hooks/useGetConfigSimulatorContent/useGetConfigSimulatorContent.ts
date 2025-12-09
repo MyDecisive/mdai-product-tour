@@ -1,27 +1,19 @@
 import { useMemo } from "react";
 import type { EngineConfigTarget } from "../../utils/engineTypesScratch";
-import type { SimulatorType } from "../../utils/types";
-import { useManageScrollToAndToggle } from "./useManageScrollToAndToggle";
-import { usePulsedGroup } from "./usePulsedGroup";
+import { useManageScrollTo } from "./useManageScrollTo";
 
 export function useGetConfigSimulatorContent({
   files,
-  activeTab,
-  showingChange,
-  onAnimationComplete,
+  activeScrollTarget,
+  onConfigScrollComplete,
 }: EngineConfigTarget & {
   onSetActiveTab: (tabName: string) => void;
-  onAnimationComplete: (sim?: SimulatorType) => void;
+  onConfigScrollComplete: (scrollId: string) => void;
 }) {
-  const { pulsedGroups, addPulsedGroup } = usePulsedGroup();
-
-  const { groupsShowingChange, makeSetContainerRef } =
-    useManageScrollToAndToggle({
-      activeTab,
-      showingChange,
-      onAnimationComplete,
-      addPulsedGroup,
-    });
+  const { makeSetContainerRef } = useManageScrollTo({
+    activeScrollTarget,
+    onConfigScrollComplete,
+  });
 
   const tabContents = useMemo(() => {
     return Object.values(files).map((file) => ({
@@ -32,8 +24,5 @@ export function useGetConfigSimulatorContent({
 
   return {
     tabContents,
-    activeTab,
-    groupsShowingChange,
-    pulsedGroups,
   };
 }

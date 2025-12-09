@@ -25,6 +25,7 @@ export interface AnimationEngineControls {
   // config sim
   onSetActiveTab: (tabName: string) => void;
   onToggleShowingChange: (groupId: string) => void;
+  onConfigScrollComplete: (scrollId: string) => void;
   // terminal sim:
   onTerminalContentPrinted: (index: number) => void;
 }
@@ -145,6 +146,10 @@ export function useAnimationEngine(
 
       onToggleShowingChange: (groupId: string) => {
         engineRef.current?.onToggleShowingChange(groupId);
+      },
+
+      onConfigScrollComplete(scrollId: string) {
+        engineRef.current?.onConfigScrollComplete(scrollId);
       },
 
       onTerminalContentPrinted: (index: number) => {

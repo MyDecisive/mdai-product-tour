@@ -2,6 +2,7 @@ import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
   EngineLogsTarget,
   EngineTargetState,
+  LineGroup,
   PodId,
 } from "../utils/engineTypesScratch";
 import {
@@ -10,16 +11,18 @@ import {
   addStatusPods,
   addTerminalStrings,
   removeStatusPods,
-  scrollToConfigLine,
   setConfigActiveTab,
+  setConfigScrollTarget,
   setLogsContextLabel,
   setTerminalContentPrinted,
+  toggleConfigPulseGroup,
   toggleConfigShowingChange,
   updateBannerState,
   updatePodStatus,
 } from "../utils/frameStateMergeStrategies";
 import { createLogRecord, findReplacementPod } from "../utils/transformHelpers";
 import type {
+  ConfigSimScrollTarget,
   EngineFrames,
   LogRecord,
   PodStatusType,
@@ -51,6 +54,9 @@ export class AnimationEngineInstance {
   private logsStopTimeoutRef: ReturnType<typeof setTimeout> | null = null;
   private logsCycleCount = 0;
   private logsCurrentIndex = 0;
+
+  private configScrollResolvers = new Map<string, () => void>();
+  private configPulseGroupTimeouts: ReturnType<typeof setTimeout>[] = [];
 
   constructor(
     actions: EngineFrames["Any"][],
@@ -97,17 +103,24 @@ export class AnimationEngineInstance {
 
   cleanup() {
     this.isRunning = false;
+
     this.timeouts.forEach(clearTimeout);
     if (this.podRemovalTimer) {
       clearTimeout(this.podRemovalTimer);
     }
-    this.timeouts = [];
-    this.currentActionResolver = null;
+    this.configPulseGroupTimeouts.forEach(clearTimeout);
     if (this.logsIntervalRef) {
       clearInterval(this.logsIntervalRef);
     }
+
+    this.timeouts = [];
+    this.currentActionResolver = null;
+
     this.logsCurrentIndex = 0;
     this.logsCycleCount = 0;
+
+    this.configScrollResolvers.clear();
+    this.configPulseGroupTimeouts = [];
   }
 
   private readonly frameHandlers: SimulatorHandlerMap = {
@@ -126,7 +139,7 @@ export class AnimationEngineInstance {
         this.updateState(addConfigTarget, frame.updates);
       },
       [FRAME_TYPES.SCROLL_TO]: (frame) => {
-        this.updateState(scrollToConfigLine, frame.updates);
+        void this.configScrollAndToggle(frame.updates);
       },
     },
     [SIMULATORS.LOGS]: {
@@ -278,6 +291,67 @@ export class AnimationEngineInstance {
   public onToggleShowingChange(groupId: string): void {
     this.updateState<string>(toggleConfigShowingChange, groupId);
   }
+
+  private pulseGroup(groupId: string): void {
+    this.updateState<string>(toggleConfigPulseGroup, groupId);
+
+    const timeoutId = setTimeout(() => {
+      this.updateState<string>(toggleConfigPulseGroup, groupId);
+    }, 1500);
+
+    this.configPulseGroupTimeouts.push(timeoutId);
+  }
+
+  private async configScrollAndToggle({
+    fileName,
+    line,
+    scrollOnly,
+  }: ConfigSimScrollTarget): Promise<void> {
+    const file = this.currentState.config?.files[fileName];
+    if (!file) return;
+
+    const group = file.groups.find((grp) => {
+      if (grp.type !== "group") return false;
+      return grp.start <= line && line <= grp.end;
+    }) as LineGroup | undefined;
+
+    if (!group?.groupId) return;
+
+    this.onSetActiveTab(fileName);
+    await this.delay(50);
+
+    const scrollId = `scroll-${Date.now()}`;
+    const scrollPromise = new Promise<void>((resolve) => {
+      this.configScrollResolvers.set(scrollId, resolve);
+    });
+
+    this.updateState(setConfigScrollTarget, {
+      id: scrollId,
+      fileName,
+      groupId: group.groupId,
+      line,
+    });
+
+    await scrollPromise;
+
+    if (!scrollOnly) {
+      this.onToggleShowingChange(group.groupId);
+      this.pulseGroup(group.groupId);
+      await this.delay(300);
+    }
+
+    this.advanceAnimation();
+  }
+
+  public onConfigScrollComplete = (scrollId: string): void => {
+    const resolve = this.configScrollResolvers.get(scrollId);
+    if (resolve) {
+      resolve();
+      this.configScrollResolvers.delete(scrollId);
+    }
+
+    this.updateState(setConfigScrollTarget, undefined);
+  };
 
   // ----------------------------------------------------------------------------
   // Logs sim methods

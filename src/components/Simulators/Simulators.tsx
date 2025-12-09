@@ -63,7 +63,7 @@ export function Simulators() {
                   {...engineState.currentSimulatorState.config}
                   onSetActiveTab={engineControls.onSetActiveTab}
                   onToggleShowingChange={engineControls.onToggleShowingChange}
-                  onAnimationComplete={engineControls.advanceAnimation}
+                  onConfigScrollComplete={engineControls.onConfigScrollComplete}
                 />
               )}
             </SimulatorBox>

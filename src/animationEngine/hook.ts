@@ -18,7 +18,6 @@ export interface AnimationEngineControls {
   // generic
   reset: (str?: string) => void; // Reset to previous subStep's target state and replay
   play: () => void; // Begin animations
-  advanceAnimation: (sim?: SimulatorType) => void; // Signal that current action is complete
   onTriggerFrame: (frame: EngineFrames["Any"]) => void;
   // status sim
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
@@ -120,14 +119,6 @@ export function useAnimationEngine(
         setIsPlaying(false);
       },
 
-      advanceAnimation: (caller?: SimulatorType) => {
-        if (!isPlaying) return;
-        if (caller) {
-          handleSetActiveSimulator(caller);
-        }
-        engineRef.current?.advanceAnimation();
-      },
-
       onTriggerFrame: (frame: EngineFrames["Any"]) => {
         void engineRef.current?.executeAction(frame);
       },
@@ -156,7 +147,7 @@ export function useAnimationEngine(
         engineRef.current?.setTerminalContentPrinted(index);
       },
     }),
-    [isPlaying, handleSetActiveSimulator]
+    [isPlaying]
   );
 
   return [

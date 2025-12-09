@@ -2,6 +2,7 @@ import { SIMULATORS, STATUS } from "../utils/constants";
 import type {
   ActivePod,
   ActivePodMap,
+  EngineConfigSimScrollTarget,
   EngineConfigTarget,
   EngineFileConfig,
   EngineLogsTarget,
@@ -322,7 +323,7 @@ export function toggleConfigShowingChange(
 function mergeConfigSets(
   currentState: EngineTargetState,
   incomingSets: Partial<
-    Pick<EngineConfigTarget, "showingToggle" | "showingChange">
+    Pick<EngineConfigTarget, "showingToggle" | "showingChange" | "pulsedGroups">
   >
 ): EngineTargetState {
   const currentConfig = currentState.config;
@@ -337,6 +338,7 @@ function mergeConfigSets(
       showingChange: incomingSets.showingChange
         ? new Set(incomingSets.showingChange)
         : new Set(),
+      pulsedGroups: new Set(),
     };
 
     return mergeIntoSimulator<"config", EngineConfigTarget>(
@@ -381,13 +383,15 @@ export function addConfigTarget(
   currentState: EngineTargetState,
   update: EngineConfigTarget
 ): EngineTargetState {
-  const { files, showingChange, showingToggle, activeTab } = update;
+  const { files, showingChange, showingToggle, activeTab, pulsedGroups } =
+    update;
   let state = addOrReplaceConfigFile(currentState, files);
 
   if (showingToggle || showingChange) {
     state = mergeConfigSets(state, {
       showingChange,
       showingToggle,
+      pulsedGroups,
     });
   }
 

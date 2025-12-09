@@ -197,6 +197,7 @@ async function transformConfig(
     files,
     activeTab,
     showingToggle: new Set<string>(),
+    pulsedGroups: new Set<string>(),
     showingChange,
   };
 }

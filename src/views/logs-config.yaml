@@ -60,10 +60,13 @@ steps:
                 actions:
                   - type: activate
                     simulator: status
+                    duration: 1250
                   - type: activate
                     simulator: status
+                    duration: 1250
                   - type: activate
                     simulator: logs
+                    duration: 1250
         initialState:
           status:
             - namespace: "mdai"
@@ -191,17 +194,21 @@ steps:
               - text: In <emphasize>line 39</emphasize> of the OTEL.YAML file, you define a rule that says drop logs from “service4321”.
                 onClick:
                   type: scroll_to
+                  waitForComplete: false
                   simulator: config
                   updates:
                     fileName: otel.yaml
                     line: 39
+                    scrollOnly: true
               - text: In <emphasize>line 65</emphasize> you enable this filter rule.
                 onClick:
                   type: scroll_to
+                  waitForComplete: false
                   simulator: config
                   updates:
                     fileName: otel.yaml
                     line: 65
+                    scrollOnly: true
               - text: We are now actively dropping all logs from service4321, which saves you money. The downside is that this approach uses basic, static OTEL, which is suboptimal.
         initialState:
           config:
@@ -309,36 +316,45 @@ steps:
                 actions:
                   - type: activate
                     simulator: config
+                    duration: 1250
               - bullet: "2."
                 text: 'Select HUB.YAML. <button:0>Line 11</button> defines a dynamic "noisy" service filter (replacing the static service4321 drop).'
                 actions:
                   - type: scroll_to
+                    waitForComplete: false
                     simulator: config
                     updates:
                       fileName: hub.yaml
                       line: 11
+                      scrollOnly: true
 
               - bullet: "3."
                 text: '<button:0>Line 49</button> contains the PromQL query that sets the "noisy" threshold and duration.'
                 actions:
                   - type: scroll_to
+                    waitForComplete: false
                     simulator: config
                     updates:
                       fileName: hub.yaml
                       line: 49
+                      scrollOnly: true
               - bullet: "4."
                 text: "Check OTEL.YAML (Lines <button:0>54</button> & <button:1>99</button>) to see how these variables make OTEL dynamic."
                 actions:
                   - type: scroll_to
+                    waitForComplete: false
                     simulator: config
                     updates:
                       fileName: otel.yaml
                       line: 54
+                      scrollOnly: true
                   - type: scroll_to
+                    waitForComplete: false
                     simulator: config
                     updates:
                       fileName: otel.yaml
                       line: 99
+                      scrollOnly: true
               - bullet: "5."
                 text: "The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
           - text: This is dynamic, real-time observaility control.

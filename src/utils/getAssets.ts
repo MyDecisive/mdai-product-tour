@@ -1,3 +1,5 @@
+import type { TourConfiguration } from "./configTypesScratch";
+
 const logFiles = import.meta.glob("../assets/logs/*.txt", {
   eager: true,
   query: "?raw",
@@ -19,4 +21,14 @@ export function getVideoUrl(fileName: string): string {
     throw new Error(`Video file not found: ${fileName}`);
   }
   return (videoFiles[key] as { default: string }).default;
+}
+
+const tourConfigFiles = import.meta.glob("../assets/tours/*.yaml", {
+  eager: true,
+});
+
+export function getTourConfigs() {
+  return (
+    Object.values(tourConfigFiles) as { default: TourConfiguration }[]
+  ).map((module) => module.default);
 }

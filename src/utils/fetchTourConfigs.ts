@@ -1,4 +1,3 @@
-import { parse } from "yaml";
 import { transformSubStepConfigToInstanceArgs } from "./configToEngineTransforms";
 import type {
   StepConfig,
@@ -11,64 +10,20 @@ import type {
   EngineTargetState,
   TourEngine,
 } from "./engineTypesScratch";
-import { fetchGitHubFile, prefetchAllGitHubFiles } from "./fetchRawGithubFile";
+import { prefetchAllGitHubFiles } from "./fetchRawGithubFile";
+import { getTourConfigs } from "./getAssets";
 import type { NavigationState } from "./types";
 
-const tourConfigUrls =
-  (import.meta.env.VITE_TOUR_CONFIG_URLS as string)?.split(",") || [];
-
-export async function fetchAllTourConfigs(): Promise<TourEngine[]> {
-  return Promise.all(tourConfigUrls.map((url) => loadTourConfig(url.trim())));
-}
-
-/**
- * Loads and parses a tour configuration from a GitHub URL
- */
-async function loadTourConfig(url: string): Promise<TourEngine> {
+export function getAllParsedTourConfigs() {
   try {
-    const yamlContent =
-      import.meta.env.VITE_USE_LOCAL_CONFIGS === "true"
-        ? await loadLocalConfig(url)
-        : await fetchGitHubFile(url);
+    const configs = getTourConfigs();
 
-    const config = parseYaml(yamlContent) as TourConfiguration;
+    configs.forEach(validateTourConfig);
 
-    validateTourConfig(config);
-
-    return transformParsedTourConfigToInstanceArgs(config);
+    return Promise.all(configs.map(transformParsedTourConfigToInstanceArgs));
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to load tour config: ${message}`);
-  }
-}
-
-async function loadLocalConfig(url: string): Promise<string> {
-  // Extract filename from GitHub URL (e.g., "tour1.yml")
-  const filename = url.split("/").pop() || "";
-
-  // Import from local content folder
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const module = await import(`../views/${filename}.yaml?raw`);
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  return typeof module.default === "string"
-    ? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      module.default
-    : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      JSON.stringify(module.default);
-}
-
-/**
- * Parses YAML string to object
- */
-function parseYaml(yamlString: string): unknown {
-  try {
-    return parse(yamlString);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(`YAML parse error: ${error.message}`);
-    }
-    throw error;
   }
 }
 

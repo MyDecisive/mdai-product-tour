@@ -11,7 +11,9 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "type-check": "tsc --noEmit --watch"
+    "type-check": "tsc --noEmit --watch",
+    "generate-schema": "ts-json-schema-generator --path 'src/utils/configTypesScratch.ts' --type 'TourConfiguration' --out schema/tour-schema.json --tsconfig tsconfig.schema.json",
+    "validate-tour": "ts-node -P tsconfig.node.json ./bin/validate-tour.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -37,15 +39,20 @@
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "jsdom": "^27.0.0",
+    "ts-json-schema-generator": "^2.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
     "vite-plugin-radar": "^0.10.1",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "yaml": "^2.8.2"
   }
 }

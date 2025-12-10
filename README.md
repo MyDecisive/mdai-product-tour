@@ -30,3 +30,19 @@ This project was bootstrapped with [Vite](https://vitejs.dev/)
 - [MUI](https://mui.com/material-ui/getting-started/) - Material UI is an open-source React component library that implements Google's Material Design. It's comprehensive and can be used in production out of the box.
 - [mui-tel-input](https://github.com/viclafouch/mui-tel-input): Used for contact form. A phone number input designed for use with Material UI, built with [libphonenumber-js](https://www.npmjs.com/package/libphonenumber-js).
 - [typed.js](https://mattboldt.github.io/typed.js/docs/): Typed.js is a library that types. Used terminal animations.
+
+## Validating a tour config
+
+1. generate a schema:
+
+```
+npm run generate-schema
+```
+
+2. apply validation:
+
+```
+npm run validate-tour -- tourName
+```
+
+Do not add the file extension for the tourName, just the name of the tour!!

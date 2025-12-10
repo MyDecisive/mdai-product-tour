@@ -16,6 +16,9 @@ import type {
   TerminalTypedOptions,
 } from "../utils/types";
 
+/**
+ * Logs
+ */
 function createLogId(
   cycleCount: number,
   index: number,
@@ -228,6 +231,10 @@ function kubernetesLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
   }, [] as LogRecord[]);
 }
 
+/**
+ * Terminal
+ */
+
 const userEntryBehavior: Partial<TerminalTypedOptions> = {
   prompt: TERMINAL_PROMPT,
   typeSpeed: 70,
@@ -278,6 +285,9 @@ export function createTerminalContent(
   ];
 }
 
+/**
+ * Config
+ */
 export const createChangeMap = (
   changes: LineChangeBlock[]
 ): Map<number, string> => {
@@ -465,6 +475,9 @@ export const extractRelevantSections = (
   return sections;
 };
 
+/**
+ * Status
+ */
 export function findReplacementPod(
   currentPod: ActivePod,
   activePods: ActivePodMap

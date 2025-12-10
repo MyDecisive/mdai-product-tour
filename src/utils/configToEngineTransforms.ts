@@ -500,7 +500,7 @@ export async function transformSubStepConfigToInstanceArgs(
   if (content && content.length) {
     if (
       content.some(({ items = [] }) =>
-        items.some((item) => item.actions || item.onClick)
+        items.some((item) => !("src" in item) && (item.actions || item.onClick))
       )
     ) {
       const updatedContent = await Promise.all(

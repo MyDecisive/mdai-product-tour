@@ -357,7 +357,8 @@ steps:
                       scrollOnly: true
               - bullet: "5."
                 text: "The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
-          - text: This is dynamic, real-time observaility control.
+          - items:
+              - text: This is dynamic, real-time observaility control.
         initialState:
           config:
             files:
@@ -486,8 +487,8 @@ steps:
       - id: 3-c
         visualizationModal: true
         content:
-          title: Visualize the results
-          items:
-            - text: null
-              src: dynamic-example.mp4
-              alt: Postfilter Visualization
+          - title: Visualize the results
+            items:
+              - text: ""
+                src: dynamic-example.mp4
+                alt: Postfilter Visualization

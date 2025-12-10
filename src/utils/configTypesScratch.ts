@@ -1,8 +1,9 @@
-import {
-  type BannerTargetState,
-  type ContentItem,
-  type LineChangeBlock,
-  type TourFrames,
+import type {
+  BannerTargetState,
+  ContentItem,
+  LineChangeBlock,
+  TourFrames,
+  VisualizationContentItem,
 } from "./types";
 
 // ============================================================================
@@ -84,7 +85,7 @@ export interface SubStepConfig {
 export interface ContentBlock {
   title?: string;
   variant?: "default" | "list";
-  items: TourContentItem[];
+  items: (TourContentItem | VisualizationContentItem)[];
 }
 
 export interface TourContentItem extends ContentItem {

@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR_CHAR, TERMINAL_PROMPT } from "../constants";
+import type { ActivePod, ActivePodMap } from "../engineTypesScratch";
 import {
   braidLogs,
   createLogRecord,
   createTerminalContent,
+  findReplacementPod,
   parseRawLogFileToLogLines,
 } from "../transformHelpers";
 import type { LogRecord } from "../types";
@@ -465,6 +467,158 @@ describe("createTerminalContent", () => {
       const result = createTerminalContent(strings, false);
 
       expect(result[0].strings?.[0]).toContain("line1\nline2");
+    });
+  });
+});
+
+describe("findReplacementPod", () => {
+  const createPod = (overrides: Partial<ActivePod>): ActivePod => ({
+    id: "pod-1",
+    name: "auth-service-abc123",
+    namespace: "production",
+    status: "Running",
+    replicaNo: 1,
+    parentServiceKey: "service-key-1",
+    restartCount: 0,
+    ...overrides,
+  });
+
+  describe("successful replacement scenarios", () => {
+    it("should find replacement pod with different parentServiceKey but same service and namespace", () => {
+      const currentPod = createPod({
+        id: "pod-1",
+        name: "auth-service-abc123",
+        parentServiceKey: "service-key-1",
+        namespace: "production",
+      });
+
+      const activePods: ActivePodMap = {
+        "pod-2": createPod({
+          id: "pod-2",
+          name: "auth-service-xyz789",
+          parentServiceKey: "service-key-2", // Different parent
+          namespace: "production",
+          status: "Running",
+        }),
+      };
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeDefined();
+      expect(result?.id).toBe("pod-2");
+      expect(result?.parentServiceKey).not.toBe(currentPod.parentServiceKey);
+    });
+
+    it("should prefer the first matching pod when multiple replacements exist", () => {
+      const currentPod = createPod({
+        id: "pod-1",
+        name: "auth-service-abc123",
+        parentServiceKey: "service-key-1",
+      });
+
+      const activePods: ActivePodMap = {
+        "pod-2": createPod({
+          id: "pod-2",
+          name: "auth-service-xyz789",
+          parentServiceKey: "service-key-2",
+          status: "Running",
+        }),
+        "pod-3": createPod({
+          id: "pod-3",
+          name: "auth-service-def456",
+          parentServiceKey: "service-key-3",
+          status: "Running",
+        }),
+      };
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeDefined();
+      // based on Object.values order
+      expect(["pod-2", "pod-3"]).toContain(result?.id);
+    });
+  });
+
+  describe("rejection scenarios - no match found", () => {
+    it("should return undefined when pod has same parentServiceKey", () => {
+      const currentPod = createPod({
+        parentServiceKey: "service-key-1",
+      });
+
+      const activePods: ActivePodMap = {
+        "pod-2": createPod({
+          parentServiceKey: "service-key-1",
+          status: "Running",
+        }),
+      };
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when pod is in different namespace", () => {
+      const currentPod = createPod({
+        namespace: "production",
+        parentServiceKey: "service-key-1",
+      });
+
+      const activePods: ActivePodMap = {
+        "pod-2": createPod({
+          namespace: "staging",
+          parentServiceKey: "service-key-2",
+          status: "Running",
+        }),
+      };
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when pod is from different service", () => {
+      const currentPod = createPod({
+        name: "auth-service-abc123",
+        parentServiceKey: "service-key-1",
+      });
+
+      const activePods: ActivePodMap = {
+        "pod-2": createPod({
+          name: "billing-service-xyz789",
+          parentServiceKey: "service-key-2",
+          status: "Running",
+        }),
+      };
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when pod is not running", () => {
+      const currentPod = createPod({
+        parentServiceKey: "service-key-1",
+      });
+
+      const activePods: ActivePodMap = {
+        "pod-2": createPod({
+          parentServiceKey: "service-key-2",
+          status: "Pending",
+        }),
+      };
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when activePods is empty", () => {
+      const currentPod = createPod({});
+      const activePods: ActivePodMap = {};
+
+      const result = findReplacementPod(currentPod, activePods);
+
+      expect(result).toBeUndefined();
     });
   });
 });

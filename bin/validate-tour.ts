@@ -22,6 +22,7 @@ import path from "path";
 import process from "process";
 import { isMap, isScalar, isSeq, type Node, Pair, parseDocument } from "yaml";
 import type { TourConfiguration } from "../src/utils/configTypesScratch";
+import { prettifyPointerWithIds } from "./validate-tour-utils";
 
 function usageAndExit(): never {
   console.error("Usage: validate-tour <tour-name | path/to/tour.yaml>");
@@ -105,52 +106,6 @@ function jsonPointerToPathParts(pointer: string) {
       if (/^\d+$/.test(p)) return Number(p);
       return p;
     });
-}
-
-/**
- * Build a prettier path string using ids where available in arrays.
- * - data: the JS object parsed from YAML (unknown, we type-narrow at runtime)
- * - pathParts: array form of pointer (mix of strings and numbers)
- */
-function prettifyPointerWithIds(data: unknown, pathParts: (string | number)[]) {
-  let cur: unknown = data;
-  const outParts: string[] = [];
-
-  for (const part of pathParts) {
-    if (cur === undefined || cur === null) {
-      outParts.push(String(part));
-      cur = undefined;
-      continue;
-    }
-
-    if (Array.isArray(cur)) {
-      const idx = typeof part === "number" ? part : parseInt(String(part), 10);
-      const elem = (cur as unknown[])[idx];
-      if (
-        elem &&
-        typeof elem === "object" &&
-        "id" in (elem as Record<string, unknown>)
-      ) {
-        const idVal = (elem as Record<string, unknown>).id;
-        if (typeof idVal === "string" && idVal.length > 0) {
-          outParts.push(idVal);
-        } else {
-          outParts.push(String(part));
-        }
-      } else {
-        outParts.push(String(part));
-      }
-      cur = elem;
-    } else if (typeof cur === "object") {
-      outParts.push(String(part));
-      cur = (cur as Record<string, unknown>)[String(part)];
-    } else {
-      outParts.push(String(part));
-      cur = undefined;
-    }
-  }
-
-  return "/" + outParts.join("/");
 }
 
 function reportYamlParseErrors(

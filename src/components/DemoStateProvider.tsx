@@ -9,8 +9,8 @@ import { useAnimationEngine } from "../animationEngine/hook.ts";
 import { DemoContext } from "../hooks/useDemoContext.ts";
 import { getCurrentEngineData } from "../utils/demoStateHelpers.ts";
 import type { TourEngine } from "../utils/engineTypesScratch.ts";
-import type { NavigationState } from "../utils/types.ts";
 import { getAllParsedTourConfigs } from "../utils/fetchTourConfigs.ts";
+import type { NavigationState } from "../utils/types.ts";
 
 interface DemoStateProviderProps {
   children: ReactNode;
@@ -25,8 +25,8 @@ const defaultNavState: NavigationState = {
 
 export function DemoStateProvider({ children }: DemoStateProviderProps) {
   const [tourConfigs, setTourConfigs] = useState<TourEngine[] | null>(null);
-  const [loadingState, setLoadingState] = useState<boolean>(true);
-  const [errorState, setErrorState] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [navigationState, setNavigationState] =
     useState<NavigationState>(defaultNavState);
@@ -34,7 +34,6 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
   const [animationComplete, setAnimationComplete] = useState<boolean>(false);
 
   useEffect(() => {
-    setLoadingState(true);
     getAllParsedTourConfigs()
       .then((configs) => {
         setTourConfigs(configs);
@@ -48,13 +47,12 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
         }
       })
       .catch((err: unknown) => {
-        // TODO: Handle error state in App.tsx (loading state too)
         const msg =
-          err instanceof Error ? err.message : "Failed to load config";
+          err instanceof Error ? err.message : "Failed to load tour configs";
 
-        setErrorState(msg);
+        setError(msg);
       })
-      .finally(() => setLoadingState(false));
+      .finally(() => setLoading(false));
   }, []);
 
   const setNavState = useCallback((newNavState: Partial<NavigationState>) => {
@@ -97,8 +95,8 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
       setNavState,
       setAnimationComplete,
       animationComplete,
-      loadingState,
-      errorState,
+      loading,
+      error,
       onAnimationComplete,
       resetAnimationComplete,
       engineState,
@@ -111,8 +109,8 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
     tourConfigs,
     setNavState,
     animationComplete,
-    loadingState,
-    errorState,
+    loading,
+    error,
     engineState,
     engineControls,
   ]);

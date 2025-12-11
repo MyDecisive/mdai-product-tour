@@ -1,7 +1,8 @@
-import { Box } from "@mui/material";
+import { Backdrop, Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import { Banner, Footer, NavDrawer, Simulators } from "./components";
 import { BigContentModal } from "./components/BigContentModal/BigContentModal";
+import { Error } from "./components/Error";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
 import { SplashPage } from "./components/SplashPage";
 import { useDemoContext } from "./hooks/useDemoContext";
@@ -9,6 +10,8 @@ import { useDemoContext } from "./hooks/useDemoContext";
 function App() {
   const {
     navigationState: { tour },
+    loading,
+    error,
   } = useDemoContext();
 
   return (
@@ -21,6 +24,15 @@ function App() {
         overflow: "hidden",
       }}
     >
+      {loading && (
+        <Backdrop
+          sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+          open={true}
+        >
+          <CircularProgress />
+        </Backdrop>
+      )}
+      {error && <Error error={error} />}
       <Box
         sx={{
           display: "flex",

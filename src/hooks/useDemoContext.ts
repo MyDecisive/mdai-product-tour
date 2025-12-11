@@ -13,8 +13,8 @@ export interface DemoContextValue {
   onAnimationComplete: () => void;
   resetAnimationComplete: () => void;
   animationComplete: boolean;
-  loadingState: boolean;
-  errorState: string | null;
+  loading: boolean;
+  error: string | null;
   engineControls: AnimationEngineControls;
   engineState: AnimationEngineState;
 }

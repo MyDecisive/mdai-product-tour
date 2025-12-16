@@ -382,6 +382,7 @@ const findYamlParents = (lines: string[], lineNo: number): number[] => {
 };
 
 function determineChangeEnd(
+  start: number,
   end: number | undefined,
   changeLinesLength: number,
   linesLength: number
@@ -390,11 +391,15 @@ function determineChangeEnd(
     return end;
   }
   if (changeLinesLength > 0) {
-    return changeLinesLength;
+    return start + changeLinesLength - 1;
   }
-  return linesLength;
+  return start + linesLength - 1;
 }
 
+/**
+ * Note for debugging/reasoning about this function:
+ * reference to LineNos refers to file line numbers, NOT array indices.
+ */
 export const extractRelevantSections = (
   lines: string[],
   changes: LineChangeBlock[],
@@ -410,6 +415,7 @@ export const extractRelevantSections = (
 
   changes.forEach(({ start, end, changeLines }) => {
     const changeEnd = determineChangeEnd(
+      start,
       end,
       changeLines?.length || 0,
       lines.length

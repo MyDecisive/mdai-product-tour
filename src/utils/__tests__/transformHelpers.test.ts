@@ -1,14 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR_CHAR, TERMINAL_PROMPT } from "../constants";
-import type { ActivePod, ActivePodMap } from "../engineTypesScratch";
+import type { ActivePod, ActivePodMap, LineGroup } from "../engineTypesScratch";
 import {
   braidLogs,
+  createChangeMap,
+  createConfigContentGroups,
   createLogRecord,
   createTerminalContent,
+  extractRelevantSections,
   findReplacementPod,
   parseRawLogFileToLogLines,
+  rawLinesFromText,
 } from "../transformHelpers";
-import type { LogRecord } from "../types";
+import type { LineChangeBlock, LogRecord } from "../types";
 
 describe("createLogRecord", () => {
   const mockDate = new Date("2024-01-15T12:00:00.000Z");
@@ -620,5 +624,507 @@ describe("findReplacementPod", () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe("rawLinesFromText", () => {
+  it("should split text by newlines", () => {
+    const text = "line1\nline2\nline3";
+    const result = rawLinesFromText(text);
+
+    expect(result).toEqual(["line1", "line2", "line3"]);
+  });
+
+  it("should handle single line", () => {
+    const result = rawLinesFromText("single line");
+
+    expect(result).toEqual(["single line"]);
+  });
+
+  it("should handle empty string", () => {
+    const result = rawLinesFromText("");
+
+    expect(result).toEqual([""]);
+  });
+
+  it("should handle trailing newline", () => {
+    const result = rawLinesFromText("line1\nline2\n");
+
+    expect(result).toEqual(["line1", "line2", ""]);
+  });
+});
+
+describe("createChangeMap", () => {
+  it("should create map from changeLines", () => {
+    const changes: LineChangeBlock[] = [
+      {
+        start: 5,
+        changeLines: ["old line 5", "old line 6"],
+      },
+    ];
+
+    const result = createChangeMap(changes);
+
+    expect(result.get(5)).toBe("old line 5");
+    expect(result.get(6)).toBe("old line 6");
+  });
+
+  it("should handle multiple change blocks", () => {
+    const changes: LineChangeBlock[] = [
+      {
+        start: 5,
+        changeLines: ["old line 5"],
+      },
+      {
+        start: 10,
+        changeLines: ["old line 10", "old line 11"],
+      },
+    ];
+
+    const result = createChangeMap(changes);
+
+    expect(result.get(5)).toBe("old line 5");
+    expect(result.get(10)).toBe("old line 10");
+    expect(result.get(11)).toBe("old line 11");
+  });
+
+  it("should fill gaps between start and end with empty strings", () => {
+    const changes: LineChangeBlock[] = [
+      {
+        start: 5,
+        end: 8,
+        changeLines: ["old line 5"],
+      },
+    ];
+
+    const result = createChangeMap(changes);
+
+    expect(result.get(5)).toBe("old line 5");
+    expect(result.get(6)).toBe("");
+    expect(result.get(7)).toBe("");
+    expect(result.get(8)).toBe("");
+  });
+
+  it("should not override existing changeLines with empty strings", () => {
+    const changes: LineChangeBlock[] = [
+      {
+        start: 5,
+        end: 7,
+        changeLines: ["old line 5", "old line 6", "old line 7"],
+      },
+    ];
+
+    const result = createChangeMap(changes);
+
+    expect(result.get(5)).toBe("old line 5");
+    expect(result.get(6)).toBe("old line 6");
+    expect(result.get(7)).toBe("old line 7");
+  });
+
+  it("should handle empty changeLines array", () => {
+    const changes: LineChangeBlock[] = [
+      {
+        start: 5,
+        end: 7,
+        changeLines: [],
+      },
+    ];
+
+    const result = createChangeMap(changes);
+
+    expect(result.get(5)).toBe("");
+    expect(result.get(6)).toBe("");
+    expect(result.get(7)).toBe("");
+  });
+
+  it("should handle empty changes array", () => {
+    const result = createChangeMap([]);
+
+    expect(result.size).toBe(0);
+  });
+});
+
+describe("extractRelevantSections", () => {
+  describe("basic functionality", () => {
+    it("should return empty array when no changes", () => {
+      const lines = ["line1", "line2", "line3"];
+      const result = extractRelevantSections(lines, []);
+
+      expect(result).toEqual([]);
+    });
+
+    it("should return empty array when no lines", () => {
+      const changes: LineChangeBlock[] = [{ start: 1, changeLines: ["old"] }];
+      const result = extractRelevantSections([], changes);
+
+      expect(result).toEqual([]);
+    });
+
+    it("should extract single change with context", () => {
+      const lines = ["line1", "line2", "line3", "line4", "line5"];
+      const changes: LineChangeBlock[] = [
+        { start: 3, changeLines: ["old line 3"] },
+      ];
+
+      const result = extractRelevantSections(lines, changes, 1);
+
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({
+        type: "group",
+        start: 2,
+        lines: ["line2"],
+      });
+    });
+
+    it("should create gap between non-consecutive sections", () => {
+      const lines = [
+        "line1",
+        "line2",
+        "line3",
+        "line4",
+        "line5",
+        "line6",
+        "line7",
+      ];
+      const changes: LineChangeBlock[] = [
+        { start: 2, end: 2, changeLines: ["old"] },
+        { start: 6, end: 6, changeLines: ["old"] },
+      ];
+
+      const result = extractRelevantSections(lines, changes, 0);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].type).toBe("group");
+      expect(result[1].type).toBe("gap");
+      expect(result[2].type).toBe("group");
+    });
+  });
+
+  describe("context spacing", () => {
+    // Context lines are adjacent LineGroups to the LineGroup with changeLines
+    it("should respect custom context spacing", () => {
+      const lines = ["l1", "l2", "l3", "l4", "l5", "l6", "l7"];
+      const changes: LineChangeBlock[] = [{ start: 4, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 1);
+      expect(result.length).toBe(3);
+      expect(result).toEqual([
+        {
+          type: "group",
+          start: 3,
+          lines: ["l3"],
+        },
+        {
+          type: "group",
+          start: 4,
+          lines: ["l4"],
+        },
+        {
+          type: "group",
+          start: 5,
+          lines: ["l5"],
+        },
+      ]);
+    });
+
+    it("should handle zero context spacing", () => {
+      const lines = ["l1", "l2", "l3", "l4", "l5"];
+      const changes: LineChangeBlock[] = [{ start: 3, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 0);
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toEqual({
+        type: "group",
+        start: 3,
+        lines: ["l3"],
+      });
+    });
+
+    it("should not exceed array bounds with large context", () => {
+      const lines = ["l1", "l2", "l3"];
+      const changes: LineChangeBlock[] = [{ start: 2, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 10);
+
+      expect(result).toEqual([
+        {
+          type: "group",
+          start: 1,
+          lines: ["l1"],
+        },
+        {
+          type: "group",
+          start: 2,
+          lines: ["l2"],
+        },
+        {
+          type: "group",
+          start: 3,
+          lines: ["l3"],
+        },
+      ]);
+    });
+  });
+
+  describe("YAML parent detection", () => {
+    it("should include YAML parent lines", () => {
+      const lines = [
+        "root:",
+        "  child:",
+        "    grandchild: value",
+        "  other: value",
+      ];
+      const changes: LineChangeBlock[] = [{ start: 3, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 0);
+      // Yaml parent lines are always provided as context groups
+      // regardless of contextSpacing argument
+      const allLines = result
+        .filter((s) => s.type === "group")
+        .flatMap((s) => s.lines);
+
+      expect(allLines).toContain("root:");
+      expect(allLines).toContain("  child:");
+    });
+
+    it("should skip comment lines when finding parents", () => {
+      const lines = ["root:", "  # comment", "  child:", "    value: test"];
+      const changes: LineChangeBlock[] = [{ start: 4, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 0);
+
+      const allLines = result
+        .filter((s) => s.type === "group")
+        .flatMap((s) => s.lines);
+
+      expect(allLines).toContain("root:");
+      expect(allLines).toContain("  child:");
+      expect(allLines).not.toContain("  # comment");
+    });
+  });
+
+  describe("change end determination", () => {
+    it("should use explicit end when provided", () => {
+      const lines = ["l1", "l2", "l3", "l4", "l5"];
+      const changes: LineChangeBlock[] = [
+        {
+          start: 2,
+          end: 4,
+          changeLines: ["old"],
+        },
+      ];
+
+      const result = extractRelevantSections(lines, changes, 0);
+
+      expect(result[0]).toEqual({
+        type: "group",
+        start: 2,
+        lines: ["l2", "l3", "l4"],
+      });
+    });
+
+    it("should use changeLines length when end not provided", () => {
+      const lines = ["l1", "l2", "l3", "l4", "l5"];
+      const changes: LineChangeBlock[] = [
+        {
+          start: 2,
+          changeLines: ["old1", "old2"],
+        },
+      ];
+
+      const result = extractRelevantSections(lines, changes, 0);
+
+      expect(result[0]).toEqual({
+        type: "group",
+        start: 2,
+        lines: ["l2", "l3"],
+      });
+    });
+  });
+
+  describe("section grouping", () => {
+    it("should keep consecutive changed lines in same group", () => {
+      const lines = ["l1", "l2", "l3", "l4", "l5"];
+      const changes: LineChangeBlock[] = [
+        { start: 2, changeLines: ["old"] },
+        { start: 3, changeLines: ["old"] },
+      ];
+
+      const result = extractRelevantSections(lines, changes, 0);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: "group",
+        start: 2,
+        lines: ["l2", "l3"],
+      });
+    });
+
+    it("should split groups when transitioning between changed and unchanged lines", () => {
+      const lines = ["l1", "l2", "l3", "l4", "l5"];
+      const changes: LineChangeBlock[] = [
+        { start: 2, changeLines: ["old"] },
+        // line 3 is context (not changed)
+        { start: 4, changeLines: ["old"] },
+      ];
+
+      const result = extractRelevantSections(lines, changes, 1);
+
+      // Should split into separate groups with changed and context sections
+      expect(result.length).toBe(5);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle change at beginning of file", () => {
+      const lines = ["l1", "l2", "l3"];
+      const changes: LineChangeBlock[] = [{ start: 1, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 1);
+
+      expect(result).toEqual([
+        {
+          type: "group",
+          start: 1,
+          lines: ["l1"],
+        },
+        {
+          type: "group",
+          start: 2,
+          lines: ["l2"],
+        },
+      ]);
+    });
+
+    it("should handle change at end of file", () => {
+      const lines = ["l1", "l2", "l3"];
+      const changes: LineChangeBlock[] = [{ start: 3, changeLines: ["old"] }];
+
+      const result = extractRelevantSections(lines, changes, 1);
+
+      expect(result).toEqual([
+        {
+          type: "group",
+          start: 2,
+          lines: ["l2"],
+        },
+        {
+          type: "group",
+          start: 3,
+          lines: ["l3"],
+        },
+      ]);
+    });
+  });
+});
+
+describe("createConfigContentGroups", () => {
+  const fileName = "test.yaml";
+
+  it("should convert gap sections", () => {
+    const sections = [{ type: "gap" as const, lineNo: 5 }];
+    const changeMap = new Map<number, string>();
+
+    const result = createConfigContentGroups(fileName, sections, changeMap);
+
+    expect(result).toEqual([{ type: "gap", lineNo: 5 }]);
+  });
+
+  it("should convert group sections without changes", () => {
+    const sections = [
+      { type: "group" as const, start: 1, lines: ["line1", "line2"] },
+    ];
+    const changeMap = new Map<number, string>();
+
+    const result = createConfigContentGroups(fileName, sections, changeMap);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      type: "group",
+      groupId: "test.yaml-1-2",
+      start: 1,
+      end: 2,
+      isChangeBlock: false,
+      lines: [
+        { lineNo: 1, content: "line1" },
+        { lineNo: 2, content: "line2" },
+      ],
+    });
+  });
+
+  it("should add change content when present in changeMap", () => {
+    const sections = [
+      { type: "group" as const, start: 5, lines: ["new line 5", "line 6"] },
+    ];
+    const changeMap = new Map([[5, "old line 5"]]);
+
+    const result = createConfigContentGroups(fileName, sections, changeMap);
+
+    expect(result[0]).toMatchObject({
+      type: "group",
+      isChangeBlock: true,
+      lines: [
+        {
+          lineNo: 5,
+          content: "new line 5",
+          changeLineNo: 5,
+          changeContent: "old line 5",
+        },
+        { lineNo: 6, content: "line 6" },
+      ],
+    });
+  });
+
+  it("should mark group as changeBlock when any line has changes", () => {
+    const sections = [
+      {
+        type: "group" as const,
+        start: 1,
+        lines: ["line1", "line2", "line3"],
+      },
+    ];
+    const changeMap = new Map([[2, "old line 2"]]);
+
+    const result = createConfigContentGroups(fileName, sections, changeMap);
+
+    expect(result[0]).toMatchObject({
+      isChangeBlock: true,
+    });
+  });
+
+  it("should create unique groupIds", () => {
+    const sections = [
+      { type: "group" as const, start: 1, lines: ["line1"] },
+      { type: "group" as const, start: 5, lines: ["line5", "line6"] },
+    ];
+    const changeMap = new Map<number, string>();
+
+    const result = createConfigContentGroups(fileName, sections, changeMap);
+
+    expect((result[0] as LineGroup).groupId).toBe("test.yaml-1-1");
+    expect((result[1] as LineGroup).groupId).toBe("test.yaml-5-6");
+  });
+
+  it("should handle mixed gaps and groups", () => {
+    const sections = [
+      { type: "group" as const, start: 1, lines: ["line1"] },
+      { type: "gap" as const, lineNo: 3 },
+      { type: "group" as const, start: 5, lines: ["line5"] },
+    ];
+    const changeMap = new Map<number, string>();
+
+    const result = createConfigContentGroups(fileName, sections, changeMap);
+
+    expect(result).toHaveLength(3);
+    expect(result[0].type).toBe("group");
+    expect(result[1].type).toBe("gap");
+    expect(result[2].type).toBe("group");
+  });
+
+  it("should handle empty sections array", () => {
+    const result = createConfigContentGroups(fileName, [], new Map());
+
+    expect(result).toEqual([]);
   });
 });

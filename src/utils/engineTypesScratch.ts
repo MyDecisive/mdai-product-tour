@@ -148,10 +148,13 @@ export interface EngineConfigTarget {
 // Logs
 // ----------------------------------------------------------------------------
 
-export interface EngineLogsTarget {
+export interface EngineLogsContext {
   records: LogRecord[];
   speed: number;
-  errorRecords: LogRecord[];
-  errorFrequency: number;
-  contextLabel?: string;
+  contextName: string;
+}
+
+export interface EngineLogsTarget {
+  activeContext: string;
+  allContexts: Record<string, EngineLogsContext>;
 }

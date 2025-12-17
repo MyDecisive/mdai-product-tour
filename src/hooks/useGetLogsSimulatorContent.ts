@@ -1,11 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { EngineLogsTarget } from "../utils/engineTypesScratch";
+import type { LogRecord } from "../utils/types";
 
 export function useGetLogsSimulatorContent({
-  records,
+  activeContext,
+  allContexts,
   playing,
-}: Pick<EngineLogsTarget, "records"> & { playing: boolean }) {
+}: EngineLogsTarget & { playing: boolean }) {
   const logContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const records = useMemo(() => {
+    if (!activeContext || !allContexts[activeContext]) {
+      return [] as LogRecord[];
+    }
+
+    return allContexts[activeContext].records;
+  }, [activeContext, allContexts]);
 
   useEffect(() => {
     if (logContainerRef.current && records.length && playing) {
@@ -14,6 +24,7 @@ export function useGetLogsSimulatorContent({
   }, [records, playing]);
 
   return {
+    records,
     logContainerRef,
   };
 }

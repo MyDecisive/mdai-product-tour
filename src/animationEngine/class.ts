@@ -1,6 +1,6 @@
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
-  EngineLogsTarget,
+  EngineLogsContext,
   EngineTargetState,
   LineGroup,
   PodId,
@@ -8,12 +8,13 @@ import type {
 import {
   addConfigTarget,
   addLogsRecords,
+  addOrReplaceLogsContext,
   addStatusPods,
   addTerminalStrings,
   removeStatusPods,
   setConfigActiveTab,
   setConfigScrollTarget,
-  setLogsContextLabel,
+  setLogsActiveContext,
   setTerminalContentPrinted,
   toggleConfigPulseGroup,
   toggleConfigShowingChange,
@@ -144,7 +145,7 @@ export class AnimationEngineInstance {
     },
     [SIMULATORS.LOGS]: {
       [FRAME_TYPES.ADD]: (frame) => {
-        this.updateState(addLogsRecords, frame.updates);
+        this.updateState(addOrReplaceLogsContext, frame.updates);
       },
       [FRAME_TYPES.STREAM]: (frame) => {
         this.logsStream(frame.updates);
@@ -258,17 +259,13 @@ export class AnimationEngineInstance {
   }
 
   private executePodRemovals(): void {
-    this.updateState<Set<string>>(removeStatusPods, this.podsToRemove);
+    this.updateState(removeStatusPods, this.podsToRemove);
     this.podsToRemove.clear();
   }
 
   public onPodStatusChange(podId: PodId, newStatus: PodStatusType): void {
     const incrementRestarts = newStatus === STATUS.crashLoopBackoff;
-    this.updateState<{
-      podId: string;
-      status: PodStatusType;
-      incrementRestarts: boolean;
-    }>(updatePodStatus, {
+    this.updateState(updatePodStatus, {
       podId,
       status: newStatus,
       incrementRestarts,
@@ -285,18 +282,18 @@ export class AnimationEngineInstance {
   // Config sim methods
   // ----------------------------------------------------------------------------
   public onSetActiveTab(tabName: string) {
-    this.updateState<string>(setConfigActiveTab, tabName);
+    this.updateState(setConfigActiveTab, tabName);
   }
 
   public onToggleShowingChange(groupId: string): void {
-    this.updateState<string>(toggleConfigShowingChange, groupId);
+    this.updateState(toggleConfigShowingChange, groupId);
   }
 
   private pulseGroup(groupId: string): void {
-    this.updateState<string>(toggleConfigPulseGroup, groupId);
+    this.updateState(toggleConfigPulseGroup, groupId);
 
     const timeoutId = setTimeout(() => {
-      this.updateState<string>(toggleConfigPulseGroup, groupId);
+      this.updateState(toggleConfigPulseGroup, groupId);
     }, 1500);
 
     this.configPulseGroupTimeouts.push(timeoutId);
@@ -356,19 +353,7 @@ export class AnimationEngineInstance {
   // ----------------------------------------------------------------------------
   // Logs sim methods
   // ----------------------------------------------------------------------------
-  private getNextLog(
-    records: LogRecord[],
-    errorRecords: LogRecord[],
-    errorFrequency: number
-  ): LogRecord {
-    const shouldError =
-      errorRecords.length > 0 && Math.random() < errorFrequency;
-
-    if (shouldError) {
-      const randomIdx = Math.floor(Math.random() * errorRecords.length);
-      return createLogRecord(errorRecords[randomIdx], -1, -1, true);
-    }
-
+  private getNextLog(records: LogRecord[]): LogRecord {
     const logIndex = this.logsCurrentIndex % records.length;
     const nextLog = createLogRecord(
       records[logIndex],
@@ -389,11 +374,9 @@ export class AnimationEngineInstance {
   private logsStream({
     records,
     speed,
-    errorRecords,
-    errorFrequency,
     duration,
-    contextLabel,
-  }: EngineLogsTarget & { duration: number }): void {
+    contextName,
+  }: EngineLogsContext & { duration: number }): void {
     if (this.logsIntervalRef) {
       clearInterval(this.logsIntervalRef);
       this.logsIntervalRef = null;
@@ -411,12 +394,13 @@ export class AnimationEngineInstance {
       return;
     }
 
-    this.updateState<string | undefined>(setLogsContextLabel, contextLabel);
+    this.updateState(setLogsActiveContext, contextName);
 
     const emitOne = () => {
-      const nextLog = this.getNextLog(records, errorRecords, errorFrequency);
+      const nextLog = this.getNextLog(records);
 
-      this.updateState<{ records: LogRecord[] }>(addLogsRecords, {
+      this.updateState(addLogsRecords, {
+        contextName,
         records: [nextLog],
       });
     };

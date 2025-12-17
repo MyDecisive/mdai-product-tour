@@ -6,13 +6,18 @@ import { SimulatorContextLabel } from "../SimContextLabel";
 import { LogRow } from "./LogRow";
 
 export const LogsSimulator: React.FC<
-  Pick<EngineLogsTarget, "records" | "contextLabel"> & { playing: boolean }
-> = ({ contextLabel, records, playing }) => {
-  const { logContainerRef } = useGetLogsSimulatorContent({ records, playing });
+  EngineLogsTarget & { playing: boolean }
+> = ({ activeContext, allContexts, playing }) => {
+  const { logContainerRef, records } = useGetLogsSimulatorContent({
+    allContexts,
+    activeContext,
+    playing,
+  });
+
   return (
     <>
-      {contextLabel && (
-        <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
+      {activeContext && (
+        <SimulatorContextLabel>{activeContext}</SimulatorContextLabel>
       )}
       <Box
         className="log-rows-container"

@@ -1,23 +1,42 @@
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useMemo } from "react";
 import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorContent";
-import type { EngineLogsTarget } from "../../../utils/engineTypesScratch";
+import type {
+  ActivePodMap,
+  EngineLogsTarget,
+} from "../../../utils/engineTypesScratch";
 import { SimulatorContextLabel } from "../SimContextLabel";
 import { LogRow } from "./LogRow";
 
 export const LogsSimulator: React.FC<
-  EngineLogsTarget & { playing: boolean }
-> = ({ activeContext, allContexts, playing }) => {
+  EngineLogsTarget & { playing: boolean; activeStatusPods: ActivePodMap }
+> = ({ activeContext, allContexts, playing, activeStatusPods }) => {
   const { logContainerRef, records } = useGetLogsSimulatorContent({
     allContexts,
     activeContext,
     playing,
   });
 
+  const activeContextLabel = useMemo(() => {
+    const podObjects = Object.values(activeStatusPods);
+    if (!activeContext || !podObjects.length) {
+      return "";
+    }
+
+    const relevantPod = podObjects.find((pod) =>
+      pod.name.startsWith(activeContext)
+    );
+    if (!relevantPod) {
+      return "";
+    }
+
+    return relevantPod.name;
+  }, [activeContext, activeStatusPods]);
+
   return (
     <>
-      {activeContext && (
-        <SimulatorContextLabel>{activeContext}</SimulatorContextLabel>
+      {activeContextLabel && (
+        <SimulatorContextLabel>{activeContextLabel}</SimulatorContextLabel>
       )}
       <Box
         className="log-rows-container"

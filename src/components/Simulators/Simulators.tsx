@@ -76,6 +76,11 @@ export function Simulators() {
             >
               {engineState.currentSimulatorState.status != null && (
                 <Status
+                  activeLogContext={
+                    engineState.activeSimulator.has(SIMULATORS.LOGS)
+                      ? engineState.currentSimulatorState.logs?.activeContext
+                      : undefined
+                  }
                   activePods={
                     engineState.currentSimulatorState.status.activePods
                   }
@@ -131,6 +136,9 @@ export function Simulators() {
               {engineState.currentSimulatorState.logs != null && (
                 <LogsSimulator
                   {...engineState.currentSimulatorState.logs}
+                  activeStatusPods={
+                    engineState.currentSimulatorState.status?.activePods || {}
+                  }
                   playing={
                     engineState.isPlaying &&
                     engineState.activeSimulator.has(SIMULATORS.LOGS)

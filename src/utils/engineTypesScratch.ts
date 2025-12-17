@@ -87,6 +87,7 @@ export interface ActivePod {
   replicaNo: number;
   parentServiceKey: string;
   restartCount: number;
+  isActiveLogsContext?: boolean;
 }
 
 export type ActivePodMap = Record<PodId, ActivePod>;

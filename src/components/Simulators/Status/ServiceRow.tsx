@@ -1,4 +1,3 @@
-import type { CSSObject } from "@emotion/react";
 import { alpha } from "@mui/material";
 import { blue, green, grey, orange, red, yellow } from "@mui/material/colors";
 import { useEffect, useRef } from "react";
@@ -28,34 +27,48 @@ function getNextStatus(currentStatus: PodStatusType): PodStatusType | null {
   }
 }
 
-const STATUS_STYLE_MAP: Record<PodStatusType, CSSObject> = {
+const STATUS_STYLE_MAP: Record<
+  PodStatusType,
+  {
+    color: string;
+    backgroundColor: string;
+    highLightTextColor: string;
+  }
+> = {
   [STATUS.pending]: {
     color: yellow[400],
     backgroundColor: alpha(yellow["900"], 0.2),
+    highLightTextColor: yellow[900],
   },
   [STATUS.containerCreating]: {
     color: blue[400],
     backgroundColor: alpha(blue["900"], 0.2),
+    highLightTextColor: blue[900],
   },
   [STATUS.running]: {
     color: green[400],
     backgroundColor: alpha(green["900"], 0.2),
+    highLightTextColor: green[900],
   },
   [STATUS.error]: {
     color: red[400],
     backgroundColor: alpha(red["900"], 0.2),
+    highLightTextColor: red[900],
   },
   [STATUS.crashLoopBackoff]: {
     color: red[400],
     backgroundColor: alpha(red["900"], 0.2),
+    highLightTextColor: red[900],
   },
   [STATUS.terminating]: {
     color: orange[400],
     backgroundColor: alpha(orange["900"], 0.2),
+    highLightTextColor: orange[900],
   },
   [STATUS.shutdown]: {
     color: grey[400],
     backgroundColor: alpha(grey["900"], 0.2),
+    highLightTextColor: grey[900],
   },
 };
 
@@ -74,6 +87,7 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
   status,
   restartCount,
   onStatusChange,
+  isActiveLogsContext,
 }) => {
   const timeoutRef = useRef<NodeJS.Timeout>(null);
 
@@ -101,8 +115,9 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
     };
   }, [status, id, onStatusChange]);
 
-  const rowColor = STATUS_STYLE_MAP[status]?.color;
-  const rowBackgroundColor = STATUS_STYLE_MAP[status]?.backgroundColor;
+  const color = STATUS_STYLE_MAP[status].color;
+  const backgroundColor = STATUS_STYLE_MAP[status].backgroundColor;
+  const highLightTextColor = STATUS_STYLE_MAP[status].highLightTextColor;
 
   return (
     <StyledRow
@@ -112,8 +127,14 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
       status={status}
       restarts={restartCount.toString()}
       containerStyles={{
-        color: rowColor || "white",
-        backgroundColor: rowBackgroundColor || "black",
+        color,
+        backgroundColor,
+        padding: "0 2px",
+        boxSizing: "border-box",
+        ...(isActiveLogsContext && {
+          color: highLightTextColor,
+          backgroundColor: color,
+        }),
       }}
     />
   );

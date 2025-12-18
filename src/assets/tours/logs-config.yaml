@@ -13,19 +13,10 @@ steps:
         content:
           - items:
               - text: |
-                  We'll start the synthetic services in our K8S cluster. This will generate the data we need to use, as the MyDecisive SmartHub is currently running but idle (see <button:0>Status</button> window). <code>./mdai-kind.sh logs</code>and then <code>helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./synthetics/loggen_fluent_config.yaml</code>to open the floodgates.
-
-                  Next, we start Fluentd containers to stream logs from services like "service1234" and "service4321.” The <button:1>Status</button> window will confirm the container start, and the <button:2>Tail Logs</button> window will show the incoming log data.
-
+                  We'll start the synthetic services and an opentelemetry collector in our K8S cluster. This will generate the data we need to use, as the MyDecisive SmartHub is currently running but idle (see <button:0>Status</button> window).
                 actions:
                   - type: activate
                     simulator: status
-                    duration: 1250
-                  - type: activate
-                    simulator: status
-                    duration: 1250
-                  - type: activate
-                    simulator: logs
                     duration: 1250
         initialState:
           status:
@@ -101,6 +92,20 @@ steps:
                 - serviceLogsBasic.txt
               speed: 50
               duration: 3000
+      - id: 1-b
+        title: Send log data to your collector
+        content:
+          - items:
+              - text: |
+                  Next, we start Fluentd containers to stream logs from services like "service1234" and "service4321” to your collector. The <button:0>Status</button> window will confirm the container start, and the <button:1>Tail Logs</button> window will show the incoming log data.
+                actions:
+                  - type: activate
+                    simulator: status
+                    duration: 1250
+                  - type: activate
+                    simulator: logs
+                    duration: 1250
+        animation:
           - type: enter_command
             simulator: terminal
             updates:
@@ -122,10 +127,6 @@ steps:
             simulator: status
             updates:
               - name: "fluent-fluentd"
-          - type: clear
-            simulators:
-              - logs
-            waitForComplete: false
           - type: stream
             simulator: logs
             updates:
@@ -169,7 +170,6 @@ steps:
                     fileName: otel.yaml
                     line: 65
                     scrollOnly: true
-              - text: We are now actively dropping all logs from service4321, which saves you money. The downside is that this approach uses basic, static OTEL, which is suboptimal.
         initialState:
           config:
             files:
@@ -204,6 +204,14 @@ steps:
               line: 65
           - type: delay
             duration: 1500
+      - id: 2-b
+        title: Get Static Filtration online!
+        content:
+          - items:
+              - text: Just changing the config isn't enough. Run the command to apply the changes we covered in the previous step to update your collector.
+              - text: We are now actively dropping all logs from service4321, which saves you money. The downside is that this approach uses basic, static OTEL, which is suboptimal.
+              - text: You’re now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let’s do better
+        animation:
           - type: enter_command
             simulator: terminal
             updates:
@@ -226,7 +234,7 @@ steps:
             simulator: status
             updates:
               - namespace: "mdai"
-                name: "gateway-collector"
+                name: "gateway-collector-64dc799dcb"
           - type: update
             simulator: banner
             updates:
@@ -237,7 +245,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
-              contextName: gateway-collector
+              contextName: gateway-collector-64dc799dcb
               logsSources:
                 - collectorLogsStatic.txt
               speed: 85
@@ -268,17 +276,8 @@ steps:
       - id: 2-a
         title: Sprinkle in some variables
         content:
-          - title: What’s happening in the config file?
-            variant: list
-            items:
-              - bullet: "1."
-                text: "We are now working with two areas in the <button:0>Config</button> window: OTEL and dynamic variables."
-                actions:
-                  - type: activate
-                    simulator: config
-                    duration: 1250
-              - bullet: "2."
-                text: 'Select HUB.YAML. <button:0>Line 11</button> defines a dynamic "noisy" service filter (replacing the static service4321 drop).'
+          - items:
+              - text: In the SmartHub config file, we define a variable (<button:0>line 11</button>) to keep track of our noisy services.
                 actions:
                   - type: scroll_to
                     waitForComplete: false
@@ -287,38 +286,24 @@ steps:
                       fileName: hub.yaml
                       line: 11
                       scrollOnly: true
-
-              - bullet: "3."
-                text: '<button:0>Line 49</button> contains the PromQL query that sets the "noisy" threshold and duration.'
+              - text: Then we describe what to look for with a Prometheus alert on <button:0>line 30</button>
                 actions:
                   - type: scroll_to
                     waitForComplete: false
                     simulator: config
                     updates:
                       fileName: hub.yaml
-                      line: 49
+                      line: 30
                       scrollOnly: true
-              - bullet: "4."
-                text: "Check OTEL.YAML (Lines <button:0>54</button> & <button:1>99</button>) to see how these variables make OTEL dynamic."
+              - text: And then we declare a rule on <button:0>line 50</button> that defines what to do when a service causes the alert to fire.
                 actions:
                   - type: scroll_to
                     waitForComplete: false
                     simulator: config
                     updates:
-                      fileName: otel.yaml
-                      line: 54
+                      fileName: hub.yaml
+                      line: 50
                       scrollOnly: true
-                  - type: scroll_to
-                    waitForComplete: false
-                    simulator: config
-                    updates:
-                      fileName: otel.yaml
-                      line: 99
-                      scrollOnly: true
-              - bullet: "5."
-                text: "The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
-          - items:
-              - text: This is dynamic, real-time observaility control.
         initialState:
           config:
             files:
@@ -334,6 +319,57 @@ steps:
                   - start: 50
                     end: 63
                     changeLines: []
+            activeTab: hub.yaml
+        animation:
+          - type: scroll_to
+            simulator: config
+            updates:
+              line: 11
+              fileName: hub.yaml
+          - type: delay
+            duration: 1500
+          - type: scroll_to
+            simulator: config
+            updates:
+              line: 30
+              fileName: hub.yaml
+          - type: delay
+            duration: 1500
+          - type: scroll_to
+            simulator: config
+            updates:
+              line: 50
+              fileName: hub.yaml
+          - type: delay
+            duration: 1500
+      - id: 3-b
+        title: Wire up the collector
+        content:
+          - items:
+              - text: Back in your collector config, we've added a filter processor on <button:0>line 50</button> processor matches against the SmartHub variable value.
+                actions:
+                  - type: scroll_to
+                    waitForComplete: false
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 50
+                      scrollOnly: true
+              - text: And we'll <button:0>swap</button> that filter processor in your pipeline with the static one.
+                actions:
+                  - type: scroll_to
+                    waitForComplete: false
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 98
+                      scrollOnly: true
+              - text: "The key: The SmartHub detects log volume and configuration changes and adjusts the cluster configuration instantly to meet your budget."
+          - items:
+              - text: This is dynamic, real-time observaility control.
+        initialState:
+          config:
+            files:
               - url: "https://github.com/DecisiveAI/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/dynamic/otel.yaml"
                 fileName: otel.yaml
                 changes:
@@ -359,27 +395,6 @@ steps:
                       - "          # filter/dynamic-non-crit-services,"
             activeTab: hub.yaml
         animation:
-          - type: scroll_to
-            simulator: config
-            updates:
-              line: 11
-              fileName: hub.yaml
-          - type: delay
-            duration: 1500
-          - type: scroll_to
-            simulator: config
-            updates:
-              line: 30
-              fileName: hub.yaml
-          - type: delay
-            duration: 1500
-          - type: scroll_to
-            simulator: config
-            updates:
-              line: 50
-              fileName: hub.yaml
-          - type: delay
-            duration: 1500
           - type: scroll_to
             simulator: config
             updates:
@@ -421,7 +436,7 @@ steps:
               - namespace: "mdai"
                 name: "mdai-operator-controller-manager-65955fb98b"
               - namespace: "mdai"
-                name: "gateway-collector"
+                name: "gateway-collector-64dc799dcb"
           - type: enter_command
             simulator: terminal
             updates:
@@ -438,7 +453,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
-              contextName: gateway-collector
+              contextName: gateway-collector-64dc799dcb
               logsSources:
                 - collectorLogsDynamic.txt
               speed: 40

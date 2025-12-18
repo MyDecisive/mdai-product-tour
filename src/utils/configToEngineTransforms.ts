@@ -20,6 +20,7 @@ import type {
   EngineContentBlock,
   EngineContentItem,
   EngineFileConfig,
+  EngineLogsContext,
   EngineLogsTarget,
   EngineStatusTarget,
   EngineSubStep,
@@ -31,12 +32,12 @@ import type {
 import { fetchGitHubFile } from "./fetchRawGithubFile";
 import {
   addConfigTarget,
-  addLogsRecords,
+  addOrReplaceLogsContext,
   addStatusPods,
   addTerminalStrings,
   combineTargetStates,
   scrollToConfigLine,
-  setLogsContextLabel,
+  setLogsActiveContext,
   updateBannerState,
 } from "./frameStateMergeStrategies";
 import { getLogFile } from "./getAssets";
@@ -44,6 +45,7 @@ import {
   braidLogs,
   createChangeMap,
   createConfigContentGroups,
+  createEmptyLogs,
   createLogRecord,
   createTerminalContent,
   extractRelevantSections,
@@ -211,32 +213,25 @@ function loadLogsTextFile(fileName: string): LogRecord[] {
   return parseRawLogFileToLogLines(text);
 }
 
-function transformLogs(
+function transformLogsRecords(
   {
     logsSources = [],
     speed,
-    errorFrequency,
-    errorLogsSource,
     duration,
-    contextLabel,
+    contextName,
   }: TourLogSimTarget & { duration?: number },
   prepLogRecordsForState?: boolean
-): EngineLogsTarget & { duration: number } {
+): EngineLogsContext & { duration: number } {
   const engineSpeed = speed ?? 1000;
-  const engineErrorFrequency = errorFrequency ?? 0.1;
 
   const logRecordsByFile = logsSources.map(loadLogsTextFile);
 
-  const errorLogs = errorLogsSource ? loadLogsTextFile(errorLogsSource) : [];
-
   const records = braidLogs(...logRecordsByFile);
 
-  const returnObj: Omit<ReturnType<typeof transformLogs>, "records"> = {
+  const returnObj: Omit<ReturnType<typeof transformLogsRecords>, "records"> = {
     speed: engineSpeed,
-    errorFrequency: engineErrorFrequency,
-    errorRecords: errorLogs,
     duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
-    contextLabel,
+    contextName,
   };
 
   if (prepLogRecordsForState) {
@@ -252,6 +247,24 @@ function transformLogs(
     records,
     ...returnObj,
   };
+}
+
+function transformLogs(
+  tourLogs: (TourLogSimTarget & { duration?: number })[],
+  prepLogRecordsForState?: boolean
+): EngineLogsTarget {
+  return tourLogs.reduce((accum, curr) => {
+    if (!curr.contextName) {
+      return accum;
+    }
+    const transformed = transformLogsRecords(curr, prepLogRecordsForState);
+
+    accum.activeContext = transformed.contextName;
+
+    accum.allContexts[transformed.contextName] = transformed;
+
+    return accum;
+  }, createEmptyLogs());
 }
 
 // ============================================================================
@@ -296,14 +309,14 @@ async function transformTourToEngineAnimation(
           if (frame.simulator === SIMULATORS.LOGS) {
             return {
               ...frame,
-              updates: transformLogs(frame.updates, true),
+              updates: transformLogsRecords(frame.updates, true),
             };
           }
           return frame;
         case FRAME_TYPES.STREAM:
           return {
             ...frame,
-            updates: transformLogs(frame.updates),
+            updates: transformLogsRecords(frame.updates),
           };
         case FRAME_TYPES.SCROLL_TO:
         case FRAME_TYPES.PAUSE:
@@ -324,15 +337,18 @@ function createEmptyEngineTargetState(): EngineTargetState {
 
 function addLogRecordsForState(
   state: EngineTargetState,
-  updates: EngineLogsTarget & { duration: number }
+  updates: EngineLogsContext & { duration: number }
 ): EngineTargetState {
   const stateReadyLogsRecords = updates.records
     .slice(0, Math.max(Math.ceil(updates.duration / updates.speed), 60))
     .map((log, index) => createLogRecord(log, -1, index, false));
 
-  return addLogsRecords(setLogsContextLabel(state, updates.contextLabel), {
+  const updatedAllContextsState = addOrReplaceLogsContext(state, {
+    ...updates,
     records: stateReadyLogsRecords,
   });
+
+  return setLogsActiveContext(updatedAllContextsState, updates.contextName);
 }
 
 const stateBuilders: SimulatorStateBuilderMap = {
@@ -406,7 +422,7 @@ const stateBuilders: SimulatorStateBuilderMap = {
   },
 };
 
-function builtTargetStateFromEngineAnimation(
+function buildTargetStateFromEngineAnimation(
   frames: EngineFrames["Any"][],
   initialState?: EngineTargetState
 ): EngineTargetState {
@@ -488,7 +504,7 @@ export async function transformSubStepConfigToInstanceArgs(
   if (animation && animation.length > 0) {
     const frames = await transformTourToEngineAnimation(animation || [], id);
 
-    const targetState = builtTargetStateFromEngineAnimation(
+    const targetState = buildTargetStateFromEngineAnimation(
       frames,
       returnVal.initialState
     );

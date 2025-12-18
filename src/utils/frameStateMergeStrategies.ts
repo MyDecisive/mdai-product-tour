@@ -5,6 +5,7 @@ import type {
   EngineConfigSimScrollTarget,
   EngineConfigTarget,
   EngineFileConfig,
+  EngineLogsContext,
   EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
@@ -18,6 +19,208 @@ import { findReplacementPod } from "./transformHelpers";
 // ============================================================================
 // TYPE-SAFE STATE TRANSFORMATION FUNCTIONS
 // ============================================================================
+
+function updateAt<K extends keyof EngineTargetState, T = unknown>(
+  currentState: EngineTargetState,
+  simulator: K,
+  path: string[],
+  updater: (current: unknown) => T
+): EngineTargetState {
+  if (path.length === 0) {
+    throw new Error("Path cannot be empty");
+  }
+
+  const current = currentState[simulator];
+
+  const updateNested = (obj: unknown, pathIndex: number): unknown => {
+    if (pathIndex >= path.length) {
+      return updater(obj);
+    }
+
+    const key = path[pathIndex];
+
+    // Validate that we can traverse this path
+    if (obj !== undefined && obj !== null && typeof obj !== "object") {
+      throw new Error(
+        `Cannot traverse path ${path.slice(0, pathIndex + 1).join(".")}: ` +
+          `expected object but got ${typeof obj}`
+      );
+    }
+
+    const currentObj = (obj || {}) as Record<string, unknown>;
+
+    return {
+      ...currentObj,
+      [key]: updateNested(currentObj[key], pathIndex + 1),
+    };
+  };
+
+  return {
+    ...currentState,
+    [simulator]: updateNested(current, 0),
+  };
+}
+
+function appendAt<K extends keyof EngineTargetState>(
+  currentState: EngineTargetState,
+  simulator: K,
+  path: string[],
+  items: unknown[]
+): EngineTargetState {
+  return updateAt(currentState, simulator, path, (current) => {
+    if (current !== undefined && !Array.isArray(current)) {
+      throw new Error(
+        `Cannot append to path ${path.join(".")}: ` +
+          `expected array but got ${typeof current} (${JSON.stringify(
+            current
+          ).slice(0, 50)})`
+      );
+    }
+
+    if (!Array.isArray(items)) {
+      throw new Error(
+        `Cannot append non-array items to path ${path.join(".")}: ` +
+          `got ${typeof items}`
+      );
+    }
+
+    const arr = (Array.isArray(current) ? current : []) as unknown[];
+    return [...arr, ...items];
+  });
+}
+// TODO: once unit tests have been written for this file, convert to these less specific helper functions
+// function setAt<K extends keyof EngineTargetState>(
+//   currentState: EngineTargetState,
+//   simulator: K,
+//   path: string[],
+//   value: unknown
+// ): EngineTargetState {
+//   return updateAt(currentState, simulator, path, () => value);
+// }
+
+// function mergeAt<K extends keyof EngineTargetState>(
+//   currentState: EngineTargetState,
+//   simulator: K,
+//   path: string[],
+//   updates: Record<string, unknown>
+// ): EngineTargetState {
+//   return updateAt(currentState, simulator, path, (current) => {
+//     if (
+//       current !== undefined &&
+//       (typeof current !== "object" || Array.isArray(current))
+//     ) {
+//       throw new Error(
+//         `Cannot merge at path ${path.join(".")}: ` +
+//           `expected object but got ${
+//             Array.isArray(current) ? "array" : typeof current
+//           }`
+//       );
+//     }
+
+//     if (
+//       typeof updates !== "object" ||
+//       updates === null ||
+//       Array.isArray(updates)
+//     ) {
+//       throw new Error(
+//         `Cannot merge non-object updates at path ${path.join(".")}: ` +
+//           `got ${Array.isArray(updates) ? "array" : typeof updates}`
+//       );
+//     }
+
+//     return {
+//       ...((current as Record<string, unknown>) || {}),
+//       ...updates,
+//     };
+//   });
+// }
+
+// function removeFromArrayAt<K extends keyof EngineTargetState>(
+//   currentState: EngineTargetState,
+//   simulator: K,
+//   path: string[],
+//   predicate: (item: unknown) => boolean
+// ): EngineTargetState {
+//   return updateAt<K, unknown[]>(
+//     currentState,
+//     simulator,
+//     path,
+//     (current) => {
+//       if (!Array.isArray(current)) {
+//         throw new Error(
+//           `Cannot filter path ${path.join(".")}: ` +
+//             `expected array but got ${typeof current}`
+//         );
+//       }
+
+//       if (typeof predicate !== "function") {
+//         throw new Error(
+//           `Cannot filter array at path ${path.join(".")}: ` +
+//             `predicate must be a function`
+//         );
+//       }
+
+//       return current.filter(predicate);
+//     }
+//   );
+// }
+
+// function deleteKeysAt<K extends keyof EngineTargetState>(
+//   currentState: EngineTargetState,
+//   simulator: K,
+//   path: string[],
+//   keys: string[]
+// ): EngineTargetState {
+//   return updateAt(currentState, simulator, path, (current) => {
+//     if (
+//       typeof current !== "object" ||
+//       current === null ||
+//       Array.isArray(current)
+//     ) {
+//       throw new Error(
+//         `Cannot delete keys at path ${path.join(".")}: ` +
+//           `expected object but got ${
+//             Array.isArray(current) ? "array" : typeof current
+//           }`
+//       );
+//     }
+
+//     if (!Array.isArray(keys)) {
+//       throw new Error(
+//         `Cannot delete keys at path ${path.join(".")}: ` +
+//           `keys must be an array`
+//       );
+//     }
+
+//     const obj = { ...(current as Record<string, unknown>) };
+//     keys.forEach((key) => delete obj[key]);
+//     return obj;
+//   });
+// }
+
+// function toggleInSetAt<K extends keyof EngineTargetState>(
+//   currentState: EngineTargetState,
+//   simulator: K,
+//   path: string[],
+//   value: unknown
+// ): EngineTargetState {
+//   return updateAt(currentState, simulator, path, (current) => {
+//     if (current !== undefined && !(current instanceof Set)) {
+//       throw new Error(
+//         `Cannot toggle in path ${path.join(".")}: ` +
+//           `expected Set but got ${current?.constructor?.name || typeof current}`
+//       );
+//     }
+
+//     const set = new Set(current as Set<unknown>);
+//     if (set.has(value)) {
+//       set.delete(value);
+//     } else {
+//       set.add(value);
+//     }
+//     return set;
+//   });
+// }
 
 // Generic merge for simple cases
 export function mergeIntoSimulator<
@@ -58,7 +261,6 @@ export function mergeObjects<
   };
 }
 
-// Append to arrays
 export function appendToArray<
   K extends keyof EngineTargetState,
   S extends NonNullable<EngineTargetState[K]>,
@@ -229,9 +431,13 @@ export function combineTargetStates(
   }
 
   if (second.logs) {
-    // TODO: Doing a full replace here because of different logs contexts
     returnState.logs = {
-      ...second.logs,
+      activeContext:
+        second.logs.activeContext ?? returnState.logs?.activeContext,
+      allContexts: {
+        ...returnState.logs?.allContexts,
+        ...second.logs.allContexts,
+      },
     };
   }
 
@@ -542,27 +748,46 @@ export function scrollToConfigLine(
 /**
  * LOGS
  */
-export function setLogsContextLabel(
+export function addOrReplaceLogsContext(
   currentState: EngineTargetState,
-  contextLabel: string | undefined
+  logsContext: EngineLogsContext
+): EngineTargetState {
+  const logsContextEntry = {
+    [logsContext.contextName]: logsContext,
+  };
+
+  return mergeObjects<"logs", EngineLogsTarget, "allContexts">(
+    currentState,
+    "logs",
+    "allContexts",
+    logsContextEntry
+  );
+}
+
+export function setLogsActiveContext(
+  currentState: EngineTargetState,
+  contextName: string
 ): EngineTargetState {
   return mergeIntoSimulator<"logs", EngineLogsTarget>(currentState, "logs", {
-    contextLabel,
+    activeContext: contextName,
   });
 }
 
 export function addLogsRecords(
   currentState: EngineTargetState,
-  { records }: Pick<EngineLogsTarget, "records">
+  updates: Pick<EngineLogsContext, "contextName" | "records">
 ): EngineTargetState {
-  return appendToArray<"logs", EngineLogsTarget, "records">(
+  return appendAt(
     currentState,
     "logs",
-    "records",
-    records
+    ["allContexts", updates.contextName, "records"],
+    updates.records
   );
 }
 
+/**
+ * TERMINAL
+ */
 export function addTerminalStrings(
   currentState: EngineTargetState,
   { strings }: EngineTerminalTarget
@@ -575,9 +800,6 @@ export function addTerminalStrings(
   );
 }
 
-/**
- * TERMINAL
- */
 export function setTerminalContentPrinted(
   currentState: EngineTargetState,
   index: number

@@ -14,6 +14,7 @@ const HEADER_ROW_HEIGHT = 20;
 export interface StatusSimulatorProps extends EngineStatusTarget {
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
   playing: boolean;
+  activeLogContext: string | undefined;
 }
 
 export const Status: FC<StatusSimulatorProps> = ({
@@ -21,6 +22,7 @@ export const Status: FC<StatusSimulatorProps> = ({
   podOrder,
   onPodStatusChange,
   playing,
+  activeLogContext = "",
 }: StatusSimulatorProps) => {
   const {
     services = [],
@@ -30,6 +32,7 @@ export const Status: FC<StatusSimulatorProps> = ({
     activePods,
     podOrder,
     playing,
+    activeLogContext,
   });
 
   return (
@@ -59,12 +62,20 @@ export const Status: FC<StatusSimulatorProps> = ({
           }}
         >
           {services.map((service) => {
-            const { name, id, status, restartCount, namespace } = service;
+            const {
+              name,
+              id,
+              status,
+              restartCount,
+              namespace,
+              isActiveLogsContext,
+            } = service;
 
             return (
               <ServiceRow
                 key={id}
                 namespace={namespace}
+                isActiveLogsContext={isActiveLogsContext}
                 id={id}
                 status={status}
                 name={name}

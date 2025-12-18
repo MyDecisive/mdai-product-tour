@@ -9,6 +9,7 @@ import type {
   ActivePodMap,
   ConfigContent,
   ConfigLine,
+  EngineLogsTarget,
 } from "../utils/engineTypesScratch";
 import type {
   LineChangeBlock,
@@ -19,6 +20,14 @@ import type {
 /**
  * Logs
  */
+
+export function createEmptyLogs(): EngineLogsTarget {
+  return {
+    activeContext: "",
+    allContexts: {},
+  };
+}
+
 function createLogId(
   cycleCount: number,
   index: number,

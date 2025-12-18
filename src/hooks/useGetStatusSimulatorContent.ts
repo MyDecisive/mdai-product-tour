@@ -5,12 +5,24 @@ export function useGetStatusSimulatorContent({
   activePods,
   podOrder,
   playing,
+  activeLogContext = "",
 }: Omit<StatusSimulatorProps, "onPodStatusChange">) {
   const serviceContainerRef = useRef<HTMLDivElement | null>(null);
 
   const servicesToDisplay = useMemo(() => {
-    return podOrder.map((podId) => activePods[podId]);
-  }, [activePods, podOrder]);
+    return podOrder.map((podId) => {
+      const svc = activePods[podId];
+
+      if (activeLogContext !== "" && podId.startsWith(activeLogContext)) {
+        return {
+          ...svc,
+          isActiveLogsContext: true,
+        };
+      }
+
+      return svc;
+    });
+  }, [activePods, podOrder, activeLogContext]);
 
   useEffect(() => {
     if (playing && serviceContainerRef.current) {

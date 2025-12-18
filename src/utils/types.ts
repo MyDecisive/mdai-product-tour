@@ -10,7 +10,7 @@ import type {
 import type {
   EngineConfigTarget,
   EngineContentBlock,
-  EngineLogsTarget,
+  EngineLogsContext,
   EngineStatusTarget,
   EngineTargetState,
   EngineTerminalTarget,
@@ -144,12 +144,12 @@ export type SimulatorFrameConfigs = {
   };
   [SIMULATORS.LOGS]: {
     [FRAME_TYPES.ADD]: FrameConfig<
-      Pick<TourLogSimTarget, "logsSources">,
-      EngineLogsTarget & { duration: number }
+      TourLogSimTarget,
+      EngineLogsContext & { duration: number }
     >;
     [FRAME_TYPES.STREAM]: FrameConfig<
       TourLogSimTarget & { duration?: number },
-      EngineLogsTarget & { duration: number }
+      EngineLogsContext & { duration: number }
     >;
     [FRAME_TYPES.PAUSE]: FrameConfig<undefined, undefined>;
   };

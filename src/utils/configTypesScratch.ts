@@ -36,16 +36,14 @@ export interface TourConfigSimTarget {
 export interface TourLogSimTarget {
   logsSources?: string[]; // local files -- must be a log file in public/logs/
   speed?: number; // defaults to 1000
-  errorLogsSource?: string; // local file -- must be a log file in public/logs/
-  errorFrequency?: number; // defaults to 0.1
-  contextLabel?: string;
+  contextName: string; // The name of the service/pod these logs represent
 }
 
 export interface TourTargetState {
   terminal?: TourTerminalTarget[];
   status?: TourStatusTarget[];
   config?: TourConfigSimTarget;
-  logs?: TourLogSimTarget;
+  logs?: TourLogSimTarget[];
   banner?: BannerTargetState;
 }
 

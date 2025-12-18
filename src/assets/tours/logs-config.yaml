@@ -180,7 +180,7 @@ steps:
           - title: See the results!
             items:
               - text: "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money."
-                src: logs-example.mp4
+                src: basic-logs.mp4
                 alt: Logs Visualization
 
   - id: "2"
@@ -299,7 +299,7 @@ steps:
           - title: Nice work on the filters!
             items:
               - text: You are cutting down the noise big-time. One hitch--Service4321 is missing from Datadog. Don’t worry, we’ll get it right together.
-                src: filter-example.mp4
+                src: static-logs.mp4
                 alt: Prefilter Visualization
 
   - id: "3"
@@ -490,5 +490,5 @@ steps:
           - title: Visualize the results
             items:
               - text: ""
-                src: dynamic-example.mp4
+                src: dynamic-logs.mp4
                 alt: Postfilter Visualization

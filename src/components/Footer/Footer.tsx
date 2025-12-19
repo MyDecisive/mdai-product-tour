@@ -2,6 +2,7 @@ import { Box, Link, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
 import GitHubIcon from "../../assets/logos/github-icon.svg";
 import LinkedInIcon from "../../assets/logos/linkedIn-icon.png";
+import SlackIcon from "../../assets/logos/logo_slack.svg";
 import LogoText from "../../assets/logos/mydecisive-ai-logo-text.svg";
 import Logo from "../../assets/logos/smol-logo.svg";
 import { useDemoContext } from "../../hooks/useDemoContext";
@@ -79,7 +80,6 @@ export const Footer = () => {
               />
             </Stack>
           </Link>
-          <Typography>&copy; 2025 DecisiveAI</Typography>
         </Stack>
         <Stack
           order={{ xs: 0, sm: 2 }}
@@ -99,22 +99,38 @@ export const Footer = () => {
             rel="noopener noreferrer"
             target="_blank"
           >
-            Documentation
+            Docs
           </Link>
           <Link
-            href="https://mydecisivecommunity.slack.com/archives/C08LE3DJ877"
+            href="https://www.mydecisive.ai/platform"
             sx={linkStyles}
             rel="noopener noreferrer"
             target="_blank"
           >
-            Community Engagement
+            Solutions
           </Link>
         </Stack>
-        <Stack rowGap="12px" order={{ xs: 1, sm: 99 }} alignItems={"flex-end"}>
+        <Stack
+          order={{ xs: 1, sm: 99 }}
+          alignItems={"flex-end"}
+          position={"relative"}
+        >
           <Stack
             direction={"row"}
             columnGap={{ xs: "8px", sm: "16px", md: "24px" }}
           >
+            <Link
+              href="https://mydecisivecommunity.slack.com/archives/C08LJ9Z8EBE"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Box
+                alt="Slack"
+                component={"img"}
+                src={SlackIcon}
+                width={"45px"}
+              />
+            </Link>
             <Link
               href="https://github.com/orgs/DecisiveAI/repositories?type=public"
               rel="noopener noreferrer"
@@ -140,6 +156,11 @@ export const Footer = () => {
               />
             </Link>
           </Stack>
+          <Typography
+            sx={{ fontSize: "12px", position: "absolute", bottom: "-1em" }}
+          >
+            &copy; 2025 DecisiveAI
+          </Typography>
         </Stack>
       </Stack>
     </Box>

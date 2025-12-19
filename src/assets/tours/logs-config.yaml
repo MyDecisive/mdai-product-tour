@@ -6,49 +6,9 @@ buttonText: Fire it up
 default_open: true
 steps:
   - id: "0"
-    title: Let's set the stage
-    subSteps:
-      - id: 0-a
-        title: This is a consolidated experience
-        animation:
-          - type: activate
-            simulator: config
-            duration: 2250
-          - type: activate
-            simulator: terminal
-            duration: 2250
-          - type: activate
-            simulator: status
-            duration: 2250
-          - type: activate
-            simulator: logs
-            duration: 2250
-        content:
-          - title: Consolidated tools
-            items:
-              - text: Multiple tools in one unified view--making it easy to see how MyDecisive works.
-          - variant: list
-            items:
-              - bullet: "1."
-                text: <highlight:config>IDE Simulator:</highlight> Tweak and control SmartHub through its config files
-              - text: <highlight:terminal>Terminal Simulator:</highlight> Deploy changes to SmartHub like a pro
-                bullet: "2."
-              - bullet: "3."
-                text: <highlight:status>Status Simulator:</highlight> Keep an eye on running SmartHub processes and components
-              - bullet: "4."
-                text: <highlight:logs>Tail logs Simulator:</highlight> Watch SmartHub's logs stream by in real time
-          - items:
-              - text: You can also navigate through the steps with your left and right arrow keys.
-      - id: 0-b
-        title: Meet Dynamic Log Filtering
-        content:
-          - items:
-              - text: "Big bills? Not cool. Dynamic Log Filtering helps you slash up to 90% of your Datadog or New Relic spend. Here’s how, in three painless steps."
-
-  - id: "1"
     title: "Step 1: Get the data flowing"
     subSteps:
-      - id: 1-a
+      - id: 0-a
         title: Generate synthethic log data
         content:
           - items:
@@ -174,7 +134,7 @@ steps:
                 - collectorLogsBasic.txt
               speed: 1000
               duration: 4000
-      - id: 1-b
+      - id: 0-b
         visualizationModal: true
         content:
           - title: See the results!
@@ -183,10 +143,10 @@ steps:
                 src: basic-logs.mp4
                 alt: Logs Visualization
 
-  - id: "2"
+  - id: "1"
     title: "Step 2: Drop unwanted data"
     subSteps:
-      - id: 2-a
+      - id: 1-a
         title: Configure static filters
         content:
           - variant: list
@@ -282,18 +242,18 @@ steps:
                 - collectorLogsStatic.txt
               speed: 85
               duration: 3000
-      - id: 2-b
+      - id: 1-b
         title: Static Filtration is online!
         content:
           - items:
               - text: You’re now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let’s do better
-      - id: 2-c
+      - id: 1-c
         title: The big deal?
         content:
           - title: Your data, your rules
             items:
               - text: We only edited the OTEL configuration, and MyDecisive's SmartHub automatically deployed the new logic. The cluster also adjusted to support the new pipelines without losing any data.
-      - id: 2-d
+      - id: 1-d
         visualizationModal: true
         content:
           - title: Nice work on the filters!
@@ -302,10 +262,10 @@ steps:
                 src: static-logs.mp4
                 alt: Prefilter Visualization
 
-  - id: "3"
+  - id: "2"
     title: "Step 3: Dynamic OTEL → Power-User Mode"
     subSteps:
-      - id: 3-a
+      - id: 2-a
         title: Sprinkle in some variables
         content:
           - title: What’s happening in the config file?
@@ -434,7 +394,7 @@ steps:
               fileName: otel.yaml
           - type: delay
             duration: 1500
-      - id: 3-b
+      - id: 2-b
         title: Kick the cluster one last time
         content:
           - items:
@@ -484,7 +444,7 @@ steps:
               speed: 40
               duration: 1600
 
-      - id: 3-c
+      - id: 2-c
         visualizationModal: true
         content:
           - title: Visualize the results

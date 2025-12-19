@@ -1,0 +1,55 @@
+id: intro
+version: 0.9.0
+title: How to use this tour
+subtitle: See the anatomy of this app
+buttonText: Show me
+steps:
+  - id: "0"
+    title: Let's set the stage
+    subSteps:
+      - id: 0-a
+        title: This is a consolidated experience
+        content:
+          - items:
+              - text: |
+                  This area of the app will describe the overall concepts of a given solution. Navigate between the steps using the buttons below.
+          - items:
+              - text: You can also navigate through the steps with your left and right arrow keys.
+          - items:
+              - text: Clicking on one of the step headings will allow you to jump around the tour if you want, but we recommend going from start to finish.
+
+      - id: 0-b
+        title: Consolidated tools
+        animation:
+          - type: activate
+            simulator: config
+            duration: 2250
+          - type: activate
+            simulator: terminal
+            duration: 2250
+          - type: activate
+            simulator: status
+            duration: 2250
+          - type: activate
+            simulator: logs
+            duration: 2250
+        content:
+          - items:
+              - text: |
+                  Multiple tools in one unified view--making it easy to see how MyDecisive works. 
+                  The boxes on the right will show you an approximation of your various tools as if you were performing the work yourself.
+          - variant: list
+            items:
+              - bullet: "1."
+                text: <highlight:config>IDE Simulator:</highlight> Tweak and control SmartHub through its config files
+              - bullet: "2."
+                text: <highlight:terminal>Terminal Simulator:</highlight> Deploy changes to SmartHub like a pro
+              - bullet: "3."
+                text: <highlight:status>Status Simulator:</highlight> Keep an eye on running SmartHub processes and components
+              - bullet: "4."
+                text: <highlight:logs>Tail logs Simulator:</highlight> Watch SmartHub's logs stream by in real time
+          - items:
+              - text: If you want to see an animation sequence again, click the "Reset" button and then the "Play" button again.
+
+          - items:
+              - text: That's it! Advancing from here will take you back to the home page where you can select whichever solution tour you like.

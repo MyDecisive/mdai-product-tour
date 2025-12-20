@@ -92,7 +92,7 @@ steps:
                 - serviceLogsBasic.txt
               speed: 50
               duration: 3000
-      - id: 1-b
+      - id: 0-b
         title: Send log data to your collector
         content:
           - items:
@@ -135,7 +135,7 @@ steps:
                 - collectorLogsBasic.txt
               speed: 1000
               duration: 4000
-      - id: 0-b
+      - id: 0-c
         visualizationModal: true
         content:
           - title: See the results!
@@ -204,7 +204,7 @@ steps:
               line: 65
           - type: delay
             duration: 1500
-      - id: 2-b
+      - id: 1-b
         title: Get Static Filtration online!
         content:
           - items:
@@ -250,18 +250,18 @@ steps:
                 - collectorLogsStatic.txt
               speed: 85
               duration: 3000
-      - id: 1-b
+      - id: 1-c
         title: Static Filtration is online!
         content:
           - items:
               - text: You’re now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let’s do better
-      - id: 1-c
+      - id: 1-d
         title: The big deal?
         content:
           - title: Your data, your rules
             items:
               - text: We only edited the OTEL configuration, and MyDecisive's SmartHub automatically deployed the new logic. The cluster also adjusted to support the new pipelines without losing any data.
-      - id: 1-d
+      - id: 1-e
         visualizationModal: true
         content:
           - title: Nice work on the filters!
@@ -342,7 +342,7 @@ steps:
               fileName: hub.yaml
           - type: delay
             duration: 1500
-      - id: 3-b
+      - id: 2-b
         title: Wire up the collector
         content:
           - items:
@@ -409,7 +409,7 @@ steps:
               fileName: otel.yaml
           - type: delay
             duration: 1500
-      - id: 2-b
+      - id: 2-c
         title: Kick the cluster one last time
         content:
           - items:
@@ -459,7 +459,7 @@ steps:
               speed: 40
               duration: 1600
 
-      - id: 2-c
+      - id: 2-d
         visualizationModal: true
         content:
           - title: Visualize the results

@@ -102,7 +102,7 @@ export const Footer = () => {
             Docs
           </Link>
           <Link
-            href="https://www.mydecisive.ai/platform"
+            href="https://www.mydecisive.ai/solutions"
             sx={linkStyles}
             rel="noopener noreferrer"
             target="_blank"

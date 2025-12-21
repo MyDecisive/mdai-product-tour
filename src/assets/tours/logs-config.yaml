@@ -1,6 +1,6 @@
 id: logs
 version: 0.9.0
-title: Dynamic Log Filtering
+title: Intelligent LogStream
 subtitle: Ready to see how it works?
 buttonText: Fire it up
 default_open: true

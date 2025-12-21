@@ -35,7 +35,9 @@ export function createDrawerItems(
 ): undefined | TourSelectionItem[] | StepItem[] {
   if (!tourConfigs) return undefined;
   if (!tour) {
-    return tourConfigs.map((tour, index) => {
+    // temporarily remove all coming soon tours from drawer
+    const nonHiddenTours = tourConfigs.filter(tc => tc.coming_soon != true);
+    return nonHiddenTours.map((tour, index) => {
       const { coming_soon, id, ...rest } = tour;
 
       return {

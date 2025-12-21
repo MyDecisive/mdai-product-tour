@@ -30,7 +30,7 @@ export function SplashPage() {
               cursor: "pointer",
             }}
           >
-            Dynamic Log Filtering
+            Intelligent LogStream
           </Link>{" "}
           demo now!
         </Typography>

@@ -1,20 +1,10 @@
-logoImage: "/assets/full-logo.svg"
-topCopy: Contact us to learn more
-nameLabel: Full name
-nameRequiredMessage: Name is required
+logoImage: "/media/logo_2.png"
+topCopy: Sign up for product updates and get early access to new features from MyDecisive as they are released
 emailLabel: Email address
 emailRequiredMessage: Email is required
 emailInvalidMessage: Invalid email
-phoneLabel: Phone number
-phoneRequiredMessage: Phone is required
-contactReasonsLabel: I am interested in
-contactReasons:
-  - Licensing
-  - Help
-questionsLabel: Tell us more (optional)
-bottomCopy: Thanks! We look forward to chatting with you about the possiblities.
-bottomSignature: The MyDecisive team.
 submitButtonLabel: Submit
+cancelButtonLabel: Cancel
 emailSuccess: Thank you! We will follow up as soon as possible!
 emailErrorPrefix: An error occurred submitting your inquiry.
 emailErrorLinkLabel: Click here
@@ -23,14 +13,6 @@ emailSubject: Interested in learning more about DecisiveAI
 emailBodyTemplate: |
   Hello!
 
-  My name is %name% and I am interested in hearing more about DecisiveAI!
+  My email is %email% and I am interested in hearing more about DecisiveAI!
 
-  I am interested in:
-
-  %contactReasons%
-
-  %questions%
-
-  -%name%
   %email%
-  %phone%

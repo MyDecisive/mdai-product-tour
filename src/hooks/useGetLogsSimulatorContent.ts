@@ -9,6 +9,16 @@ export function useGetLogsSimulatorContent({
 }: EngineLogsTarget & { playing: boolean }) {
   const logContainerRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    setState((prev) => {
+      return {
+        ...prev,
+        currentIndex: 0,
+        cycleCount: prev.cycleCount + 1,
+      };
+    });
+  }, [logRecords]);
+
   const records = useMemo(() => {
     if (!activeContext || !allContexts[activeContext]) {
       return [] as LogRecord[];

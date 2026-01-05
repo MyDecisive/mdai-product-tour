@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
@@ -36,13 +35,6 @@ export function Body() {
 
   return (
     <Box sx={css([BodyScrollContainer])}>
-      {!inTour && (
-        <Box sx={{ padding: "10px 4px 10px 8px" }}>
-          <Typography>
-            Ready to play? Select a use case and let's roll.
-          </Typography>
-        </Box>
-      )}
       <Box sx={css([NavDrawerBodyStyles])} className="drawer-body">
         <SimpleTreeView
           slots={{

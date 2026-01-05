@@ -1,12 +1,27 @@
 import { Box } from "@mui/material";
-import { useGetTerminalSimulatorContent } from "../../hooks/useGetTerminalSimulatorContent";
+import {
+  parseTypedJsString,
+  useGetTerminalSimulatorContent,
+} from "../../hooks/useGetTerminalSimulatorContent";
+import { type TerminalTypedOptions } from "../../utils/types";
 
-export function Terminal() {
-  const {
-    typedOptions = [],
-    elementsRef,
-    containerElementRef,
-  } = useGetTerminalSimulatorContent();
+interface TerminalProps {
+  state: TerminalTypedOptions[] | null | undefined;
+  playing: boolean;
+  onTerminalContentPrinted: (index: number) => void;
+}
+
+export function Terminal({
+  state,
+  playing,
+  onTerminalContentPrinted,
+}: TerminalProps) {
+  const { completedItems, currentItem, activeElementRef, containerElementRef } =
+    useGetTerminalSimulatorContent({
+      state,
+      playing,
+      onTerminalContentPrinted,
+    });
 
   return (
     <Box
@@ -28,32 +43,56 @@ export function Terminal() {
           flexDirection: "column",
           justifyContent: "flex-end",
           width: "100%",
-          minHeight: "100%",
         }}
       >
-        {typedOptions.map((_, index) => (
+        {completedItems.map((item, i) => (
           <div
-            key={index}
+            key={`${i}-completed-${item.strings?.[0] ?? "empty"}`}
             style={{
               display: "flex",
               alignItems: "flex-end",
-              lineHeight: "1.5em",
+              height: "fit-content",
+              minHeight: "20px",
             }}
           >
             <pre
-              ref={(el) => {
-                elementsRef.current[index] = el;
-              }}
               style={{
                 margin: 0,
-                lineHeight: "1.5em",
+                lineHeight: "1.25rem",
                 display: "inline",
-                wordWrap: "break-word",
-                whiteSpace: "break-spaces",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {item.strings?.map(parseTypedJsString).join("\n")}
+            </pre>
+          </div>
+        ))}
+        {currentItem && (
+          <div
+            css={{
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "flex-start",
+              height: "fit-content",
+              minHeight: "20px",
+              "& > .typed-cursor": {
+                lineHeight: "20px",
+              },
+            }}
+          >
+            <pre
+              ref={activeElementRef}
+              style={{
+                margin: 0,
+                lineHeight: "1.25rem",
+                display: "inline",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap",
               }}
             />
           </div>
-        ))}
+        )}
       </div>
     </Box>
   );

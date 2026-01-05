@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "types": [
-      "@modyfi/vite-plugin-yaml/modules"
-    ]
+    "types": ["@modyfi/vite-plugin-yaml/modules"],
+    "jsxImportSource": "@emotion/react"
   },
   "files": [],
   "references": [

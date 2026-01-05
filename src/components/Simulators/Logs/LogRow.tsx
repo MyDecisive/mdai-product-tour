@@ -86,9 +86,8 @@ export function LogRow(props: LogRowProps) {
           fontSize: 13,
           lineHeight: 1.5,
           color: grey[200],
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
+          wordBreak: "break-all",
+          whiteSpace: "pre-wrap",
           flex: "0 1 auto",
         }}
       >

@@ -1,9 +1,11 @@
-import GitHubIcon from "../../assets/github-icon.svg";
-import LinkedInIcon from "../../assets/linkedIn-icon.png";
-import Logo from "../../assets/smol-logo.svg";
-import LogoText from "../../assets/mydecisive-ai-logo-text.svg";
 import { Box, Link, Stack, Typography } from "@mui/material";
-import { useHighlander } from "../../hooks/useHighlander";
+import { useCallback } from "react";
+import GitHubIcon from "../../assets/logos/github-icon.svg";
+import LinkedInIcon from "../../assets/logos/linkedIn-icon.png";
+import SlackIcon from "../../assets/logos/logo_slack.svg";
+import LogoText from "../../assets/logos/mydecisive-ai-logo-text.svg";
+import Logo from "../../assets/logos/smol-logo.svg";
+import { useDemoContext } from "../../hooks/useDemoContext";
 
 const linkStyles = {
   textDecoration: "none",
@@ -12,7 +14,11 @@ const linkStyles = {
 };
 
 export const Footer = () => {
-  const { actions } = useHighlander();
+  const { setNavState } = useDemoContext();
+
+  const openContactModal = useCallback(() => {
+    setNavState({ bigContentModal: "contact" });
+  }, [setNavState]);
 
   return (
     <Box
@@ -74,7 +80,6 @@ export const Footer = () => {
               />
             </Stack>
           </Link>
-          <Typography>&copy; 2025 DecisiveAI</Typography>
         </Stack>
         <Stack
           order={{ xs: 0, sm: 2 }}
@@ -85,10 +90,7 @@ export const Footer = () => {
           rowGap="20px"
           mb="4px"
         >
-          <Link
-            sx={linkStyles}
-            onClick={() => actions.OPEN_BIG_CONTENT_MODAL("contact")}
-          >
+          <Link sx={linkStyles} onClick={openContactModal}>
             Need Help?
           </Link>
           <Link
@@ -97,23 +99,38 @@ export const Footer = () => {
             rel="noopener noreferrer"
             target="_blank"
           >
-            Documentation
+            Docs
           </Link>
           <Link
-            href="https://mydecisivecommunity.slack.com/archives/C08LE3DJ877"
+            href="https://www.mydecisive.ai/solutions"
             sx={linkStyles}
             rel="noopener noreferrer"
             target="_blank"
           >
-            Community Engagement
+            Solutions
           </Link>
         </Stack>
         <Stack
-          rowGap="12px"
           order={{ xs: 1, sm: 99 }}
           alignItems={"flex-end"}
+          position={"relative"}
         >
-          <Stack direction={"row"} columnGap={{xs: "8px", sm: "16px", md: "24px" }}>
+          <Stack
+            direction={"row"}
+            columnGap={{ xs: "8px", sm: "16px", md: "24px" }}
+          >
+            <Link
+              href="https://mydecisivecommunity.slack.com/archives/C08LJ9Z8EBE"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Box
+                alt="Slack"
+                component={"img"}
+                src={SlackIcon}
+                width={"45px"}
+              />
+            </Link>
             <Link
               href="https://github.com/orgs/DecisiveAI/repositories?type=public"
               rel="noopener noreferrer"
@@ -139,6 +156,11 @@ export const Footer = () => {
               />
             </Link>
           </Stack>
+          <Typography
+            sx={{ fontSize: "12px", position: "absolute", bottom: "-1em" }}
+          >
+            &copy; 2025 DecisiveAI
+          </Typography>
         </Stack>
       </Stack>
     </Box>

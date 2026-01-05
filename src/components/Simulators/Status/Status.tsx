@@ -1,68 +1,96 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { type FC } from "react";
 import { useGetStatusSimulatorContent } from "../../../hooks/useGetStatusSimulatorContent";
-import { SimulatorContextLabel } from "../SimContextLabel";
+import type {
+  EngineStatusTarget,
+  PodId,
+} from "../../../utils/engineTypesScratch";
+import type { PodStatusType } from "../../../utils/types";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
 
 const HEADER_ROW_HEIGHT = 20;
+// TODO: Move these prop types to a types file
+export interface StatusSimulatorProps extends EngineStatusTarget {
+  onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+  playing: boolean;
+  activeLogContext: string | undefined;
+}
 
-export const Status: FC = () => {
+export const Status: FC<StatusSimulatorProps> = ({
+  activePods,
+  podOrder,
+  onPodStatusChange,
+  playing,
+  activeLogContext = "",
+}: StatusSimulatorProps) => {
   const {
     services = [],
-    contextLabel,
-    handlePodRemove,
-    handleStatusChange,
+    // contextLabel,
     serviceContainerRef,
-  } = useGetStatusSimulatorContent();
+  } = useGetStatusSimulatorContent({
+    activePods,
+    podOrder,
+    playing,
+    activeLogContext,
+  });
 
   return (
     <>
-      <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel>
+      {/* <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel> */}
       <Box
         sx={{
           maxHeight: "350px",
         }}
       >
-        {services && services.length > 0 && (
-          <>
-            <StyledRow
-              namespace="NAMESPACE"
-              name="NAME"
-              ready="READY"
-              status="STATUS"
-              restarts="RESTARTS"
-              containerStyles={{
-                borderBottom: "1px solid rgba(111, 111, 111, 0.50)",
-              }}
-            />
-            <Box
-              ref={serviceContainerRef}
-              sx={{
-                scrollBehavior: "smooth",
-                overflowY: "auto",
-                maxHeight: `calc(350px - ${HEADER_ROW_HEIGHT}px )`,
-              }}
-            >
-              {services.map((service) => {
-                const { name, beingReplaced, id, status, namespace } = service;
+        <StyledRow
+          namespace="NAMESPACE"
+          name="NAME"
+          ready="READY"
+          status="STATUS"
+          restarts="RESTARTS"
+          containerStyles={{
+            borderBottom: "1px solid rgba(111, 111, 111, 0.50)",
+          }}
+        />
+        <Box
+          ref={serviceContainerRef}
+          sx={{
+            scrollBehavior: "smooth",
+            overflowY: "auto",
+            maxHeight: `calc(350px - ${HEADER_ROW_HEIGHT}px )`,
+          }}
+        >
+          {services.map((service) => {
+            const {
+              name,
+              id,
+              status,
+              restartCount,
+              namespace,
+              isActiveLogsContext,
+            } = service;
 
-                return (
-                  <ServiceRow
-                    key={id}
-                    namespace={namespace}
-                    podId={id}
-                    beingReplaced={beingReplaced}
-                    status={status}
-                    name={name}
-                    onStatusChange={handleStatusChange}
-                    onRemove={handlePodRemove}
-                  />
-                );
-              })}
-            </Box>
-          </>
-        )}
+            return (
+              <ServiceRow
+                key={id}
+                namespace={namespace}
+                isActiveLogsContext={isActiveLogsContext}
+                id={id}
+                status={status}
+                name={name}
+                restartCount={restartCount}
+                onStatusChange={onPodStatusChange}
+              />
+            );
+          })}
+
+          {services.length === 0 && (
+            <Typography className="text-gray-500 text-center py-4">
+              No pods running
+            </Typography>
+          )}
+        </Box>
       </Box>
     </>
   );

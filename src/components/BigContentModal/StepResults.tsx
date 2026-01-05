@@ -1,44 +1,12 @@
 import { Box, Button, css, Typography } from "@mui/material";
-import { useMemo, useRef, useState } from "react";
-import postfilter from "../../assets/dynamic-example.mp4";
-import preFilter from "../../assets/filter-example.mp4";
-import logsView from "../../assets/logs-example.mp4";
-import { selectNavigation } from "../../contexts/selectors";
-import { useHighlander } from "../../hooks/useHighlander";
-import { useSelector } from "../../hooks/useSelector";
-import { ITEM_IDS } from "../../utils/constants";
-
-export const stepVizMap = {
-  [ITEM_IDS.step1_data]: {
-    src: logsView,
-    alt: "Logs Visualization",
-    style: {
-      width: "100%",
-    },
-    label: "See the results!",
-    content:
-      "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money.",
-  },
-  [ITEM_IDS.step2_explore]: {
-    src: preFilter,
-    alt: "Prefilter Visualization",
-    style: {
-      width: "100%",
-    },
-    label: "Nice work on the filters!",
-    content:
-      "You are cutting down the noise big-time. One hitch--Service4321 are missing from Datadog. Don’t worry, we’ll get it right together.",
-  },
-  [ITEM_IDS.step3_kick]: {
-    src: postfilter,
-    alt: "Postfilter Visualization",
-    style: {
-      width: "100%",
-    },
-    label: "Visualize the results",
-    content: "",
-  },
-};
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
+import type {
+  EngineContentItem,
+  EngineSubStep,
+} from "../../utils/engineTypesScratch";
+import { getVideoUrl } from "../../utils/getAssets";
+import type { VisualizationContentItem } from "../../utils/types";
 
 const ButtonContainerStyles = css({
   display: "flex",
@@ -47,22 +15,57 @@ const ButtonContainerStyles = css({
   paddingTop: "12px",
 });
 
-export function StepResults({ handleClose }: { handleClose: () => void }) {
-  const { subStep } = useSelector(selectNavigation);
-  const { actions } = useHighlander();
-  const { src, alt, style, label, content } = useMemo(() => {
-    if (subStep && Object.keys(stepVizMap).includes(subStep)) {
-      return stepVizMap[subStep as keyof typeof stepVizMap];
-    }
+function isVisualization(
+  item: EngineContentItem | VisualizationContentItem
+): item is VisualizationContentItem {
+  return (
+    "src" in item &&
+    "alt" in item &&
+    typeof item.src === "string" &&
+    typeof item.alt === "string"
+  );
+}
 
-    return {} as {
-      src: undefined;
-      alt: undefined;
-      style: undefined;
-      label: string;
-      content: string;
-    };
-  }, [subStep]);
+function currentDrawerItemToVizModalData(
+  currentDrawerItem: EngineSubStep | undefined
+) {
+  if (
+    !currentDrawerItem ||
+    !currentDrawerItem?.visualizationModal ||
+    !currentDrawerItem.content?.length
+  ) {
+    return undefined;
+  }
+
+  const firstBlockWithTitle = currentDrawerItem.content.find(
+    (block) => !!block.title
+  );
+
+  if (!firstBlockWithTitle) {
+    return undefined;
+  }
+  const visualizationContent = firstBlockWithTitle.items.find(isVisualization);
+
+  if (!visualizationContent) {
+    return undefined;
+  }
+  const title = firstBlockWithTitle.title;
+
+  return {
+    title,
+    text: visualizationContent.text,
+    src: visualizationContent.src,
+    alt: visualizationContent.alt,
+  } as VisualizationContentItem & { title: string | null };
+}
+
+export function StepResults({ handleClose }: { handleClose: () => void }) {
+  const { currentDrawerItem, handleNextButtonClick, handlePrevButtonClick } =
+    useGetDrawerContent();
+
+  const resultsProps = useMemo(() => {
+    return currentDrawerItemToVizModalData(currentDrawerItem);
+  }, [currentDrawerItem]);
 
   const [playing, setPlaying] = useState<boolean>(false);
 
@@ -73,6 +76,22 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
       void videoTagRef.current.play();
     }
   };
+
+  const onClickNext = useCallback(() => {
+    handleNextButtonClick();
+    handleClose();
+  }, [handleNextButtonClick, handleClose]);
+
+  const onClickPrev = useCallback(() => {
+    handlePrevButtonClick();
+    handleClose();
+  }, [handleClose, handlePrevButtonClick]);
+
+  if (!resultsProps) {
+    return null;
+  }
+
+  const { src, alt, title, text } = resultsProps;
 
   return (
     <>
@@ -86,11 +105,11 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
       >
         <Box sx={{ flexGrow: 1 }}>
           <Typography sx={{ fontWeight: 700 }} component="div">
-            {label}
+            {title}
           </Typography>
-          {content && (
+          {text && (
             <Typography component={"div"} sx={{ py: 1 }}>
-              {content}
+              {text}
             </Typography>
           )}
         </Box>
@@ -98,18 +117,10 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
           <Button disabled={playing} variant="text" onClick={playVideo}>
             Reset
           </Button>
-          <Button variant="text" onClick={handleClose}>
+          <Button variant="text" onClick={onClickPrev}>
             Prev
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              actions.GO_NEXT_STEP();
-              if (subStep !== ITEM_IDS.step3_kick) {
-                handleClose();
-              }
-            }}
-          >
+          <Button variant="contained" onClick={onClickNext}>
             Next
           </Button>
         </Box>
@@ -125,8 +136,7 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
         >
           <video
             ref={videoTagRef}
-            src={src}
-            style={style}
+            src={getVideoUrl(src)}
             controls={false}
             autoPlay
             muted

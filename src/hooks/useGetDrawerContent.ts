@@ -1,35 +1,71 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, type MouseEvent } from "react";
 import {
-  selectDrawerItems,
-  selectExpandedDrawerItems,
-  selectInTour,
-} from "../contexts/selectors";
-import type { StepItemId } from "../utils/types";
-import { useHighlander } from "./useHighlander";
-import { useSelector } from "./useSelector";
+  createDrawerItems,
+  createExpandedDrawerItemIds,
+  onTreeItemClick,
+} from "../utils/demoStateHelpers";
+import { useDemoContext } from "./useDemoContext";
 import { useNavButtonHandlers } from "./useStepNavButtonHandlers";
 
-type DrawerItemClick = (
-  event: React.MouseEvent<Element, MouseEvent>,
-  itemId: StepItemId
-) => void;
-
 export function useGetDrawerContent() {
-  const { actions } = useHighlander();
+  const {
+    tourConfigs,
+    setNavState,
+    navigationState: { tour, step, subStep },
+    engineControls,
+  } = useDemoContext();
 
-  const drawerItems = useSelector(selectDrawerItems);
-  const expandedDrawerItems = useSelector(selectExpandedDrawerItems);
-  const inTour = useSelector(selectInTour);
+  const inTour = tour !== "";
 
-  const { showPlayButton, nextButtonDisabled } = useNavButtonHandlers();
+  const selectTour = useCallback(
+    (tourId: string) => {
+      setNavState({
+        tour: tourId,
+        step: 0,
+        subStep: 0,
+      });
+    },
+    [setNavState]
+  );
 
-  const handleDrawerItemClick: DrawerItemClick = (_, itemId: StepItemId) => {
-    if (drawerItems.find((item) => item.itemId === itemId)) {
-      actions.TOGGLE_STEP(itemId);
-    } else {
-      actions.TOGGLE_SUB_STEP(itemId);
-    }
-  };
+  const drawerItems = useMemo(() => {
+    return createDrawerItems(selectTour, tourConfigs, tour);
+  }, [selectTour, tourConfigs, tour]);
+
+  const currentDrawerItem = useMemo(() => {
+    const selectedTour = tourConfigs?.find((t) => t.id === tour);
+    if (!selectedTour || step === -1 || subStep === -1) return undefined;
+
+    const selectedStep = selectedTour.steps[step];
+    const selectedSubStep = selectedStep.subSteps[subStep];
+
+    return selectedSubStep;
+  }, [tour, tourConfigs, step, subStep]);
+
+  const expandedDrawerItemIds = useMemo(() => {
+    return createExpandedDrawerItemIds(
+      step,
+      subStep,
+      !!currentDrawerItem?.visualizationModal
+    );
+  }, [step, subStep, currentDrawerItem]);
+
+  const handleTreeItemClick = useCallback(
+    (_: MouseEvent, stepId: string) => {
+      engineControls.reset();
+      onTreeItemClick(stepId, step, subStep, setNavState);
+    },
+    [step, subStep, setNavState, engineControls]
+  );
+
+  const {
+    showPlayButton,
+    nextButtonDisabled,
+    handleClickPlay,
+    handleNextButtonClick,
+    handlePrevButtonClick,
+    hidePrevButton,
+  } = useNavButtonHandlers();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,15 +73,17 @@ export function useGetDrawerContent() {
         if (e.key === "ArrowRight") {
           e.preventDefault();
           if (showPlayButton) {
-            actions.BEGIN_ANIMATION();
+            handleClickPlay();
             return;
           }
           if (!nextButtonDisabled) {
-            actions.GO_NEXT_STEP();
+            handleNextButtonClick();
           }
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          actions.GO_PREV_STEP();
+          if (!hidePrevButton) {
+            handlePrevButtonClick();
+          }
         }
       }
     };
@@ -55,12 +93,24 @@ export function useGetDrawerContent() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [actions, inTour, showPlayButton, nextButtonDisabled]);
+  }, [
+    inTour,
+    showPlayButton,
+    nextButtonDisabled,
+    handleClickPlay,
+    handleNextButtonClick,
+    handlePrevButtonClick,
+    hidePrevButton,
+  ]);
 
   return {
     inTour,
     drawerItems,
-    handleDrawerItemClick,
-    expandedDrawerItems,
+    handleTreeItemClick,
+    expandedDrawerItemIds,
+    // visualization steps
+    currentDrawerItem,
+    handleNextButtonClick,
+    handlePrevButtonClick,
   };
 }

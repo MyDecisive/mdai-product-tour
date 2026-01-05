@@ -37,18 +37,34 @@ export function SimulatorBox({
         className={`actual-simulator-container ${title
           .toLowerCase()
           .replace(" ", "-")}`}
-        sx={{
-          p: "24px 16px 16px 16px",
-          minHeight: "350px",
-          maxWidth: "100%",
-          borderRadius: "4px",
-          background: "#393939",
-          position: "relative",
-          border: `3px solid ${active ? "#EA80FC" : "#393939"}`,
-          ...innerStyles,
-        }}
+        sx={[
+          {
+            p: "24px 16px 16px 16px",
+            minHeight: "350px",
+            maxWidth: "100%",
+            borderRadius: "4px",
+            background: "#393939",
+            position: "relative",
+            border: `3px solid ${active ? "#EA80FC" : "#393939"}`,
+          },
+          active && !children
+            ? {
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }
+            : {
+                ...innerStyles,
+              },
+        ]}
       >
-        {children}
+        {active && !children ? (
+          <Typography variant="h4" sx={{ color: "#EA80FC" }}>
+            {`${title} Simulator`}
+          </Typography>
+        ) : (
+          children
+        )}
       </Box>
     </>
   );

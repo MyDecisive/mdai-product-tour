@@ -1,122 +1,106 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Typed from "typed.js";
-import { selectPanelState } from "../contexts/selectors";
-import type { TerminalTypedProps } from "../utils/types";
-import { useHighlander } from "./useHighlander";
-import { useSelector } from "./useSelector";
+import { createTerminalContent } from "../utils/transformHelpers";
+import type { TerminalTypedOptions } from "../utils/types";
 
-export function useGetTerminalSimulatorContent() {
-  const { terminal = {} } = useSelector(selectPanelState);
-  const { actions } = useHighlander();
+export function parseTypedJsString(str: string) {
+  return str.replaceAll(/`/gi, "").replaceAll(/\^\d+/gi, "");
+}
 
-  const { typedOptions = [] } = terminal as TerminalTypedProps;
-  const elementsRef = useRef<(HTMLPreElement | null)[]>([]);
-  const typedInstancesRef = useRef<(Typed | null)[]>([]);
+// TODO: Move these prop types to a types file
+interface TerminalProps {
+  state: TerminalTypedOptions[] | null | undefined;
+  playing: boolean;
+  onTerminalContentPrinted: (index: number) => void;
+}
+
+export function useGetTerminalSimulatorContent({
+  state,
+  playing,
+  onTerminalContentPrinted,
+}: TerminalProps) {
+  const activeElementRef = useRef<HTMLPreElement | null>(null);
+  const typedInstanceRef = useRef<Typed | null>(null);
   const containerElementRef = useRef<HTMLDivElement | null>(null);
 
-  const [workDone, setWorkDone] = useState<boolean>(false);
-
   useEffect(() => {
-    typedOptions.forEach((options, index) => {
-      const element = elementsRef.current[index];
-      if (element) {
-        const originalOnComplete = options.onComplete?.bind(options);
+    if (!state || state.length === 0) {
+      typedInstanceRef.current?.destroy();
+      typedInstanceRef.current = null;
+      return;
+    }
 
-        const wrappedOptions = {
-          ...options,
-          onBegin: (typed: Typed) => {
-            if (!options.strings) {
-              typed.stop();
-            }
-          },
-          preStringTyped: (_: number, typed: Typed) => {
-            if (typed.cursor) {
-              typed.cursor.style.display = "none";
-            }
-          },
-          onTypingPaused: (_: number, typed: Typed) => {
-            if (typed.cursor && options.showCursor) {
-              typed.cursor.style.display = "inline-block";
-              typed.cursor.classList.add("typed-cursor--blink");
-            }
-          },
-          onTypingResumed: (_: number, typed: Typed) => {
-            if (typed.cursor) {
-              typed.cursor.style.display = "none";
-            }
-          },
-          onComplete: (typed: Typed) => {
-            if (originalOnComplete) {
-              originalOnComplete(typed);
-            }
+    const currentIndex = state.findIndex((opt) => !opt.printed);
+    if (currentIndex === -1 || !activeElementRef.current) return;
 
-            if (typed.cursor) {
-              if (index !== typedOptions.length - 1) {
-                typed.cursor.style.display = "none";
-              }
-              if (index === typedOptions.length - 1 && options.showCursor) {
-                typed.cursor.style.display = "inline-block";
-              }
-            }
+    const options = state[currentIndex];
 
-            const nextIndex = index + 1;
-            if (nextIndex < typedOptions.length) {
-              const nextTyped = typedInstancesRef.current[nextIndex];
-              if (nextTyped && nextTyped.cursor) {
-                nextTyped.cursor.style.display = "inline-block";
-                nextTyped.start();
-              }
-            }
-            if (index === typedOptions.length - 1) {
-              actions.INCREMENT_ANIMATION();
-              setWorkDone(true);
-            }
-          },
-        };
-
-        const typed = new Typed(element, wrappedOptions);
-
-        if (index === 0) {
-          if (typed.cursor) {
-            typed.cursor.style.display = "inline-block";
-          }
-        } else {
+    typedInstanceRef.current?.destroy();
+    typedInstanceRef.current = new Typed(activeElementRef.current, {
+      ...options,
+      onBegin: (typed: Typed) => {
+        if (!playing) {
           typed.stop();
-          if (typed.cursor) {
-            typed.cursor.style.display = "none";
+          if (options.strings) {
+            activeElementRef.current!.innerHTML = options.strings
+              .map(parseTypedJsString)
+              .join("\n");
           }
         }
-
-        typedInstancesRef.current[index] = typed;
-      }
+      },
+      preStringTyped: (_: number, typed: Typed) => {
+        if (typed.cursor) {
+          typed.cursor.style.display = "none";
+        }
+      },
+      onTypingPaused: (_: number, typed: Typed) => {
+        if (typed.cursor && options.showCursor) {
+          typed.cursor.style.display = "inline-block";
+          typed.cursor.classList.add("typed-cursor--blink");
+        }
+      },
+      onTypingResumed: (_: number, typed: Typed) => {
+        if (typed.cursor) {
+          typed.cursor.style.display = "none";
+        }
+      },
+      onComplete: (typed: Typed) => {
+        options.onComplete?.(typed);
+        onTerminalContentPrinted(currentIndex);
+      },
     });
 
+    if (!playing) {
+      typedInstanceRef.current.stop();
+    }
+
     return () => {
-      typedInstancesRef.current.forEach((typed) => {
-        if (typed) {
-          typed.destroy();
-        }
-      });
-      typedInstancesRef.current = [];
+      typedInstanceRef.current?.destroy();
+      typedInstanceRef.current = null;
     };
-  }, [typedOptions, actions]);
+  }, [state, playing, onTerminalContentPrinted]);
 
   useEffect(() => {
-    if (!workDone && containerElementRef.current) {
+    if (playing && containerElementRef.current) {
       containerElementRef.current.scrollTop =
         containerElementRef.current.scrollHeight;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerElementRef.current, workDone]);
+    if (!playing) {
+      typedInstanceRef.current?.stop();
+    }
+  }, [playing]);
 
-  useEffect(() => {
-    setWorkDone(() => false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(typedOptions)]);
+  const currentItem = state?.find((opt) => !opt.printed);
+  const completedItems = state?.filter((opt) => opt.printed) ?? [];
+
+  if (!currentItem) {
+    completedItems.push(createTerminalContent([""], true)[0]);
+  }
 
   return {
-    typedOptions,
-    elementsRef,
+    completedItems,
+    currentItem,
+    activeElementRef,
     containerElementRef,
   };
 }

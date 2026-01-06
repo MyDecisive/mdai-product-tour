@@ -16,6 +16,22 @@ import type {
   EngineTerminalTarget,
 } from "./engineTypesScratch";
 
+export interface ContactFormContent {
+  logoImage: string;
+  topCopy: string;
+  emailLabel: string;
+  emailRequiredMessage: string;
+  emailInvalidMessage: string;
+  submitButtonLabel: string;
+  cancelButtonLabel: string;
+  emailSuccess: string;
+  emailErrorPrefix: string;
+  emailErrorLinkLabel: string;
+  emailErrorSuffix: string;
+  emailSubject: string;
+  emailBodyTemplate: string;
+}
+
 export type BigContentModalType = "contact" | "finished" | "results";
 
 export type BigContentModalContentProps = {

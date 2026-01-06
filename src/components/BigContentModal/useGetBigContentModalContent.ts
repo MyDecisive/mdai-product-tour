@@ -44,6 +44,6 @@ export function useGetBigContentModalContent() {
   return {
     ContentComponent: MODAL_CONTENT[bigContentModal],
     handleClose,
-    showCloseButton: bigContentModal !== "results",
+    showCloseButton: bigContentModal === "finished",
   };
 }

@@ -10,7 +10,7 @@ const splashData = {
       link: {
         text: "MyDecisive SmartHub",
         href: "https://www.mydecisive.ai/platform",
-      }
+      },
     },
     body: `In an era where "more data" often means "more noise" and skyrocketing costs, MyDecisive provides a different path. We believe platform teams should be innovating, not fighting fires.`,
   },
@@ -23,11 +23,11 @@ const splashData = {
       },
       {
         title: "Bring Your Own Cloud (BYOC)",
-        body: `MyDecisive runs in your environment on Kubernetes. This keeps your data secure, ensures compliance, and allows for sophisticated in-memory processing that SaaS-based vendors simply cannot provide.`
+        body: `MyDecisive runs in your environment on Kubernetes. This keeps your data secure, ensures compliance, and allows for sophisticated in-memory processing that SaaS-based vendors simply cannot provide.`,
       },
       {
         title: "Zero Vendor Lock-in",
-        body: `We are 100% Open Source and built on OpenTelemetry (OTel) standards. Use our hub to filter and proxy data to Splunk, Datadog, or Databricks without being tethered to proprietary agents or APIs.`
+        body: `We are 100% Open Source and built on OpenTelemetry (OTel) standards. Use our hub to filter and proxy data to Splunk, Datadog, or Databricks without being tethered to proprietary agents or APIs.`,
       },
     ],
   },
@@ -37,13 +37,13 @@ const splashData = {
     bullets: [
       <span>
         {`See how our `}
-        <a
+        <Link
           href="https://www.mydecisive.ai/solutions/intelligent-logstream"
           target="_blank"
           rel="noopener noreferrer"
         >
           Intelligent LogStream
-        </a>
+        </Link>
         {` changes the paradigm by moving intelligence to the "edge" of your data pipeline. It doesn't just transport logs; it understands them in real-time, on the wire.`}
       </span>,
       `Watch it identify noisy, redundant services and apply filters that reduce volume by 90% or more while keeping the signals that matter.`,
@@ -61,13 +61,16 @@ const splashData = {
 export function SplashPage() {
   const { setNavState } = useDemoContext();
 
-  const startTour = useCallback((tour: string = "logs") => {
-    setNavState({
-      tour: tour,
-      step: 0,
-      subStep: 0,
-    });
-  }, [setNavState]);
+  const startTour = useCallback(
+    (tour: string = "logs") => {
+      setNavState({
+        tour: tour,
+        step: 0,
+        subStep: 0,
+      });
+    },
+    [setNavState]
+  );
   return (
     <Stack
       alignItems="flex-start"
@@ -86,13 +89,13 @@ export function SplashPage() {
         {/* Header */}
         <Typography variant="h3" fontSize="32px">
           {splashData.header.title.text}
-          <a
+          <Link
             href={splashData.header.title.link.href}
             target="_blank"
             rel="noopener noreferrer"
           >
             {splashData.header.title.link.text}
-          </a>
+          </Link>
           {"."}
         </Typography>
         <Typography variant="body1" maxWidth={700}>
@@ -111,11 +114,7 @@ export function SplashPage() {
             py: 5,
           }}
         >
-          <Typography
-            mb={4}
-            textAlign="left"
-            variant="h5"
-          >
+          <Typography mb={4} textAlign="left" variant="h5">
             {splashData.card.title}
           </Typography>
 
@@ -130,9 +129,7 @@ export function SplashPage() {
                   <Typography variant="body2" fontWeight={700} mb={2}>
                     {section.title}
                   </Typography>
-                  <Typography variant="body2">
-                    {section.body}
-                  </Typography>
+                  <Typography variant="body2">{section.body}</Typography>
                 </Stack>
               </Grid>
             ))}
@@ -141,11 +138,7 @@ export function SplashPage() {
 
         {/* BOTTOM SECTION */}
         <Stack>
-          <Typography
-            mb={2}
-            textAlign="left"
-            variant="h5"
-          >
+          <Typography mb={2} textAlign="left" variant="h5">
             {splashData.bottomSection.title}
           </Typography>
           <Typography variant="body1">
@@ -155,9 +148,7 @@ export function SplashPage() {
             {splashData.bottomSection.bullets.map((bullet, idx) => {
               return (
                 <li key={`bottomSection-bullet-${idx}`}>
-                  <Typography variant="body2">
-                    {bullet}
-                  </Typography>
+                  <Typography variant="body2">{bullet}</Typography>
                 </li>
               );
             })}
@@ -169,7 +160,6 @@ export function SplashPage() {
             <Link
               onClick={() => startTour("intro")}
               sx={{
-                color: "#EA80FC !important",
                 textDecoration: "none",
                 cursor: "pointer",
               }}

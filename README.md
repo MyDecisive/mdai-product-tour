@@ -6,11 +6,13 @@ MyDecisive AI official Product Tour
 
 Before running the site, be sure to copy `.env` to `.env.local` and enter the appropriate values. You should be able to get these from the [repository actions variables](https://github.com/DecisiveAI/site/settings/variables/actions) or from a team member.
 
-To run this site locally, simply run the following in a terminal at the root of this repo:
+To run this site locally, add an environment variable entry for `VITE_DEPLOY_TARGET`.
+
+Then simply run the following in a terminal at the root of this repo:
 
 ```
 npm i
-npm start
+npm run dev
 ```
 
 If everything worked, `Local:   http://localhost:5173/` or similar should appear with the appropriate address!

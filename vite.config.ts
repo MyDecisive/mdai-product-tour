@@ -2,10 +2,20 @@ import viteYaml from "@modyfi/vite-plugin-yaml";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 import { VitePluginRadar } from "vite-plugin-radar";
+import Sitemap from "vite-plugin-sitemap";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const envVars = loadEnv(mode, process.cwd());
+  const envVars = loadEnv(mode, process.cwd(), "");
+
+  const siteMapPlugin = Sitemap({
+    hostname: envVars.VITE_DEPLOY_TARGET,
+    robots:
+      envVars.PRERENDER_ENV !== "production"
+        ? [{ userAgent: "*", disallow: "/" }]
+        : [{ userAgent: "*", allow: "/" }],
+  });
+
   return {
     plugins: [
       react({
@@ -28,6 +38,7 @@ export default defineConfig(({ mode }) => {
           },
         ],
       }),
+      siteMapPlugin,
     ],
   };
 });

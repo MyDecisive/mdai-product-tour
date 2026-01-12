@@ -6,13 +6,13 @@ on:
       environment:
         type: choice
         description: Which environment?
-        options: 
+        options:
           - Staging
           - Prod
       rusure:
         type: choice
         description: Are you sure?
-        options: 
+        options:
           - "no"
           - "no?"
           - "no."
@@ -37,6 +37,8 @@ jobs:
           VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
           VITE_CONTACT_API_URL: ${{ vars.VITE_CONTACT_API_URL }}
           VITE_GOOGLE_ANALYTICS_KEY: ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.GTAG_PROD || vars.GTAG_STAGING }}
+          VITE_DEPLOY_TARGET: ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.SITEMAP_HOSTNAME_PROD || vars.SITEMAP_HOSTNAME_STAGING }}
+          PRERENDER_ENV: ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && 'production' || 'staging' }}
         run: npm install && npm run build
       - name: Set AWS credentials
         uses: aws-actions/configure-aws-credentials@v2

@@ -48,3 +48,7 @@ npm run validate-tour -- tourName
 ```
 
 Do not add the file extension for the tourName, just the name of the tour!!
+
+## Production build
+
+To test a production build run `PRERENDER_ENV=production npm run build`

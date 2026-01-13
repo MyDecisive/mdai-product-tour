@@ -1,7 +1,6 @@
 import { Box, Button, css, List, ListItem, Typography } from "@mui/material";
 import FullLogo from "../../assets/logos/full_logo.svg";
 import type { BigContentModalContentProps } from "../../utils/types";
-import { ContactForm } from "./ContactForm";
 
 const listItemStyles = css({
   display: "list-item",
@@ -75,7 +74,6 @@ export function TourFinished({ handleClose }: BigContentModalContentProps) {
           Try it yourself
         </Button>
       </Box>
-      <ContactForm handleClose={handleClose} styles={{ flex: "1 1 50%" }} />
     </Box>
   );
 }

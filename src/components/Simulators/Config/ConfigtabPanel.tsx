@@ -109,6 +109,7 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
           <Box
             key={`group-${group.groupId}`}
             sx={{
+              color: "var(--mdai-text-disabled)",
               ...(isChangeBlock && {
                 outline: "2px solid #B062C2",
                 outlineOffset: "-2px",
@@ -138,9 +139,6 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
                   key={`line-${line.lineNo}`}
                   data-line={line.lineNo}
                   sx={{
-                    ...(!highlight && {
-                      color: "var(--mdai-text-disabled)",
-                    }),
                     display: "grid",
                     gridTemplateColumns: "40px 1fr",
                     gap: 1,
@@ -155,13 +153,11 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
                     ...(pulsed && {
                       animation: "backgroundPulse 1s ease-out forwards",
                     }),
+                    ...(highlight && { color: "text.primary" }),
                   }}
                 >
                   <Box
                     sx={{
-                      color: highlight
-                        ? "text.disabled" // TODO: Clean up these color tokens so this declaration isn't such a head scratcher
-                        : "var(--mdai-text-disabled)",
                       textAlign: "right",
                     }}
                   >

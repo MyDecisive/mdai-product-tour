@@ -14,11 +14,11 @@ const linkStyles = {
 };
 
 export const Footer = () => {
-  const { setNavState } = useDemoContext();
+  const { setContactModalOpen } = useDemoContext();
 
   const openContactModal = useCallback(() => {
-    setNavState({ bigContentModal: "contact" });
-  }, [setNavState]);
+    setContactModalOpen(true);
+  }, [setContactModalOpen]);
 
   return (
     <Box

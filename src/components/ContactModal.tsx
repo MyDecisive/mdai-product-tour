@@ -216,17 +216,21 @@ export const ContactModal = () => {
                   By clicking the "Submit" button below, you agree to
                   MyDecisive's{" "}
                 </span>
-                <a href="terms" rel="noopener noreferrer" target="_blank">
+                <Link
+                  href="https://www.mydecisive.ai/terms"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
                   Terms of Use
-                </a>
+                </Link>
                 <span> and acknowledge our </span>
-                <a
-                  href="privacy-policy"
+                <Link
+                  href="https://www.mydecisive.ai/privacy-policy"
                   rel="noopener noreferrer"
                   target="_blank"
                 >
                   Privacy Policy
-                </a>
+                </Link>
                 .
               </Typography>
               {isErrored && (

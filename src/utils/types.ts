@@ -32,7 +32,7 @@ export interface ContactFormContent {
   emailBodyTemplate: string;
 }
 
-export type BigContentModalType = "contact" | "finished" | "results";
+export type BigContentModalType = "finished" | "results";
 
 export type BigContentModalContentProps = {
   handleClose: () => void;

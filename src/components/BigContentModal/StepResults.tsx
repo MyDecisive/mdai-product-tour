@@ -1,4 +1,5 @@
-import { Box, Button, css, Typography } from "@mui/material";
+import { css } from "@emotion/react";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
 import type {
@@ -70,6 +71,7 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
   const [playing, setPlaying] = useState<boolean>(false);
 
   const videoTagRef = useRef<HTMLVideoElement | null>(null);
+  const videoParentRef = useRef<HTMLDivElement | null>(null);
 
   const playVideo = () => {
     if (videoTagRef && videoTagRef.current) {
@@ -87,6 +89,14 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
     handleClose();
   }, [handleClose, handlePrevButtonClick]);
 
+  const onLoadedData = useCallback(() => {
+    if (resultsProps && videoTagRef?.current && videoParentRef?.current) {
+      const parentBounds = videoParentRef.current.getBoundingClientRect();
+
+      videoTagRef.current.height = parentBounds.height;
+    }
+  }, [resultsProps]);
+
   if (!resultsProps) {
     return null;
   }
@@ -94,7 +104,13 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
   const { src, alt, title, text } = resultsProps;
 
   return (
-    <>
+    <Stack
+      sx={{
+        maxHeight: "100%",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -125,28 +141,30 @@ export function StepResults({ handleClose }: { handleClose: () => void }) {
           </Button>
         </Box>
       </Box>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            pt: 2,
-            width: { xs: "100%", md: "70%" },
-          }}
+      <Box
+        ref={videoParentRef}
+        sx={css({
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+          minHeight: 0,
+          overflow: "auto",
+        })}
+      >
+        <video
+          ref={videoTagRef}
+          src={getVideoUrl(src)}
+          controls={false}
+          autoPlay
+          muted
+          onPlay={() => setPlaying(true)}
+          onEnded={() => setPlaying(false)}
+          onLoadedData={onLoadedData}
         >
-          <video
-            ref={videoTagRef}
-            src={getVideoUrl(src)}
-            controls={false}
-            autoPlay
-            muted
-            onPlay={() => setPlaying(true)}
-            onEnded={() => setPlaying(false)}
-          >
-            {alt}
-          </video>
-        </Box>
+          {alt}
+        </video>
       </Box>
-    </>
+    </Stack>
   );
 }

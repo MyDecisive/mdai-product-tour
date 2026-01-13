@@ -1,0 +1,20 @@
+import { Slide } from "@mui/material";
+import type { TransitionProps } from "@mui/material/transitions";
+import React from "react";
+
+export const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>
+) {
+  return (
+    <Slide
+      direction="up"
+      timeout={{ enter: 450, exit: 390 }}
+      ref={ref}
+      {...props}
+    />
+  );
+});

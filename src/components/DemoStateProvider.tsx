@@ -28,6 +28,8 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [contactModalOpen, setContactModalOpen] = useState<boolean>(false);
+
   const [navigationState, setNavigationState] =
     useState<NavigationState>(defaultNavState);
 
@@ -101,6 +103,8 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
       resetAnimationComplete,
       engineState,
       engineControls,
+      contactModalOpen,
+      setContactModalOpen,
     };
   }, [
     onAnimationComplete,
@@ -113,6 +117,8 @@ export function DemoStateProvider({ children }: DemoStateProviderProps) {
     error,
     engineState,
     engineControls,
+    contactModalOpen,
+    setContactModalOpen,
   ]);
 
   return (

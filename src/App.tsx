@@ -2,6 +2,7 @@ import { Backdrop, Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import { Banner, Footer, NavDrawer, Simulators } from "./components";
 import { BigContentModal } from "./components/BigContentModal/BigContentModal";
+import { ContactModal } from "./components/ContactModal";
 import { Error } from "./components/Error";
 import { drawerWidth } from "./components/NavDrawer/NavDrawer";
 import { SplashPage } from "./components/SplashPage";
@@ -60,6 +61,7 @@ function App() {
           )}
         </Box>
         <BigContentModal />
+        <ContactModal />
       </Box>
       <Footer />
     </Box>

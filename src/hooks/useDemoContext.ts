@@ -1,4 +1,9 @@
-import { createContext, useContext } from "react";
+import {
+  createContext,
+  useContext,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import type {
   AnimationEngineControls,
   AnimationEngineState,
@@ -17,6 +22,8 @@ export interface DemoContextValue {
   error: string | null;
   engineControls: AnimationEngineControls;
   engineState: AnimationEngineState;
+  contactModalOpen: boolean;
+  setContactModalOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const DemoContext = createContext<DemoContextValue | undefined>(

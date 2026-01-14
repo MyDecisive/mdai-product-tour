@@ -20,7 +20,7 @@ type TopLevelLabelProps = {
   children?: ReactNode;
 };
 
-export const subLabelStyles = css({
+const subLabelStyles = css({
   color: "#9E9E9E",
   fontStyle: "italic",
   fontFamily: "Inter",

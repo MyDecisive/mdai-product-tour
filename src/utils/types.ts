@@ -1,4 +1,3 @@
-import type { RefObject } from "react";
 import type { TypedOptions } from "typed.js";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
@@ -53,7 +52,6 @@ export type SimulatorBoxProps = {
   innerStyles?: React.CSSProperties;
   children?: React.ReactNode;
   active?: boolean;
-  ref?: RefObject<HTMLDivElement | null>;
 };
 
 export interface LogRecord {
@@ -82,15 +80,7 @@ export interface TerminalTypedOptions extends TypedOptions {
   printed: boolean;
 }
 
-export type DeepPartial<T> = Partial<{
-  [P in keyof T]: T[P] extends object
-    ? T[P] extends Array<infer U>
-      ? Array<DeepPartial<U>>
-      : DeepPartial<T[P]>
-    : Partial<T[P]>;
-}>;
-
-export type FrameType = (typeof FRAME_TYPES)[Exclude<
+type FrameType = (typeof FRAME_TYPES)[Exclude<
   keyof typeof FRAME_TYPES,
   "delay" | "clear" | "activate"
 >];
@@ -102,7 +92,7 @@ interface BaseFrame {
   type: (typeof FRAME_TYPES)[keyof typeof FRAME_TYPES];
 }
 
-export type Frame<
+type Frame<
   S extends SimulatorType = SimulatorType,
   T extends FrameType = FrameType,
   U = unknown
@@ -110,17 +100,17 @@ export type Frame<
   ? BaseFrame & { simulator: S; type: T; updates?: U }
   : BaseFrame & { simulator: S; type: T; updates: U };
 
-export interface DelayFrame extends BaseFrame {
+interface DelayFrame extends BaseFrame {
   type: typeof FRAME_TYPES.DELAY;
   duration: number;
 }
 
-export interface ClearSimulatorsFrame extends BaseFrame {
+interface ClearSimulatorsFrame extends BaseFrame {
   type: typeof FRAME_TYPES.CLEAR;
   simulators: SimulatorType[];
 }
 
-export interface ActivateSimulatorFrame extends BaseFrame {
+interface ActivateSimulatorFrame extends BaseFrame {
   type: typeof FRAME_TYPES.ACTIVATE;
   simulator: SimulatorType;
   duration?: number;
@@ -138,7 +128,7 @@ export interface ConfigSimScrollTarget {
 }
 
 // This is the source of truth for available frames
-export type SimulatorFrameConfigs = {
+type SimulatorFrameConfigs = {
   [SIMULATORS.TERMINAL]: {
     [FRAME_TYPES.ENTER_COMMAND]: FrameConfig<
       TourTerminalTarget[],

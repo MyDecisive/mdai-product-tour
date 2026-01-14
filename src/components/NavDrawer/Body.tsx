@@ -17,12 +17,6 @@ const NavDrawerBodyStyles = css({
   marginBottom: "24px",
 });
 
-export const subLabelStyles = css({
-  color: "#8A38F5",
-  fontStyle: "italic",
-  fontFamily: "Inter",
-});
-
 const BodyScrollContainer = css({
   maxHeight: `100%`,
   overflowY: "auto",

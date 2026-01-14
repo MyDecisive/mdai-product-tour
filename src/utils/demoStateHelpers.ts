@@ -1,6 +1,5 @@
 import type { EngineTargetState, TourEngine } from "./engineTypesScratch";
 import type {
-  BigContentModalType,
   EngineFrames,
   NavigationState,
   StepItem,
@@ -36,7 +35,7 @@ export function createDrawerItems(
   if (!tourConfigs) return undefined;
   if (!tour) {
     // temporarily remove all coming soon tours from drawer
-    const nonHiddenTours = tourConfigs.filter(tc => tc.coming_soon != true);
+    const nonHiddenTours = tourConfigs.filter((tc) => tc.coming_soon != true);
     return nonHiddenTours.map((tour, index) => {
       const { coming_soon, id, ...rest } = tour;
 
@@ -147,116 +146,5 @@ export function getCurrentEngineData(
     targetState: currentSubStep.targetState ?? emptyEngineData.targetState,
     animation: currentSubStep.animation ?? emptyEngineData.animation,
     prevTargetState,
-  };
-}
-
-export function determineNextButtonText(
-  tour: string,
-  tourConfigs: TourEngine[] | null,
-  step: number,
-  subStep: number
-): string {
-  const currentTour = tourConfigs?.find((t) => t.id === tour);
-  if (!currentTour || subStep === -1) {
-    return "Next";
-  }
-
-  const currentStep = currentTour.steps[step];
-
-  if (subStep === currentStep.subSteps.length - 1) {
-    const nextStep = currentTour.steps[step + 1];
-    const nextStepFirstSubStep = nextStep.subSteps[0];
-
-    if (nextStepFirstSubStep.visualizationModal) {
-      return "See results";
-    }
-  }
-
-  if (currentStep.subSteps[subStep + 1]?.visualizationModal) {
-    return "See results";
-  }
-
-  return "Next";
-}
-
-export function determineNextNavState(
-  tour: string,
-  tourConfigs: TourEngine[] | null,
-  step: number,
-  subStep: number
-) {
-  const currentTour = tourConfigs?.find((t) => t.id === tour);
-  if (!currentTour) {
-    return null;
-  }
-
-  const currentStep = currentTour.steps[step];
-  if (subStep === currentStep.subSteps.length - 1) {
-    if (step === currentTour.steps.length - 1) {
-      return {
-        tour: "",
-        step: -1,
-        subStep: -1,
-        bigContentModal: null,
-      };
-    }
-    return {
-      tour,
-      step: step + 1,
-      subStep: 0,
-      bigContentModal: null,
-    };
-  }
-
-  const nextSubStep = currentStep.subSteps[subStep + 1];
-
-  return {
-    tour,
-    step,
-    subStep: subStep + 1,
-    bigContentModal: nextSubStep.visualizationModal
-      ? ("results" as BigContentModalType)
-      : null,
-  };
-}
-
-export function determinePreviousNavState(
-  tour: string,
-  tourConfigs: TourEngine[] | null,
-  step: number,
-  subStep: number
-) {
-  const currentTour = tourConfigs?.find((t) => t.id === tour);
-  if (!currentTour) {
-    return null;
-  }
-
-  if (subStep === 0) {
-    if (step === 0) {
-      return {
-        tour: "",
-        step: -1,
-        subStep: -1,
-        bigContentModal: null,
-      };
-    }
-
-    const prevStep = currentTour.steps[step - 1];
-    const lastSubStep = prevStep.subSteps[prevStep.subSteps.length - 1];
-    return {
-      tour,
-      step: step - 1,
-      subStep: currentTour.steps[step - 1].subSteps.length - 1,
-      bigContentModal: lastSubStep.visualizationModal
-        ? ("results" as BigContentModalType)
-        : null,
-    };
-  }
-
-  return {
-    tour,
-    step,
-    subStep: subStep - 1,
-    bigContentModal: null,
   };
 }

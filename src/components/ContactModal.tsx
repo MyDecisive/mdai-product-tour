@@ -23,8 +23,6 @@ interface FormValues {
   email: string;
 }
 
-export type DefaultValues = Partial<FormValues>;
-
 const makeFallbackMailtoLink = (values: FormValues) =>
   `${contactUrl}?subject=${
     contactFormContent.emailSubject
@@ -38,7 +36,7 @@ const makeEmailBody = (values: FormValues) =>
     contactFormContent.emailBodyTemplate
   );
 
-export const sendContactForm = async (values: FormValues) => {
+const sendContactForm = async (values: FormValues) => {
   if (!contactAPIEndpoint) {
     throw new Error("Missing contact form submission endpoint!");
   }

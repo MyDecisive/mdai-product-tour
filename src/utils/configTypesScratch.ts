@@ -90,8 +90,3 @@ export interface TourContentItem extends ContentItem {
   actions?: TourFrames["Any"][];
   onClick?: TourFrames["Any"]; // Item-level click handler
 }
-
-export type HighlightText = {
-  text: string;
-  simulator: "status" | "config" | "logs" | "terminal";
-};

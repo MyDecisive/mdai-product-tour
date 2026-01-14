@@ -11,7 +11,7 @@ import type {
 import type { TourEngine } from "../utils/engineTypesScratch";
 import type { NavigationState } from "../utils/types";
 
-export interface DemoContextValue {
+interface DemoContextValue {
   navigationState: NavigationState;
   setNavState: (navState: Partial<NavigationState>) => void;
   tourConfigs: TourEngine[] | null;

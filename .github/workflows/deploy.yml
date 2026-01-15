@@ -50,6 +50,15 @@ jobs:
       - name: Invalidate CloudFront
         run: aws cloudfront create-invalidation --distribution-id ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && secrets.DISTRIBUTION_ID_PROD || secrets.DISTRIBUTION_ID_STAGING }} --paths '/*'
 
+  notify-on-success:
+    needs: build
+    if: success()
+    uses: DecisiveAI/ci/.github/workflows/deploy-notify.yml@main
+    secrets:
+      SLACK_NOTIFY_URL: ${{ secrets.SLACK_FE_DEPLOY_NOTIFY_URL }}
+    with:
+      deployed-url: ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.SITEMAP_HOSTNAME_PROD || vars.SITEMAP_HOSTNAME_STAGING }}
+
   notify-on-failure:
     needs: build
     if: failure() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))

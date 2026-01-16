@@ -18,13 +18,13 @@ steps:
                   Next, we start Fluentd containers to stream logs from services like "service1234" and "service4321.” The <button:1>Status</button> window will confirm the container start, and the <button:2>Tail Logs</button> window will show the incoming log data.
 
                 actions:
-                  - type: activate
+                  - kind: activate
                     simulator: status
                     duration: 1250
-                  - type: activate
+                  - kind: activate
                     simulator: status
                     duration: 1250
-                  - type: activate
+                  - kind: activate
                     simulator: logs
                     duration: 1250
         initialState:
@@ -67,7 +67,7 @@ steps:
             logsSent: 0
             logsFiltered: 0
         animation:
-          - type: enter_command
+          - kind: enter_command
             simulator: terminal
             updates:
               # TODO: allow outputs only terminal commands & break this frame up with
@@ -86,14 +86,14 @@ steps:
                   - "+ kubectl  apply -f ./mock-data/data_filtration.yaml -n mdai"
                   - "^300configmap/mdai-logger-settings created"
                   - "^900deployment.apps/mdai-logger-bundle created"
-          - type: add_services
+          - kind: add_services
             simulator: status
             updates:
               - namespace: "mdai"
                 name: "gateway-collector-64dc799dcb"
               - namespace: "synthetics"
                 name: "mdai-logger-bundle-8584566955"
-          - type: stream
+          - kind: stream
             simulator: logs
             updates:
               contextName: mdai-logger-bundle-8584566955
@@ -101,7 +101,7 @@ steps:
                 - serviceLogsBasic.txt
               speed: 50
               duration: 3000
-          - type: enter_command
+          - kind: enter_command
             simulator: terminal
             updates:
               - input: "helm upgrade --install --repo https://fluent.github.io/helm-charts fluent fluentd -f ./mock-data/configs/loggen_fluent.yaml"
@@ -118,15 +118,15 @@ steps:
                   - "export POD_NAME=$(kubectl get pods --namespace default -l 'app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=fluent' -o jsonpath='{.items[0].metadata.name}')"
                   - "kubectl --namespace default port-forward $POD_NAME 24231:24231"
                   - "curl http://127.0.0.1:24231/metrics"
-          - type: add_services
+          - kind: add_services
             simulator: status
             updates:
               - name: "fluent-fluentd"
-          - type: clear
+          - kind: clear
             simulators:
               - logs
             waitForComplete: false
-          - type: stream
+          - kind: stream
             simulator: logs
             updates:
               contextName: gateway-collector-64dc799dcb
@@ -153,7 +153,7 @@ steps:
             items:
               - text: In <emphasize>line 39</emphasize> of the OTEL.YAML file, you define a rule that says drop logs from “service4321”.
                 onClick:
-                  type: scroll_to
+                  kind: scroll_to
                   waitForComplete: false
                   simulator: config
                   updates:
@@ -162,7 +162,7 @@ steps:
                     scrollOnly: true
               - text: In <emphasize>line 65</emphasize> you enable this filter rule.
                 onClick:
-                  type: scroll_to
+                  kind: scroll_to
                   waitForComplete: false
                   simulator: config
                   updates:
@@ -190,21 +190,21 @@ steps:
                       - "#            filter/static-non-crit-services,"
             activeTab: otel.yaml
         animation:
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               fileName: otel.yaml
               line: 39
-          - type: delay
+          - kind: delay
             duration: 1500
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               fileName: otel.yaml
               line: 65
-          - type: delay
+          - kind: delay
             duration: 1500
-          - type: enter_command
+          - kind: enter_command
             simulator: terminal
             updates:
               - input: "mdai use_case data_filtration --version 0.9.0 --workflow static"
@@ -222,22 +222,22 @@ steps:
                   - "configmap/mdai-logger-settings unchanged"
                   - "^300deployment.apps/mdai-logger-bundle unchanged"
                   - "^900✅ use-case 'data_filtration': applied"
-          - type: add_services
+          - kind: add_services
             simulator: status
             updates:
               - namespace: "mdai"
-                name: "gateway-collector"
-          - type: update
+                name: "gateway-collector-64dc799dcb"
+          - kind: update
             simulator: banner
             updates:
               text: of log data filtered
               logsSent: 3.99
               logsFiltered: 24.51
             waitForComplete: false
-          - type: stream
+          - kind: stream
             simulator: logs
             updates:
-              contextName: gateway-collector
+              contextName: gateway-collector-64dc799dcb
               logsSources:
                 - collectorLogsStatic.txt
               speed: 85
@@ -274,13 +274,13 @@ steps:
               - bullet: "1."
                 text: "We are now working with two areas in the <button:0>Config</button> window: OTEL and dynamic variables."
                 actions:
-                  - type: activate
+                  - kind: activate
                     simulator: config
                     duration: 1250
               - bullet: "2."
                 text: 'Select HUB.YAML. <button:0>Line 11</button> defines a dynamic "noisy" service filter (replacing the static service4321 drop).'
                 actions:
-                  - type: scroll_to
+                  - kind: scroll_to
                     waitForComplete: false
                     simulator: config
                     updates:
@@ -291,7 +291,7 @@ steps:
               - bullet: "3."
                 text: '<button:0>Line 49</button> contains the PromQL query that sets the "noisy" threshold and duration.'
                 actions:
-                  - type: scroll_to
+                  - kind: scroll_to
                     waitForComplete: false
                     simulator: config
                     updates:
@@ -301,14 +301,14 @@ steps:
               - bullet: "4."
                 text: "Check OTEL.YAML (Lines <button:0>54</button> & <button:1>99</button>) to see how these variables make OTEL dynamic."
                 actions:
-                  - type: scroll_to
+                  - kind: scroll_to
                     waitForComplete: false
                     simulator: config
                     updates:
                       fileName: otel.yaml
                       line: 54
                       scrollOnly: true
-                  - type: scroll_to
+                  - kind: scroll_to
                     waitForComplete: false
                     simulator: config
                     updates:
@@ -359,40 +359,40 @@ steps:
                       - "          # filter/dynamic-non-crit-services,"
             activeTab: hub.yaml
         animation:
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               line: 11
               fileName: hub.yaml
-          - type: delay
+          - kind: delay
             duration: 1500
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               line: 30
               fileName: hub.yaml
-          - type: delay
+          - kind: delay
             duration: 1500
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               line: 50
               fileName: hub.yaml
-          - type: delay
+          - kind: delay
             duration: 1500
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               line: 43
               fileName: otel.yaml
-          - type: delay
+          - kind: delay
             duration: 1500
-          - type: scroll_to
+          - kind: scroll_to
             simulator: config
             updates:
               line: 98
               fileName: otel.yaml
-          - type: delay
+          - kind: delay
             duration: 1500
       - id: 2-b
         title: Kick the cluster one last time
@@ -400,7 +400,7 @@ steps:
           - items:
               - text: "We use a command-line tool (kubectl) to dynamically configure the system. Now, our smart central controller (SmartHub) automatically manages and adjusts the logging volume from services based on how much data they're sending, using a configurable, real-time threshold."
         animation:
-          - type: enter_command
+          - kind: enter_command
             simulator: terminal
             updates:
               - input: "mdai use_case data_filtration --version 0.9.0 --workflow dynamic"
@@ -415,14 +415,14 @@ steps:
                   - "configmap/mdai-logger-settings unchanged"
                   - "^300deployment.apps/mdai-logger-bundle unchanged"
                   - "^900✅ use-case 'data_filtration': applied"
-          - type: add_services
+          - kind: add_services
             simulator: status
             updates:
               - namespace: "mdai"
                 name: "mdai-operator-controller-manager-65955fb98b"
               - namespace: "mdai"
-                name: "gateway-collector"
-          - type: enter_command
+                name: "gateway-collector-64dc799dcb"
+          - kind: enter_command
             simulator: terminal
             updates:
               - input: "mdai apply ./0.9.0/use_cases/data_filtration/dynamic/observer.yaml -n mdai"
@@ -430,15 +430,15 @@ steps:
                   - "✅ Prerequisites OK"
                   - "+ kubectl  apply -f ./0.9.0/use_cases/data_filtration/dynamic/observer.yaml -n mdai"
                   - "mdaiobserver.hub.mydecisive.ai/ddf created"
-          - type: add_services
+          - kind: add_services
             simulator: status
             updates:
               - namespace: "mdai"
                 name: "ddf-mdai-observer-f4786d445"
-          - type: stream
+          - kind: stream
             simulator: logs
             updates:
-              contextName: gateway-collector
+              contextName: gateway-collector-64dc799dcb
               logsSources:
                 - collectorLogsDynamic.txt
               speed: 40

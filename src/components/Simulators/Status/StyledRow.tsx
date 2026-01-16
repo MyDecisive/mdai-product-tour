@@ -1,14 +1,14 @@
 import { css, type CSSObject } from "@emotion/react";
 import { Box, Typography } from "@mui/material";
 
-type StyleRowProps = {
+interface StyleRowProps {
   name: string;
   namespace: string;
   ready: string;
   status: string;
   restarts: string;
   containerStyles?: CSSObject;
-};
+}
 
 export function StyledRow({
   name,

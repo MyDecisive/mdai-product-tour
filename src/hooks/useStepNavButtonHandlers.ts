@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react";
-import type { EngineSubStep, TourEngine } from "../utils/engineTypesScratch";
-import type { NavigationState } from "../utils/types";
+import type { Definition, NavigationState, SubStep } from "../types/steps";
 import { useDemoContext } from "./useDemoContext";
 
 export function useNavButtonHandlers() {
@@ -73,9 +72,9 @@ export function useNavButtonHandlers() {
 }
 
 function findCurrentSubStep(
-  tourConfigs: TourEngine[] | null,
+  tourConfigs: Definition[] | null,
   { tour, step, subStep }: NavigationState
-): EngineSubStep | null {
+): SubStep | null {
   if (!tourConfigs) {
     return null;
   }

@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import type { EngineConfigTarget } from "../../utils/engineTypesScratch";
+import type { Player } from "../../types/player";
 import { useManageScrollTo } from "./useManageScrollTo";
 
 export function useGetConfigSimulatorContent({
   files,
   activeScrollTarget,
   onConfigScrollComplete,
-}: EngineConfigTarget & {
+}: NonNullable<Player["config"]> & {
   onSetActiveTab: (tabName: string) => void;
   onConfigScrollComplete: (scrollId: string) => void;
 }) {

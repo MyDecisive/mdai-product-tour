@@ -1,18 +1,15 @@
 import { Box, Typography } from "@mui/material";
 import { type FC } from "react";
 import { useGetStatusSimulatorContent } from "../../../hooks/useGetStatusSimulatorContent";
-import type {
-  EngineStatusTarget,
-  PodId,
-} from "../../../utils/engineTypesScratch";
-import type { PodStatusType } from "../../../utils/types";
+import type { PodStatus } from "../../../types/kinds";
+import type { Player, PodId } from "../../../types/player";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
 
 const HEADER_ROW_HEIGHT = 20;
-// TODO: Move these prop types to a types file
-export interface StatusSimulatorProps extends EngineStatusTarget {
-  onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+
+export interface StatusSimulatorProps extends NonNullable<Player["status"]> {
+  onPodStatusChange: (podId: PodId, newStatus: PodStatus) => void;
   playing: boolean;
   activeLogContext: string | undefined;
 }
@@ -24,11 +21,7 @@ export const Status: FC<StatusSimulatorProps> = ({
   playing,
   activeLogContext = "",
 }: StatusSimulatorProps) => {
-  const {
-    services = [],
-    // contextLabel,
-    serviceContainerRef,
-  } = useGetStatusSimulatorContent({
+  const { services = [], serviceContainerRef } = useGetStatusSimulatorContent({
     activePods,
     podOrder,
     playing,
@@ -37,7 +30,6 @@ export const Status: FC<StatusSimulatorProps> = ({
 
   return (
     <>
-      {/* <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel> */}
       <Box
         sx={{
           maxHeight: "350px",

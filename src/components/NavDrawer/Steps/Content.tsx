@@ -1,9 +1,6 @@
 import { Box, List, ListItem, Typography } from "@mui/material";
 import { useDemoContext } from "../../../hooks/useDemoContext";
-import type {
-  EngineContentBlock,
-  EngineContentItem,
-} from "../../../utils/engineTypesScratch";
+import type { ContentBlock, ContentItem } from "../../../types/steps";
 import { MarkupText } from "./Markup";
 
 const ListItemStyles: React.CSSProperties = {
@@ -23,13 +20,13 @@ const TitleStyles: React.CSSProperties = {
   fontWeight: 700,
 };
 
-export function ContentBlock({ variant, title, items }: EngineContentBlock) {
+export function ContentBlock({ variant, title, items }: ContentBlock) {
   const { engineControls, engineState } = useDemoContext();
 
   const { onTriggerFrame } = engineControls;
   const { activeSimulator } = engineState;
 
-  const typeCastItems = items as EngineContentItem[];
+  const typeCastItems = items as ContentItem[];
 
   return (
     <Box

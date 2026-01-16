@@ -1,10 +1,9 @@
 import { Box, Link } from "@mui/material";
 import { useCallback } from "react";
-import type { ConfigContent } from "../../../utils/engineTypesScratch";
+import type { ConfigContent } from "../../../types/player";
 import { GapLine } from "./GapLine";
 import { ToggleChangeButton } from "./ToggleChangeButton";
 
-// This _should_ simply extend `ConfigTabContents`
 interface ConfigTabPanelProps {
   fileName: string;
   url: string | undefined;
@@ -90,7 +89,7 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
         </Box>
       )}
       {groups.map((group, groupIndex) => {
-        if (group.type === "gap") {
+        if (group.kind === "gap") {
           return <GapLine key={`${fileName}-gap-${group.lineNo}`} {...group} />;
         }
 
@@ -102,8 +101,8 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
         const isChangeBlock = !!group.isChangeBlock;
         const pulsed = pulsedGroups.has(group.groupId);
 
-        const gapUpTop = isChangeBlock && prevGroup?.type === "gap";
-        const gapDownBelow = isChangeBlock && nextGroup?.type === "gap";
+        const gapUpTop = isChangeBlock && prevGroup?.kind === "gap";
+        const gapDownBelow = isChangeBlock && nextGroup?.kind === "gap";
 
         return (
           <Box

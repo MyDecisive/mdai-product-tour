@@ -4,24 +4,20 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import type {
-  AnimationEngineControls,
-  AnimationEngineState,
-} from "../animationEngine/hook";
-import type { TourEngine } from "../utils/engineTypesScratch";
-import type { NavigationState } from "../utils/types";
+import type { PlayerControls, PlayerState } from "../player/hook";
+import type { Definition, NavigationState } from "../types/steps";
 
-export interface DemoContextValue {
+interface DemoContextValue {
   navigationState: NavigationState;
   setNavState: (navState: Partial<NavigationState>) => void;
-  tourConfigs: TourEngine[] | null;
+  tourConfigs: Definition[] | null;
   onAnimationComplete: () => void;
   resetAnimationComplete: () => void;
   animationComplete: boolean;
   loading: boolean;
   error: string | null;
-  engineControls: AnimationEngineControls;
-  engineState: AnimationEngineState;
+  engineControls: PlayerControls;
+  engineState: PlayerState;
   contactModalOpen: boolean;
   setContactModalOpen: Dispatch<SetStateAction<boolean>>;
 }

@@ -1,5 +1,14 @@
 import { Box, Link, Typography } from "@mui/material";
-import type { SimulatorBoxProps } from "../../utils/types";
+
+interface SimulatorBoxProps {
+  title: string;
+  link?: string;
+  href?: string;
+  styles?: React.CSSProperties;
+  innerStyles?: React.CSSProperties;
+  children?: React.ReactNode;
+  active?: boolean;
+}
 
 export function SimulatorBox({
   title,

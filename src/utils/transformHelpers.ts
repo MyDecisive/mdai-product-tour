@@ -1,27 +1,25 @@
+import type {
+  ActivePod,
+  ActivePods,
+  ConfigContent,
+  Line,
+  LogRecord,
+  Player,
+  TerminalTypedOptions,
+} from "../types/player";
+import type * as Tour from "../types/tour";
 import {
   CURSOR_CHAR,
   POD_NAME_DELIM,
   STATUS,
   TERMINAL_PROMPT,
 } from "../utils/constants";
-import type {
-  ActivePod,
-  ActivePodMap,
-  ConfigContent,
-  ConfigLine,
-  EngineLogsTarget,
-} from "../utils/engineTypesScratch";
-import type {
-  LineChangeBlock,
-  LogRecord,
-  TerminalTypedOptions,
-} from "../utils/types";
 
 /**
  * Logs
  */
 
-export function createEmptyLogs(): EngineLogsTarget {
+export function createEmptyLogs(): NonNullable<Player["logs"]> {
   return {
     activeContext: "",
     allContexts: {},
@@ -298,7 +296,7 @@ export function createTerminalContent(
  * Config
  */
 export const createChangeMap = (
-  changes: LineChangeBlock[]
+  changes: Tour.LineChangeBlock[]
 ): Map<number, string> => {
   const changeMap = new Map<number, string>();
 
@@ -326,18 +324,18 @@ export function rawLinesFromText(yaml: string): string[] {
 export function createConfigContentGroups(
   fileName: string,
   relevantSections: (
-    | { type: "gap"; lineNo: number }
-    | { type: "group"; start: number; lines: string[] }
+    | { kind: "gap"; lineNo: number }
+    | { kind: "group"; start: number; lines: string[] }
   )[],
   changeMap: Map<number, string>
 ) {
   const groups: ConfigContent[] = [];
 
   relevantSections.forEach((section) => {
-    if (section.type === "gap") {
+    if (section.kind === "gap") {
       groups.push(section);
     } else {
-      const lines: ConfigLine[] = section.lines.map((line, i) => {
+      const lines: Line[] = section.lines.map((line, i) => {
         const lineNo = section.start + i;
         const newContent = changeMap.get(lineNo);
 
@@ -356,7 +354,7 @@ export function createConfigContentGroups(
       const isChangeBlock = lines.some((l) => l.changeContent !== undefined);
 
       groups.push({
-        type: "group",
+        kind: "group",
         groupId: `${fileName}-${start}-${end}`,
         start,
         end,
@@ -411,11 +409,11 @@ function determineChangeEnd(
  */
 export const extractRelevantSections = (
   lines: string[],
-  changes: LineChangeBlock[],
+  changes: Tour.LineChangeBlock[],
   contextSpacing = 2
 ): (
-  | { type: "gap"; lineNo: number }
-  | { type: "group"; start: number; lines: string[] }
+  | { kind: "gap"; lineNo: number }
+  | { kind: "group"; start: number; lines: string[] }
 )[] => {
   if (!changes?.length || !lines.length) return [];
 
@@ -469,12 +467,12 @@ export const extractRelevantSections = (
 
     // section is complete, add it, a gap, and restart
     sections.push({
-      type: "group",
+      kind: "group",
       start: groupStart,
       lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
     });
     if (!isConsecutiveLineNo) {
-      sections.push({ type: "gap", lineNo: oneHigherThanPreviousLineNo });
+      sections.push({ kind: "gap", lineNo: oneHigherThanPreviousLineNo });
     }
     groupStart = sortedLineNos[i];
     groupLineNos = [groupStart];
@@ -482,7 +480,7 @@ export const extractRelevantSections = (
 
   // Add the last group from the mutable variables.
   sections.push({
-    type: "group",
+    kind: "group",
     start: groupStart,
     lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
   });
@@ -495,7 +493,7 @@ export const extractRelevantSections = (
  */
 export function findReplacementPod(
   currentPod: ActivePod,
-  activePods: ActivePodMap
+  activePods: ActivePods
 ): ActivePod | undefined {
   return Object.values(activePods).find((active) => {
     const differentPodSource =

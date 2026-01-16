@@ -22,10 +22,8 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@mui/x-tree-view": "^8.10.2",
-    "mui-tel-input": "^9.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "reselect": "^5.1.1",
     "typed.js": "^2.1.0",
     "vite-plugin-sitemap": "^0.8.2"
   },

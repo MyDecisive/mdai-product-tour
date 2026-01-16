@@ -1,6 +1,5 @@
 import { Box, Button, css, List, ListItem, Typography } from "@mui/material";
 import FullLogo from "../../assets/logos/full_logo.svg";
-import type { BigContentModalContentProps } from "../../utils/types";
 
 const listItemStyles = css({
   display: "list-item",
@@ -8,7 +7,7 @@ const listItemStyles = css({
   marginLeft: "20px",
 });
 
-export function TourFinished({ handleClose }: BigContentModalContentProps) {
+export function TourFinished({ handleClose }: { handleClose: () => void }) {
   return (
     <Box
       sx={{

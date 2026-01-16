@@ -17,10 +17,10 @@ const InfoBoxTitleStyles = css({
   fontWeight: 500,
 });
 
-type InfoBoxProps = {
+interface InfoBoxProps {
   children: ReactNode;
   title?: ReactNode;
-};
+}
 
 export function InfoBox({ children, title }: InfoBoxProps) {
   return (

@@ -8,19 +8,19 @@ import {
 } from "@mui/x-tree-view/TreeItem";
 import { type ReactNode } from "react";
 
-type TreeItemProps = {
+interface TreeItemProps extends MuiTreeItemProps {
   topLevel?: boolean;
-} & MuiTreeItemProps;
+}
 
-type TopLevelLabelProps = {
+interface TopLevelLabelProps {
   style?: CSSObject;
   itemId: string;
   label?: string;
   subLabel?: string;
   children?: ReactNode;
-};
+}
 
-export const subLabelStyles = css({
+const subLabelStyles = css({
   color: "#9E9E9E",
   fontStyle: "italic",
   fontFamily: "Inter",

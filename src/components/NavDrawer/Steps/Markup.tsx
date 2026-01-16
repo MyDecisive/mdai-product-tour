@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
 import { Box, Button, Typography } from "@mui/material";
 import React from "react";
-import type { EngineContentItem } from "../../../utils/engineTypesScratch";
-import type { EngineFrames, SimulatorType } from "../../../utils/types";
+import type { AnyFrame } from "../../../types/frames";
+import type { Simulator } from "../../../types/kinds";
+import type { ContentItem } from "../../../types/steps";
 
 const InlineButtonStyles = css({
   padding: 0,
@@ -15,9 +16,9 @@ const InlineButtonStyles = css({
 
 interface MarkupProps {
   text: string;
-  actions?: EngineContentItem["actions"];
-  activeSimulator: Set<SimulatorType>;
-  onTriggerFrame: (frame: EngineFrames["Any"]) => void;
+  actions?: ContentItem["actions"];
+  activeSimulator: Set<Simulator>;
+  onTriggerFrame: (frame: AnyFrame) => void;
 }
 
 export function MarkupText({
@@ -41,7 +42,7 @@ export function MarkupText({
 
 function parseAndRender(
   text: string,
-  activeSimulator: Set<SimulatorType>,
+  activeSimulator: Set<Simulator>,
   handleActionClick: (index: number) => void
 ): React.ReactNode {
   const segments: React.ReactNode[] = [];
@@ -92,7 +93,7 @@ function parseAndRender(
       // <highlight:simulator>text</highlight>
       regex: /<highlight:(\w+)>([^<]+)<\/highlight>/g,
       render: (match: RegExpMatchArray, key: number) => {
-        const simulator = match[1] as SimulatorType;
+        const simulator = match[1] as Simulator;
         const content = match[2];
         const isActive = activeSimulator.has(simulator);
         return (

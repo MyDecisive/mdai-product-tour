@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
-import type { EngineLogsTarget } from "../utils/engineTypesScratch";
-import type { LogRecord } from "../utils/types";
+import type { LogRecord, Player } from "../types/player";
 
 export function useGetLogsSimulatorContent({
   activeContext,
   allContexts,
   playing,
-}: EngineLogsTarget & { playing: boolean }) {
+}: NonNullable<Player["logs"]> & { playing: boolean }) {
   const logContainerRef = useRef<HTMLDivElement | null>(null);
 
   const records = useMemo(() => {

@@ -1,10 +1,19 @@
-import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import type {
-  EngineLogsContext,
-  EngineTargetState,
+  AnyFrame,
+  ConstructedFrameKind,
+  Frame,
+  FrameConfigs,
+} from "../types/frames";
+import type { PodStatus, Simulator } from "../types/kinds";
+import type {
   LineGroup,
+  LogRecord,
+  LogsContext,
+  Player,
   PodId,
-} from "../utils/engineTypesScratch";
+  ScrollTarget,
+} from "../types/player";
+import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import {
   addConfigTarget,
   addLogsRecords,
@@ -22,28 +31,37 @@ import {
   updatePodStatus,
 } from "../utils/frameStateMergeStrategies";
 import { createLogRecord, findReplacementPod } from "../utils/transformHelpers";
-import type {
-  ConfigSimScrollTarget,
-  EngineFrames,
-  LogRecord,
-  PodStatusType,
-  SimulatorHandlerMap,
-  SimulatorType,
-} from "../utils/types";
 
-export interface EngineCallbacks {
-  onStateChange: (state: EngineTargetState) => void;
-  onActiveSimulatorChange: (simulator: SimulatorType | null) => void;
+type FrameHandler<
+  SimName extends keyof FrameConfigs,
+  FType extends keyof FrameConfigs[SimName]
+> = (
+  frame: Frame<
+    Extract<SimName, Simulator>,
+    Extract<FType, ConstructedFrameKind>,
+    FrameConfigs[SimName][FType]
+  >
+) => void;
+
+type SimulatorHandlerMap = {
+  [SimName in keyof FrameConfigs]: {
+    [FType in keyof FrameConfigs[SimName]]: FrameHandler<SimName, FType>;
+  };
+};
+
+export interface PlayerCallbacks {
+  onStateChange: (state: Player) => void;
+  onActiveSimulatorChange: (simulator: Simulator | null) => void;
   onComplete: () => void;
 }
 
-export class AnimationEngineInstance {
-  private actions: EngineFrames["Any"][];
-  private startState: EngineTargetState;
-  private targetState: EngineTargetState;
-  private callbacks: EngineCallbacks;
+export class PlayerInstance {
+  private actions: AnyFrame[];
+  private startState: Player;
+  private targetState: Player;
+  private callbacks: PlayerCallbacks;
 
-  private currentState: EngineTargetState;
+  private currentState: Player;
   private isRunning = false;
   private timeouts: NodeJS.Timeout[] = [];
   private currentActionResolver: (() => void) | null = null;
@@ -60,10 +78,10 @@ export class AnimationEngineInstance {
   private configPulseGroupTimeouts: ReturnType<typeof setTimeout>[] = [];
 
   constructor(
-    actions: EngineFrames["Any"][],
-    startState: EngineTargetState,
-    targetState: EngineTargetState,
-    callbacks: EngineCallbacks
+    actions: AnyFrame[],
+    startState: Player,
+    targetState: Player,
+    callbacks: PlayerCallbacks
   ) {
     this.actions = actions;
     this.startState = startState;
@@ -161,13 +179,13 @@ export class AnimationEngineInstance {
     },
   };
 
-  public async executeAction(action: EngineFrames["Any"]): Promise<void> {
-    if (action.type === FRAME_TYPES.DELAY) {
+  public async executeAction(action: AnyFrame): Promise<void> {
+    if (action.kind === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
       return;
     }
 
-    if (action.type === FRAME_TYPES.CLEAR) {
+    if (action.kind === FRAME_TYPES.CLEAR) {
       this.clearStatePerSimulator(action.simulators);
       return;
     }
@@ -179,9 +197,9 @@ export class AnimationEngineInstance {
       this.callbacks.onActiveSimulatorChange(simulator);
     }
 
-    if (action.type === FRAME_TYPES.ACTIVATE) {
+    if (action.kind === FRAME_TYPES.ACTIVATE) {
       // duration is enforced in transformTourToEngineAnimation
-      await this.delay(action.duration!);
+      await this.delay(action.duration);
       this.callbacks.onActiveSimulatorChange(simulator);
       return;
     }
@@ -194,7 +212,7 @@ export class AnimationEngineInstance {
 
     const simHandlers =
       this.frameHandlers[action.simulator as keyof typeof this.frameHandlers];
-    const handler = simHandlers?.[action.type as keyof typeof simHandlers] as
+    const handler = simHandlers?.[action.kind as keyof typeof simHandlers] as
       | ((frame: typeof action) => void)
       | undefined;
 
@@ -263,7 +281,7 @@ export class AnimationEngineInstance {
     this.podsToRemove.clear();
   }
 
-  public onPodStatusChange(podId: PodId, newStatus: PodStatusType): void {
+  public onPodStatusChange(podId: PodId, newStatus: PodStatus): void {
     const incrementRestarts = newStatus === STATUS.crashLoopBackoff;
     this.updateState(updatePodStatus, {
       podId,
@@ -303,12 +321,12 @@ export class AnimationEngineInstance {
     fileName,
     line,
     scrollOnly,
-  }: ConfigSimScrollTarget): Promise<void> {
+  }: ScrollTarget): Promise<void> {
     const file = this.currentState.config?.files[fileName];
     if (!file) return;
 
     const group = file.groups.find((grp) => {
-      if (grp.type !== "group") return false;
+      if (grp.kind !== "group") return false;
       return grp.start <= line && line <= grp.end;
     }) as LineGroup | undefined;
 
@@ -376,7 +394,7 @@ export class AnimationEngineInstance {
     speed,
     duration,
     contextName,
-  }: EngineLogsContext & { duration: number }): void {
+  }: LogsContext & { duration: number }): void {
     if (this.logsIntervalRef) {
       clearInterval(this.logsIntervalRef);
       this.logsIntervalRef = null;
@@ -433,10 +451,7 @@ export class AnimationEngineInstance {
   // Generic/Helper methods
   // ----------------------------------------------------------------------------
   private updateState<T>(
-    updateFn: (
-      currentState: EngineTargetState,
-      updates: T
-    ) => EngineTargetState,
+    updateFn: (currentState: Player, updates: T) => Player,
     updates: T
   ): void {
     const newState = updateFn(this.currentState, updates);
@@ -444,10 +459,10 @@ export class AnimationEngineInstance {
     this.callbacks.onStateChange(this.currentState);
   }
 
-  private clearStatePerSimulator(simulators: SimulatorType[]) {
+  private clearStatePerSimulator(simulators: Simulator[]) {
     this.currentState = Object.fromEntries(
       Object.entries(this.currentState || {}).filter(
-        ([k]) => !simulators.includes(k as SimulatorType)
+        ([k]) => !simulators.includes(k as Simulator)
       )
     );
     this.callbacks.onStateChange(this.currentState);

@@ -1,14 +1,14 @@
 import { alpha } from "@mui/material";
 import { blue, green, grey, orange, red, yellow } from "@mui/material/colors";
 import { useEffect, useRef } from "react";
+import type { PodStatus } from "../../../types/kinds";
+import type { ActivePod, PodId } from "../../../types/player";
 import { STATUS } from "../../../utils/constants";
-import type { ActivePod, PodId } from "../../../utils/engineTypesScratch";
-import type { PodStatusType } from "../../../utils/types";
 import { StyledRow } from "./StyledRow";
 
 const POD_ERROR_RATE = 0.15;
 
-function getNextStatus(currentStatus: PodStatusType): PodStatusType | null {
+function getNextStatus(currentStatus: PodStatus): PodStatus | null {
   switch (currentStatus) {
     case STATUS.pending:
       return STATUS.containerCreating;
@@ -28,7 +28,7 @@ function getNextStatus(currentStatus: PodStatusType): PodStatusType | null {
 }
 
 const STATUS_STYLE_MAP: Record<
-  PodStatusType,
+  PodStatus,
   {
     color: string;
     backgroundColor: string;
@@ -73,7 +73,7 @@ const STATUS_STYLE_MAP: Record<
 };
 
 type ServiceRowProps = Omit<ActivePod, "replicaNo" | "parentServiceKey"> & {
-  onStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+  onStatusChange: (podId: PodId, newStatus: PodStatus) => void;
 };
 
 function createStatusChangeDelay() {

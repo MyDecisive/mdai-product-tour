@@ -5,16 +5,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useAnimationEngine } from "../animationEngine/hook.ts";
 import { DemoContext } from "../hooks/useDemoContext.ts";
+import { useAnimationEngine } from "../player/hook.ts";
+import type { Definition, NavigationState } from "../types/steps.ts";
 import { getCurrentEngineData } from "../utils/demoStateHelpers.ts";
-import type { TourEngine } from "../utils/engineTypesScratch.ts";
 import { getAllParsedTourConfigs } from "../utils/fetchTourConfigs.ts";
-import type { NavigationState } from "../utils/types.ts";
-
-interface DemoStateProviderProps {
-  children: ReactNode;
-}
 
 const defaultNavState: NavigationState = {
   tour: "",
@@ -23,8 +18,8 @@ const defaultNavState: NavigationState = {
   bigContentModal: null,
 };
 
-export function DemoStateProvider({ children }: DemoStateProviderProps) {
-  const [tourConfigs, setTourConfigs] = useState<TourEngine[] | null>(null);
+export function DemoStateProvider({ children }: { children: ReactNode }) {
+  const [tourConfigs, setTourConfigs] = useState<Definition[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

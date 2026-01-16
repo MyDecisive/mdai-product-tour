@@ -1,18 +1,14 @@
+import type { Player } from "../types/player";
+import type {
+  Definition,
+  NavigationState,
+  Step,
+  SubStep,
+} from "../types/steps";
+import type * as Tour from "../types/tour";
 import { transformSubStepConfigToInstanceArgs } from "./configToEngineTransforms";
-import type {
-  StepConfig,
-  SubStepConfig,
-  TourConfiguration,
-} from "./configTypesScratch";
-import type {
-  EngineStep,
-  EngineSubStep,
-  EngineTargetState,
-  TourEngine,
-} from "./engineTypesScratch";
 import { prefetchAllGitHubFiles } from "./fetchRawGithubFile";
 import { getTourConfigs } from "./getAssets";
-import type { NavigationState } from "./types";
 
 export function getAllParsedTourConfigs() {
   try {
@@ -32,12 +28,12 @@ export function getAllParsedTourConfigs() {
  */
 function validateTourConfig(
   config: unknown
-): asserts config is TourConfiguration {
+): asserts config is Tour.Definition {
   if (!config || typeof config !== "object") {
     throw new Error("Invalid config: must be an object");
   }
 
-  const c = config as Partial<TourConfiguration>;
+  const c = config as Partial<Tour.Definition>;
 
   if (!c.id || !c.version || !c.title || (c.steps && !Array.isArray(c.steps))) {
     throw new Error(
@@ -47,15 +43,15 @@ function validateTourConfig(
 }
 
 async function transformParsedTourConfigToInstanceArgs(
-  config: TourConfiguration
-): Promise<TourEngine> {
+  config: Tour.Definition
+): Promise<Definition> {
   await prefetchAllGitHubFiles(config);
 
-  let previousTargetState: EngineTargetState | undefined;
-  const transformedSteps: EngineStep[] = [];
+  let previousTargetState: Player | undefined;
+  const transformedSteps: Step[] = [];
 
   for (const step of config?.steps || []) {
-    const transformedSubSteps: EngineSubStep[] = [];
+    const transformedSubSteps: SubStep[] = [];
 
     for (const [subStepIndex, subStep] of (step?.subSteps || []).entries()) {
       const { id, title, visualizationModal } = subStep;
@@ -93,12 +89,14 @@ async function transformParsedTourConfigToInstanceArgs(
         id,
         title,
         visualizationModal,
+        itemId: subStepIndex.toString(),
         ...transformed,
       });
     }
 
     transformedSteps.push({
       ...step,
+      itemId: transformedSteps.length.toString(),
       subSteps: transformedSubSteps,
     });
   }
@@ -112,9 +110,9 @@ async function transformParsedTourConfigToInstanceArgs(
 function createNextNavState(
   tourId: string,
   stepIndex: number,
-  stepsArr: StepConfig[],
+  stepsArr: Tour.Step[],
   subStepIndex: number,
-  subStepsArr: SubStepConfig[]
+  subStepsArr: Tour.SubStep[]
 ): NavigationState {
   const returnNavState: Pick<NavigationState, "tour" | "bigContentModal"> &
     Partial<NavigationState> = {
@@ -157,9 +155,9 @@ function createNextNavState(
 function createPrevNavState(
   tourId: string,
   stepIndex: number,
-  stepsArr: StepConfig[],
+  stepsArr: Tour.Step[],
   subStepIndex: number,
-  subStepsArr: SubStepConfig[]
+  subStepsArr: Tour.SubStep[]
 ): NavigationState {
   const returnNavState: Pick<NavigationState, "tour" | "bigContentModal"> &
     Partial<NavigationState> = {

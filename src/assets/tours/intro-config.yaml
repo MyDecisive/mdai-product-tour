@@ -21,16 +21,16 @@ steps:
       - id: 0-b
         title: Consolidated tools
         animation:
-          - type: activate
+          - kind: activate
             simulator: config
             duration: 2250
-          - type: activate
+          - kind: activate
             simulator: terminal
             duration: 2250
-          - type: activate
+          - kind: activate
             simulator: status
             duration: 2250
-          - type: activate
+          - kind: activate
             simulator: logs
             duration: 2250
         content:

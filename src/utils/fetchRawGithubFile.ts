@@ -1,4 +1,4 @@
-import type { TourConfiguration } from "./configTypesScratch";
+import type { Definition } from "../types/tour";
 import { FRAME_TYPES, SIMULATORS } from "./constants";
 
 /**
@@ -47,7 +47,7 @@ export async function fetchGitHubFile(url: string) {
 const githubFileCache = new Map<string, string>();
 
 export async function prefetchAllGitHubFiles(
-  config: TourConfiguration
+  config: Definition
 ): Promise<void> {
   const urlsToFetch = new Set<string>();
 
@@ -60,7 +60,7 @@ export async function prefetchAllGitHubFiles(
 
       subStep.animation?.forEach((action) => {
         if (
-          action.type === FRAME_TYPES.ADD &&
+          action.kind === FRAME_TYPES.ADD &&
           action.simulator === SIMULATORS.CONFIG &&
           action.updates?.files
         ) {

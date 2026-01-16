@@ -1,26 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { AnyFrame } from "../types/frames";
+import type { PodStatus, Simulator } from "../types/kinds";
+import type { Player, PodId } from "../types/player";
 import { STATUS } from "../utils/constants";
-import type { EngineTargetState, PodId } from "../utils/engineTypesScratch";
-import type {
-  EngineFrames,
-  PodStatusType,
-  SimulatorType,
-} from "../utils/types";
-import { AnimationEngineInstance } from "./class";
+import { PlayerInstance } from "./class";
 
-export interface AnimationEngineState {
+export interface PlayerState {
   isPlaying: boolean;
-  currentSimulatorState: EngineTargetState;
-  activeSimulator: Set<SimulatorType>;
+  currentSimulatorState: Player;
+  activeSimulator: Set<Simulator>;
 }
 
-export interface AnimationEngineControls {
+export interface PlayerControls {
   // generic
   reset: (str?: string) => void; // Reset to previous subStep's target state and replay
   play: () => void; // Begin animations
-  onTriggerFrame: (frame: EngineFrames["Any"]) => void;
+  onTriggerFrame: (frame: AnyFrame) => void;
   // status sim
-  onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
+  onPodStatusChange: (podId: PodId, newStatus: PodStatus) => void;
   // config sim
   onSetActiveTab: (tabName: string) => void;
   onToggleShowingChange: (groupId: string) => void;
@@ -30,24 +27,24 @@ export interface AnimationEngineControls {
 }
 
 export function useAnimationEngine(
-  targetState: EngineTargetState,
-  frames: EngineFrames["Any"][],
-  previousState: EngineTargetState,
+  targetState: Player,
+  frames: AnyFrame[],
+  previousState: Player,
   onCompleteCallback: () => void
-): [AnimationEngineState, AnimationEngineControls] {
+): [PlayerState, PlayerControls] {
   const [isPlaying, setIsPlaying] = useState(false);
   const [terminalState, setTerminalState] = useState(previousState.terminal);
   const [statusState, setStatusState] = useState(previousState.status);
   const [configState, setConfigState] = useState(previousState.config);
   const [logsState, setLogsState] = useState(previousState.logs);
   const [bannerState, setBannerState] = useState(previousState.banner);
-  const [activeSimulator, setActiveSimulator] = useState<Set<SimulatorType>>(
+  const [activeSimulator, setActiveSimulator] = useState<Set<Simulator>>(
     new Set()
   );
 
-  const engineRef = useRef<AnimationEngineInstance | null>(null);
+  const engineRef = useRef<PlayerInstance | null>(null);
 
-  const updateSimulatorStates = useCallback((state: EngineTargetState) => {
+  const updateSimulatorStates = useCallback((state: Player) => {
     setTerminalState((prev) =>
       state.terminal !== prev ? state.terminal : prev
     );
@@ -57,7 +54,7 @@ export function useAnimationEngine(
     setBannerState((prev) => (state.banner !== prev ? state.banner : prev));
   }, []);
 
-  const handleSetActiveSimulator = useCallback((sim: SimulatorType | null) => {
+  const handleSetActiveSimulator = useCallback((sim: Simulator | null) => {
     setActiveSimulator((old) => {
       if (sim === null) {
         return new Set();
@@ -73,20 +70,15 @@ export function useAnimationEngine(
   }, []);
 
   useEffect(() => {
-    const engine = new AnimationEngineInstance(
-      frames,
-      previousState,
-      targetState,
-      {
-        onStateChange: updateSimulatorStates,
-        onActiveSimulatorChange: handleSetActiveSimulator,
-        onComplete: () => {
-          setIsPlaying(false);
-          setActiveSimulator(new Set());
-          onCompleteCallback();
-        },
-      }
-    );
+    const engine = new PlayerInstance(frames, previousState, targetState, {
+      onStateChange: updateSimulatorStates,
+      onActiveSimulatorChange: handleSetActiveSimulator,
+      onComplete: () => {
+        setIsPlaying(false);
+        setActiveSimulator(new Set());
+        onCompleteCallback();
+      },
+    });
 
     engineRef.current = engine;
 
@@ -105,7 +97,7 @@ export function useAnimationEngine(
     handleSetActiveSimulator,
   ]);
 
-  const controls = useMemo<AnimationEngineControls>(
+  const controls = useMemo<PlayerControls>(
     () => ({
       play: () => {
         if (!isPlaying) {
@@ -119,7 +111,7 @@ export function useAnimationEngine(
         setIsPlaying(false);
       },
 
-      onTriggerFrame: (frame: EngineFrames["Any"]) => {
+      onTriggerFrame: (frame: AnyFrame) => {
         void engineRef.current?.executeAction(frame);
       },
 

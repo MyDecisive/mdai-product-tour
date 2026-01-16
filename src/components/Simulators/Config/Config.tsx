@@ -1,11 +1,11 @@
 import { Tab, Tabs } from "@mui/material";
 import { useCallback } from "react";
 import { useGetConfigSimulatorContent } from "../../../hooks/useGetConfigSimulatorContent";
-import type { EngineConfigTarget } from "../../../utils/engineTypesScratch";
+import type { EngineTargetState } from "../../../types/player";
 import { ConfigTabPanel } from "./ConfigtabPanel";
 
 export function Config(
-  props: EngineConfigTarget & {
+  props: NonNullable<EngineTargetState["config"]> & {
     onSetActiveTab: (tabName: string) => void;
     onToggleShowingChange: (groupId: string) => void;
     onConfigScrollComplete: (scrollId: string) => void;

@@ -1,7 +1,10 @@
 import { useCallback, useMemo } from "react";
-import type { EngineSubStep, TourEngine } from "../utils/engineTypesScratch";
-import type { NavigationState } from "../utils/types";
 import { useDemoContext } from "./useDemoContext";
+import type {
+  TourEngine,
+  NavigationState,
+  EngineSubStep,
+} from "../types/steps";
 
 export function useNavButtonHandlers() {
   const {

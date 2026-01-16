@@ -1,13 +1,10 @@
 import { Box, Typography } from "@mui/material";
 import { type FC } from "react";
 import { useGetStatusSimulatorContent } from "../../../hooks/useGetStatusSimulatorContent";
-import type {
-  EngineStatusTarget,
-  PodId,
-} from "../../../utils/engineTypesScratch";
-import type { PodStatusType } from "../../../utils/types";
 import { ServiceRow } from "./ServiceRow";
 import { StyledRow } from "./StyledRow";
+import type { PodStatusType } from "../../../types/kinds";
+import type { EngineStatusTarget, PodId } from "../../../types/player";
 
 const HEADER_ROW_HEIGHT = 20;
 // TODO: Move these prop types to a types file

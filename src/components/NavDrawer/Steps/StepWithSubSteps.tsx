@@ -1,8 +1,8 @@
-import type { StepItem } from "../../../utils/types";
+import type { EngineStep } from "../../../types/steps";
 import { TreeItem } from "../../TreeItem";
 import { SubStep } from "./SubStep";
 
-export function StepWithSubSteps({ itemId, title, subSteps }: StepItem) {
+export function StepWithSubSteps({ itemId, title, subSteps }: EngineStep) {
   return (
     <>
       <TreeItem

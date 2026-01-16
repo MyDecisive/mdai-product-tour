@@ -14,8 +14,23 @@ import React, { useCallback, useMemo } from "react";
 import { useDemoContext } from "../hooks/useDemoContext";
 import { contactAPIEndpoint, contactUrl, emailRegex } from "../utils/constants";
 import formContent from "../utils/contactForm.yml";
-import type { ContactFormContent } from "../utils/types";
 import { Transition } from "./Transition";
+
+interface ContactFormContent {
+  logoImage: string;
+  topCopy: string;
+  emailLabel: string;
+  emailRequiredMessage: string;
+  emailInvalidMessage: string;
+  submitButtonLabel: string;
+  cancelButtonLabel: string;
+  emailSuccess: string;
+  emailErrorPrefix: string;
+  emailErrorLinkLabel: string;
+  emailErrorSuffix: string;
+  emailSubject: string;
+  emailBodyTemplate: string;
+}
 
 const contactFormContent = formContent as ContactFormContent;
 

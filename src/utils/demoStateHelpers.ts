@@ -1,10 +1,11 @@
-import type { EngineTargetState, TourEngine } from "./engineTypesScratch";
+import type { AnyFrame } from "../types/frames";
+import type { EngineTargetState } from "../types/player";
 import type {
-  EngineFrames,
+  EngineStep,
   NavigationState,
-  StepItem,
+  TourEngine,
   TourSelectionItem,
-} from "./types";
+} from "../types/steps";
 
 export function createExpandedDrawerItemIds(
   step: number,
@@ -31,7 +32,7 @@ export function createDrawerItems(
   onTourSelect: (selectedTour: string) => void,
   tourConfigs: TourEngine[] | null,
   tour: string
-): undefined | TourSelectionItem[] | StepItem[] {
+): undefined | TourSelectionItem[] | EngineStep[] {
   if (!tourConfigs) return undefined;
   if (!tour) {
     // temporarily remove all coming soon tours from drawer
@@ -64,7 +65,7 @@ export function createDrawerItems(
           };
         }),
     };
-  }) as StepItem[];
+  }) as EngineStep[];
 }
 
 export function onTreeItemClick(
@@ -103,7 +104,7 @@ export function getCurrentEngineData(
   subStep: number
 ): {
   targetState: EngineTargetState;
-  animation: EngineFrames["Any"][];
+  animation: AnyFrame[];
   prevTargetState: EngineTargetState;
 } {
   const currentTour = tourConfigs?.find((t) => t.id === tour);

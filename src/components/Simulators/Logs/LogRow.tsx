@@ -1,8 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { green, grey, red, yellow } from "@mui/material/colors";
-import type { LogRecord } from "../../../utils/types";
-
-type LogRowProps = LogRecord;
+import type { LogRecord } from "../../../types/player";
 
 const formatTimestamp = (timestamp: string): string => {
   return new Date(timestamp).toISOString().split("T")[1].split(".")[0];
@@ -30,7 +28,7 @@ const getLogLevelColor = (level: string): string => {
   }
 };
 
-export function LogRow(props: LogRowProps) {
+export function LogRow(props: LogRecord) {
   const level = getLogLevel(props);
   const levelColor = getLogLevelColor(level);
 

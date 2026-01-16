@@ -1,15 +1,12 @@
 import { useCallback, type FunctionComponent } from "react";
 import { useDemoContext } from "../../hooks/useDemoContext";
-import type {
-  BigContentModalContentProps,
-  BigContentModalType,
-} from "../../utils/types";
+import type { BigContentModalType } from "../../types/steps";
 import { StepResults } from "./StepResults";
 import { TourFinished } from "./TourFinished";
 
 const MODAL_CONTENT: Record<
   BigContentModalType,
-  FunctionComponent<BigContentModalContentProps>
+  FunctionComponent<{ handleClose: () => void }>
 > = {
   finished: TourFinished,
   results: StepResults,

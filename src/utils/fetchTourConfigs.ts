@@ -1,18 +1,18 @@
-import { transformSubStepConfigToInstanceArgs } from "./configToEngineTransforms";
+import type { EngineTargetState } from "../types/player";
+import type {
+  EngineStep,
+  EngineSubStep,
+  NavigationState,
+  TourEngine,
+} from "../types/steps";
 import type {
   StepConfig,
   SubStepConfig,
   TourConfiguration,
-} from "./configTypesScratch";
-import type {
-  EngineStep,
-  EngineSubStep,
-  EngineTargetState,
-  TourEngine,
-} from "./engineTypesScratch";
+} from "../types/tour";
+import { transformSubStepConfigToInstanceArgs } from "./configToEngineTransforms";
 import { prefetchAllGitHubFiles } from "./fetchRawGithubFile";
 import { getTourConfigs } from "./getAssets";
-import type { NavigationState } from "./types";
 
 export function getAllParsedTourConfigs() {
   try {
@@ -93,12 +93,14 @@ async function transformParsedTourConfigToInstanceArgs(
         id,
         title,
         visualizationModal,
+        itemId: subStepIndex.toString(),
         ...transformed,
       });
     }
 
     transformedSteps.push({
       ...step,
+      itemId: transformedSteps.length.toString(),
       subSteps: transformedSubSteps,
     });
   }

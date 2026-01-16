@@ -2,9 +2,9 @@ import { alpha } from "@mui/material";
 import { blue, green, grey, orange, red, yellow } from "@mui/material/colors";
 import { useEffect, useRef } from "react";
 import { STATUS } from "../../../utils/constants";
-import type { ActivePod, PodId } from "../../../utils/engineTypesScratch";
-import type { PodStatusType } from "../../../utils/types";
 import { StyledRow } from "./StyledRow";
+import type { PodStatusType } from "../../../types/kinds";
+import type { ActivePod, PodId } from "../../../types/player";
 
 const POD_ERROR_RATE = 0.15;
 

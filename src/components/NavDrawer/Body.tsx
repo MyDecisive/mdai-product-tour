@@ -4,7 +4,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Box from "@mui/material/Box";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
-import type { StepItem, TourSelectionItem } from "../../utils/types";
+import type { EngineStep, TourSelectionItem } from "../../types/steps";
 import { StepWithSubSteps } from "./Steps/StepWithSubSteps";
 import { TourSelect } from "./Steps/TourSelect";
 
@@ -41,7 +41,7 @@ export function Body() {
           {drawerItems &&
             (inTour
               ? drawerItems.map((item) => (
-                  <StepWithSubSteps key={item.id} {...(item as StepItem)} />
+                  <StepWithSubSteps key={item.id} {...(item as EngineStep)} />
                 ))
               : drawerItems.map((item) => (
                   <TourSelect key={item.id} {...(item as TourSelectionItem)} />

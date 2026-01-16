@@ -8,8 +8,7 @@ import type {
   AnimationEngineControls,
   AnimationEngineState,
 } from "../animationEngine/hook";
-import type { TourEngine } from "../utils/engineTypesScratch";
-import type { NavigationState } from "../utils/types";
+import type { NavigationState, TourEngine } from "../types/steps";
 
 interface DemoContextValue {
   navigationState: NavigationState;

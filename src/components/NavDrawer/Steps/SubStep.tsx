@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { TreeItem, treeItemClasses } from "@mui/x-tree-view";
-import type { SubStepItem } from "../../../utils/types";
+import type { EngineSubStep } from "../../../types/steps";
 import { StepNavButtons } from "../StepNavButtons";
 import { ContentBlock } from "./Content";
 
@@ -15,7 +15,7 @@ const NavTreeSubStepStyles = css({
   },
 });
 
-export function SubStep({ itemId, title, content }: SubStepItem) {
+export function SubStep({ itemId, title, content }: EngineSubStep) {
   return (
     <>
       <TreeItem

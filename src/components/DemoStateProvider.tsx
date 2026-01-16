@@ -8,9 +8,8 @@ import {
 import { useAnimationEngine } from "../animationEngine/hook.ts";
 import { DemoContext } from "../hooks/useDemoContext.ts";
 import { getCurrentEngineData } from "../utils/demoStateHelpers.ts";
-import type { TourEngine } from "../utils/engineTypesScratch.ts";
 import { getAllParsedTourConfigs } from "../utils/fetchTourConfigs.ts";
-import type { NavigationState } from "../utils/types.ts";
+import type { NavigationState, TourEngine } from "../types/steps.ts";
 
 interface DemoStateProviderProps {
   children: ReactNode;

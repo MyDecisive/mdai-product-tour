@@ -3,7 +3,7 @@ import {
   parseTypedJsString,
   useGetTerminalSimulatorContent,
 } from "../../hooks/useGetTerminalSimulatorContent";
-import { type TerminalTypedOptions } from "../../utils/types";
+import type { TerminalTypedOptions } from "../../types/player";
 
 interface TerminalProps {
   state: TerminalTypedOptions[] | null | undefined;

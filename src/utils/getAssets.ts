@@ -1,4 +1,4 @@
-import type { TourConfiguration } from "./configTypesScratch";
+import type { TourConfiguration } from "../types/tour";
 
 const logFiles = import.meta.glob("../assets/logs/*.txt", {
   eager: true,

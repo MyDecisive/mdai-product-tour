@@ -2,12 +2,12 @@ import { css } from "@emotion/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
+import { getVideoUrl } from "../../utils/getAssets";
 import type {
   EngineContentItem,
+  VisualizationContentItem,
   EngineSubStep,
-} from "../../utils/engineTypesScratch";
-import { getVideoUrl } from "../../utils/getAssets";
-import type { VisualizationContentItem } from "../../utils/types";
+} from "../../types/steps";
 
 const ButtonContainerStyles = css({
   display: "flex",

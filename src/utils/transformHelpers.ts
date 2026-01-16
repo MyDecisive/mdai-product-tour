@@ -1,27 +1,25 @@
+import type {
+  ActivePod,
+  ActivePodMap,
+  ConfigContent,
+  ConfigLine,
+  EngineTargetState,
+  LogRecord,
+  TerminalTypedOptions,
+} from "../types/player";
+import type { LineChangeBlock } from "../types/tour";
 import {
   CURSOR_CHAR,
   POD_NAME_DELIM,
   STATUS,
   TERMINAL_PROMPT,
 } from "../utils/constants";
-import type {
-  ActivePod,
-  ActivePodMap,
-  ConfigContent,
-  ConfigLine,
-  EngineLogsTarget,
-} from "../utils/engineTypesScratch";
-import type {
-  LineChangeBlock,
-  LogRecord,
-  TerminalTypedOptions,
-} from "../utils/types";
 
 /**
  * Logs
  */
 
-export function createEmptyLogs(): EngineLogsTarget {
+export function createEmptyLogs(): NonNullable<EngineTargetState["logs"]> {
   return {
     activeContext: "",
     allContexts: {},

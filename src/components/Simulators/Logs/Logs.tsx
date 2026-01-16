@@ -1,15 +1,15 @@
 import { Box } from "@mui/material";
 import React, { useMemo } from "react";
 import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorContent";
-import type {
-  ActivePodMap,
-  EngineLogsTarget,
-} from "../../../utils/engineTypesScratch";
+import type { ActivePodMap, EngineTargetState } from "../../../types/player";
 import { SimulatorContextLabel } from "../SimContextLabel";
 import { LogRow } from "./LogRow";
 
 export const LogsSimulator: React.FC<
-  EngineLogsTarget & { playing: boolean; activeStatusPods: ActivePodMap }
+  NonNullable<EngineTargetState["logs"]> & {
+    playing: boolean;
+    activeStatusPods: ActivePodMap;
+  }
 > = ({ activeContext, allContexts, playing, activeStatusPods }) => {
   const { logContainerRef, records } = useGetLogsSimulatorContent({
     allContexts,

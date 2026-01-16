@@ -1,12 +1,29 @@
+import type { AnyFrame, SimulatorFrameConfigs } from "../types/frames";
+import type {
+  ActivePodMap,
+  EngineFileConfig,
+  EngineLogsContext,
+  EngineStatusTarget,
+  EngineTargetState,
+  LineGroup,
+  LogRecord,
+  PodId,
+} from "../types/player";
+import type {
+  EngineContentBlock,
+  EngineContentItem,
+  EngineSubStep,
+} from "../types/steps";
 import type {
   SubStepConfig,
+  AnyFrame as TourAnyFrame,
   TourConfigSimTarget,
   TourContentItem,
-  TourLogSimTarget,
+  TourLogsSimTarget,
   TourStatusTarget,
   TourTargetState,
   TourTerminalTarget,
-} from "./configTypesScratch";
+} from "../types/tour";
 import {
   DEFAULT_ANIMATION_STEP_DURATION,
   FRAME_TYPES,
@@ -14,21 +31,6 @@ import {
   SIMULATORS,
   STATUS,
 } from "./constants";
-import type {
-  ActivePodMap,
-  EngineConfigTarget,
-  EngineContentBlock,
-  EngineContentItem,
-  EngineFileConfig,
-  EngineLogsContext,
-  EngineLogsTarget,
-  EngineStatusTarget,
-  EngineSubStep,
-  EngineTargetState,
-  EngineTerminalTarget,
-  LineGroup,
-  PodId,
-} from "./engineTypesScratch";
 import { fetchGitHubFile } from "./fetchRawGithubFile";
 import {
   addConfigTarget,
@@ -53,12 +55,6 @@ import {
   parseRawLogFileToLogLines,
   rawLinesFromText,
 } from "./transformHelpers";
-import type {
-  EngineFrames,
-  LogRecord,
-  SimulatorStateBuilderMap,
-  TourFrames,
-} from "./types";
 
 // ============================================================================
 // TERMINAL SIMULATOR TRANSFORMS
@@ -67,7 +63,7 @@ import type {
 function transformTerminal(
   terminalTargets: TourTerminalTarget[],
   printed: boolean
-): EngineTerminalTarget {
+): NonNullable<EngineTargetState["terminal"]> {
   const strings = terminalTargets.flatMap(({ input, outputs = [] }) =>
     createTerminalContent([input], printed).concat(
       createTerminalContent(outputs, printed, "terminal")
@@ -155,7 +151,7 @@ function transformStatus(
 
 async function transformConfig(
   configSimTarget: TourConfigSimTarget
-): Promise<EngineConfigTarget> {
+): Promise<NonNullable<EngineTargetState["config"]>> {
   const fileEntries = await Promise.all(
     configSimTarget.files.map(async ({ fileName, url, changes }) => {
       const name = fileName ?? url.split("/").at(-1) ?? "unknown";
@@ -219,7 +215,7 @@ function transformLogsRecords(
     speed,
     duration,
     contextName,
-  }: TourLogSimTarget & { duration?: number },
+  }: TourLogsSimTarget & { duration?: number },
   prepLogRecordsForState?: boolean
 ): EngineLogsContext & { duration: number } {
   const engineSpeed = speed ?? 1000;
@@ -250,9 +246,9 @@ function transformLogsRecords(
 }
 
 function transformLogs(
-  tourLogs: (TourLogSimTarget & { duration?: number })[],
+  tourLogs: (TourLogsSimTarget & { duration?: number })[],
   prepLogRecordsForState?: boolean
-): EngineLogsTarget {
+): NonNullable<EngineTargetState["logs"]> {
   return tourLogs.reduce((accum, curr) => {
     if (!curr.contextName) {
       return accum;
@@ -272,9 +268,9 @@ function transformLogs(
 // ============================================================================
 
 async function transformTourToEngineAnimation(
-  animation: TourFrames["Any"][],
+  animation: TourAnyFrame[],
   contextId: string
-): Promise<EngineFrames["Any"][]> {
+): Promise<AnyFrame[]> {
   return Promise.all(
     animation.map(async (frame) => {
       if (
@@ -351,12 +347,26 @@ function addLogRecordsForState(
   return setLogsActiveContext(updatedAllContextsState, updates.contextName);
 }
 
+export type StateBuilder<
+  SimName extends keyof SimulatorFrameConfigs,
+  FType extends keyof SimulatorFrameConfigs[SimName]
+> = (
+  state: EngineTargetState,
+  updates: SimulatorFrameConfigs[SimName][FType]
+) => EngineTargetState;
+
+export type SimulatorStateBuilderMap = {
+  [SimName in keyof SimulatorFrameConfigs]: {
+    [FType in keyof SimulatorFrameConfigs[SimName]]?: StateBuilder<
+      SimName,
+      FType
+    >;
+  };
+};
+
 const stateBuilders: SimulatorStateBuilderMap = {
   [SIMULATORS.TERMINAL]: {
-    [FRAME_TYPES.ENTER_COMMAND]: (
-      state: EngineTargetState,
-      updates: EngineTerminalTarget
-    ) => {
+    [FRAME_TYPES.ENTER_COMMAND]: (state, updates) => {
       const updatesPrinted = {
         strings: updates.strings.map((str) => ({ ...str, printed: true })),
       };
@@ -364,10 +374,7 @@ const stateBuilders: SimulatorStateBuilderMap = {
     },
   },
   [SIMULATORS.STATUS]: {
-    [FRAME_TYPES.ADD_SERVICES]: (
-      state: EngineTargetState,
-      updates: EngineStatusTarget
-    ) => {
+    [FRAME_TYPES.ADD_SERVICES]: (state, updates) => {
       const targetStateUpdates = Object.entries(updates.activePods).reduce(
         (accum, [key, value]) => {
           const replacementPod = findReplacementPod(
@@ -398,10 +405,7 @@ const stateBuilders: SimulatorStateBuilderMap = {
     },
   },
   [SIMULATORS.CONFIG]: {
-    [FRAME_TYPES.ADD]: (
-      state: EngineTargetState,
-      updates: EngineConfigTarget
-    ) => {
+    [FRAME_TYPES.ADD]: (state, updates) => {
       if (updates.showingChange.size > 0) {
         return addConfigTarget(state, {
           ...updates,
@@ -423,7 +427,7 @@ const stateBuilders: SimulatorStateBuilderMap = {
 };
 
 function buildTargetStateFromEngineAnimation(
-  frames: EngineFrames["Any"][],
+  frames: AnyFrame[],
   initialState?: EngineTargetState
 ): EngineTargetState {
   return frames.reduce((state, frame) => {
@@ -483,9 +487,11 @@ export async function transformSubStepConfigToInstanceArgs(
 ): Promise<
   Pick<EngineSubStep, "initialState" | "targetState" | "animation" | "content">
 > {
-  const returnVal: Pick<
-    EngineSubStep,
-    "initialState" | "targetState" | "animation" | "content"
+  const returnVal: Partial<
+    Pick<
+      EngineSubStep,
+      "initialState" | "targetState" | "animation" | "content"
+    >
   > = {
     initialState: { ...previousTargetState },
   };
@@ -548,7 +554,10 @@ export async function transformSubStepConfigToInstanceArgs(
     }
   }
 
-  return returnVal;
+  return returnVal as Pick<
+    EngineSubStep,
+    "initialState" | "targetState" | "animation" | "content"
+  >;
 }
 
 async function transformContentItemToEngineContentItem(
@@ -557,8 +566,8 @@ async function transformContentItemToEngineContentItem(
 ): Promise<EngineContentItem> {
   const { onClick, actions, ...rest } = content;
 
-  let transformedOnClick: EngineFrames["Any"] | undefined;
-  let transformedActions: EngineFrames["Any"][] | undefined;
+  let transformedOnClick: AnyFrame | undefined;
+  let transformedActions: AnyFrame[] | undefined;
 
   if (onClick) {
     const [result] = await transformTourToEngineAnimation([onClick], contextId);

@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
 import { Box, Button, Typography } from "@mui/material";
 import React from "react";
-import type { EngineContentItem } from "../../../utils/engineTypesScratch";
-import type { EngineFrames, SimulatorType } from "../../../utils/types";
+import type { AnyFrame } from "../../../types/frames";
+import type { SimulatorType } from "../../../types/kinds";
+import type { EngineContentItem } from "../../../types/steps";
 
 const InlineButtonStyles = css({
   padding: 0,
@@ -17,7 +18,7 @@ interface MarkupProps {
   text: string;
   actions?: EngineContentItem["actions"];
   activeSimulator: Set<SimulatorType>;
-  onTriggerFrame: (frame: EngineFrames["Any"]) => void;
+  onTriggerFrame: (frame: AnyFrame) => void;
 }
 
 export function MarkupText({

@@ -1,10 +1,19 @@
-import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
+import type {
+  AnyFrame,
+  ConfigSimScrollTarget,
+  ConstructedFrameKind,
+  Frame,
+  SimulatorFrameConfigs,
+} from "../types/frames";
+import type { PodStatusType, SimulatorType } from "../types/kinds";
 import type {
   EngineLogsContext,
   EngineTargetState,
   LineGroup,
+  LogRecord,
   PodId,
-} from "../utils/engineTypesScratch";
+} from "../types/player";
+import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import {
   addConfigTarget,
   addLogsRecords,
@@ -22,14 +31,26 @@ import {
   updatePodStatus,
 } from "../utils/frameStateMergeStrategies";
 import { createLogRecord, findReplacementPod } from "../utils/transformHelpers";
-import type {
-  ConfigSimScrollTarget,
-  EngineFrames,
-  LogRecord,
-  PodStatusType,
-  SimulatorHandlerMap,
-  SimulatorType,
-} from "../utils/types";
+
+type FrameHandler<
+  SimName extends keyof SimulatorFrameConfigs,
+  FType extends keyof SimulatorFrameConfigs[SimName]
+> = (
+  frame: Frame<
+    Extract<SimName, SimulatorType>,
+    Extract<FType, ConstructedFrameKind>,
+    SimulatorFrameConfigs[SimName][FType]
+  >
+) => void;
+
+type SimulatorHandlerMap = {
+  [SimName in keyof SimulatorFrameConfigs]: {
+    [FType in keyof SimulatorFrameConfigs[SimName]]: FrameHandler<
+      SimName,
+      FType
+    >;
+  };
+};
 
 export interface EngineCallbacks {
   onStateChange: (state: EngineTargetState) => void;
@@ -38,7 +59,7 @@ export interface EngineCallbacks {
 }
 
 export class AnimationEngineInstance {
-  private actions: EngineFrames["Any"][];
+  private actions: AnyFrame[];
   private startState: EngineTargetState;
   private targetState: EngineTargetState;
   private callbacks: EngineCallbacks;
@@ -60,7 +81,7 @@ export class AnimationEngineInstance {
   private configPulseGroupTimeouts: ReturnType<typeof setTimeout>[] = [];
 
   constructor(
-    actions: EngineFrames["Any"][],
+    actions: AnyFrame[],
     startState: EngineTargetState,
     targetState: EngineTargetState,
     callbacks: EngineCallbacks
@@ -161,7 +182,7 @@ export class AnimationEngineInstance {
     },
   };
 
-  public async executeAction(action: EngineFrames["Any"]): Promise<void> {
+  public async executeAction(action: AnyFrame): Promise<void> {
     if (action.type === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
       return;
@@ -181,7 +202,7 @@ export class AnimationEngineInstance {
 
     if (action.type === FRAME_TYPES.ACTIVATE) {
       // duration is enforced in transformTourToEngineAnimation
-      await this.delay(action.duration!);
+      await this.delay(action.duration);
       this.callbacks.onActiveSimulatorChange(simulator);
       return;
     }

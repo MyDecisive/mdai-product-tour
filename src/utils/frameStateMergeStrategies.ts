@@ -1,19 +1,16 @@
-import { SIMULATORS, STATUS } from "../utils/constants";
+import type { PodStatusType } from "../types/kinds";
 import type {
   ActivePod,
   ActivePodMap,
   EngineConfigSimScrollTarget,
-  EngineConfigTarget,
   EngineFileConfig,
   EngineLogsContext,
-  EngineLogsTarget,
   EngineStatusTarget,
   EngineTargetState,
-  EngineTerminalTarget,
   LineGroup,
   PodId,
-} from "../utils/engineTypesScratch";
-import type { BannerTargetState, PodStatusType } from "../utils/types";
+} from "../types/player";
+import { SIMULATORS, STATUS } from "../utils/constants";
 import { findReplacementPod } from "./transformHelpers";
 
 // ============================================================================
@@ -568,7 +565,7 @@ export function setConfigActiveTab(
   currentState: EngineTargetState,
   tabName: string
 ): EngineTargetState {
-  return mergeIntoSimulator<"config", EngineConfigTarget>(
+  return mergeIntoSimulator<"config", NonNullable<EngineTargetState["config"]>>(
     currentState,
     "config",
     { activeTab: tabName }
@@ -583,44 +580,44 @@ export function toggleConfigShowingChange(
   const config = state.config;
 
   if (!config?.showingToggle.has(groupId)) {
-    state = toggleInSet<"config", EngineConfigTarget, "showingToggle">(
-      state,
+    state = toggleInSet<
       "config",
-      "showingToggle",
-      groupId
-    );
+      NonNullable<EngineTargetState["config"]>,
+      "showingToggle"
+    >(state, "config", "showingToggle", groupId);
   }
 
-  return toggleInSet<"config", EngineConfigTarget, "showingChange">(
-    state,
+  return toggleInSet<
     "config",
-    "showingChange",
-    groupId
-  );
+    NonNullable<EngineTargetState["config"]>,
+    "showingChange"
+  >(state, "config", "showingChange", groupId);
 }
 
 export function toggleConfigPulseGroup(
   currentState: EngineTargetState,
   groupId: string
 ): EngineTargetState {
-  return toggleInSet<"config", EngineConfigTarget, "pulsedGroups">(
-    currentState,
+  return toggleInSet<
     "config",
-    "pulsedGroups",
-    groupId
-  );
+    NonNullable<EngineTargetState["config"]>,
+    "pulsedGroups"
+  >(currentState, "config", "pulsedGroups", groupId);
 }
 
 function mergeConfigSets(
   currentState: EngineTargetState,
   incomingSets: Partial<
-    Pick<EngineConfigTarget, "showingToggle" | "showingChange" | "pulsedGroups">
+    Pick<
+      NonNullable<EngineTargetState["config"]>,
+      "showingToggle" | "showingChange" | "pulsedGroups"
+    >
   >
 ): EngineTargetState {
   const currentConfig = currentState.config;
   if (!currentConfig) {
     // No config yet; if incoming sets provided, create a new config skeleton
-    const newConfig: EngineConfigTarget = {
+    const newConfig: NonNullable<EngineTargetState["config"]> = {
       files: {},
       activeTab: "",
       showingToggle: incomingSets.showingToggle
@@ -632,11 +629,10 @@ function mergeConfigSets(
       pulsedGroups: new Set(),
     };
 
-    return mergeIntoSimulator<"config", EngineConfigTarget>(
-      currentState,
+    return mergeIntoSimulator<
       "config",
-      newConfig
-    );
+      NonNullable<EngineTargetState["config"]>
+    >(currentState, "config", newConfig);
   }
 
   const combinedToggle = unionSets(
@@ -652,7 +648,7 @@ function mergeConfigSets(
     incomingSets.pulsedGroups
   );
 
-  return mergeIntoSimulator<"config", EngineConfigTarget>(
+  return mergeIntoSimulator<"config", NonNullable<EngineTargetState["config"]>>(
     currentState,
     "config",
     {
@@ -667,17 +663,16 @@ function addOrReplaceConfigFile(
   currentState: EngineTargetState,
   files: Record<string, EngineFileConfig>
 ): EngineTargetState {
-  return mergeObjects<"config", EngineConfigTarget, "files">(
-    currentState,
+  return mergeObjects<
     "config",
-    "files",
-    files
-  );
+    NonNullable<EngineTargetState["config"]>,
+    "files"
+  >(currentState, "config", "files", files);
 }
 
 export function addConfigTarget(
   currentState: EngineTargetState,
-  update: EngineConfigTarget
+  update: NonNullable<EngineTargetState["config"]>
 ): EngineTargetState {
   const { files, showingChange, showingToggle, activeTab, pulsedGroups } =
     update;
@@ -704,7 +699,7 @@ export function setConfigScrollTarget(
   currentState: EngineTargetState,
   activeScrollTarget: EngineConfigSimScrollTarget | undefined
 ): EngineTargetState {
-  return mergeIntoSimulator<"config", EngineConfigTarget>(
+  return mergeIntoSimulator<"config", NonNullable<EngineTargetState["config"]>>(
     currentState,
     "config",
     { activeScrollTarget }
@@ -728,21 +723,25 @@ export function scrollToConfigLine(
 
   const file = config.files[fileName];
 
-  const { groupId } = (file.groups.find((grp) => {
-    const isLineGroup = grp.type === "group";
-    if (!isLineGroup) {
-      return;
-    }
-    return grp.start <= line && line <= grp.end;
-  }) || {}) as LineGroup;
+  const lineGroup =
+    (file.groups.find((grp) => {
+      const isLineGroup = grp.type === "group";
+      if (!isLineGroup) {
+        return;
+      }
+      return grp.start <= line && line <= grp.end;
+    }) as LineGroup) || ({} as LineGroup);
 
-  if (!groupId) {
+  if (!lineGroup?.groupId) {
     return currentState;
   }
 
   const stateWithUpdatedActiveTab = setConfigActiveTab(currentState, fileName);
 
-  return toggleConfigShowingChange(stateWithUpdatedActiveTab, groupId);
+  return toggleConfigShowingChange(
+    stateWithUpdatedActiveTab,
+    lineGroup.groupId
+  );
 }
 
 /**
@@ -756,21 +755,24 @@ export function addOrReplaceLogsContext(
     [logsContext.contextName]: logsContext,
   };
 
-  return mergeObjects<"logs", EngineLogsTarget, "allContexts">(
-    currentState,
+  return mergeObjects<
     "logs",
-    "allContexts",
-    logsContextEntry
-  );
+    NonNullable<EngineTargetState["logs"]>,
+    "allContexts"
+  >(currentState, "logs", "allContexts", logsContextEntry);
 }
 
 export function setLogsActiveContext(
   currentState: EngineTargetState,
   contextName: string
 ): EngineTargetState {
-  return mergeIntoSimulator<"logs", EngineLogsTarget>(currentState, "logs", {
-    activeContext: contextName,
-  });
+  return mergeIntoSimulator<"logs", NonNullable<EngineTargetState["logs"]>>(
+    currentState,
+    "logs",
+    {
+      activeContext: contextName,
+    }
+  );
 }
 
 export function addLogsRecords(
@@ -790,14 +792,13 @@ export function addLogsRecords(
  */
 export function addTerminalStrings(
   currentState: EngineTargetState,
-  { strings }: EngineTerminalTarget
+  { strings }: NonNullable<EngineTargetState["terminal"]>
 ): EngineTargetState {
-  return appendToArray<"terminal", EngineTerminalTarget, "strings">(
-    currentState,
+  return appendToArray<
     "terminal",
-    "strings",
-    strings
-  );
+    NonNullable<EngineTargetState["terminal"]>,
+    "strings"
+  >(currentState, "terminal", "strings", strings);
 }
 
 export function setTerminalContentPrinted(
@@ -815,11 +816,10 @@ export function setTerminalContentPrinted(
       : str
   );
 
-  return mergeIntoSimulator<"terminal", EngineTerminalTarget>(
-    currentState,
+  return mergeIntoSimulator<
     "terminal",
-    { strings: printedTerminalContent }
-  );
+    NonNullable<EngineTargetState["terminal"]>
+  >(currentState, "terminal", { strings: printedTerminalContent });
 }
 
 /**
@@ -827,9 +827,9 @@ export function setTerminalContentPrinted(
  */
 export function updateBannerState(
   currentState: EngineTargetState,
-  update: BannerTargetState
+  update: NonNullable<EngineTargetState["banner"]>
 ): EngineTargetState {
-  return mergeIntoSimulator<"banner", BannerTargetState>(
+  return mergeIntoSimulator<"banner", NonNullable<EngineTargetState["banner"]>>(
     currentState,
     SIMULATORS.BANNER,
     update

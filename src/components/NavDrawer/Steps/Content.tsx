@@ -3,7 +3,7 @@ import { useDemoContext } from "../../../hooks/useDemoContext";
 import type {
   EngineContentBlock,
   EngineContentItem,
-} from "../../../utils/engineTypesScratch";
+} from "../../../types/steps";
 import { MarkupText } from "./Markup";
 
 const ListItemStyles: React.CSSProperties = {

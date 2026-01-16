@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { EngineConfigSimScrollTarget } from "../../utils/engineTypesScratch";
+import type { EngineConfigSimScrollTarget } from "../../types/player";
 import { delay } from "../../utils/delay";
 import { calculateScrollTarget, smoothScrollTo } from "./scrollHelpers";
 

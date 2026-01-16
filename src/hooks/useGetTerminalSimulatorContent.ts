@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import { createTerminalContent } from "../utils/transformHelpers";
-import type { TerminalTypedOptions } from "../utils/types";
+import type { TerminalTypedOptions } from "../types/player";
 
 export function parseTypedJsString(str: string) {
   return str.replaceAll(/`/gi, "").replaceAll(/\^\d+/gi, "");

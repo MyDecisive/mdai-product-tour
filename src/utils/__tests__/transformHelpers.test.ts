@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type {
+  ActivePod,
+  ActivePodMap,
+  LineGroup,
+  LogRecord,
+} from "../../types/player";
+import type { LineChangeBlock } from "../../types/tour";
 import { CURSOR_CHAR, TERMINAL_PROMPT } from "../constants";
-import type { ActivePod, ActivePodMap, LineGroup } from "../engineTypesScratch";
 import {
   braidLogs,
   createChangeMap,
@@ -12,7 +18,6 @@ import {
   parseRawLogFileToLogLines,
   rawLinesFromText,
 } from "../transformHelpers";
-import type { LineChangeBlock, LogRecord } from "../types";
 
 describe("createLogRecord", () => {
   const mockDate = new Date("2024-01-15T12:00:00.000Z");

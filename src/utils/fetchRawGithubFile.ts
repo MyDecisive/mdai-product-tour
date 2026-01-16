@@ -1,4 +1,4 @@
-import type { TourConfiguration } from "./configTypesScratch";
+import type { TourConfiguration } from "../types/tour";
 import { FRAME_TYPES, SIMULATORS } from "./constants";
 
 /**

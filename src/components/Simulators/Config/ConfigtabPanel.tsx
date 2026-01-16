@@ -1,6 +1,6 @@
 import { Box, Link } from "@mui/material";
 import { useCallback } from "react";
-import type { ConfigContent } from "../../../utils/engineTypesScratch";
+import type { ConfigContent } from "../../../types/player";
 import { GapLine } from "./GapLine";
 import { ToggleChangeButton } from "./ToggleChangeButton";
 

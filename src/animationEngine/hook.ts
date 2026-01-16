@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { AnyFrame } from "../types/frames";
+import type { PodStatusType, SimulatorType } from "../types/kinds";
+import type { EngineTargetState, PodId } from "../types/player";
 import { STATUS } from "../utils/constants";
-import type { EngineTargetState, PodId } from "../utils/engineTypesScratch";
-import type {
-  EngineFrames,
-  PodStatusType,
-  SimulatorType,
-} from "../utils/types";
 import { AnimationEngineInstance } from "./class";
 
 export interface AnimationEngineState {
@@ -18,7 +15,7 @@ export interface AnimationEngineControls {
   // generic
   reset: (str?: string) => void; // Reset to previous subStep's target state and replay
   play: () => void; // Begin animations
-  onTriggerFrame: (frame: EngineFrames["Any"]) => void;
+  onTriggerFrame: (frame: AnyFrame) => void;
   // status sim
   onPodStatusChange: (podId: PodId, newStatus: PodStatusType) => void;
   // config sim
@@ -31,7 +28,7 @@ export interface AnimationEngineControls {
 
 export function useAnimationEngine(
   targetState: EngineTargetState,
-  frames: EngineFrames["Any"][],
+  frames: AnyFrame[],
   previousState: EngineTargetState,
   onCompleteCallback: () => void
 ): [AnimationEngineState, AnimationEngineControls] {
@@ -119,7 +116,7 @@ export function useAnimationEngine(
         setIsPlaying(false);
       },
 
-      onTriggerFrame: (frame: EngineFrames["Any"]) => {
+      onTriggerFrame: (frame: AnyFrame) => {
         void engineRef.current?.executeAction(frame);
       },
 

@@ -226,7 +226,7 @@ steps:
             simulator: status
             updates:
               - namespace: "mdai"
-                name: "gateway-collector"
+                name: "gateway-collector-64dc799dcb"
           - type: update
             simulator: banner
             updates:
@@ -237,7 +237,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
-              contextName: gateway-collector
+              contextName: gateway-collector-64dc799dcb
               logsSources:
                 - collectorLogsStatic.txt
               speed: 85
@@ -421,7 +421,7 @@ steps:
               - namespace: "mdai"
                 name: "mdai-operator-controller-manager-65955fb98b"
               - namespace: "mdai"
-                name: "gateway-collector"
+                name: "gateway-collector-64dc799dcb"
           - type: enter_command
             simulator: terminal
             updates:
@@ -438,7 +438,7 @@ steps:
           - type: stream
             simulator: logs
             updates:
-              contextName: gateway-collector
+              contextName: gateway-collector-64dc799dcb
               logsSources:
                 - collectorLogsDynamic.txt
               speed: 40

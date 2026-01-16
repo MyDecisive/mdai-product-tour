@@ -21,11 +21,7 @@ export const Status: FC<StatusSimulatorProps> = ({
   playing,
   activeLogContext = "",
 }: StatusSimulatorProps) => {
-  const {
-    services = [],
-    // contextLabel,
-    serviceContainerRef,
-  } = useGetStatusSimulatorContent({
+  const { services = [], serviceContainerRef } = useGetStatusSimulatorContent({
     activePods,
     podOrder,
     playing,
@@ -34,7 +30,6 @@ export const Status: FC<StatusSimulatorProps> = ({
 
   return (
     <>
-      {/* <SimulatorContextLabel>{contextLabel}</SimulatorContextLabel> */}
       <Box
         sx={{
           maxHeight: "350px",

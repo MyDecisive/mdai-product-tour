@@ -4,7 +4,6 @@ import type { ConfigContent } from "../../../types/player";
 import { GapLine } from "./GapLine";
 import { ToggleChangeButton } from "./ToggleChangeButton";
 
-// This _should_ simply extend `ConfigTabContents`
 interface ConfigTabPanelProps {
   fileName: string;
   url: string | undefined;

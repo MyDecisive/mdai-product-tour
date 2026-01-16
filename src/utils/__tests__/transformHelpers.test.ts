@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   ActivePod,
-  ActivePodMap,
+  ActivePods,
   LineGroup,
   LogRecord,
 } from "../../types/player";
-import type { LineChangeBlock } from "../../types/tour";
+import type * as Tour from "../../types/tour";
 import { CURSOR_CHAR, TERMINAL_PROMPT } from "../constants";
 import {
   braidLogs,
@@ -501,7 +501,7 @@ describe("findReplacementPod", () => {
         namespace: "production",
       });
 
-      const activePods: ActivePodMap = {
+      const activePods: ActivePods = {
         "pod-2": createPod({
           id: "pod-2",
           name: "auth-service-xyz789",
@@ -525,7 +525,7 @@ describe("findReplacementPod", () => {
         parentServiceKey: "service-key-1",
       });
 
-      const activePods: ActivePodMap = {
+      const activePods: ActivePods = {
         "pod-2": createPod({
           id: "pod-2",
           name: "auth-service-xyz789",
@@ -554,7 +554,7 @@ describe("findReplacementPod", () => {
         parentServiceKey: "service-key-1",
       });
 
-      const activePods: ActivePodMap = {
+      const activePods: ActivePods = {
         "pod-2": createPod({
           parentServiceKey: "service-key-1",
           status: "Running",
@@ -572,7 +572,7 @@ describe("findReplacementPod", () => {
         parentServiceKey: "service-key-1",
       });
 
-      const activePods: ActivePodMap = {
+      const activePods: ActivePods = {
         "pod-2": createPod({
           namespace: "staging",
           parentServiceKey: "service-key-2",
@@ -591,7 +591,7 @@ describe("findReplacementPod", () => {
         parentServiceKey: "service-key-1",
       });
 
-      const activePods: ActivePodMap = {
+      const activePods: ActivePods = {
         "pod-2": createPod({
           name: "billing-service-xyz789",
           parentServiceKey: "service-key-2",
@@ -609,7 +609,7 @@ describe("findReplacementPod", () => {
         parentServiceKey: "service-key-1",
       });
 
-      const activePods: ActivePodMap = {
+      const activePods: ActivePods = {
         "pod-2": createPod({
           parentServiceKey: "service-key-2",
           status: "Pending",
@@ -623,7 +623,7 @@ describe("findReplacementPod", () => {
 
     it("should return undefined when activePods is empty", () => {
       const currentPod = createPod({});
-      const activePods: ActivePodMap = {};
+      const activePods: ActivePods = {};
 
       const result = findReplacementPod(currentPod, activePods);
 
@@ -661,7 +661,7 @@ describe("rawLinesFromText", () => {
 
 describe("createChangeMap", () => {
   it("should create map from changeLines", () => {
-    const changes: LineChangeBlock[] = [
+    const changes: Tour.LineChangeBlock[] = [
       {
         start: 5,
         changeLines: ["old line 5", "old line 6"],
@@ -675,7 +675,7 @@ describe("createChangeMap", () => {
   });
 
   it("should handle multiple change blocks", () => {
-    const changes: LineChangeBlock[] = [
+    const changes: Tour.LineChangeBlock[] = [
       {
         start: 5,
         changeLines: ["old line 5"],
@@ -694,7 +694,7 @@ describe("createChangeMap", () => {
   });
 
   it("should fill gaps between start and end with empty strings", () => {
-    const changes: LineChangeBlock[] = [
+    const changes: Tour.LineChangeBlock[] = [
       {
         start: 5,
         end: 8,
@@ -711,7 +711,7 @@ describe("createChangeMap", () => {
   });
 
   it("should not override existing changeLines with empty strings", () => {
-    const changes: LineChangeBlock[] = [
+    const changes: Tour.LineChangeBlock[] = [
       {
         start: 5,
         end: 7,
@@ -727,7 +727,7 @@ describe("createChangeMap", () => {
   });
 
   it("should handle empty changeLines array", () => {
-    const changes: LineChangeBlock[] = [
+    const changes: Tour.LineChangeBlock[] = [
       {
         start: 5,
         end: 7,
@@ -759,7 +759,9 @@ describe("extractRelevantSections", () => {
     });
 
     it("should return empty array when no lines", () => {
-      const changes: LineChangeBlock[] = [{ start: 1, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 1, changeLines: ["old"] },
+      ];
       const result = extractRelevantSections([], changes);
 
       expect(result).toEqual([]);
@@ -767,7 +769,7 @@ describe("extractRelevantSections", () => {
 
     it("should extract single change with context", () => {
       const lines = ["line1", "line2", "line3", "line4", "line5"];
-      const changes: LineChangeBlock[] = [
+      const changes: Tour.LineChangeBlock[] = [
         { start: 3, changeLines: ["old line 3"] },
       ];
 
@@ -791,7 +793,7 @@ describe("extractRelevantSections", () => {
         "line6",
         "line7",
       ];
-      const changes: LineChangeBlock[] = [
+      const changes: Tour.LineChangeBlock[] = [
         { start: 2, end: 2, changeLines: ["old"] },
         { start: 6, end: 6, changeLines: ["old"] },
       ];
@@ -809,7 +811,9 @@ describe("extractRelevantSections", () => {
     // Context lines are adjacent LineGroups to the LineGroup with changeLines
     it("should respect custom context spacing", () => {
       const lines = ["l1", "l2", "l3", "l4", "l5", "l6", "l7"];
-      const changes: LineChangeBlock[] = [{ start: 4, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 4, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 1);
       expect(result.length).toBe(3);
@@ -834,7 +838,9 @@ describe("extractRelevantSections", () => {
 
     it("should handle zero context spacing", () => {
       const lines = ["l1", "l2", "l3", "l4", "l5"];
-      const changes: LineChangeBlock[] = [{ start: 3, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 3, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 0);
 
@@ -848,7 +854,9 @@ describe("extractRelevantSections", () => {
 
     it("should not exceed array bounds with large context", () => {
       const lines = ["l1", "l2", "l3"];
-      const changes: LineChangeBlock[] = [{ start: 2, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 2, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 10);
 
@@ -880,7 +888,9 @@ describe("extractRelevantSections", () => {
         "    grandchild: value",
         "  other: value",
       ];
-      const changes: LineChangeBlock[] = [{ start: 3, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 3, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 0);
       // Yaml parent lines are always provided as context groups
@@ -895,7 +905,9 @@ describe("extractRelevantSections", () => {
 
     it("should skip comment lines when finding parents", () => {
       const lines = ["root:", "  # comment", "  child:", "    value: test"];
-      const changes: LineChangeBlock[] = [{ start: 4, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 4, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 0);
 
@@ -912,7 +924,7 @@ describe("extractRelevantSections", () => {
   describe("change end determination", () => {
     it("should use explicit end when provided", () => {
       const lines = ["l1", "l2", "l3", "l4", "l5"];
-      const changes: LineChangeBlock[] = [
+      const changes: Tour.LineChangeBlock[] = [
         {
           start: 2,
           end: 4,
@@ -931,7 +943,7 @@ describe("extractRelevantSections", () => {
 
     it("should use changeLines length when end not provided", () => {
       const lines = ["l1", "l2", "l3", "l4", "l5"];
-      const changes: LineChangeBlock[] = [
+      const changes: Tour.LineChangeBlock[] = [
         {
           start: 2,
           changeLines: ["old1", "old2"],
@@ -951,7 +963,7 @@ describe("extractRelevantSections", () => {
   describe("section grouping", () => {
     it("should keep consecutive changed lines in same group", () => {
       const lines = ["l1", "l2", "l3", "l4", "l5"];
-      const changes: LineChangeBlock[] = [
+      const changes: Tour.LineChangeBlock[] = [
         { start: 2, changeLines: ["old"] },
         { start: 3, changeLines: ["old"] },
       ];
@@ -968,7 +980,7 @@ describe("extractRelevantSections", () => {
 
     it("should split groups when transitioning between changed and unchanged lines", () => {
       const lines = ["l1", "l2", "l3", "l4", "l5"];
-      const changes: LineChangeBlock[] = [
+      const changes: Tour.LineChangeBlock[] = [
         { start: 2, changeLines: ["old"] },
         // line 3 is context (not changed)
         { start: 4, changeLines: ["old"] },
@@ -984,7 +996,9 @@ describe("extractRelevantSections", () => {
   describe("edge cases", () => {
     it("should handle change at beginning of file", () => {
       const lines = ["l1", "l2", "l3"];
-      const changes: LineChangeBlock[] = [{ start: 1, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 1, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 1);
 
@@ -1004,7 +1018,9 @@ describe("extractRelevantSections", () => {
 
     it("should handle change at end of file", () => {
       const lines = ["l1", "l2", "l3"];
-      const changes: LineChangeBlock[] = [{ start: 3, changeLines: ["old"] }];
+      const changes: Tour.LineChangeBlock[] = [
+        { start: 3, changeLines: ["old"] },
+      ];
 
       const result = extractRelevantSections(lines, changes, 1);
 

@@ -1,7 +1,7 @@
 import { FRAME_TYPES, SIMULATORS } from "../utils/constants";
 import type * as Frames from "./frames";
 import type * as Kinds from "./kinds";
-import type { EngineTargetState } from "./player";
+import type { Player as RuntimePlayer, ScrollTarget } from "./player";
 import type * as Steps from "./steps";
 
 // ============================================================================
@@ -9,7 +9,7 @@ import type * as Steps from "./steps";
 // ============================================================================
 
 // Terminal simulator
-export interface TourTerminalTarget {
+export interface TerminalEntry {
   input: string;
   outputs?: string[];
 }
@@ -20,7 +20,7 @@ export interface TourTerminalTarget {
  * replicas - defaults to 1
  * noSuffix - defaults to false
  */
-export interface TourStatusTarget {
+export interface Service {
   name: string;
   namespace?: string;
   replicas?: number;
@@ -34,15 +34,10 @@ export interface LineChangeBlock {
   changeLines: string[];
 }
 
-interface TourFileTarget {
+interface ConfigFileSource {
   url: string;
   fileName?: string;
   changes?: LineChangeBlock[];
-}
-
-export interface TourConfigSimTarget {
-  files: TourFileTarget[];
-  activeTab?: string; // defaults to first file
 }
 
 // Logs simulator
@@ -51,7 +46,7 @@ export interface TourConfigSimTarget {
  * speed - defaults to 1000
  * contextName - the name of the Service these logs represent
  */
-export interface TourLogsSimTarget {
+export interface LogsFileSource {
   logsSources?: string[];
   speed?: number;
   contextName: string;
@@ -60,12 +55,15 @@ export interface TourLogsSimTarget {
 /**
  * config.activeTab - defaults to the name of the first file in config.files
  */
-export interface TourTargetState {
-  terminal?: TourTerminalTarget[];
-  status?: TourStatusTarget[];
-  config?: TourConfigSimTarget;
-  logs?: TourLogsSimTarget[];
-  banner?: EngineTargetState["banner"];
+export interface Player {
+  terminal?: TerminalEntry[];
+  status?: Service[];
+  config?: {
+    files: ConfigFileSource[];
+    activeTab?: string; // defaults to first file
+  };
+  logs?: LogsFileSource[];
+  banner?: RuntimePlayer["banner"];
 }
 
 // ============================================================================
@@ -74,28 +72,28 @@ export interface TourTargetState {
 
 type SimulatorFrameConfigs = {
   [SIMULATORS.TERMINAL]: {
-    [FRAME_TYPES.ENTER_COMMAND]: NonNullable<TourTargetState["terminal"]>;
+    [FRAME_TYPES.ENTER_COMMAND]: NonNullable<Player["terminal"]>;
   };
   [SIMULATORS.STATUS]: {
-    [FRAME_TYPES.ADD_SERVICES]: NonNullable<TourTargetState["status"]>;
+    [FRAME_TYPES.ADD_SERVICES]: NonNullable<Player["status"]>;
   };
   [SIMULATORS.CONFIG]: {
-    [FRAME_TYPES.ADD]: NonNullable<TourTargetState["config"]>;
-    [FRAME_TYPES.SCROLL_TO]: Frames.ConfigSimScrollTarget;
+    [FRAME_TYPES.ADD]: NonNullable<Player["config"]>;
+    [FRAME_TYPES.SCROLL_TO]: ScrollTarget;
   };
   [SIMULATORS.LOGS]: {
-    [FRAME_TYPES.ADD]: TourLogsSimTarget;
-    [FRAME_TYPES.STREAM]: TourLogsSimTarget & { duration?: number };
+    [FRAME_TYPES.ADD]: LogsFileSource;
+    [FRAME_TYPES.STREAM]: LogsFileSource & { duration?: number };
     [FRAME_TYPES.PAUSE]: undefined;
   };
   [SIMULATORS.BANNER]: {
-    [FRAME_TYPES.UPDATE]: NonNullable<TourTargetState["banner"]>;
+    [FRAME_TYPES.UPDATE]: NonNullable<Player["banner"]>;
   };
 };
 
 type FramesForSim<Sim extends keyof SimulatorFrameConfigs> = {
   [F in keyof SimulatorFrameConfigs[Sim]]: Frames.Frame<
-    Extract<Sim, Kinds.SimulatorType>,
+    Extract<Sim, Kinds.Simulator>,
     Extract<F, Frames.ConstructedFrameKind>,
     SimulatorFrameConfigs[Sim][F]
   >;
@@ -126,7 +124,7 @@ export type AnyFrame =
  * actions - click handlers assigned by index to elements in the content item
  * onClick - click handler assigned to an item level click event
  */
-export interface TourContentItem extends Steps.ContentItem {
+export interface ContentItem extends Steps.BaseContentItem {
   actions?: AnyFrame[];
   onClick?: AnyFrame;
 }
@@ -134,31 +132,31 @@ export interface TourContentItem extends Steps.ContentItem {
 interface ContentBlock {
   title?: string;
   variant?: "default" | "list";
-  items: (TourContentItem | Steps.VisualizationContentItem)[];
+  items: (ContentItem | Steps.Visualization)[];
 }
 
-export interface SubStepConfig {
+export interface SubStep {
   id: string;
   title?: string;
   content: ContentBlock[];
   visualizationModal?: boolean;
-  initialState?: TourTargetState;
+  initialState?: Player;
   animation?: AnyFrame[];
 }
 
-export interface StepConfig {
+export interface Step {
   id: string;
   title: string;
-  subSteps: SubStepConfig[];
+  subSteps: SubStep[];
 }
 
-export interface TourConfiguration {
+export interface Definition {
   id: string;
   version: string;
   title: string;
   subtitle?: string;
   description?: string;
-  steps: StepConfig[];
+  steps: Step[];
   coming_soon?: boolean;
   buttonText?: string;
   default_open?: boolean;

@@ -1,4 +1,4 @@
-import type { TourConfiguration } from "../types/tour";
+import type { Definition } from "../types/tour";
 
 const logFiles = import.meta.glob("../assets/logs/*.txt", {
   eager: true,
@@ -28,7 +28,7 @@ const tourConfigFiles = import.meta.glob("../assets/tours/*.yaml", {
 });
 
 export function getTourConfigs() {
-  return (
-    Object.values(tourConfigFiles) as { default: TourConfiguration }[]
-  ).map((module) => module.default);
+  return (Object.values(tourConfigFiles) as { default: Definition }[]).map(
+    (module) => module.default
+  );
 }

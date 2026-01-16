@@ -1,18 +1,24 @@
-import { useEffect, useState } from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 
-type BarsProps = {
+interface BarsProps {
   title: string;
   value?: number;
   amount?: number;
   reverse?: boolean;
-};
+}
 
-export function Bars({ title, value = 0, amount = 0, reverse = false }: BarsProps) {
+export function Bars({
+  title,
+  value = 0,
+  amount = 0,
+  reverse = false,
+}: BarsProps) {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
-    const percentTarget = value > 0 ? Math.min(100, Math.max(0, (amount / value) * 100)) : 0;
+    const percentTarget =
+      value > 0 ? Math.min(100, Math.max(0, (amount / value) * 100)) : 0;
     const duration = 500;
     const startTime = performance.now();
 

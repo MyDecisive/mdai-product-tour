@@ -1,13 +1,13 @@
 import type {
   ActivePod,
-  ActivePodMap,
+  ActivePods,
   ConfigContent,
-  ConfigLine,
-  EngineTargetState,
+  Line,
   LogRecord,
+  Player,
   TerminalTypedOptions,
 } from "../types/player";
-import type { LineChangeBlock } from "../types/tour";
+import type * as Tour from "../types/tour";
 import {
   CURSOR_CHAR,
   POD_NAME_DELIM,
@@ -19,7 +19,7 @@ import {
  * Logs
  */
 
-export function createEmptyLogs(): NonNullable<EngineTargetState["logs"]> {
+export function createEmptyLogs(): NonNullable<Player["logs"]> {
   return {
     activeContext: "",
     allContexts: {},
@@ -296,7 +296,7 @@ export function createTerminalContent(
  * Config
  */
 export const createChangeMap = (
-  changes: LineChangeBlock[]
+  changes: Tour.LineChangeBlock[]
 ): Map<number, string> => {
   const changeMap = new Map<number, string>();
 
@@ -335,7 +335,7 @@ export function createConfigContentGroups(
     if (section.type === "gap") {
       groups.push(section);
     } else {
-      const lines: ConfigLine[] = section.lines.map((line, i) => {
+      const lines: Line[] = section.lines.map((line, i) => {
         const lineNo = section.start + i;
         const newContent = changeMap.get(lineNo);
 
@@ -409,7 +409,7 @@ function determineChangeEnd(
  */
 export const extractRelevantSections = (
   lines: string[],
-  changes: LineChangeBlock[],
+  changes: Tour.LineChangeBlock[],
   contextSpacing = 2
 ): (
   | { type: "gap"; lineNo: number }
@@ -493,7 +493,7 @@ export const extractRelevantSections = (
  */
 export function findReplacementPod(
   currentPod: ActivePod,
-  activePods: ActivePodMap
+  activePods: ActivePods
 ): ActivePod | undefined {
   return Object.values(activePods).find((active) => {
     const differentPodSource =

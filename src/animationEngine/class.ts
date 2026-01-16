@@ -1,17 +1,17 @@
 import type {
   AnyFrame,
-  ConfigSimScrollTarget,
   ConstructedFrameKind,
   Frame,
-  SimulatorFrameConfigs,
+  FrameConfigs,
 } from "../types/frames";
-import type { PodStatusType, SimulatorType } from "../types/kinds";
+import type { PodStatus, Simulator } from "../types/kinds";
 import type {
-  EngineLogsContext,
-  EngineTargetState,
   LineGroup,
   LogRecord,
+  LogsContext,
+  Player,
   PodId,
+  ScrollTarget,
 } from "../types/player";
 import { FRAME_TYPES, SIMULATORS, STATUS } from "../utils/constants";
 import {
@@ -33,38 +33,35 @@ import {
 import { createLogRecord, findReplacementPod } from "../utils/transformHelpers";
 
 type FrameHandler<
-  SimName extends keyof SimulatorFrameConfigs,
-  FType extends keyof SimulatorFrameConfigs[SimName]
+  SimName extends keyof FrameConfigs,
+  FType extends keyof FrameConfigs[SimName]
 > = (
   frame: Frame<
-    Extract<SimName, SimulatorType>,
+    Extract<SimName, Simulator>,
     Extract<FType, ConstructedFrameKind>,
-    SimulatorFrameConfigs[SimName][FType]
+    FrameConfigs[SimName][FType]
   >
 ) => void;
 
 type SimulatorHandlerMap = {
-  [SimName in keyof SimulatorFrameConfigs]: {
-    [FType in keyof SimulatorFrameConfigs[SimName]]: FrameHandler<
-      SimName,
-      FType
-    >;
+  [SimName in keyof FrameConfigs]: {
+    [FType in keyof FrameConfigs[SimName]]: FrameHandler<SimName, FType>;
   };
 };
 
-export interface EngineCallbacks {
-  onStateChange: (state: EngineTargetState) => void;
-  onActiveSimulatorChange: (simulator: SimulatorType | null) => void;
+export interface PlayerCallbacks {
+  onStateChange: (state: Player) => void;
+  onActiveSimulatorChange: (simulator: Simulator | null) => void;
   onComplete: () => void;
 }
 
-export class AnimationEngineInstance {
+export class PlayerInstance {
   private actions: AnyFrame[];
-  private startState: EngineTargetState;
-  private targetState: EngineTargetState;
-  private callbacks: EngineCallbacks;
+  private startState: Player;
+  private targetState: Player;
+  private callbacks: PlayerCallbacks;
 
-  private currentState: EngineTargetState;
+  private currentState: Player;
   private isRunning = false;
   private timeouts: NodeJS.Timeout[] = [];
   private currentActionResolver: (() => void) | null = null;
@@ -82,9 +79,9 @@ export class AnimationEngineInstance {
 
   constructor(
     actions: AnyFrame[],
-    startState: EngineTargetState,
-    targetState: EngineTargetState,
-    callbacks: EngineCallbacks
+    startState: Player,
+    targetState: Player,
+    callbacks: PlayerCallbacks
   ) {
     this.actions = actions;
     this.startState = startState;
@@ -284,7 +281,7 @@ export class AnimationEngineInstance {
     this.podsToRemove.clear();
   }
 
-  public onPodStatusChange(podId: PodId, newStatus: PodStatusType): void {
+  public onPodStatusChange(podId: PodId, newStatus: PodStatus): void {
     const incrementRestarts = newStatus === STATUS.crashLoopBackoff;
     this.updateState(updatePodStatus, {
       podId,
@@ -324,7 +321,7 @@ export class AnimationEngineInstance {
     fileName,
     line,
     scrollOnly,
-  }: ConfigSimScrollTarget): Promise<void> {
+  }: ScrollTarget): Promise<void> {
     const file = this.currentState.config?.files[fileName];
     if (!file) return;
 
@@ -397,7 +394,7 @@ export class AnimationEngineInstance {
     speed,
     duration,
     contextName,
-  }: EngineLogsContext & { duration: number }): void {
+  }: LogsContext & { duration: number }): void {
     if (this.logsIntervalRef) {
       clearInterval(this.logsIntervalRef);
       this.logsIntervalRef = null;
@@ -454,10 +451,7 @@ export class AnimationEngineInstance {
   // Generic/Helper methods
   // ----------------------------------------------------------------------------
   private updateState<T>(
-    updateFn: (
-      currentState: EngineTargetState,
-      updates: T
-    ) => EngineTargetState,
+    updateFn: (currentState: Player, updates: T) => Player,
     updates: T
   ): void {
     const newState = updateFn(this.currentState, updates);
@@ -465,10 +459,10 @@ export class AnimationEngineInstance {
     this.callbacks.onStateChange(this.currentState);
   }
 
-  private clearStatePerSimulator(simulators: SimulatorType[]) {
+  private clearStatePerSimulator(simulators: Simulator[]) {
     this.currentState = Object.fromEntries(
       Object.entries(this.currentState || {}).filter(
-        ([k]) => !simulators.includes(k as SimulatorType)
+        ([k]) => !simulators.includes(k as Simulator)
       )
     );
     this.callbacks.onStateChange(this.currentState);

@@ -1,7 +1,7 @@
 import { Button, Typography } from "@mui/material";
+import type { SelectionItem } from "../../../types/steps";
 import { InfoBox } from "../../InfoBox";
 import { TreeItem } from "../../TreeItem";
-import type { TourSelectionItem } from "../../../types/steps";
 
 export function TourSelect({
   itemId,
@@ -10,7 +10,7 @@ export function TourSelect({
   subtitle,
   buttonText,
   onTourSelect,
-}: TourSelectionItem) {
+}: SelectionItem) {
   return (
     <>
       <TreeItem

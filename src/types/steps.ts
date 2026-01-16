@@ -1,12 +1,12 @@
 import type { AnyFrame } from "./frames";
-import type { EngineTargetState } from "./player";
+import type { Player } from "./player";
 
-export interface ContentItem {
+export interface BaseContentItem {
   text: string;
   bullet?: string;
 }
 
-export interface VisualizationContentItem extends ContentItem {
+export interface Visualization extends BaseContentItem {
   src: string;
   alt: string;
 }
@@ -24,50 +24,50 @@ export interface NavigationState {
  * actions - click handlers assigned by index to elements in the content item
  * onClick - click handler assigned to an item level click event
  */
-export interface EngineContentItem extends ContentItem {
+export interface ContentItem extends BaseContentItem {
   actions?: AnyFrame[];
   onClick?: AnyFrame;
 }
 
-export interface EngineContentBlock {
+export interface ContentBlock {
   title?: string;
   variant?: "default" | "list";
-  items: (EngineContentItem | VisualizationContentItem)[];
+  items: (ContentItem | Visualization)[];
 }
 
-export interface EngineSubStep {
+export interface SubStep {
   id: string;
   itemId: string;
   title?: string;
-  content: EngineContentBlock[];
+  content: ContentBlock[];
   visualizationModal?: boolean;
-  initialState?: EngineTargetState;
+  initialState?: Player;
   animation?: AnyFrame[];
-  targetState?: EngineTargetState;
+  targetState?: Player;
   previousSubStep: NavigationState;
   nextSubStep: NavigationState;
 }
 
-export interface EngineStep {
+export interface Step {
   id: string;
   itemId: string;
   title: string;
-  subSteps: EngineSubStep[];
+  subSteps: SubStep[];
 }
 
-export interface TourEngine {
+export interface Definition {
   id: string;
   version: string;
   title: string;
   subtitle?: string;
   description?: string;
-  steps: EngineStep[];
+  steps: Step[];
   coming_soon?: boolean;
   buttonText?: string;
   default_open?: boolean;
 }
 
-export interface TourSelectionItem {
+export interface SelectionItem {
   id: string;
   itemId: string;
   title: string;

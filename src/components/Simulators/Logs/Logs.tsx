@@ -1,14 +1,14 @@
 import { Box } from "@mui/material";
 import React, { useMemo } from "react";
 import { useGetLogsSimulatorContent } from "../../../hooks/useGetLogsSimulatorContent";
-import type { ActivePodMap, EngineTargetState } from "../../../types/player";
+import type { ActivePods, Player } from "../../../types/player";
 import { SimulatorContextLabel } from "../SimContextLabel";
 import { LogRow } from "./LogRow";
 
 export const LogsSimulator: React.FC<
-  NonNullable<EngineTargetState["logs"]> & {
+  NonNullable<Player["logs"]> & {
     playing: boolean;
-    activeStatusPods: ActivePodMap;
+    activeStatusPods: ActivePods;
   }
 > = ({ activeContext, allContexts, playing, activeStatusPods }) => {
   const { logContainerRef, records } = useGetLogsSimulatorContent({

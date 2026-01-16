@@ -1,13 +1,12 @@
-import type { PodStatusType } from "../types/kinds";
+import type { PodStatus } from "../types/kinds";
 import type {
   ActivePod,
-  ActivePodMap,
-  EngineConfigSimScrollTarget,
-  EngineFileConfig,
-  EngineLogsContext,
-  EngineStatusTarget,
-  EngineTargetState,
+  ActivePods,
+  ActiveScrollTarget,
+  ConfigFile,
   LineGroup,
+  LogsContext,
+  Player,
   PodId,
 } from "../types/player";
 import { SIMULATORS, STATUS } from "../utils/constants";
@@ -17,12 +16,12 @@ import { findReplacementPod } from "./transformHelpers";
 // TYPE-SAFE STATE TRANSFORMATION FUNCTIONS
 // ============================================================================
 
-function updateAt<K extends keyof EngineTargetState, T = unknown>(
-  currentState: EngineTargetState,
+function updateAt<K extends keyof Player, T = unknown>(
+  currentState: Player,
   simulator: K,
   path: string[],
   updater: (current: unknown) => T
-): EngineTargetState {
+): Player {
   if (path.length === 0) {
     throw new Error("Path cannot be empty");
   }
@@ -58,12 +57,12 @@ function updateAt<K extends keyof EngineTargetState, T = unknown>(
   };
 }
 
-function appendAt<K extends keyof EngineTargetState>(
-  currentState: EngineTargetState,
+function appendAt<K extends keyof Player>(
+  currentState: Player,
   simulator: K,
   path: string[],
   items: unknown[]
-): EngineTargetState {
+): Player {
   return updateAt(currentState, simulator, path, (current) => {
     if (current !== undefined && !Array.isArray(current)) {
       throw new Error(
@@ -221,13 +220,9 @@ function appendAt<K extends keyof EngineTargetState>(
 
 // Generic merge for simple cases
 export function mergeIntoSimulator<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>
->(
-  currentState: EngineTargetState,
-  simulator: K,
-  updates: Partial<S>
-): EngineTargetState {
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>
+>(currentState: Player, simulator: K, updates: Partial<S>): Player {
   const current = currentState[simulator];
   return {
     ...currentState,
@@ -237,15 +232,15 @@ export function mergeIntoSimulator<
 
 // Merge objects (for activePods, files, etc.)
 export function mergeObjects<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>,
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>,
   ObjKey extends keyof S
 >(
-  currentState: EngineTargetState,
+  currentState: Player,
   simulator: K,
   objectKey: ObjKey,
   updates: S[ObjKey] extends Record<string, infer V> ? Record<string, V> : never
-): EngineTargetState {
+): Player {
   const current = currentState[simulator] as S | undefined;
   const currentObj = (current?.[objectKey] || {}) as Record<string, unknown>;
 
@@ -259,15 +254,15 @@ export function mergeObjects<
 }
 
 export function appendToArray<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>,
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>,
   ArrKey extends keyof S
 >(
-  currentState: EngineTargetState,
+  currentState: Player,
   simulator: K,
   arrayKey: ArrKey,
   items: S[ArrKey] extends Array<infer T> ? T[] : never
-): EngineTargetState {
+): Player {
   const current = currentState[simulator] as S | undefined;
   const currentArr = (current?.[arrayKey] || []) as unknown[];
 
@@ -282,17 +277,17 @@ export function appendToArray<
 
 // Update nested property in object
 export function updateInObject<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>,
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>,
   ObjKey extends keyof S,
   ItemKey extends keyof NonNullable<S[ObjKey]>
 >(
-  currentState: EngineTargetState,
+  currentState: Player,
   simulator: K,
   objectKey: ObjKey,
   itemKey: ItemKey,
   updates: Partial<NonNullable<S[ObjKey]>[ItemKey]>
-): EngineTargetState {
+): Player {
   const current = currentState[simulator] as S | undefined;
   const currentObj = current?.[objectKey] as
     | Record<string | number | symbol, unknown>
@@ -323,15 +318,15 @@ export function updateInObject<
 
 // Toggle Set membership
 export function toggleInSet<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>,
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>,
   SetKey extends keyof S
 >(
-  currentState: EngineTargetState,
+  currentState: Player,
   simulator: K,
   setKey: SetKey,
   value: S[SetKey] extends Set<infer T> ? T : never
-): EngineTargetState {
+): Player {
   const current = currentState[simulator] as S | undefined;
   const currentSet = (current?.[setKey] || new Set()) as Set<unknown>;
   const newSet = new Set(currentSet);
@@ -361,15 +356,15 @@ function unionSets<T>(a?: Set<T>, b?: Set<T>): Set<T> {
 
 // Remove from array by predicate
 export function removeFromArray<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>,
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>,
   ArrKey extends keyof S
 >(
-  currentState: EngineTargetState,
+  currentState: Player,
   simulator: K,
   arrayKey: ArrKey,
   predicate: (item: S[ArrKey] extends Array<infer T> ? T : never) => boolean
-): EngineTargetState {
+): Player {
   const current = currentState[simulator] as S | undefined;
   const currentArr = (current?.[arrayKey] || []) as Array<
     S[ArrKey] extends Array<infer T> ? T : never
@@ -386,15 +381,15 @@ export function removeFromArray<
 
 // Remove keys from object
 export function removeFromObject<
-  K extends keyof EngineTargetState,
-  S extends NonNullable<EngineTargetState[K]>,
+  K extends keyof Player,
+  S extends NonNullable<Player[K]>,
   ObjKey extends keyof S
 >(
-  currentState: EngineTargetState,
+  currentState: Player,
   simulator: K,
   objectKey: ObjKey,
   keysToRemove: (keyof NonNullable<S[ObjKey]>)[]
-): EngineTargetState {
+): Player {
   const current = currentState[simulator] as S | undefined;
   const currentObj = (current?.[objectKey] || {}) as Record<string, unknown>;
   const newObj = { ...currentObj };
@@ -414,11 +409,8 @@ export function removeFromObject<
 // SPECIFIC STATE TRANSFORMATIONS (fully type-safe)
 // ============================================================================
 
-export function combineTargetStates(
-  first: EngineTargetState,
-  second: EngineTargetState
-): EngineTargetState {
-  const returnState: EngineTargetState = { ...first };
+export function combineTargetStates(first: Player, second: Player): Player {
+  const returnState: Player = { ...first };
 
   if (second.banner) {
     returnState.banner = {
@@ -466,7 +458,7 @@ export function combineTargetStates(
       };
 
       return accum;
-    }, {} as ActivePodMap);
+    }, {} as ActivePods);
     returnState.status = {
       activePods: {
         ...returnState.status?.activePods,
@@ -489,17 +481,16 @@ export function combineTargetStates(
  * STATUS
  */
 export function addStatusPods(
-  currentState: EngineTargetState,
-  updates: EngineStatusTarget
-): EngineTargetState {
-  let state = mergeObjects<"status", EngineStatusTarget, "activePods">(
-    currentState,
+  currentState: Player,
+  updates: NonNullable<Player["status"]>
+): Player {
+  let state = mergeObjects<
     "status",
-    "activePods",
-    updates.activePods
-  );
+    NonNullable<Player["status"]>,
+    "activePods"
+  >(currentState, "status", "activePods", updates.activePods);
 
-  state = appendToArray<"status", EngineStatusTarget, "podOrder">(
+  state = appendToArray<"status", NonNullable<Player["status"]>, "podOrder">(
     state,
     "status",
     "podOrder",
@@ -510,17 +501,17 @@ export function addStatusPods(
 }
 
 export function updatePodStatus(
-  currentState: EngineTargetState,
+  currentState: Player,
   {
     podId,
     status,
     incrementRestarts,
   }: {
     podId: PodId;
-    status: PodStatusType;
+    status: PodStatus;
     incrementRestarts?: boolean;
   }
-): EngineTargetState {
+): Player {
   const pod = currentState.status?.activePods[podId];
   if (!pod) return currentState;
 
@@ -529,7 +520,7 @@ export function updatePodStatus(
     ...(incrementRestarts && { restartCount: pod.restartCount + 1 }),
   };
 
-  return mergeObjects<"status", EngineStatusTarget, "activePods">(
+  return mergeObjects<"status", NonNullable<Player["status"]>, "activePods">(
     currentState,
     "status",
     "activePods",
@@ -538,22 +529,20 @@ export function updatePodStatus(
 }
 
 export function removeStatusPods(
-  currentState: EngineTargetState,
+  currentState: Player,
   podIds: Set<PodId>
-): EngineTargetState {
-  let state = removeFromArray<"status", EngineStatusTarget, "podOrder">(
-    currentState,
+): Player {
+  let state = removeFromArray<
     "status",
-    "podOrder",
-    (id) => !podIds.has(id)
-  );
+    NonNullable<Player["status"]>,
+    "podOrder"
+  >(currentState, "status", "podOrder", (id) => !podIds.has(id));
 
-  state = removeFromObject<"status", EngineStatusTarget, "activePods">(
-    state,
+  state = removeFromObject<
     "status",
-    "activePods",
-    Array.from(podIds)
-  );
+    NonNullable<Player["status"]>,
+    "activePods"
+  >(state, "status", "activePods", Array.from(podIds));
 
   return state;
 }
@@ -562,10 +551,10 @@ export function removeStatusPods(
  * CONFIG
  */
 export function setConfigActiveTab(
-  currentState: EngineTargetState,
+  currentState: Player,
   tabName: string
-): EngineTargetState {
-  return mergeIntoSimulator<"config", NonNullable<EngineTargetState["config"]>>(
+): Player {
+  return mergeIntoSimulator<"config", NonNullable<Player["config"]>>(
     currentState,
     "config",
     { activeTab: tabName }
@@ -573,51 +562,53 @@ export function setConfigActiveTab(
 }
 
 export function toggleConfigShowingChange(
-  currentState: EngineTargetState,
+  currentState: Player,
   groupId: string
-): EngineTargetState {
+): Player {
   let state = currentState;
   const config = state.config;
 
   if (!config?.showingToggle.has(groupId)) {
     state = toggleInSet<
       "config",
-      NonNullable<EngineTargetState["config"]>,
+      NonNullable<Player["config"]>,
       "showingToggle"
     >(state, "config", "showingToggle", groupId);
   }
 
-  return toggleInSet<
+  return toggleInSet<"config", NonNullable<Player["config"]>, "showingChange">(
+    state,
     "config",
-    NonNullable<EngineTargetState["config"]>,
-    "showingChange"
-  >(state, "config", "showingChange", groupId);
+    "showingChange",
+    groupId
+  );
 }
 
 export function toggleConfigPulseGroup(
-  currentState: EngineTargetState,
+  currentState: Player,
   groupId: string
-): EngineTargetState {
-  return toggleInSet<
+): Player {
+  return toggleInSet<"config", NonNullable<Player["config"]>, "pulsedGroups">(
+    currentState,
     "config",
-    NonNullable<EngineTargetState["config"]>,
-    "pulsedGroups"
-  >(currentState, "config", "pulsedGroups", groupId);
+    "pulsedGroups",
+    groupId
+  );
 }
 
 function mergeConfigSets(
-  currentState: EngineTargetState,
+  currentState: Player,
   incomingSets: Partial<
     Pick<
-      NonNullable<EngineTargetState["config"]>,
+      NonNullable<Player["config"]>,
       "showingToggle" | "showingChange" | "pulsedGroups"
     >
   >
-): EngineTargetState {
+): Player {
   const currentConfig = currentState.config;
   if (!currentConfig) {
     // No config yet; if incoming sets provided, create a new config skeleton
-    const newConfig: NonNullable<EngineTargetState["config"]> = {
+    const newConfig: NonNullable<Player["config"]> = {
       files: {},
       activeTab: "",
       showingToggle: incomingSets.showingToggle
@@ -629,10 +620,11 @@ function mergeConfigSets(
       pulsedGroups: new Set(),
     };
 
-    return mergeIntoSimulator<
+    return mergeIntoSimulator<"config", NonNullable<Player["config"]>>(
+      currentState,
       "config",
-      NonNullable<EngineTargetState["config"]>
-    >(currentState, "config", newConfig);
+      newConfig
+    );
   }
 
   const combinedToggle = unionSets(
@@ -648,7 +640,7 @@ function mergeConfigSets(
     incomingSets.pulsedGroups
   );
 
-  return mergeIntoSimulator<"config", NonNullable<EngineTargetState["config"]>>(
+  return mergeIntoSimulator<"config", NonNullable<Player["config"]>>(
     currentState,
     "config",
     {
@@ -660,20 +652,21 @@ function mergeConfigSets(
 }
 
 function addOrReplaceConfigFile(
-  currentState: EngineTargetState,
-  files: Record<string, EngineFileConfig>
-): EngineTargetState {
-  return mergeObjects<
+  currentState: Player,
+  files: Record<string, ConfigFile>
+): Player {
+  return mergeObjects<"config", NonNullable<Player["config"]>, "files">(
+    currentState,
     "config",
-    NonNullable<EngineTargetState["config"]>,
-    "files"
-  >(currentState, "config", "files", files);
+    "files",
+    files
+  );
 }
 
 export function addConfigTarget(
-  currentState: EngineTargetState,
-  update: NonNullable<EngineTargetState["config"]>
-): EngineTargetState {
+  currentState: Player,
+  update: NonNullable<Player["config"]>
+): Player {
   const { files, showingChange, showingToggle, activeTab, pulsedGroups } =
     update;
   let state = addOrReplaceConfigFile(currentState, files);
@@ -696,10 +689,10 @@ export function addConfigTarget(
 }
 
 export function setConfigScrollTarget(
-  currentState: EngineTargetState,
-  activeScrollTarget: EngineConfigSimScrollTarget | undefined
-): EngineTargetState {
-  return mergeIntoSimulator<"config", NonNullable<EngineTargetState["config"]>>(
+  currentState: Player,
+  activeScrollTarget: ActiveScrollTarget | undefined
+): Player {
+  return mergeIntoSimulator<"config", NonNullable<Player["config"]>>(
     currentState,
     "config",
     { activeScrollTarget }
@@ -707,7 +700,7 @@ export function setConfigScrollTarget(
 }
 
 export function scrollToConfigLine(
-  currentState: EngineTargetState,
+  currentState: Player,
   {
     fileName,
     line,
@@ -715,7 +708,7 @@ export function scrollToConfigLine(
     fileName: string;
     line: number;
   }
-): EngineTargetState {
+): Player {
   const config = currentState.config;
   if (!config || !config.files[fileName]) {
     return currentState;
@@ -748,25 +741,26 @@ export function scrollToConfigLine(
  * LOGS
  */
 export function addOrReplaceLogsContext(
-  currentState: EngineTargetState,
-  logsContext: EngineLogsContext
-): EngineTargetState {
+  currentState: Player,
+  logsContext: LogsContext
+): Player {
   const logsContextEntry = {
     [logsContext.contextName]: logsContext,
   };
 
-  return mergeObjects<
+  return mergeObjects<"logs", NonNullable<Player["logs"]>, "allContexts">(
+    currentState,
     "logs",
-    NonNullable<EngineTargetState["logs"]>,
-    "allContexts"
-  >(currentState, "logs", "allContexts", logsContextEntry);
+    "allContexts",
+    logsContextEntry
+  );
 }
 
 export function setLogsActiveContext(
-  currentState: EngineTargetState,
+  currentState: Player,
   contextName: string
-): EngineTargetState {
-  return mergeIntoSimulator<"logs", NonNullable<EngineTargetState["logs"]>>(
+): Player {
+  return mergeIntoSimulator<"logs", NonNullable<Player["logs"]>>(
     currentState,
     "logs",
     {
@@ -776,9 +770,9 @@ export function setLogsActiveContext(
 }
 
 export function addLogsRecords(
-  currentState: EngineTargetState,
-  updates: Pick<EngineLogsContext, "contextName" | "records">
-): EngineTargetState {
+  currentState: Player,
+  updates: Pick<LogsContext, "contextName" | "records">
+): Player {
   return appendAt(
     currentState,
     "logs",
@@ -791,20 +785,18 @@ export function addLogsRecords(
  * TERMINAL
  */
 export function addTerminalStrings(
-  currentState: EngineTargetState,
-  { strings }: NonNullable<EngineTargetState["terminal"]>
-): EngineTargetState {
-  return appendToArray<
+  currentState: Player,
+  { strings }: NonNullable<Player["terminal"]>
+): Player {
+  return appendToArray<"terminal", NonNullable<Player["terminal"]>, "strings">(
+    currentState,
     "terminal",
-    NonNullable<EngineTargetState["terminal"]>,
-    "strings"
-  >(currentState, "terminal", "strings", strings);
+    "strings",
+    strings
+  );
 }
 
-export function setTerminalContentPrinted(
-  currentState: EngineTargetState,
-  index: number
-) {
+export function setTerminalContentPrinted(currentState: Player, index: number) {
   const terminalContent = currentState.terminal!.strings;
 
   const printedTerminalContent = terminalContent.map((str, idx) =>
@@ -816,20 +808,21 @@ export function setTerminalContentPrinted(
       : str
   );
 
-  return mergeIntoSimulator<
+  return mergeIntoSimulator<"terminal", NonNullable<Player["terminal"]>>(
+    currentState,
     "terminal",
-    NonNullable<EngineTargetState["terminal"]>
-  >(currentState, "terminal", { strings: printedTerminalContent });
+    { strings: printedTerminalContent }
+  );
 }
 
 /**
  * BANNER
  */
 export function updateBannerState(
-  currentState: EngineTargetState,
-  update: NonNullable<EngineTargetState["banner"]>
-): EngineTargetState {
-  return mergeIntoSimulator<"banner", NonNullable<EngineTargetState["banner"]>>(
+  currentState: Player,
+  update: NonNullable<Player["banner"]>
+): Player {
+  return mergeIntoSimulator<"banner", NonNullable<Player["banner"]>>(
     currentState,
     SIMULATORS.BANNER,
     update

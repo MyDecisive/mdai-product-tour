@@ -1,16 +1,16 @@
 import { FRAME_TYPES, SIMULATORS } from "../utils/constants";
 import type * as Kinds from "./kinds";
-import type { EngineLogsContext, EngineTargetState } from "./player";
+import type { LogsContext, Player, ScrollTarget } from "./player";
 
 export type ConstructedFrameKind = Exclude<
-  Kinds.FrameType,
+  Kinds.Frame,
   | typeof FRAME_TYPES.DELAY
   | typeof FRAME_TYPES.CLEAR
   | typeof FRAME_TYPES.ACTIVATE
 >;
 
 export type Frame<
-  S extends Kinds.SimulatorType = Kinds.SimulatorType,
+  S extends Kinds.Simulator = Kinds.Simulator,
   T extends ConstructedFrameKind = ConstructedFrameKind,
   U = unknown
 > = [U] extends [undefined]
@@ -22,7 +22,7 @@ export type Frame<
  */
 export interface BaseFrame {
   waitForComplete?: boolean;
-  type: Kinds.FrameType;
+  type: Kinds.Frame;
 }
 
 export interface DelayFrame extends BaseFrame {
@@ -32,57 +32,51 @@ export interface DelayFrame extends BaseFrame {
 
 export interface ClearSimulatorsFrame extends BaseFrame {
   type: typeof FRAME_TYPES.CLEAR;
-  simulators: Kinds.SimulatorType[];
+  simulators: Kinds.Simulator[];
 }
 
 export interface ActivateSimulatorFrame extends BaseFrame {
   type: typeof FRAME_TYPES.ACTIVATE;
-  simulator: Kinds.SimulatorType;
+  simulator: Kinds.Simulator;
   duration: number;
 }
 
-export interface ConfigSimScrollTarget {
-  fileName: string;
-  line: number;
-  scrollOnly?: boolean;
-}
-
-export type SimulatorFrameConfigs = {
+export type FrameConfigs = {
   [SIMULATORS.TERMINAL]: {
-    [FRAME_TYPES.ENTER_COMMAND]: NonNullable<EngineTargetState["terminal"]>;
+    [FRAME_TYPES.ENTER_COMMAND]: NonNullable<Player["terminal"]>;
   };
   [SIMULATORS.STATUS]: {
-    [FRAME_TYPES.ADD_SERVICES]: NonNullable<EngineTargetState["status"]>;
+    [FRAME_TYPES.ADD_SERVICES]: NonNullable<Player["status"]>;
   };
   [SIMULATORS.CONFIG]: {
-    [FRAME_TYPES.ADD]: NonNullable<EngineTargetState["config"]>;
-    [FRAME_TYPES.SCROLL_TO]: ConfigSimScrollTarget;
+    [FRAME_TYPES.ADD]: NonNullable<Player["config"]>;
+    [FRAME_TYPES.SCROLL_TO]: ScrollTarget;
   };
   [SIMULATORS.LOGS]: {
-    [FRAME_TYPES.ADD]: EngineLogsContext & { duration: number };
-    [FRAME_TYPES.STREAM]: EngineLogsContext & { duration: number };
+    [FRAME_TYPES.ADD]: LogsContext & { duration: number };
+    [FRAME_TYPES.STREAM]: LogsContext & { duration: number };
     [FRAME_TYPES.PAUSE]: undefined;
   };
   [SIMULATORS.BANNER]: {
-    [FRAME_TYPES.UPDATE]: NonNullable<EngineTargetState["banner"]>;
+    [FRAME_TYPES.UPDATE]: NonNullable<Player["banner"]>;
   };
 };
 
-type FramesForSim<Sim extends keyof SimulatorFrameConfigs> = {
-  [F in keyof SimulatorFrameConfigs[Sim]]: Frame<
-    Extract<Sim, Kinds.SimulatorType>,
+type FramesForSim<Sim extends keyof FrameConfigs> = {
+  [F in keyof FrameConfigs[Sim]]: Frame<
+    Extract<Sim, Kinds.Simulator>,
     Extract<F, ConstructedFrameKind>,
-    SimulatorFrameConfigs[Sim][F]
+    FrameConfigs[Sim][F]
   >;
 };
 
-type FrameUnionForSim<Sim extends keyof SimulatorFrameConfigs> =
-  FramesForSim<Sim>[keyof SimulatorFrameConfigs[Sim]];
+type FrameUnionForSim<Sim extends keyof FrameConfigs> =
+  FramesForSim<Sim>[keyof FrameConfigs[Sim]];
 
 export type AnyFrame =
   | {
-      [S in keyof SimulatorFrameConfigs]: FrameUnionForSim<S>;
-    }[keyof SimulatorFrameConfigs]
+      [S in keyof FrameConfigs]: FrameUnionForSim<S>;
+    }[keyof FrameConfigs]
   | DelayFrame
   | ClearSimulatorsFrame
   | ActivateSimulatorFrame;

@@ -1,10 +1,10 @@
 import type { AnyFrame } from "../types/frames";
-import type { EngineTargetState } from "../types/player";
+import type { Player } from "../types/player";
 import type {
-  EngineStep,
+  Definition,
   NavigationState,
-  TourEngine,
-  TourSelectionItem,
+  SelectionItem,
+  Step,
 } from "../types/steps";
 
 export function createExpandedDrawerItemIds(
@@ -30,9 +30,9 @@ export function createExpandedDrawerItemIds(
 
 export function createDrawerItems(
   onTourSelect: (selectedTour: string) => void,
-  tourConfigs: TourEngine[] | null,
+  tourConfigs: Definition[] | null,
   tour: string
-): undefined | TourSelectionItem[] | EngineStep[] {
+): undefined | SelectionItem[] | Step[] {
   if (!tourConfigs) return undefined;
   if (!tour) {
     // temporarily remove all coming soon tours from drawer
@@ -47,7 +47,7 @@ export function createDrawerItems(
         comingSoon: !!coming_soon,
         ...(!tour.coming_soon ? { onTourSelect: () => onTourSelect(id) } : {}),
       };
-    }) as TourSelectionItem[];
+    }) as SelectionItem[];
   }
   const selectedTour = tourConfigs.find((t) => t.id === tour);
   if (!selectedTour) return undefined;
@@ -65,7 +65,7 @@ export function createDrawerItems(
           };
         }),
     };
-  }) as EngineStep[];
+  }) as Step[];
 }
 
 export function onTreeItemClick(
@@ -99,13 +99,13 @@ const emptyEngineData = {
 
 export function getCurrentEngineData(
   tour: string,
-  tourConfigs: TourEngine[] | null,
+  tourConfigs: Definition[] | null,
   step: number,
   subStep: number
 ): {
-  targetState: EngineTargetState;
+  targetState: Player;
   animation: AnyFrame[];
-  prevTargetState: EngineTargetState;
+  prevTargetState: Player;
 } {
   const currentTour = tourConfigs?.find((t) => t.id === tour);
   if (!currentTour || subStep === -1 || step === -1) {
@@ -121,7 +121,7 @@ export function getCurrentEngineData(
     currentSubStep = currentStep.subSteps[subStep - 1];
   }
 
-  let prevTargetState: EngineTargetState = emptyEngineData.prevTargetState;
+  let prevTargetState: Player = emptyEngineData.prevTargetState;
 
   if (currentSubStep.initialState) {
     prevTargetState = currentSubStep.initialState;

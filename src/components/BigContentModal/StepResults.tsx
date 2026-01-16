@@ -2,12 +2,8 @@ import { css } from "@emotion/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useGetDrawerContent } from "../../hooks/useGetDrawerContent";
+import type { ContentItem, SubStep, Visualization } from "../../types/steps";
 import { getVideoUrl } from "../../utils/getAssets";
-import type {
-  EngineContentItem,
-  VisualizationContentItem,
-  EngineSubStep,
-} from "../../types/steps";
 
 const ButtonContainerStyles = css({
   display: "flex",
@@ -17,8 +13,8 @@ const ButtonContainerStyles = css({
 });
 
 function isVisualization(
-  item: EngineContentItem | VisualizationContentItem
-): item is VisualizationContentItem {
+  item: ContentItem | Visualization
+): item is Visualization {
   return (
     "src" in item &&
     "alt" in item &&
@@ -28,7 +24,7 @@ function isVisualization(
 }
 
 function currentDrawerItemToVizModalData(
-  currentDrawerItem: EngineSubStep | undefined
+  currentDrawerItem: SubStep | undefined
 ) {
   if (
     !currentDrawerItem ||
@@ -57,7 +53,7 @@ function currentDrawerItemToVizModalData(
     text: visualizationContent.text,
     src: visualizationContent.src,
     alt: visualizationContent.alt,
-  } as VisualizationContentItem & { title: string | null };
+  } as Visualization & { title: string | null };
 }
 
 export function StepResults({ handleClose }: { handleClose: () => void }) {

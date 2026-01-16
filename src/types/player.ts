@@ -1,6 +1,5 @@
 import type { TypedOptions } from "typed.js";
-import type { ConfigSimScrollTarget as FrameScrolTarget } from "./frames";
-import type { PodStatusType } from "./kinds";
+import type { PodStatus } from "./kinds";
 
 // ============================================================================
 // Simulator/Player state
@@ -12,7 +11,7 @@ export interface TerminalTypedOptions extends TypedOptions {
   printed: boolean;
 }
 
-interface EngineTerminalTarget {
+interface Terminal {
   strings: TerminalTypedOptions[];
 }
 
@@ -23,22 +22,22 @@ export interface ActivePod {
   id: PodId;
   name: string;
   namespace: string;
-  status: PodStatusType;
+  status: PodStatus;
   replicaNo: number;
   parentServiceKey: string;
   restartCount: number;
   isActiveLogsContext?: boolean;
 }
 
-export type ActivePodMap = Record<PodId, ActivePod>;
+export type ActivePods = Record<PodId, ActivePod>;
 
-export interface EngineStatusTarget {
-  activePods: ActivePodMap;
+interface Status {
+  activePods: ActivePods;
   podOrder: PodId[];
 }
 
 // Config simulator
-export interface ConfigLine {
+export interface Line {
   lineNo: number;
   content: string;
   changeLineNo?: number;
@@ -50,7 +49,7 @@ export interface LineGroup {
   groupId: string;
   start: number;
   end: number;
-  lines: ConfigLine[];
+  lines: Line[];
   isChangeBlock: boolean;
 }
 
@@ -61,25 +60,31 @@ interface GapLine {
 
 export type ConfigContent = LineGroup | GapLine;
 
-export interface EngineFileConfig {
+export interface ConfigFile {
   groups: ConfigContent[];
   fileName: string;
   url: string;
   changeMap: Map<number, string>; // from createChangeMap
 }
 
-export interface EngineConfigSimScrollTarget extends FrameScrolTarget {
+export interface ScrollTarget {
+  fileName: string;
+  line: number;
+  scrollOnly?: boolean;
+}
+
+export interface ActiveScrollTarget extends ScrollTarget {
   id: string;
   groupId: string;
 }
 
-interface EngineConfigTarget {
-  files: Record<EngineFileConfig["fileName"], EngineFileConfig>;
+interface Config {
+  files: Record<ConfigFile["fileName"], ConfigFile>;
   activeTab: string;
   showingToggle: Set<LineGroup["groupId"]>;
   showingChange: Set<LineGroup["groupId"]>;
   pulsedGroups: Set<LineGroup["groupId"]>;
-  activeScrollTarget?: EngineConfigSimScrollTarget;
+  activeScrollTarget?: ActiveScrollTarget;
 }
 
 // Logs simulator
@@ -92,27 +97,27 @@ export interface LogRecord {
   [key: string]: unknown;
 }
 
-export interface EngineLogsContext {
+export interface LogsContext {
   records: LogRecord[];
   speed: number;
   contextName: string;
 }
 
-interface EngineLogsTarget {
+interface Logs {
   activeContext: string;
-  allContexts: Record<string, EngineLogsContext>;
+  allContexts: Record<string, LogsContext>;
 }
 
-interface BannerTargetState {
+interface Banner {
   text: string;
   logsSent: number;
   logsFiltered: number;
 }
 
-export interface EngineTargetState {
-  terminal?: EngineTerminalTarget;
-  status?: EngineStatusTarget;
-  config?: EngineConfigTarget;
-  logs?: EngineLogsTarget;
-  banner?: BannerTargetState;
+export interface Player {
+  terminal?: Terminal;
+  status?: Status;
+  config?: Config;
+  logs?: Logs;
+  banner?: Banner;
 }

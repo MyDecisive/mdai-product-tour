@@ -4,7 +4,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import type { PlayerControls, PlayerState } from "../animationEngine/hook";
+import type { PlayerControls, PlayerState } from "../player/hook";
 import type { Definition, NavigationState } from "../types/steps";
 
 interface DemoContextValue {

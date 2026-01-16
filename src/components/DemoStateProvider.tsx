@@ -5,8 +5,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useAnimationEngine } from "../animationEngine/hook.ts";
 import { DemoContext } from "../hooks/useDemoContext.ts";
+import { useAnimationEngine } from "../player/hook.ts";
 import type { Definition, NavigationState } from "../types/steps.ts";
 import { getCurrentEngineData } from "../utils/demoStateHelpers.ts";
 import { getAllParsedTourConfigs } from "../utils/fetchTourConfigs.ts";

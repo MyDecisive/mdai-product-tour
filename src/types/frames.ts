@@ -14,29 +14,29 @@ export type Frame<
   T extends ConstructedFrameKind = ConstructedFrameKind,
   U = unknown
 > = [U] extends [undefined]
-  ? BaseFrame & { simulator: S; type: T; updates?: U }
-  : BaseFrame & { simulator: S; type: T; updates: U };
+  ? BaseFrame & { simulator: S; kind: T; updates?: U }
+  : BaseFrame & { simulator: S; kind: T; updates: U };
 
 /**
  * waitForComplete - defaults to true
  */
 export interface BaseFrame {
   waitForComplete?: boolean;
-  type: Kinds.Frame;
+  kind: Kinds.Frame;
 }
 
 export interface DelayFrame extends BaseFrame {
-  type: typeof FRAME_TYPES.DELAY;
+  kind: typeof FRAME_TYPES.DELAY;
   duration: number;
 }
 
 export interface ClearSimulatorsFrame extends BaseFrame {
-  type: typeof FRAME_TYPES.CLEAR;
+  kind: typeof FRAME_TYPES.CLEAR;
   simulators: Kinds.Simulator[];
 }
 
 export interface ActivateSimulatorFrame extends BaseFrame {
-  type: typeof FRAME_TYPES.ACTIVATE;
+  kind: typeof FRAME_TYPES.ACTIVATE;
   simulator: Kinds.Simulator;
   duration: number;
 }

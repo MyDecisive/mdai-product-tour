@@ -172,7 +172,7 @@ async function transformConfig(
   const showingChange = new Set(
     fileEntries.flatMap(([, conf]) =>
       conf.groups
-        .filter((g): g is LineGroup => g.type === "group" && g.isChangeBlock)
+        .filter((g): g is LineGroup => g.kind === "group" && g.isChangeBlock)
         .map((g) => g.groupId)
     )
   );
@@ -265,7 +265,7 @@ async function transformTourToEngineAnimation(
       ) {
         frame.waitForComplete = true;
       }
-      switch (frame.type) {
+      switch (frame.kind) {
         case FRAME_TYPES.ACTIVATE:
           return {
             ...frame,
@@ -412,13 +412,13 @@ function buildTargetStateFromEngineAnimation(
 ): Player {
   return frames.reduce((state, frame) => {
     if (
-      frame.type === FRAME_TYPES.DELAY ||
-      frame.type === FRAME_TYPES.ACTIVATE
+      frame.kind === FRAME_TYPES.DELAY ||
+      frame.kind === FRAME_TYPES.ACTIVATE
     ) {
       return state;
     }
 
-    if (frame.type === FRAME_TYPES.CLEAR) {
+    if (frame.kind === FRAME_TYPES.CLEAR) {
       const clearedState = { ...state };
       frame.simulators.forEach((sim) => {
         clearedState[sim] = undefined;
@@ -429,7 +429,7 @@ function buildTargetStateFromEngineAnimation(
     const sim = frame.simulator;
 
     const simBuilders = stateBuilders[sim];
-    const builder = simBuilders?.[frame.type as keyof typeof simBuilders] as
+    const builder = simBuilders?.[frame.kind as keyof typeof simBuilders] as
       | ((state: Player, updates: unknown) => Player)
       | undefined;
 

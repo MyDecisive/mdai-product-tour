@@ -60,7 +60,7 @@ export async function prefetchAllGitHubFiles(
 
       subStep.animation?.forEach((action) => {
         if (
-          action.type === FRAME_TYPES.ADD &&
+          action.kind === FRAME_TYPES.ADD &&
           action.simulator === SIMULATORS.CONFIG &&
           action.updates?.files
         ) {

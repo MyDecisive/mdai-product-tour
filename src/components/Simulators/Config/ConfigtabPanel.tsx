@@ -89,7 +89,7 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
         </Box>
       )}
       {groups.map((group, groupIndex) => {
-        if (group.type === "gap") {
+        if (group.kind === "gap") {
           return <GapLine key={`${fileName}-gap-${group.lineNo}`} {...group} />;
         }
 
@@ -101,8 +101,8 @@ export function ConfigTabPanel(props: ConfigTabPanelProps) {
         const isChangeBlock = !!group.isChangeBlock;
         const pulsed = pulsedGroups.has(group.groupId);
 
-        const gapUpTop = isChangeBlock && prevGroup?.type === "gap";
-        const gapDownBelow = isChangeBlock && nextGroup?.type === "gap";
+        const gapUpTop = isChangeBlock && prevGroup?.kind === "gap";
+        const gapDownBelow = isChangeBlock && nextGroup?.kind === "gap";
 
         return (
           <Box

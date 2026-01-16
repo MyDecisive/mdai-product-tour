@@ -324,15 +324,15 @@ export function rawLinesFromText(yaml: string): string[] {
 export function createConfigContentGroups(
   fileName: string,
   relevantSections: (
-    | { type: "gap"; lineNo: number }
-    | { type: "group"; start: number; lines: string[] }
+    | { kind: "gap"; lineNo: number }
+    | { kind: "group"; start: number; lines: string[] }
   )[],
   changeMap: Map<number, string>
 ) {
   const groups: ConfigContent[] = [];
 
   relevantSections.forEach((section) => {
-    if (section.type === "gap") {
+    if (section.kind === "gap") {
       groups.push(section);
     } else {
       const lines: Line[] = section.lines.map((line, i) => {
@@ -354,7 +354,7 @@ export function createConfigContentGroups(
       const isChangeBlock = lines.some((l) => l.changeContent !== undefined);
 
       groups.push({
-        type: "group",
+        kind: "group",
         groupId: `${fileName}-${start}-${end}`,
         start,
         end,
@@ -412,8 +412,8 @@ export const extractRelevantSections = (
   changes: Tour.LineChangeBlock[],
   contextSpacing = 2
 ): (
-  | { type: "gap"; lineNo: number }
-  | { type: "group"; start: number; lines: string[] }
+  | { kind: "gap"; lineNo: number }
+  | { kind: "group"; start: number; lines: string[] }
 )[] => {
   if (!changes?.length || !lines.length) return [];
 
@@ -467,12 +467,12 @@ export const extractRelevantSections = (
 
     // section is complete, add it, a gap, and restart
     sections.push({
-      type: "group",
+      kind: "group",
       start: groupStart,
       lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
     });
     if (!isConsecutiveLineNo) {
-      sections.push({ type: "gap", lineNo: oneHigherThanPreviousLineNo });
+      sections.push({ kind: "gap", lineNo: oneHigherThanPreviousLineNo });
     }
     groupStart = sortedLineNos[i];
     groupLineNos = [groupStart];
@@ -480,7 +480,7 @@ export const extractRelevantSections = (
 
   // Add the last group from the mutable variables.
   sections.push({
-    type: "group",
+    kind: "group",
     start: groupStart,
     lines: groupLineNos.map((n) => lines[n - 1]), // replace lineNos with line content
   });

@@ -180,12 +180,12 @@ export class PlayerInstance {
   };
 
   public async executeAction(action: AnyFrame): Promise<void> {
-    if (action.type === FRAME_TYPES.DELAY) {
+    if (action.kind === FRAME_TYPES.DELAY) {
       await this.delay(action.duration);
       return;
     }
 
-    if (action.type === FRAME_TYPES.CLEAR) {
+    if (action.kind === FRAME_TYPES.CLEAR) {
       this.clearStatePerSimulator(action.simulators);
       return;
     }
@@ -197,7 +197,7 @@ export class PlayerInstance {
       this.callbacks.onActiveSimulatorChange(simulator);
     }
 
-    if (action.type === FRAME_TYPES.ACTIVATE) {
+    if (action.kind === FRAME_TYPES.ACTIVATE) {
       // duration is enforced in transformTourToEngineAnimation
       await this.delay(action.duration);
       this.callbacks.onActiveSimulatorChange(simulator);
@@ -212,7 +212,7 @@ export class PlayerInstance {
 
     const simHandlers =
       this.frameHandlers[action.simulator as keyof typeof this.frameHandlers];
-    const handler = simHandlers?.[action.type as keyof typeof simHandlers] as
+    const handler = simHandlers?.[action.kind as keyof typeof simHandlers] as
       | ((frame: typeof action) => void)
       | undefined;
 
@@ -326,7 +326,7 @@ export class PlayerInstance {
     if (!file) return;
 
     const group = file.groups.find((grp) => {
-      if (grp.type !== "group") return false;
+      if (grp.kind !== "group") return false;
       return grp.start <= line && line <= grp.end;
     }) as LineGroup | undefined;
 

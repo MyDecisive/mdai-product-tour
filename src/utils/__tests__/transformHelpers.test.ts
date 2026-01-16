@@ -777,7 +777,7 @@ describe("extractRelevantSections", () => {
 
       expect(result).toHaveLength(3);
       expect(result[0]).toEqual({
-        type: "group",
+        kind: "group",
         start: 2,
         lines: ["line2"],
       });
@@ -801,9 +801,9 @@ describe("extractRelevantSections", () => {
       const result = extractRelevantSections(lines, changes, 0);
 
       expect(result).toHaveLength(3);
-      expect(result[0].type).toBe("group");
-      expect(result[1].type).toBe("gap");
-      expect(result[2].type).toBe("group");
+      expect(result[0].kind).toBe("group");
+      expect(result[1].kind).toBe("gap");
+      expect(result[2].kind).toBe("group");
     });
   });
 
@@ -819,17 +819,17 @@ describe("extractRelevantSections", () => {
       expect(result.length).toBe(3);
       expect(result).toEqual([
         {
-          type: "group",
+          kind: "group",
           start: 3,
           lines: ["l3"],
         },
         {
-          type: "group",
+          kind: "group",
           start: 4,
           lines: ["l4"],
         },
         {
-          type: "group",
+          kind: "group",
           start: 5,
           lines: ["l5"],
         },
@@ -846,7 +846,7 @@ describe("extractRelevantSections", () => {
 
       expect(result.length).toBe(1);
       expect(result[0]).toEqual({
-        type: "group",
+        kind: "group",
         start: 3,
         lines: ["l3"],
       });
@@ -862,17 +862,17 @@ describe("extractRelevantSections", () => {
 
       expect(result).toEqual([
         {
-          type: "group",
+          kind: "group",
           start: 1,
           lines: ["l1"],
         },
         {
-          type: "group",
+          kind: "group",
           start: 2,
           lines: ["l2"],
         },
         {
-          type: "group",
+          kind: "group",
           start: 3,
           lines: ["l3"],
         },
@@ -896,7 +896,7 @@ describe("extractRelevantSections", () => {
       // Yaml parent lines are always provided as context groups
       // regardless of contextSpacing argument
       const allLines = result
-        .filter((s) => s.type === "group")
+        .filter((s) => s.kind === "group")
         .flatMap((s) => s.lines);
 
       expect(allLines).toContain("root:");
@@ -912,7 +912,7 @@ describe("extractRelevantSections", () => {
       const result = extractRelevantSections(lines, changes, 0);
 
       const allLines = result
-        .filter((s) => s.type === "group")
+        .filter((s) => s.kind === "group")
         .flatMap((s) => s.lines);
 
       expect(allLines).toContain("root:");
@@ -935,7 +935,7 @@ describe("extractRelevantSections", () => {
       const result = extractRelevantSections(lines, changes, 0);
 
       expect(result[0]).toEqual({
-        type: "group",
+        kind: "group",
         start: 2,
         lines: ["l2", "l3", "l4"],
       });
@@ -953,7 +953,7 @@ describe("extractRelevantSections", () => {
       const result = extractRelevantSections(lines, changes, 0);
 
       expect(result[0]).toEqual({
-        type: "group",
+        kind: "group",
         start: 2,
         lines: ["l2", "l3"],
       });
@@ -972,7 +972,7 @@ describe("extractRelevantSections", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
-        type: "group",
+        kind: "group",
         start: 2,
         lines: ["l2", "l3"],
       });
@@ -1004,12 +1004,12 @@ describe("extractRelevantSections", () => {
 
       expect(result).toEqual([
         {
-          type: "group",
+          kind: "group",
           start: 1,
           lines: ["l1"],
         },
         {
-          type: "group",
+          kind: "group",
           start: 2,
           lines: ["l2"],
         },
@@ -1026,12 +1026,12 @@ describe("extractRelevantSections", () => {
 
       expect(result).toEqual([
         {
-          type: "group",
+          kind: "group",
           start: 2,
           lines: ["l2"],
         },
         {
-          type: "group",
+          kind: "group",
           start: 3,
           lines: ["l3"],
         },
@@ -1044,17 +1044,17 @@ describe("createConfigContentGroups", () => {
   const fileName = "test.yaml";
 
   it("should convert gap sections", () => {
-    const sections = [{ type: "gap" as const, lineNo: 5 }];
+    const sections = [{ kind: "gap" as const, lineNo: 5 }];
     const changeMap = new Map<number, string>();
 
     const result = createConfigContentGroups(fileName, sections, changeMap);
 
-    expect(result).toEqual([{ type: "gap", lineNo: 5 }]);
+    expect(result).toEqual([{ kind: "gap", lineNo: 5 }]);
   });
 
   it("should convert group sections without changes", () => {
     const sections = [
-      { type: "group" as const, start: 1, lines: ["line1", "line2"] },
+      { kind: "group" as const, start: 1, lines: ["line1", "line2"] },
     ];
     const changeMap = new Map<number, string>();
 
@@ -1062,7 +1062,7 @@ describe("createConfigContentGroups", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
-      type: "group",
+      kind: "group",
       groupId: "test.yaml-1-2",
       start: 1,
       end: 2,
@@ -1076,14 +1076,14 @@ describe("createConfigContentGroups", () => {
 
   it("should add change content when present in changeMap", () => {
     const sections = [
-      { type: "group" as const, start: 5, lines: ["new line 5", "line 6"] },
+      { kind: "group" as const, start: 5, lines: ["new line 5", "line 6"] },
     ];
     const changeMap = new Map([[5, "old line 5"]]);
 
     const result = createConfigContentGroups(fileName, sections, changeMap);
 
     expect(result[0]).toMatchObject({
-      type: "group",
+      kind: "group",
       isChangeBlock: true,
       lines: [
         {
@@ -1100,7 +1100,7 @@ describe("createConfigContentGroups", () => {
   it("should mark group as changeBlock when any line has changes", () => {
     const sections = [
       {
-        type: "group" as const,
+        kind: "group" as const,
         start: 1,
         lines: ["line1", "line2", "line3"],
       },
@@ -1116,8 +1116,8 @@ describe("createConfigContentGroups", () => {
 
   it("should create unique groupIds", () => {
     const sections = [
-      { type: "group" as const, start: 1, lines: ["line1"] },
-      { type: "group" as const, start: 5, lines: ["line5", "line6"] },
+      { kind: "group" as const, start: 1, lines: ["line1"] },
+      { kind: "group" as const, start: 5, lines: ["line5", "line6"] },
     ];
     const changeMap = new Map<number, string>();
 
@@ -1129,18 +1129,18 @@ describe("createConfigContentGroups", () => {
 
   it("should handle mixed gaps and groups", () => {
     const sections = [
-      { type: "group" as const, start: 1, lines: ["line1"] },
-      { type: "gap" as const, lineNo: 3 },
-      { type: "group" as const, start: 5, lines: ["line5"] },
+      { kind: "group" as const, start: 1, lines: ["line1"] },
+      { kind: "gap" as const, lineNo: 3 },
+      { kind: "group" as const, start: 5, lines: ["line5"] },
     ];
     const changeMap = new Map<number, string>();
 
     const result = createConfigContentGroups(fileName, sections, changeMap);
 
     expect(result).toHaveLength(3);
-    expect(result[0].type).toBe("group");
-    expect(result[1].type).toBe("gap");
-    expect(result[2].type).toBe("group");
+    expect(result[0].kind).toBe("group");
+    expect(result[1].kind).toBe("gap");
+    expect(result[2].kind).toBe("group");
   });
 
   it("should handle empty sections array", () => {

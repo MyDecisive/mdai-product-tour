@@ -718,7 +718,7 @@ export function scrollToConfigLine(
 
   const lineGroup =
     (file.groups.find((grp) => {
-      const isLineGroup = grp.type === "group";
+      const isLineGroup = grp.kind === "group";
       if (!isLineGroup) {
         return;
       }

@@ -45,7 +45,7 @@ export interface Line {
 }
 
 export interface LineGroup {
-  type: "group";
+  kind: "group";
   groupId: string;
   start: number;
   end: number;
@@ -55,7 +55,7 @@ export interface LineGroup {
 
 interface GapLine {
   lineNo: number;
-  type: "gap";
+  kind: "gap";
 }
 
 export type ConfigContent = LineGroup | GapLine;

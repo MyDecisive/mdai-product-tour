@@ -22,12 +22,12 @@ const index = fs.readFileSync(toAbsolute("../dist/index.html"), "utf-8");
 
   let updatedHtml = index;
 
-  if (prerenderEnv !== "production") {
-    updatedHtml = index.replace(
-      `<!--app-robot-->`,
-      `<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">`
-    );
-  }
+  updatedHtml = index.replace(
+    `<!--app-robot-->`,
+    prerenderEnv === "production"
+      ? `<link rel="canonical" href="https://demo.mydecisive.ai" />`
+      : `<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">`
+  );
 
   const filePath = `../dist/index.html`;
 

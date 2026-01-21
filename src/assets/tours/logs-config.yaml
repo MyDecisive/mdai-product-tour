@@ -98,7 +98,7 @@ steps:
             updates:
               contextName: mdai-logger-bundle-8584566955
               logsSources:
-                - serviceLogsBasic.txt
+                - logStreamServiceBasic.txt
               speed: 50
               duration: 3000
           - kind: enter_command
@@ -131,7 +131,7 @@ steps:
             updates:
               contextName: gateway-collector-64dc799dcb
               logsSources:
-                - collectorLogsBasic.txt
+                - logStreamCollectorBasic.txt
               speed: 1000
               duration: 4000
       - id: 0-b
@@ -239,7 +239,7 @@ steps:
             updates:
               contextName: gateway-collector-64dc799dcb
               logsSources:
-                - collectorLogsStatic.txt
+                - logStreamCollectorStatic.txt
               speed: 85
               duration: 3000
       - id: 1-b
@@ -440,7 +440,7 @@ steps:
             updates:
               contextName: gateway-collector-64dc799dcb
               logsSources:
-                - collectorLogsDynamic.txt
+                - logStreamCollectorDynamic.txt
               speed: 40
               duration: 1600
 

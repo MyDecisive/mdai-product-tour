@@ -12,10 +12,10 @@ export type ConstructedFrameKind = Exclude<
 export type Frame<
   S extends Kinds.Simulator = Kinds.Simulator,
   T extends ConstructedFrameKind = ConstructedFrameKind,
-  U = unknown
-> = [U] extends [undefined]
-  ? BaseFrame & { simulator: S; kind: T; updates?: U }
-  : BaseFrame & { simulator: S; kind: T; updates: U };
+  U = undefined,
+> = BaseFrame & { simulator: S; kind: T } & ([undefined] extends [U]
+    ? { updates?: Exclude<U, undefined> }
+    : { updates: U });
 
 /**
  * waitForComplete - defaults to true

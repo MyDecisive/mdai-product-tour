@@ -13,7 +13,7 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit --watch",
-    "generate-schema": "ts-json-schema-generator --path 'src/utils/configTypesScratch.ts' --type 'TourConfiguration' --out schema/tour-schema.json --tsconfig tsconfig.schema.json",
+    "generate-schema": "ts-json-schema-generator --path 'src/types/tour.ts' --type 'Definition' --out schema/tour-schema.json --tsconfig tsconfig.schema.json",
     "validate-tour": "ts-node -P tsconfig.node.json ./bin/validate-tour.ts"
   },
   "dependencies": {

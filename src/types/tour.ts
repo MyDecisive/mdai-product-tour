@@ -72,13 +72,16 @@ export interface Player {
 
 type SimulatorFrameConfigs = {
   [SIMULATORS.TERMINAL]: {
-    [FRAME_TYPES.ENTER_COMMAND]: NonNullable<Player["terminal"]>;
+    [FRAME_TYPES.ENTER_COMMAND]: TerminalEntry[];
   };
   [SIMULATORS.STATUS]: {
-    [FRAME_TYPES.ADD_SERVICES]: NonNullable<Player["status"]>;
+    [FRAME_TYPES.ADD_SERVICES]: Service[];
   };
   [SIMULATORS.CONFIG]: {
-    [FRAME_TYPES.ADD]: NonNullable<Player["config"]>;
+    [FRAME_TYPES.ADD]: {
+      files: ConfigFileSource[];
+      activeTab?: string;
+    };
     [FRAME_TYPES.SCROLL_TO]: ScrollTarget;
   };
   [SIMULATORS.LOGS]: {
@@ -87,7 +90,7 @@ type SimulatorFrameConfigs = {
     [FRAME_TYPES.PAUSE]: undefined;
   };
   [SIMULATORS.BANNER]: {
-    [FRAME_TYPES.UPDATE]: NonNullable<Player["banner"]>;
+    [FRAME_TYPES.UPDATE]: NonNullable<RuntimePlayer["banner"]>;
   };
 };
 

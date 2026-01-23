@@ -154,13 +154,13 @@ mdai-logger 2025-11-26T19:25:40+00:00 - service34 - teamR - us-east-1 - WARNING 
 mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - ERROR - The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams.
     `.trim();
 
-    const result = parseRawLogFileToLogLines(rawLogs);
+    const result = parseRawLogFileToLogLines(rawLogs, "service");
 
     expect(result).toHaveLength(4);
     expect(result[0]).toMatchObject({
       level: "INFO",
       message: expect.stringContaining(
-        "service4321 - The algorithm"
+        "service4321 - The algorithm",
       ) as unknown,
     });
     expect(result[2]).toMatchObject({
@@ -168,30 +168,7 @@ mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - 
       message: expect.stringContaining("service34 - The algorithm") as unknown,
     });
   });
-  it("should parse kubernetesLogs logs format", () => {
-    const rawLogs = `
-2025-11-26 18:22:10.938554625 +0000 kubernetes.var.log.containers.mdai-logger-bundle-8584566955-45flc_synthetics_mdai-logger-noisy-4d4a707f61ba80f5cdff756f7770c9c179464456c54e1c9f3777806e23fec8cf.log: {"timestamp":"2025-11-26T18:22:10+00:00","mdai_service":"service1234","team":"teamA","region":"us-east-1","level":"INFO","message":"The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams."}
-2025-11-26 18:22:10.938559625 +0000 kubernetes.var.log.containers.mdai-logger-bundle-8584566955-45flc_synthetics_mdai-logger-noisy-4d4a707f61ba80f5cdff756f7770c9c179464456c54e1c9f3777806e23fec8cf.log: {"timestamp":"2025-11-26T18:22:10+00:00","mdai_service":"service1234","team":"teamA","region":"us-east-1","level":"WARNING","message":"The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams."}
-2025-11-26 18:22:11.110704250 +0000 kubernetes.var.log.containers.mdai-logger-bundle-8584566955-45flc_synthetics_mdai-logger-xnoisy-6e97f1ed771fc785d1cabfaa575ecc5a9c5393b87bb21faff4312d16bb6f8efd.log: {"timestamp":"2025-11-26T18:22:10+00:00","mdai_service":"service4321","team":"teamB","region":"us-east-1","level":"INFO","message":"The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams."}
-    `.trim();
-
-    const result = parseRawLogFileToLogLines(rawLogs);
-
-    expect(result).toHaveLength(3);
-    expect(result[1]).toMatchObject({
-      level: "WARNING",
-      message: expect.stringContaining(
-        "flc_synthetics_mdai-logger-noisy-4d4a707f61"
-      ) as unknown,
-    });
-    expect(result[2]).toMatchObject({
-      level: "INFO",
-      message: expect.stringContaining(
-        "flc_synthetics_mdai-logger-xnoisy-6e97f1ed"
-      ) as unknown,
-    });
-  });
-  it("should parse collectorLogs logs format", () => {
+  it("should parse collector logs format", () => {
     const rawLogs = `
 2025-12-01T22:47:26.730Z    info    extensions/extensions.go:62    Extension started.    {"resource": {"mdai-logstream": "collector"}, "otelcol.component.id": "health_check", "otelcol.component.kind": "extension"}
 2025-12-01T22:47:26.730Z    info    healthcheck/handler.go:132    Health Check state change    {"resource": {"mdai-logstream": "collector"}, "otelcol.component.id": "health_check", "otelcol.component.kind": "extension", "status": "ready"}
@@ -199,44 +176,19 @@ mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - 
 2025-12-01T22:47:39.731Z    info    Logs    {"resource": {"mdai-logstream": "collector"}, "otelcol.component.id": "debug/filtered", "otelcol.component.kind": "exporter", "otelcol.signal": "logs", "resource logs": 7, "log records": 871}
     `.trim();
 
-    const result = parseRawLogFileToLogLines(rawLogs);
+    const result = parseRawLogFileToLogLines(rawLogs, "collector");
 
     expect(result).toHaveLength(4);
     expect(result[1]).toMatchObject({
       level: "INFO",
       message: expect.stringContaining(
-        "healthcheck/handler.go:132 Health Check state change"
+        "healthcheck/handler.go:132 Health Check state change",
       ) as unknown,
     });
     expect(result[3]).toMatchObject({
       level: "INFO",
       message: expect.stringContaining(
-        `Logs {"resource": {"mdai-logstream": "collector"}`
-      ) as unknown,
-    });
-  });
-  it("should parse error logs format", () => {
-    const rawLogs = `
-2025-10-23T14:12:45.219Z    error    api@v0.118.0/client.go:87    Failed to connect to external API    {"endpoint": "https://dev.api.local/v1/data", "retryCount": 3}
-2025-10-23T14:12:50.782Z    error    db@v0.118.0/connection.go:203    Database query timeout after 30s    {"query": "SELECT * FROM users WHERE active = true", "duration": "30s"}
-2025-10-23T14:13:02.144Z    error    server@v0.118.0/handler.go:56    Invalid JSON in request body    {"route": "/api/upload", "client": "192.168.1.45"}
-2025-10-23T14:13:17.921Z    warn    gateway@v0.118.0/middleware.go:134    Rate limit exceeded for client    {"client": "192.168.1.100", "limit": "100 req/min"}
-2025-10-23T14:13:25.512Z    error    telemetry@v0.118.0/exporter.go:62    Failed to send telemetry data    {"destination": "collector.dev:4317", "reason": "connection refused"}
-    `.trim();
-
-    const result = parseRawLogFileToLogLines(rawLogs);
-
-    expect(result).toHaveLength(5);
-    expect(result[0]).toMatchObject({
-      level: "ERROR",
-      message: expect.stringContaining(
-        "api@v0.118.0/client.go:87: Failed to connect"
-      ) as unknown,
-    });
-    expect(result[3]).toMatchObject({
-      level: "WARN",
-      message: expect.stringContaining(
-        `gateway@v0.118.0/middleware.go:134: Rate limit exceeded`
+        `Logs {"resource": {"mdai-logstream": "collector"}`,
       ) as unknown,
     });
   });

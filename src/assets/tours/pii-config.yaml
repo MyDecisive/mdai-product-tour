@@ -96,8 +96,8 @@ steps:
             simulator: "logs"
             updates:
               contextName: mdai-operator-controller-manager-554b6b7cb8
-              logsSources:
-                - piiRedactSmartHubUpdate.txt
+              fileName: piiRedactSmartHubUpdate.txt
+              logFormat: json
               speed: 300
               duration: 4200
       - id: 0-b
@@ -152,8 +152,8 @@ steps:
             simulator: "logs"
             updates:
               contextName: gateway-collector-84888ddfc7
-              logsSources:
-                - piiRedactCollectorStart.txt
+              fileName: piiRedactCollectorStart.txt
+              logFormat: collector
               speed: 100
               duration: 2400
       - id: 0-c
@@ -181,8 +181,8 @@ steps:
             simulator: "logs"
             updates:
               contextName: gateway-collector-84888ddfc7
-              logsSources:
-                - piiRedactCollectorInitialData.txt
+              fileName: piiRedactCollectorInitialData.txt
+              logFormat: multiline
               speed: 150
               duration: 3000
   - id: "1"
@@ -207,14 +207,22 @@ steps:
           - kind: "enter_command"
             simulator: "terminal"
             updates:
-              - input: "curl -sS -X POST \n-H 'Content-Type: application/json' \n-d \"$(printf '{\"data\":\"%s\"}' \"$transformed_cc_str\")\" \n'http://localhost:8081/variables/hub/mdaihub-pii/var/cc_regex'"
+              - input: |
+                  curl -sS -X POST \
+                    -H 'Content-Type: application/json' \
+                    -d \"$(printf '{\"data\":\"%s\"}' \"$transformed_cc_str\")\" \
+                    'http://localhost:8081/variables/hub/mdaihub-pii/var/cc_regex'"
                 outputs:
                   - |
                     {"id":"019be7b6-ad58-7e39-8c2d-129bec0c1083","name":"var.add","version":1,"timestamp":"2026-01-22T21:57:47.480933346Z","payload":"{\"variableRef\":\"cc_regex\",\"dataType\":\"string\",\"operation\":\"add\",\"data\":\"\\\\\\\\b(?:\\\\\\\\d[ -]*){11,15}(\\\\\\\\d{4})\\\\\\\\b\"}","source":"manual_variables_api","source_id":"","hub_name":"mdaihub-pii"}
           - kind: "enter_command"
             simulator: "terminal"
             updates:
-              - input: "curl -sS -X POST \n-H 'Content-Type: application/json' \n-d '{\"data\":\"********-****-****-$1\"}' \n'http://localhost:8081/variables/hub/mdaihub-pii/var/cc_template'"
+              - input: |
+                  curl -sS -X POST \
+                    -H 'Content-Type: application/json' \
+                    -d '{\"data\":\"********-****-****-$1\"}' \
+                    'http://localhost:8081/variables/hub/mdaihub-pii/var/cc_template'"
                 outputs:
                   - |
                     {"id":"019be7b7-6a34-73e6-8f39-fc202df63fac","name":"var.add","version":1,"timestamp":"2026-01-22T21:58:35.828256341Z","payload":"{\"variableRef\":\"cc_template\",\"dataType\":\"string\",\"operation\":\"add\",\"data\":\"********-****-****-$1\"}","source":"manual_variables_api","source_id":"","hub_name":"mdaihub-pii"}
@@ -222,7 +230,7 @@ steps:
             simulator: "logs"
             updates:
               contextName: gateway-collector-84888ddfc7
-              logsSources:
-                - piiRedactCollectorRedactedCCData.txt
+              fileName: piiRedactCollectorRedactedCCData.txt
+              logFormat: multiline
               speed: 100
               duration: 2400

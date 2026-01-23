@@ -29,7 +29,7 @@ export function createEmptyLogs(): NonNullable<Player["logs"]> {
 function createLogId(
   cycleCount: number,
   index: number,
-  isError?: boolean
+  isError?: boolean,
 ): string {
   return isError
     ? `error-${Date.now()}-${Math.random()}`
@@ -40,7 +40,7 @@ export function createLogRecord(
   propLog: LogRecord,
   cycleCount: number,
   index: number,
-  isError?: boolean
+  isError?: boolean,
 ): LogRecord {
   return {
     ...propLog,
@@ -89,53 +89,74 @@ export function braidLogs(...logArrays: LogRecord[][]): LogRecord[] {
 
   return result;
 }
-export function parseRawLogFileToLogLines(rawLogString: string): LogRecord[] {
+export function parseRawLogFileToLogLines(
+  rawLogString: string,
+  logFormat: string,
+): LogRecord[] {
   const logStrings = rawLogString
     .trim()
     .split("\n")
     .filter((line) => line.trim());
 
-  const logFormat = determineLogFormat(logStrings[0]);
-
-  if (logFormat === "serviceLogs") {
+  if (logFormat === "service") {
     return serviceLogStringsToLogRecords(logStrings);
   }
 
-  if (logFormat === "collectorLogs") {
+  if (logFormat === "collector") {
     return collectorLogStringsToLogRecords(logStrings);
   }
 
-  if (logFormat === "errorLogs") {
-    return errorLogStringsToLogRecords(logStrings);
+  if (logFormat === "json") {
+    return jsonLogStringsToLogRecords(logStrings);
   }
 
-  if (logFormat === "kubernetesLogs") {
-    return kubernetesLogStringsToLogRecords(logStrings);
+  if (logFormat === "multiline") {
+    return multiLineLogsToLogRecords(logStrings);
   }
 
   return [];
 }
 
-function determineLogFormat(logString: string) {
-  // Check for kubernetes format first
-  if (
-    logString.includes("kubernetes.var.log.containers") &&
-    logString.includes(": {")
-  ) {
-    return "kubernetesLogs";
-  }
+interface HubLog {
+  level: NonNullable<LogRecord["level"]>;
+  timestamp: string;
+  msg?: string;
+  [key: string]: unknown;
+}
 
-  const serviceParts = logString.split(" - ");
-  if (serviceParts.length === 6) {
-    return "serviceLogs";
-  }
-  const errorOrcollectorParts = logString.split(/\s{3,}/);
-  if (errorOrcollectorParts.length > 3) {
-    const hasErrors = logString.split(" error ").length > 1;
-    return hasErrors ? "errorLogs" : "collectorLogs";
-  }
+function isHubLog(o: unknown): o is HubLog {
+  // @ts-expect-error - o is of type unknown
+  return "level" in o && "timestamp" in o;
+}
 
-  return "unknown";
+function jsonLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
+  return logStrings.reduce((acc, line) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const parsed = JSON.parse(line);
+      if (isHubLog(parsed)) {
+        const {
+          level,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          timestamp, // to remove it from the `rest`
+          msg,
+          ...rest
+        } = parsed;
+
+        const whatever = JSON.stringify(rest);
+
+        acc.push({
+          level,
+          message: msg ? `${msg} ${whatever}` : whatever,
+        });
+      }
+    } catch (e) {
+      console.warn("failed to parse line ", e);
+      return acc;
+    }
+
+    return acc;
+  }, [] as LogRecord[]);
 }
 
 function serviceLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
@@ -162,7 +183,7 @@ function serviceLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
 function collectorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
   return logStrings.reduce((acc, line) => {
     // Parse format: timestamp    level    component    json_data
-    const parts = line.split(/\s{3,}/);
+    const parts = line.split(/\s+/);
 
     if (parts.length < 4) {
       console.warn("Invalid structured log format:", line);
@@ -183,59 +204,32 @@ function collectorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
   }, [] as LogRecord[]);
 }
 
-function errorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
-  return logStrings.reduce((acc, line) => {
-    // Parse format: timestamp    level    component    message    json_data
-    const parts = line.split(/\s+/);
+function multiLineLogsToLogRecords(logStrings: string[]): LogRecord[] {
+  const firstWord = logStrings[0].match(/\w+/);
+  if (firstWord == null) {
+    return [];
+  }
 
-    if (parts.length < 5) {
-      console.warn("Invalid structured log format:", line);
-      return acc;
+  const logGroups: string[][] = [[]];
+  let logGroupIdx = 0;
+  for (let i = 0; i < logStrings.length; i++) {
+    const currentLine = logStrings[i];
+    if (currentLine.match(/(T|t)imestamp/)) {
+      continue;
     }
-
-    const [, level, component, msg, ...jsonParts] = parts;
-    const jsonString = jsonParts.join(" ");
-
-    const message = `${component}: ${msg} ${jsonString}`;
-
-    acc.push({
-      level: level.toUpperCase() as LogRecord["level"],
-      message,
-    });
-
-    return acc;
-  }, [] as LogRecord[]);
-}
-
-function kubernetesLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
-  return logStrings.reduce((acc, line) => {
-    // Parse format: timestamp kubernetes.path: {json}
-    const beginningOfLine = line.indexOf("kubernetes");
-
-    if (beginningOfLine === -1) {
-      console.warn("Invalid kubernetes log format:", line);
-      return acc;
+    if (currentLine.includes(firstWord[0])) {
+      logGroups[logGroups.length] = [currentLine];
+      logGroupIdx++;
+    } else {
+      logGroups[logGroupIdx].push(currentLine);
     }
+  }
 
-    try {
-      const message = line.slice(beginningOfLine);
-      const levelMatch = message.match(/"level":"([a-zA-Z]+)"/);
-
-      if (!levelMatch) {
-        console.warn("No level found in log", line);
-        return acc;
-      }
-      acc.push({
-        level: levelMatch[1],
-        message,
-      });
-    } catch (e) {
-      console.warn("Failed to parse kubernetes log JSON:", line);
-      console.error("error parsing k8s log line: ", e);
-    }
-
-    return acc;
-  }, [] as LogRecord[]);
+  return logGroups.map((group) => {
+    return {
+      message: group.join("\n"),
+    };
+  });
 }
 
 /**
@@ -263,7 +257,7 @@ const terminalExecutionBehavior: Partial<TerminalTypedOptions> = {
 export function createTerminalContent(
   strings: string[],
   printed: boolean,
-  behavior?: string
+  behavior?: string,
 ): TerminalTypedOptions[] {
   if (behavior === "terminal") {
     return [
@@ -277,7 +271,7 @@ export function createTerminalContent(
         ...terminalExecutionBehavior,
         strings: [string],
         printed,
-      }))
+      })),
     );
   }
 
@@ -286,7 +280,7 @@ export function createTerminalContent(
       ...userEntryBehavior,
       printed,
       strings: strings.map(
-        (str) => `\`${userEntryBehavior.prompt}\` ^850${str}`
+        (str) => `\`${userEntryBehavior.prompt}\` ^850${str}`,
       ),
     },
   ];
@@ -296,7 +290,7 @@ export function createTerminalContent(
  * Config
  */
 export const createChangeMap = (
-  changes: Tour.LineChangeBlock[]
+  changes: Tour.LineChangeBlock[],
 ): Map<number, string> => {
   const changeMap = new Map<number, string>();
 
@@ -327,7 +321,7 @@ export function createConfigContentGroups(
     | { kind: "gap"; lineNo: number }
     | { kind: "group"; start: number; lines: string[] }
   )[],
-  changeMap: Map<number, string>
+  changeMap: Map<number, string>,
 ) {
   const groups: ConfigContent[] = [];
 
@@ -392,7 +386,7 @@ function determineChangeEnd(
   start: number,
   end: number | undefined,
   changeLinesLength: number,
-  linesLength: number
+  linesLength: number,
 ) {
   if (end !== undefined) {
     return end;
@@ -410,7 +404,7 @@ function determineChangeEnd(
 export const extractRelevantSections = (
   lines: string[],
   changes: Tour.LineChangeBlock[],
-  contextSpacing = 2
+  contextSpacing = 2,
 ): (
   | { kind: "gap"; lineNo: number }
   | { kind: "group"; start: number; lines: string[] }
@@ -425,7 +419,7 @@ export const extractRelevantSections = (
       start,
       end,
       changeLines?.length || 0,
-      lines.length
+      lines.length,
     );
 
     // Add changed lines and their parents
@@ -493,7 +487,7 @@ export const extractRelevantSections = (
  */
 export function findReplacementPod(
   currentPod: ActivePod,
-  activePods: ActivePods
+  activePods: ActivePods,
 ): ActivePod | undefined {
   return Object.values(activePods).find((active) => {
     const differentPodSource =
@@ -503,7 +497,7 @@ export function findReplacementPod(
     const podNameDelimIdx = active.name.lastIndexOf(POD_NAME_DELIM);
 
     const sameService = currentPod.name.startsWith(
-      active.name.substring(0, podNameDelimIdx)
+      active.name.substring(0, podNameDelimIdx),
     );
     const activeIsRunning = active.status === STATUS.running;
 

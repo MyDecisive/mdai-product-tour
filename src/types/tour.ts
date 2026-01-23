@@ -42,12 +42,14 @@ interface ConfigFileSource {
 
 // Logs simulator
 /**
- * logsSources - file names for local files which must be located in public/logs/
+ * fileName - file name for local file which must be located in public/logs/
+ * logFormat - determines which parser, display will be used
  * speed - defaults to 1000
  * contextName - the name of the Service these logs represent
  */
 export interface LogsFileSource {
-  logsSources?: string[];
+  fileName: string;
+  logFormat: Kinds.LogFormat;
   speed?: number;
   contextName: string;
 }

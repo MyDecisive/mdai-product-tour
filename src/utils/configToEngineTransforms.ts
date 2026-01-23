@@ -1,4 +1,5 @@
 import type { AnyFrame, FrameConfigs } from "../types/frames";
+import type * as Kinds from "../types/kinds";
 import type {
   ActivePods,
   ConfigFile,
@@ -30,7 +31,6 @@ import {
 } from "./frameStateMergeStrategies";
 import { getLogFile } from "./getAssets";
 import {
-  braidLogs,
   createChangeMap,
   createConfigContentGroups,
   createEmptyLogs,
@@ -48,12 +48,12 @@ import {
 
 function transformTerminal(
   terminalTargets: Tour.TerminalEntry[],
-  printed: boolean
+  printed: boolean,
 ): NonNullable<Player["terminal"]> {
   const strings = terminalTargets.flatMap(({ input, outputs = [] }) =>
     createTerminalContent([input], printed).concat(
-      createTerminalContent(outputs, printed, "terminal")
-    )
+      createTerminalContent(outputs, printed, "terminal"),
+    ),
   );
 
   return {
@@ -85,7 +85,7 @@ function createServiceNameSuffix() {
 
   return Array.from(
     { length: SUFFIX_LENGTH },
-    () => chars[Math.floor(Math.random() * chars.length)]
+    () => chars[Math.floor(Math.random() * chars.length)],
   ).join("");
 }
 
@@ -98,7 +98,7 @@ function createPodName(service: Tour.Service): string {
 function transformStatus(
   configServices: Tour.Service[],
   contextId: string,
-  isStateTransform?: boolean
+  isStateTransform?: boolean,
 ): NonNullable<Player["status"]> {
   const activePods: ActivePods = {};
   const podOrder: PodId[] = [];
@@ -136,7 +136,7 @@ function transformStatus(
 // ============================================================================
 
 async function transformConfig(
-  configSimTarget: NonNullable<Tour.Player["config"]>
+  configSimTarget: NonNullable<Tour.Player["config"]>,
 ): Promise<NonNullable<Player["config"]>> {
   const fileEntries = await Promise.all(
     configSimTarget.files.map(async ({ fileName, url, changes }) => {
@@ -159,7 +159,7 @@ async function transformConfig(
       };
 
       return [name, engConf] as const;
-    })
+    }),
   );
 
   const files = Object.fromEntries(fileEntries);
@@ -173,8 +173,8 @@ async function transformConfig(
     fileEntries.flatMap(([, conf]) =>
       conf.groups
         .filter((g): g is LineGroup => g.kind === "group" && g.isChangeBlock)
-        .map((g) => g.groupId)
-    )
+        .map((g) => g.groupId),
+    ),
   );
 
   return {
@@ -190,36 +190,39 @@ async function transformConfig(
 // LOGS SIMULATOR TRANSFORMS
 // ============================================================================
 
-function loadLogsTextFile(fileName: string): LogRecord[] {
+function loadLogsTextFile(
+  fileName: string,
+  logFormat: Kinds.LogFormat,
+): LogRecord[] {
   const text = getLogFile(fileName);
-  return parseRawLogFileToLogLines(text);
+  return parseRawLogFileToLogLines(text, logFormat);
 }
 
 function transformLogsRecords(
   {
-    logsSources = [],
+    fileName,
+    logFormat,
     speed,
     duration,
     contextName,
   }: Tour.LogsFileSource & { duration?: number },
-  prepLogRecordsForState?: boolean
+  prepLogRecordsForState?: boolean,
 ): LogsContext & { duration: number } {
   const engineSpeed = speed ?? 1000;
 
-  const logRecordsByFile = logsSources.map(loadLogsTextFile);
-
-  const records = braidLogs(...logRecordsByFile);
+  const records = loadLogsTextFile(fileName, logFormat);
 
   const returnObj: Omit<ReturnType<typeof transformLogsRecords>, "records"> = {
     speed: engineSpeed,
     duration: duration ?? DEFAULT_ANIMATION_STEP_DURATION,
+    logFormat,
     contextName,
   };
 
   if (prepLogRecordsForState) {
     return {
       records: records.map((log, index) =>
-        createLogRecord(log, -1, index, false)
+        createLogRecord(log, -1, index, false),
       ),
       ...returnObj,
     };
@@ -233,7 +236,7 @@ function transformLogsRecords(
 
 function transformLogs(
   tourLogs: (Tour.LogsFileSource & { duration?: number })[],
-  prepLogRecordsForState?: boolean
+  prepLogRecordsForState?: boolean,
 ): NonNullable<Player["logs"]> {
   return tourLogs.reduce((accum, curr) => {
     if (!curr.contextName) {
@@ -255,7 +258,7 @@ function transformLogs(
 
 async function transformTourToEngineAnimation(
   animation: Tour.AnyFrame[],
-  contextId: string
+  contextId: string,
 ): Promise<AnyFrame[]> {
   return Promise.all(
     animation.map(async (frame) => {
@@ -305,7 +308,7 @@ async function transformTourToEngineAnimation(
         default:
           return frame;
       }
-    })
+    }),
   );
 }
 
@@ -319,7 +322,7 @@ function createEmptyEngineTargetState(): Player {
 
 function addLogRecordsForState(
   state: Player,
-  updates: LogsContext & { duration: number }
+  updates: LogsContext & { duration: number },
 ): Player {
   const stateReadyLogsRecords = updates.records
     .slice(0, Math.max(Math.ceil(updates.duration / updates.speed), 60))
@@ -335,7 +338,7 @@ function addLogRecordsForState(
 
 export type StateBuilder<
   SimName extends keyof FrameConfigs,
-  FType extends keyof FrameConfigs[SimName]
+  FType extends keyof FrameConfigs[SimName],
 > = (state: Player, updates: FrameConfigs[SimName][FType]) => Player;
 
 export type SimulatorStateBuilderMap = {
@@ -359,7 +362,7 @@ const stateBuilders: SimulatorStateBuilderMap = {
         (accum, [key, value]) => {
           const replacementPod = findReplacementPod(
             value,
-            state.status?.activePods || {}
+            state.status?.activePods || {},
           );
           if (replacementPod) {
             return accum;
@@ -372,14 +375,14 @@ const stateBuilders: SimulatorStateBuilderMap = {
 
           return accum;
         },
-        {} as ActivePods
+        {} as ActivePods,
       );
 
       return addStatusPods(state, {
         ...updates,
         activePods: targetStateUpdates,
         podOrder: updates.podOrder.filter(
-          (podId) => !!targetStateUpdates[podId]
+          (podId) => !!targetStateUpdates[podId],
         ),
       });
     },
@@ -408,7 +411,7 @@ const stateBuilders: SimulatorStateBuilderMap = {
 
 function buildTargetStateFromEngineAnimation(
   frames: AnyFrame[],
-  initialState?: Player
+  initialState?: Player,
 ): Player {
   return frames.reduce((state, frame) => {
     if (
@@ -443,7 +446,7 @@ function buildTargetStateFromEngineAnimation(
 
 async function transformTourToEngineState(
   tour: Tour.Player,
-  contextId: string
+  contextId: string,
 ): Promise<Player> {
   return {
     terminal: tour.terminal
@@ -463,7 +466,7 @@ async function transformTourToEngineState(
 // ============================================================================
 export async function transformSubStepConfigToInstanceArgs(
   { initialState, id, animation, content }: Tour.SubStep,
-  previousTargetState: Player | undefined
+  previousTargetState: Player | undefined,
 ): Promise<
   Pick<SubStep, "initialState" | "targetState" | "animation" | "content">
 > {
@@ -476,11 +479,11 @@ export async function transformSubStepConfigToInstanceArgs(
   if (initialState) {
     const transformedInitial = await transformTourToEngineState(
       initialState,
-      id
+      id,
     );
     returnVal.initialState = combineTargetStates(
       returnVal.initialState || {},
-      transformedInitial
+      transformedInitial,
     );
   }
 
@@ -489,7 +492,7 @@ export async function transformSubStepConfigToInstanceArgs(
 
     const targetState = buildTargetStateFromEngineAnimation(
       frames,
-      returnVal.initialState
+      returnVal.initialState,
     );
 
     returnVal.animation = frames;
@@ -499,7 +502,9 @@ export async function transformSubStepConfigToInstanceArgs(
   if (content && content.length) {
     if (
       content.some(({ items = [] }) =>
-        items.some((item) => !("src" in item) && (item.actions || item.onClick))
+        items.some(
+          (item) => !("src" in item) && (item.actions || item.onClick),
+        ),
       )
     ) {
       const updatedContent = await Promise.all(
@@ -511,7 +516,7 @@ export async function transformSubStepConfigToInstanceArgs(
                   await transformContentItemToEngineContentItem(item, id);
 
                 return returnItem;
-              })
+              }),
             );
 
             return {
@@ -522,7 +527,7 @@ export async function transformSubStepConfigToInstanceArgs(
           return {
             ...c,
           } as ContentBlock;
-        })
+        }),
       );
 
       returnVal.content = updatedContent;
@@ -539,7 +544,7 @@ export async function transformSubStepConfigToInstanceArgs(
 
 async function transformContentItemToEngineContentItem(
   content: Tour.ContentItem,
-  contextId: string
+  contextId: string,
 ): Promise<ContentItem> {
   const { onClick, actions, ...rest } = content;
 
@@ -554,7 +559,7 @@ async function transformContentItemToEngineContentItem(
   if (actions) {
     transformedActions = await transformTourToEngineAnimation(
       actions,
-      contextId
+      contextId,
     );
   }
 

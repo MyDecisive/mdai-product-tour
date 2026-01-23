@@ -1,5 +1,5 @@
 import type { TypedOptions } from "typed.js";
-import type { PodStatus } from "./kinds";
+import type { LogFormat, LogLevel, PodStatus } from "./kinds";
 
 // ============================================================================
 // Simulator/Player state
@@ -91,7 +91,7 @@ interface Config {
 export interface LogRecord {
   message?: string;
   content?: string;
-  level?: string;
+  level?: LogLevel;
   timestamp?: string;
   id?: string;
   [key: string]: unknown;
@@ -101,6 +101,7 @@ export interface LogsContext {
   records: LogRecord[];
   speed: number;
   contextName: string;
+  logFormat: LogFormat;
 }
 
 interface Logs {

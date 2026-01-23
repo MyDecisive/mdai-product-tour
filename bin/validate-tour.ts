@@ -21,7 +21,7 @@ import fs from "fs";
 import path from "path";
 import process from "process";
 import { isMap, isScalar, isSeq, type Node, Pair, parseDocument } from "yaml";
-import type { TourConfiguration } from "../src/utils/configTypesScratch";
+import type { Definition } from "../src/types/tour";
 
 function usageAndExit(): never {
   console.error("Usage: validate-tour <tour-name | path/to/tour.yaml>");
@@ -57,7 +57,7 @@ function offsetToLineCol(offset: number, lineStarts: number[]) {
  */
 function findYamlNodeByPath(
   rootNode: Node | null | undefined,
-  pathParts: (string | number)[]
+  pathParts: (string | number)[],
 ): Node | undefined {
   let node: Node | undefined = rootNode ?? undefined;
   if (!node) return undefined;
@@ -110,7 +110,7 @@ function jsonPointerToPathParts(pointer: string) {
 function reportYamlParseErrors(
   doc: unknown,
   filePath: string,
-  out: Array<string>
+  out: Array<string>,
 ) {
   const maybeDoc = doc as { errors?: unknown[] } | undefined;
   if (
@@ -163,7 +163,7 @@ export function prettifyPointerWithIds(
   data: unknown,
   pathParts: (string | number)[],
   // allow customizing which property names count as "id"
-  idKeys: string[] = ["id"]
+  idKeys: string[] = ["id"],
 ): string {
   const out: string[] = [];
   let cur: unknown = data;
@@ -240,8 +240,8 @@ function main() {
       process.exit(2);
     }
     const schema = JSON.parse(
-      fs.readFileSync(schemaPath, "utf8")
-    ) as JSONSchemaType<TourConfiguration>;
+      fs.readFileSync(schemaPath, "utf8"),
+    ) as JSONSchemaType<Definition>;
 
     const text = fs.readFileSync(filePath, "utf8");
     const lineStarts = buildLineIndex(text);
@@ -285,7 +285,7 @@ function main() {
           (e.params as Record<string, unknown>)["missingProperty"]
         ) {
           const missing = String(
-            (e.params as Record<string, unknown>)["missingProperty"]
+            (e.params as Record<string, unknown>)["missingProperty"],
           );
           pointer =
             pointer +
@@ -296,7 +296,7 @@ function main() {
         const pathParts = jsonPointerToPathParts(pointer);
         const node = findYamlNodeByPath(
           (doc as unknown as { contents?: Node }).contents,
-          pathParts
+          pathParts,
         );
 
         // fallback node: if not found, use parent (instancePath without appended missingProperty)
@@ -305,7 +305,7 @@ function main() {
           const parentParts = jsonPointerToPathParts(instancePath);
           nodeForRange = findYamlNodeByPath(
             (doc as unknown as { contents?: Node }).contents,
-            parentParts
+            parentParts,
           );
         }
 
@@ -326,14 +326,14 @@ function main() {
 
         const prettyPointer = prettifyPointerWithIds(
           data,
-          jsonPointerToPathParts(pointer)
+          jsonPointerToPathParts(pointer),
         );
 
         const message = e.message ? e.message : JSON.stringify(e);
         reports.push(
           `${positionStr} ${prettyPointer || "/"} — ${message} (keyword=${
             e.keyword
-          })`
+          })`,
         );
       }
     }

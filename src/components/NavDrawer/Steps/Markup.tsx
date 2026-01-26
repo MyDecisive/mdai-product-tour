@@ -33,7 +33,7 @@ export function MarkupText({
       console.warn(`No action at index ${actionIndex}`);
       return;
     }
-
+    console.log("action ", action);
     onTriggerFrame(action);
   };
 
@@ -43,7 +43,7 @@ export function MarkupText({
 function parseAndRender(
   text: string,
   activeSimulator: Set<Simulator>,
-  handleActionClick: (index: number) => void
+  handleActionClick: (index: number) => void,
 ): React.ReactNode {
   const segments: React.ReactNode[] = [];
 
@@ -162,7 +162,7 @@ function parseAndRender(
 
       if (
         match &&
-        (earliestMatch === null || match.index < earliestMatch.index)
+        (earliestMatch === null || position + match.index < earliestMatch.index)
       ) {
         earliestMatch = {
           index: position + match.index,
@@ -195,7 +195,7 @@ function parseAndRender(
           <React.Fragment key={i}>{segment}</React.Fragment>
         ) : (
           React.cloneElement(segment as React.ReactElement, { key: i })
-        )
+        ),
       )}
     </Typography>
   );

@@ -10,6 +10,7 @@ import type {
 import type * as Tour from "../types/tour";
 import {
   CURSOR_CHAR,
+  GROUP_ID_DELIM,
   LOG_LEVELS,
   POD_NAME_DELIM,
   STATUS,
@@ -322,7 +323,7 @@ export function createConfigContentGroups(
 
       groups.push({
         kind: "group",
-        groupId: `${fileName}-${start}-${end}`,
+        groupId: `${fileName}${GROUP_ID_DELIM}${start}-${end}`,
         start,
         end,
         lines,

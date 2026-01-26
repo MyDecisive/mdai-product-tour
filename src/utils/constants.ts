@@ -8,6 +8,8 @@ export const TERMINAL_PROMPT = "eng@local-terminal > ";
 export const CURSOR_CHAR = "█";
 export const POD_NAME_DELIM = "-";
 
+export const GROUP_ID_DELIM = "#";
+
 export const DEFAULT_ANIMATION_STEP_DURATION = 1500;
 
 export const FRAME_TYPES = {

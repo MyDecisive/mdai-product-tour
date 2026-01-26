@@ -17,7 +17,7 @@ export function useGetLogsSimulatorContent({
   }, [activeContext, allContexts]);
 
   useEffect(() => {
-    if (logContainerRef.current && records.length && playing) {
+    if (logContainerRef.current && records.length) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [records, playing]);

@@ -10,6 +10,7 @@ import type {
 import type * as Tour from "../types/tour";
 import {
   CURSOR_CHAR,
+  LOG_LEVELS,
   POD_NAME_DELIM,
   STATUS,
   TERMINAL_PROMPT,
@@ -49,46 +50,6 @@ export function createLogRecord(
   };
 }
 
-export function braidLogs(...logArrays: LogRecord[][]): LogRecord[] {
-  const result: LogRecord[] = [];
-  const indices = Array.from({ length: logArrays.length }, () => 0);
-
-  // Calculate ratios based on array lengths for proportional distribution
-  const lengths = logArrays.map((arr) => arr.length);
-  const totalLength = lengths.reduce((sum, len) => sum + len, 0);
-  const ratios = lengths.map((len) => len / totalLength);
-
-  let position = 0;
-
-  while (indices.some((idx, i) => idx < logArrays[i].length)) {
-    // Find which array should contribute the next log based on ratios
-    for (let i = 0; i < logArrays.length; i++) {
-      const expectedCount = Math.floor(position * ratios[i]);
-      const actualCount = indices[i];
-
-      if (actualCount <= expectedCount && indices[i] < logArrays[i].length) {
-        result.push(logArrays[i][indices[i]]);
-        indices[i]++;
-        position++;
-        break;
-      }
-    }
-
-    // Fallback: add from first available array if ratio logic doesn't advance
-    if (result.length === position - 1) {
-      for (let i = 0; i < logArrays.length; i++) {
-        if (indices[i] < logArrays[i].length) {
-          result.push(logArrays[i][indices[i]]);
-          indices[i]++;
-          position++;
-          break;
-        }
-      }
-    }
-  }
-
-  return result;
-}
 export function parseRawLogFileToLogLines(
   rawLogString: string,
   logFormat: string,
@@ -146,7 +107,7 @@ function jsonLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
         const whatever = JSON.stringify(rest);
 
         acc.push({
-          level,
+          level: level.toUpperCase(),
           message: msg ? `${msg} ${whatever}` : whatever,
         });
       }
@@ -206,13 +167,13 @@ function collectorLogStringsToLogRecords(logStrings: string[]): LogRecord[] {
 
 function multiLineLogsToLogRecords(logStrings: string[]): LogRecord[] {
   const firstWord = logStrings[0].match(/\w+/);
-  if (firstWord == null) {
+  if (firstWord == null || !logStrings.length) {
     return [];
   }
 
-  const logGroups: string[][] = [[]];
+  const logGroups: string[][] = [[logStrings[0]]];
   let logGroupIdx = 0;
-  for (let i = 0; i < logStrings.length; i++) {
+  for (let i = 1; i < logStrings.length; i++) {
     const currentLine = logStrings[i];
     if (currentLine.match(/(T|t)imestamp/)) {
       continue;
@@ -226,8 +187,20 @@ function multiLineLogsToLogRecords(logStrings: string[]): LogRecord[] {
   }
 
   return logGroups.map((group) => {
+    const message = group.join("\n");
+
+    const level = message.match(
+      new RegExp(
+        Object.values(LOG_LEVELS).reduce((acc, curr) => {
+          return acc
+            ? `${acc}|${curr}|${curr.toUpperCase()}`
+            : `${curr}|${curr.toUpperCase()}`;
+        }, ""),
+      ),
+    );
     return {
-      message: group.join("\n"),
+      level: level ? level[0].toUpperCase() : "INFO",
+      message,
     };
   });
 }

@@ -8,7 +8,6 @@ import type {
 import type * as Tour from "../../types/tour";
 import { CURSOR_CHAR, TERMINAL_PROMPT } from "../constants";
 import {
-  braidLogs,
   createChangeMap,
   createConfigContentGroups,
   createLogRecord,
@@ -192,56 +191,141 @@ mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - 
       ) as unknown,
     });
   });
-});
+  it("should parse json logs format", () => {
+    const rawLogs = `
+    {"level":"info","timestamp":"2026-01-22T18:07:16.721Z","msg":"-- Starting MdaiHub reconciliation --","controller":"mdaihub","controllerGroup":"hub.mydecisive.ai","controllerKind":"MdaiHub","MdaiHub":{"name":"mdaihub-pii","namespace":"mdai"},"namespace":"mdai","name":"mdaihub-pii","reconcileID":"d9d20442-43b1-43d1-9923-4458dcd97550","namespace":{"name":"mdaihub-pii","namespace":"mdai"},"name":"mdaihub-pii"}
+{"level":"info","timestamp":"2026-01-22T18:07:16.721Z","msg":"EnsurePrometheusRuleSynchronized","controller":"mdaihub","controllerGroup":"hub.mydecisive.ai","controllerKind":"MdaiHub","MdaiHub":{"name":"mdaihub-pii","namespace":"mdai"},"namespace":"mdai","name":"mdaihub-pii","reconcileID":"d9d20442-43b1-43d1-9923-4458dcd97550"}
+{"level":"info","timestamp":"2026-01-22T18:07:16.721Z","msg":"No evaluations found, skipping PrometheusRule creation","controller":"mdaihub","controllerGroup":"hub.mydecisive.ai","controllerKind":"MdaiHub","MdaiHub":{"name":"mdaihub-pii","namespace":"mdai"},"namespace":"mdai","name":"mdaihub-pii","reconcileID":"d9d20442-43b1-43d1-9923-4458dcd97550"}`;
 
-function makeRecords(prefix: string, ids: string[]): LogRecord[] {
-  return ids.map((id) => ({ id: `${prefix}${id}` }));
-}
+    const result = parseRawLogFileToLogLines(rawLogs, "json");
 
-describe("braidLogs", () => {
-  it("braids two arrays proportionally and preserves per-source order", () => {
-    const a = makeRecords("a", ["1", "2", "3"]); // a1,a2,a3
-    const b = makeRecords("b", ["1", "2"]); // b1,b2
-
-    const result = braidLogs(a, b);
-    const ids = result.map((r) => r.id);
-
-    // Expected interleaving based on the algorithm: a1,b1,a2,b2,a3
-    expect(ids).toEqual(["a1", "b1", "a2", "b2", "a3"]);
-
-    // Ensure each source's internal order is preserved
-    const aSeen = ids.filter((id) => id?.startsWith("a"));
-    const bSeen = ids.filter((id) => id?.startsWith("b"));
-    expect(aSeen).toEqual(["a1", "a2", "a3"]);
-    expect(bSeen).toEqual(["b1", "b2"]);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toMatchObject({
+      level: "INFO",
+      message: expect.stringContaining(
+        "-- Starting MdaiHub reconciliation --",
+      ) as unknown,
+    });
   });
+  it("should parse multiline logs format", () => {
+    const rawLogs = `LogRecord #46
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.064073303 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action inventory-check processed successfully)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:06:48Z)
+     -> level: Str(INFO)
+     -> logger: Str(checkout-service)
+     -> action: Str(inventory-check)
+     -> user_id: Int(1007)
+     -> name: Str(Gina Park)
+     -> ssn: Str(000-11-6666)
+     -> phone: Str(123-456-7777)
+     -> email: Str(gina.park@example.ai)
+     -> cc: Str(6011-1234-5678-9012)
+     -> billing_address: Str(320 Market St, San Francisco, CA 12345)
+     -> transaction_id: Int(90007)
+     -> amount: Double(22.99)
+     -> duration: Int(28)
+     -> status: Str(success)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0
+LogRecord #47
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.064285053 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action risk-check processed successfully)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:07:59Z)
+     -> level: Str(INFO)
+     -> logger: Str(checkout-service)
+     -> action: Str(risk-check)
+     -> user_id: Int(1008)
+     -> name: Str(Henry Scott)
+     -> ssn: Str(000-11-7777)
+     -> phone: Str(123-456-8888)
+     -> email: Str(henry@example.dev)
+     -> cc: Str(4111-8765-4321-1234)
+     -> billing_address: Str(752 West Ave, Brooklyn, NY 12345)
+     -> transaction_id: Int(90008)
+     -> amount: Double(64.8)
+     -> duration: Int(39)
+     -> status: Str(success)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0
+LogRecord #48
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.064415762 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action fraud-check returned borderline risk)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:09:02Z)
+     -> level: Str(WARN)
+     -> logger: Str(checkout-service)
+     -> action: Str(fraud-check)
+     -> user_id: Int(1009)
+     -> name: Str(Isabel Torres)
+     -> ssn: Str(000-11-8888)
+     -> phone: Str(123-456-9999)
+     -> email: Str(isa.torres@example.us)
+     -> cc: Str(3566-1111-1111-1113)
+     -> billing_address: Str(13 Beacon St, Boston, MA 12345)
+     -> transaction_id: Int(90009)
+     -> amount: Double(175)
+     -> duration: Int(50)
+     -> status: Str(warning)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0
+LogRecord #49
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.06454122 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action payment-check processed successfully)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:10:10Z)
+     -> level: Str(INFO)
+     -> logger: Str(checkout-service)
+     -> action: Str(payment-check)
+     -> user_id: Int(1010)
+     -> name: Str(Jake Wilson)
+     -> ssn: Str(000-11-9999)
+     -> phone: Str(123-456-0000)
+     -> email: Str(jake.wilson@example.biz)
+     -> cc: Str(5432-1098-7654-3210)
+     -> billing_address: Str(88 Cross Rd, Phoenix, AZ 12345)
+     -> transaction_id: Int(90010)
+     -> amount: Double(199.99)
+     -> duration: Int(33)
+     -> status: Str(success)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0`;
 
-  it("braids three arrays and preserves per-source order", () => {
-    const a = makeRecords("a", ["1", "2", "3"]); // a1,a2,a3
-    const b = makeRecords("b", ["1"]); // b1
-    const c = makeRecords("c", ["1"]); // c1
+    const result = parseRawLogFileToLogLines(rawLogs, "multiline");
 
-    const result = braidLogs(a, b, c);
-    const ids = result.map((r) => r.id);
-
-    // Expected interleaving (per algorithm simulation): a1,b1,a2,c1,a3
-    expect(ids).toEqual(["a1", "b1", "a2", "c1", "a3"]);
-
-    // Verify per-source order is preserved
-    expect(ids.filter((id) => id?.startsWith("a"))).toEqual(["a1", "a2", "a3"]);
-    expect(ids.filter((id) => id?.startsWith("b"))).toEqual(["b1"]);
-    expect(ids.filter((id) => id?.startsWith("c"))).toEqual(["c1"]);
-
-    expect(result).toHaveLength(a.length + b.length + c.length);
-  });
-
-  it("handles empty input arrays (one empty, one non-empty)", () => {
-    const empty: LogRecord[] = [];
-    const b = makeRecords("b", ["1", "2"]);
-
-    const result = braidLogs(empty, b);
-    expect(result.map((r) => r.id)).toEqual(["b1", "b2"]);
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(4);
+    expect(result[2]).toMatchObject({
+      level: "WARN",
+      message:
+        expect.stringContaining(`Body: Str(Action fraud-check returned borderline risk)
+Attributes:
+     -> level: Str(WARN)
+     -> logger: Str(checkout-service)
+`) as unknown,
+    });
+    expect(result[3].level).toBe("INFO");
   });
 });
 

@@ -21,7 +21,7 @@ import fs from "fs";
 import path from "path";
 import process from "process";
 import { isMap, isScalar, isSeq, type Node, Pair, parseDocument } from "yaml";
-import type { Definition } from "../src/types/tour.ts";
+import type { Definition } from "../src/types/tour";
 
 function usageAndExit(): never {
   console.error("Usage: validate-tour <tour-name | path/to/tour.yaml>");

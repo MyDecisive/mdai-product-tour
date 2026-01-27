@@ -97,8 +97,8 @@ steps:
             simulator: logs
             updates:
               contextName: mdai-logger-bundle-8584566955
-              logsSources:
-                - serviceLogsBasic.txt
+              fileName: logStreamServiceBasic.txt
+              logFormat: service
               speed: 50
               duration: 3000
           - kind: enter_command
@@ -130,8 +130,8 @@ steps:
             simulator: logs
             updates:
               contextName: gateway-collector-64dc799dcb
-              logsSources:
-                - collectorLogsBasic.txt
+              fileName: logStreamCollectorBasic.txt
+              logFormat: collector
               speed: 1000
               duration: 4000
       - id: 0-b
@@ -238,8 +238,8 @@ steps:
             simulator: logs
             updates:
               contextName: gateway-collector-64dc799dcb
-              logsSources:
-                - collectorLogsStatic.txt
+              fileName: logStreamCollectorStatic.txt
+              logFormat: collector
               speed: 85
               duration: 3000
       - id: 1-b
@@ -439,8 +439,8 @@ steps:
             simulator: logs
             updates:
               contextName: gateway-collector-64dc799dcb
-              logsSources:
-                - collectorLogsDynamic.txt
+              fileName: logStreamCollectorDynamic.txt
+              logFormat: collector
               speed: 40
               duration: 1600
 

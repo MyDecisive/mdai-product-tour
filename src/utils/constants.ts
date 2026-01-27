@@ -54,3 +54,17 @@ export const STATUS = {
   terminating,
   shutdown,
 } as const;
+
+export const LOG_LEVELS = {
+  ERROR: "ERROR",
+  WARN: "WARN",
+  DEBUG: "DEBUG",
+  INFO: "INFO",
+};
+
+export const LOG_FORMAT = {
+  SERVICE: "service",
+  COLLECTOR: "collector",
+  JSON: "json",
+  MULTILINE: "multiline",
+};

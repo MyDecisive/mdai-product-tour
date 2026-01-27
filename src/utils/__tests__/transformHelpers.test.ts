@@ -8,7 +8,6 @@ import type {
 import type * as Tour from "../../types/tour";
 import { CURSOR_CHAR, TERMINAL_PROMPT } from "../constants";
 import {
-  braidLogs,
   createChangeMap,
   createConfigContentGroups,
   createLogRecord,
@@ -154,13 +153,13 @@ mdai-logger 2025-11-26T19:25:40+00:00 - service34 - teamR - us-east-1 - WARNING 
 mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - ERROR - The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams.
     `.trim();
 
-    const result = parseRawLogFileToLogLines(rawLogs);
+    const result = parseRawLogFileToLogLines(rawLogs, "service");
 
     expect(result).toHaveLength(4);
     expect(result[0]).toMatchObject({
       level: "INFO",
       message: expect.stringContaining(
-        "service4321 - The algorithm"
+        "service4321 - The algorithm",
       ) as unknown,
     });
     expect(result[2]).toMatchObject({
@@ -168,30 +167,7 @@ mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - 
       message: expect.stringContaining("service34 - The algorithm") as unknown,
     });
   });
-  it("should parse kubernetesLogs logs format", () => {
-    const rawLogs = `
-2025-11-26 18:22:10.938554625 +0000 kubernetes.var.log.containers.mdai-logger-bundle-8584566955-45flc_synthetics_mdai-logger-noisy-4d4a707f61ba80f5cdff756f7770c9c179464456c54e1c9f3777806e23fec8cf.log: {"timestamp":"2025-11-26T18:22:10+00:00","mdai_service":"service1234","team":"teamA","region":"us-east-1","level":"INFO","message":"The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams."}
-2025-11-26 18:22:10.938559625 +0000 kubernetes.var.log.containers.mdai-logger-bundle-8584566955-45flc_synthetics_mdai-logger-noisy-4d4a707f61ba80f5cdff756f7770c9c179464456c54e1c9f3777806e23fec8cf.log: {"timestamp":"2025-11-26T18:22:10+00:00","mdai_service":"service1234","team":"teamA","region":"us-east-1","level":"WARNING","message":"The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams."}
-2025-11-26 18:22:11.110704250 +0000 kubernetes.var.log.containers.mdai-logger-bundle-8584566955-45flc_synthetics_mdai-logger-xnoisy-6e97f1ed771fc785d1cabfaa575ecc5a9c5393b87bb21faff4312d16bb6f8efd.log: {"timestamp":"2025-11-26T18:22:10+00:00","mdai_service":"service4321","team":"teamB","region":"us-east-1","level":"INFO","message":"The algorithm successfully executed, triggering neural pathways and producing a burst of optimized data streams."}
-    `.trim();
-
-    const result = parseRawLogFileToLogLines(rawLogs);
-
-    expect(result).toHaveLength(3);
-    expect(result[1]).toMatchObject({
-      level: "WARNING",
-      message: expect.stringContaining(
-        "flc_synthetics_mdai-logger-noisy-4d4a707f61"
-      ) as unknown,
-    });
-    expect(result[2]).toMatchObject({
-      level: "INFO",
-      message: expect.stringContaining(
-        "flc_synthetics_mdai-logger-xnoisy-6e97f1ed"
-      ) as unknown,
-    });
-  });
-  it("should parse collectorLogs logs format", () => {
+  it("should parse collector logs format", () => {
     const rawLogs = `
 2025-12-01T22:47:26.730Z    info    extensions/extensions.go:62    Extension started.    {"resource": {"mdai-logstream": "collector"}, "otelcol.component.id": "health_check", "otelcol.component.kind": "extension"}
 2025-12-01T22:47:26.730Z    info    healthcheck/handler.go:132    Health Check state change    {"resource": {"mdai-logstream": "collector"}, "otelcol.component.id": "health_check", "otelcol.component.kind": "extension", "status": "ready"}
@@ -199,97 +175,157 @@ mdai-logger-noisy 2025-11-26T19:25:40+00:00 - service1234 - teamA - us-east-1 - 
 2025-12-01T22:47:39.731Z    info    Logs    {"resource": {"mdai-logstream": "collector"}, "otelcol.component.id": "debug/filtered", "otelcol.component.kind": "exporter", "otelcol.signal": "logs", "resource logs": 7, "log records": 871}
     `.trim();
 
-    const result = parseRawLogFileToLogLines(rawLogs);
+    const result = parseRawLogFileToLogLines(rawLogs, "collector");
 
     expect(result).toHaveLength(4);
     expect(result[1]).toMatchObject({
       level: "INFO",
       message: expect.stringContaining(
-        "healthcheck/handler.go:132 Health Check state change"
+        "healthcheck/handler.go:132 Health Check state change",
       ) as unknown,
     });
     expect(result[3]).toMatchObject({
       level: "INFO",
       message: expect.stringContaining(
-        `Logs {"resource": {"mdai-logstream": "collector"}`
+        `Logs {"resource": {"mdai-logstream": "collector"}`,
       ) as unknown,
     });
   });
-  it("should parse error logs format", () => {
+  it("should parse json logs format", () => {
     const rawLogs = `
-2025-10-23T14:12:45.219Z    error    api@v0.118.0/client.go:87    Failed to connect to external API    {"endpoint": "https://dev.api.local/v1/data", "retryCount": 3}
-2025-10-23T14:12:50.782Z    error    db@v0.118.0/connection.go:203    Database query timeout after 30s    {"query": "SELECT * FROM users WHERE active = true", "duration": "30s"}
-2025-10-23T14:13:02.144Z    error    server@v0.118.0/handler.go:56    Invalid JSON in request body    {"route": "/api/upload", "client": "192.168.1.45"}
-2025-10-23T14:13:17.921Z    warn    gateway@v0.118.0/middleware.go:134    Rate limit exceeded for client    {"client": "192.168.1.100", "limit": "100 req/min"}
-2025-10-23T14:13:25.512Z    error    telemetry@v0.118.0/exporter.go:62    Failed to send telemetry data    {"destination": "collector.dev:4317", "reason": "connection refused"}
-    `.trim();
+    {"level":"info","timestamp":"2026-01-22T18:07:16.721Z","msg":"-- Starting MdaiHub reconciliation --","controller":"mdaihub","controllerGroup":"hub.mydecisive.ai","controllerKind":"MdaiHub","MdaiHub":{"name":"mdaihub-pii","namespace":"mdai"},"namespace":"mdai","name":"mdaihub-pii","reconcileID":"d9d20442-43b1-43d1-9923-4458dcd97550","namespace":{"name":"mdaihub-pii","namespace":"mdai"},"name":"mdaihub-pii"}
+{"level":"info","timestamp":"2026-01-22T18:07:16.721Z","msg":"EnsurePrometheusRuleSynchronized","controller":"mdaihub","controllerGroup":"hub.mydecisive.ai","controllerKind":"MdaiHub","MdaiHub":{"name":"mdaihub-pii","namespace":"mdai"},"namespace":"mdai","name":"mdaihub-pii","reconcileID":"d9d20442-43b1-43d1-9923-4458dcd97550"}
+{"level":"info","timestamp":"2026-01-22T18:07:16.721Z","msg":"No evaluations found, skipping PrometheusRule creation","controller":"mdaihub","controllerGroup":"hub.mydecisive.ai","controllerKind":"MdaiHub","MdaiHub":{"name":"mdaihub-pii","namespace":"mdai"},"namespace":"mdai","name":"mdaihub-pii","reconcileID":"d9d20442-43b1-43d1-9923-4458dcd97550"}`;
 
-    const result = parseRawLogFileToLogLines(rawLogs);
+    const result = parseRawLogFileToLogLines(rawLogs, "json");
 
-    expect(result).toHaveLength(5);
+    expect(result).toHaveLength(3);
     expect(result[0]).toMatchObject({
-      level: "ERROR",
+      level: "INFO",
       message: expect.stringContaining(
-        "api@v0.118.0/client.go:87: Failed to connect"
+        "-- Starting MdaiHub reconciliation --",
       ) as unknown,
     });
-    expect(result[3]).toMatchObject({
+  });
+  it("should parse multiline logs format", () => {
+    const rawLogs = `LogRecord #46
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.064073303 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action inventory-check processed successfully)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:06:48Z)
+     -> level: Str(INFO)
+     -> logger: Str(checkout-service)
+     -> action: Str(inventory-check)
+     -> user_id: Int(1007)
+     -> name: Str(Gina Park)
+     -> ssn: Str(000-11-6666)
+     -> phone: Str(123-456-7777)
+     -> email: Str(gina.park@example.ai)
+     -> cc: Str(6011-1234-5678-9012)
+     -> billing_address: Str(320 Market St, San Francisco, CA 12345)
+     -> transaction_id: Int(90007)
+     -> amount: Double(22.99)
+     -> duration: Int(28)
+     -> status: Str(success)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0
+LogRecord #47
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.064285053 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action risk-check processed successfully)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:07:59Z)
+     -> level: Str(INFO)
+     -> logger: Str(checkout-service)
+     -> action: Str(risk-check)
+     -> user_id: Int(1008)
+     -> name: Str(Henry Scott)
+     -> ssn: Str(000-11-7777)
+     -> phone: Str(123-456-8888)
+     -> email: Str(henry@example.dev)
+     -> cc: Str(4111-8765-4321-1234)
+     -> billing_address: Str(752 West Ave, Brooklyn, NY 12345)
+     -> transaction_id: Int(90008)
+     -> amount: Double(64.8)
+     -> duration: Int(39)
+     -> status: Str(success)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0
+LogRecord #48
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.064415762 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action fraud-check returned borderline risk)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:09:02Z)
+     -> level: Str(WARN)
+     -> logger: Str(checkout-service)
+     -> action: Str(fraud-check)
+     -> user_id: Int(1009)
+     -> name: Str(Isabel Torres)
+     -> ssn: Str(000-11-8888)
+     -> phone: Str(123-456-9999)
+     -> email: Str(isa.torres@example.us)
+     -> cc: Str(3566-1111-1111-1113)
+     -> billing_address: Str(13 Beacon St, Boston, MA 12345)
+     -> transaction_id: Int(90009)
+     -> amount: Double(175)
+     -> duration: Int(50)
+     -> status: Str(warning)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0
+LogRecord #49
+ObservedTimestamp: 1970-01-01 00:00:00 +0000 UTC
+Timestamp: 2026-01-22 16:52:19.06454122 +0000 UTC
+SeverityText:
+SeverityNumber: Unspecified(0)
+Body: Str(Action payment-check processed successfully)
+Attributes:
+     -> timestamp: Str(2025-05-14T12:10:10Z)
+     -> level: Str(INFO)
+     -> logger: Str(checkout-service)
+     -> action: Str(payment-check)
+     -> user_id: Int(1010)
+     -> name: Str(Jake Wilson)
+     -> ssn: Str(000-11-9999)
+     -> phone: Str(123-456-0000)
+     -> email: Str(jake.wilson@example.biz)
+     -> cc: Str(5432-1098-7654-3210)
+     -> billing_address: Str(88 Cross Rd, Phoenix, AZ 12345)
+     -> transaction_id: Int(90010)
+     -> amount: Double(199.99)
+     -> duration: Int(33)
+     -> status: Str(success)
+     -> fluent.tag: Str(dummy)
+Trace ID:
+Span ID:
+Flags: 0`;
+
+    const result = parseRawLogFileToLogLines(rawLogs, "multiline");
+
+    expect(result).toHaveLength(4);
+    expect(result[2]).toMatchObject({
       level: "WARN",
-      message: expect.stringContaining(
-        `gateway@v0.118.0/middleware.go:134: Rate limit exceeded`
-      ) as unknown,
+      message:
+        expect.stringContaining(`Body: Str(Action fraud-check returned borderline risk)
+Attributes:
+     -> level: Str(WARN)
+     -> logger: Str(checkout-service)
+`) as unknown,
     });
-  });
-});
-
-function makeRecords(prefix: string, ids: string[]): LogRecord[] {
-  return ids.map((id) => ({ id: `${prefix}${id}` }));
-}
-
-describe("braidLogs", () => {
-  it("braids two arrays proportionally and preserves per-source order", () => {
-    const a = makeRecords("a", ["1", "2", "3"]); // a1,a2,a3
-    const b = makeRecords("b", ["1", "2"]); // b1,b2
-
-    const result = braidLogs(a, b);
-    const ids = result.map((r) => r.id);
-
-    // Expected interleaving based on the algorithm: a1,b1,a2,b2,a3
-    expect(ids).toEqual(["a1", "b1", "a2", "b2", "a3"]);
-
-    // Ensure each source's internal order is preserved
-    const aSeen = ids.filter((id) => id?.startsWith("a"));
-    const bSeen = ids.filter((id) => id?.startsWith("b"));
-    expect(aSeen).toEqual(["a1", "a2", "a3"]);
-    expect(bSeen).toEqual(["b1", "b2"]);
-  });
-
-  it("braids three arrays and preserves per-source order", () => {
-    const a = makeRecords("a", ["1", "2", "3"]); // a1,a2,a3
-    const b = makeRecords("b", ["1"]); // b1
-    const c = makeRecords("c", ["1"]); // c1
-
-    const result = braidLogs(a, b, c);
-    const ids = result.map((r) => r.id);
-
-    // Expected interleaving (per algorithm simulation): a1,b1,a2,c1,a3
-    expect(ids).toEqual(["a1", "b1", "a2", "c1", "a3"]);
-
-    // Verify per-source order is preserved
-    expect(ids.filter((id) => id?.startsWith("a"))).toEqual(["a1", "a2", "a3"]);
-    expect(ids.filter((id) => id?.startsWith("b"))).toEqual(["b1"]);
-    expect(ids.filter((id) => id?.startsWith("c"))).toEqual(["c1"]);
-
-    expect(result).toHaveLength(a.length + b.length + c.length);
-  });
-
-  it("handles empty input arrays (one empty, one non-empty)", () => {
-    const empty: LogRecord[] = [];
-    const b = makeRecords("b", ["1", "2"]);
-
-    const result = braidLogs(empty, b);
-    expect(result.map((r) => r.id)).toEqual(["b1", "b2"]);
-    expect(result).toHaveLength(2);
+    expect(result[3].level).toBe("INFO");
   });
 });
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { ActiveScrollTarget } from "../../types/player";
+import { GROUP_ID_DELIM } from "../../utils/constants";
 import { delay } from "../../utils/delay";
 import { calculateScrollTarget, smoothScrollTo } from "./scrollHelpers";
 
@@ -20,9 +21,11 @@ export function useManageScrollTo({
 
   const scrollTo = useCallback(
     async (scrollTarget: ActiveScrollTarget) => {
-      const [fileName, lineNoStr] = scrollTarget.groupId.split("-"); // This is kind of cheating, but the groupId structure is consistent.
+      const [fileName, groupLineRange] =
+        scrollTarget.groupId.split(GROUP_ID_DELIM);
+      const [startLineNo] = groupLineRange.split("-"); // This is kind of cheating, but the groupId structure is consistent.
 
-      const lowestLine = parseInt(lineNoStr);
+      const lowestLine = parseInt(startLineNo);
 
       const ref = containerRefs.current[fileName];
       const targetTop = calculateScrollTarget(ref, lowestLine);
@@ -34,7 +37,7 @@ export function useManageScrollTo({
         onConfigScrollComplete(scrollTarget.id);
       }
     },
-    [containerRefs, onConfigScrollComplete]
+    [containerRefs, onConfigScrollComplete],
   );
 
   useEffect(() => {

@@ -1099,7 +1099,7 @@ describe("createConfigContentGroups", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       kind: "group",
-      groupId: "test.yaml-1-2",
+      groupId: "test.yaml#1-2",
       start: 1,
       end: 2,
       isChangeBlock: false,
@@ -1159,8 +1159,8 @@ describe("createConfigContentGroups", () => {
 
     const result = createConfigContentGroups(fileName, sections, changeMap);
 
-    expect((result[0] as LineGroup).groupId).toBe("test.yaml-1-1");
-    expect((result[1] as LineGroup).groupId).toBe("test.yaml-5-6");
+    expect((result[0] as LineGroup).groupId).toBe("test.yaml#1-1");
+    expect((result[1] as LineGroup).groupId).toBe("test.yaml#5-6");
   });
 
   it("should handle mixed gaps and groups", () => {

@@ -53,7 +53,7 @@ jobs:
   notify-on-success:
     needs: build
     if: success()
-    uses: DecisiveAI/ci/.github/workflows/deploy-notify.yml@main
+    uses: MyDecisive/ci/.github/workflows/deploy-notify.yml@main
     secrets:
       SLACK_NOTIFY_URL: ${{ secrets.SLACK_FE_DEPLOY_NOTIFY_URL }}
     with:
@@ -62,6 +62,6 @@ jobs:
   notify-on-failure:
     needs: build
     if: failure() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-    uses: DecisiveAI/ci/.github/workflows/slack-notify.yml@main
+    uses: MyDecisive/ci/.github/workflows/slack-notify.yml@main
     secrets:
       SLACK_NOTIFY_URL: ${{ secrets.SLACK_NOTIFY_URL }}

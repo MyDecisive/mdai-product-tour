@@ -173,7 +173,7 @@ steps:
         initialState:
           config:
             files:
-              - url: "https://github.com/DecisiveAI/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/static/otel.yaml"
+              - url: "https://github.com/MyDecisive/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/static/otel.yaml"
                 fileName: otel.yaml
                 changes:
                   - start: 39
@@ -322,7 +322,7 @@ steps:
         initialState:
           config:
             files:
-              - url: "https://github.com/DecisiveAI/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/dynamic/hub.yaml"
+              - url: "https://github.com/MyDecisive/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/dynamic/hub.yaml"
                 fileName: hub.yaml
                 changes:
                   - start: 11
@@ -334,7 +334,7 @@ steps:
                   - start: 50
                     end: 63
                     changeLines: []
-              - url: "https://github.com/DecisiveAI/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/dynamic/otel.yaml"
+              - url: "https://github.com/MyDecisive/mdai-labs/blob/cd59716b7e782854c5c9f56ab54c60947717c89d/0.9.0/use_cases/data_filtration/dynamic/otel.yaml"
                 fileName: otel.yaml
                 changes:
                   - start: 43

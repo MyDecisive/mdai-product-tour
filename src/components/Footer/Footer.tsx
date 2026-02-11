@@ -132,7 +132,7 @@ export const Footer = () => {
               />
             </Link>
             <Link
-              href="https://github.com/orgs/DecisiveAI/repositories?type=public"
+              href="https://github.com/orgs/MyDecisive/repositories?type=public"
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -159,7 +159,7 @@ export const Footer = () => {
           <Typography
             sx={{ fontSize: "12px", position: "absolute", bottom: "-1em" }}
           >
-            &copy; 2025 DecisiveAI
+            &copy; 2025 DecisiveAI, Inc.
           </Typography>
         </Stack>
       </Stack>

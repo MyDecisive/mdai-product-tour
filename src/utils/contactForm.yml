@@ -9,10 +9,10 @@ emailSuccess: Thank you! We will follow up as soon as possible!
 emailErrorPrefix: An error occurred submitting your inquiry.
 emailErrorLinkLabel: Click here
 emailErrorSuffix: to send us an email with this info to info@mydecisive.ai!
-emailSubject: Interested in learning more about DecisiveAI
+emailSubject: Interested in learning more about MyDecisive
 emailBodyTemplate: |
   Hello!
 
-  My email is %email% and I am interested in hearing more about DecisiveAI!
+  My email is %email% and I am interested in hearing more about MyDecisive!
 
   %email%

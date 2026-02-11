@@ -4,7 +4,7 @@ MyDecisive AI official Product Tour
 
 # Local Development
 
-Before running the site, be sure to copy `.env` to `.env.local` and enter the appropriate values. You should be able to get these from the [repository actions variables](https://github.com/DecisiveAI/site/settings/variables/actions) or from a team member.
+Before running the site, be sure to copy `.env` to `.env.local` and enter the appropriate values. You should be able to get these from the [repository actions variables](https://github.com/MyDecisive/mdai-product-tour/settings/variables/actions) or from a team member.
 
 To run this site locally, add an environment variable entry for `VITE_DEPLOY_TARGET`.
 

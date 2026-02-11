@@ -35,7 +35,7 @@ steps:
         initialState:
           config:
             files:
-              - url: "https://github.com/DecisiveAI/mdai-labs/blob/2ed0b992468072e44917739755f5bc4a34517840/0.9.0/use_cases/pii/dynamic/hub-single-var.yaml"
+              - url: "https://github.com/MyDecisive/mdai-labs/blob/2ed0b992468072e44917739755f5bc4a34517840/0.9.0/use_cases/pii/dynamic/hub-single-var.yaml"
                 fileName: hub-single-var.yaml
                 changes:
                   - start: 11
@@ -124,7 +124,7 @@ steps:
         initialState:
           config:
             files:
-              - url: "https://github.com/DecisiveAI/mdai-labs/blob/2ed0b992468072e44917739755f5bc4a34517840/0.9.0/use_cases/pii/dynamic/otel-single-var.yaml"
+              - url: "https://github.com/MyDecisive/mdai-labs/blob/2ed0b992468072e44917739755f5bc4a34517840/0.9.0/use_cases/pii/dynamic/otel-single-var.yaml"
                 fileName: otel-single-var.yaml
                 changes:
                   - start: 42

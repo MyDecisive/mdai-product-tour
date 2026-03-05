@@ -49,6 +49,19 @@ jobs:
         run: aws s3 sync ./dist/ s3://${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.S3_BUCKET_PROD || vars.S3_BUCKET_STAGING }} --delete
       - name: Invalidate CloudFront
         run: aws cloudfront create-invalidation --distribution-id ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && secrets.DISTRIBUTION_ID_PROD || secrets.DISTRIBUTION_ID_STAGING }} --paths '/*'
+      - name: Notify Slack on deploy to main
+        if: ${{ success() && github.ref == 'refs/heads/main' }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: |
+          curl -sS -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-type: application/json; charset=utf-8" \
+            --data "{
+              \"channel\":\"$SLACK_CHANNEL_ID\",
+              \"text\":\"✅ *Deployed* \`${{ github.repository }}\` *main*\\n• Workflow: ${{ github.workflow }}\\n• Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\\n• Commit: ${{ github.sha }}\"
+            }"
 
   notify-on-success:
     needs: build

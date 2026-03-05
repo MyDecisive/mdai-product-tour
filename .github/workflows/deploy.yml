@@ -49,22 +49,36 @@ jobs:
         run: aws s3 sync ./dist/ s3://${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && vars.S3_BUCKET_PROD || vars.S3_BUCKET_STAGING }} --delete
       - name: Invalidate CloudFront
         run: aws cloudfront create-invalidation --distribution-id ${{ (github.event.inputs.environment == 'Prod' && github.event.inputs.rusure == 'yes') && secrets.DISTRIBUTION_ID_PROD || secrets.DISTRIBUTION_ID_STAGING }} --paths '/*'
-      - name: Notify Slack on deploy to main
-        if: ${{ success() && github.ref == 'refs/heads/main' }}
+      - name: Compute deploy metadata
+        id: meta
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "Prod" && "${{ github.event.inputs.rusure }}" == "yes" ]]; then
+            echo "env_name=production" >> "$GITHUB_OUTPUT"
+            echo "deploy_url=${{ vars.SITEMAP_HOSTNAME_PROD }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "env_name=staging" >> "$GITHUB_OUTPUT"
+            echo "deploy_url=${{ vars.SITEMAP_HOSTNAME_STAGING }}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Notify Slack
+        if: ${{ success() && github.ref_name == 'main' }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          ENV_NAME: ${{ steps.meta.outputs.env_name }}
+          DEPLOY_URL: ${{ steps.meta.outputs.deploy_url }}
         run: |
-          curl -sS -X POST https://slack.com/api/chat.postMessage \
+          RESPONSE=$(curl -sS -X POST https://slack.com/api/chat.postMessage \
             -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
             -H "Content-type: application/json; charset=utf-8" \
-            --data "{
-              \"channel\":\"$SLACK_CHANNEL_ID\",
-              \"text\":\"🚀 *${{ github.repository }} deployed to production*\\n\
-              • URL: <${{ vars.SITEMAP_HOSTNAME_PROD }}|Unknown URL>\\n\
-              • Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\\n\
-              • Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\"
-            }"
+            --data @- <<EOF
+          {
+            "channel": "$SLACK_CHANNEL_ID",
+            "text": "🚀 *${{ github.repository }} deployed*\n• Environment: $ENV_NAME\n• URL: <$DEPLOY_URL|Open deployment>\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+          }
+          EOF
+          )
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep '"ok":true'
 
   notify-on-success:
     needs: build

@@ -3,7 +3,6 @@ version: 0.9.0
 title: PII Redaction
 subtitle: Keep your data secure
 buttonText: Let's go
-coming_soon: true
 steps:
   - id: "0"
     title: "Step 1: Finish setup"

@@ -60,7 +60,10 @@ jobs:
             -H "Content-type: application/json; charset=utf-8" \
             --data "{
               \"channel\":\"$SLACK_CHANNEL_ID\",
-              \"text\":\"✅ *Deployed* \`${{ github.repository }}\` *main*\\n• Workflow: ${{ github.workflow }}\\n• Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\\n• Commit: ${{ github.sha }}\"
+              \"text\":\"🚀 *${{ github.repository }} deployed to production*\\n\
+              • URL: <$SITEMAP_HOSTNAME_PROD|Unknown URL>\\n\
+              • Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\\n\
+              • Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\"
             }"
 
   notify-on-success:

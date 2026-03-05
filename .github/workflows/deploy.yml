@@ -61,7 +61,7 @@ jobs:
             --data "{
               \"channel\":\"$SLACK_CHANNEL_ID\",
               \"text\":\"🚀 *${{ github.repository }} deployed to production*\\n\
-              • URL: <$vars.SITEMAP_HOSTNAME_PROD|Unknown URL>\\n\
+              • URL: <vars.SITEMAP_HOSTNAME_PROD|Unknown URL>\\n\
               • Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\\n\
               • Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\"
             }"

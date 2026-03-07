@@ -73,7 +73,7 @@ jobs:
             --data @- <<EOF
           {
             "channel": "$SLACK_CHANNEL_ID",
-            "text": "🚀 *${{ github.repository }} deployed*\n• Environment: $ENV_NAME\n• URL: <$DEPLOY_URL|Open deployment>\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+            "text": "🚀 *${{ github.repository }} deployed*\n• Environment: $ENV_NAME\n• URL: <$DEPLOY_URL|View Changes>\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
           }
           EOF
           )

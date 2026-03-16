@@ -268,7 +268,7 @@ steps:
       - id: 2-a
         title: Sprinkle in some variables
         content:
-          - title: What’s happening in the config file?
+          - title: What's happening in the config file?
             variant: list
             items:
               - bullet: "1."

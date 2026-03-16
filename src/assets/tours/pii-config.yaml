@@ -1,22 +1,24 @@
 id: pii
 version: 0.9.0
-title: PII Redaction
+title: PII Redaction with MyDecisive
 subtitle: Keep your data secure
 buttonText: Let's go
 steps:
   - id: "0"
-    title: "Step 1: Finish setup"
+    title: "Step 1: Initialize the SmartHub"
     subSteps:
       - id: 0-a
-        title: Update the SmartHub
+        title: Deploying your private privacy layer
         content:
           - items:
               - text: |
-                  While you can see the initial MDAI cluster has already been set up, there are some final steps of setup that are worth covering in detail.
+                  We've already spun up a <bold>MyDecisive SmartHub</bold> instance for you. In the Status window, you can see the containers that make up the Hub's architecture. The SmartHub acts as the brain of your data privacy strategy, running securely inside your infrastructure.
               - text: |
-                  We'll declare some variables in our SmartHub that will define how the sensitive data is handled.
+
+                  To begin redacting PII, we define a pair of manual SmartHub variables in <code>hub-single-var.yaml</code>These variables control how sensitive data is detected and transformed before it leaves your cloud.
               - text: |
-                  Note that these variables are manual, defined on <button:0>line 14</button> and <button:1>line 23</button>. This indicates that <emphasize>you</emphasize> will be managing them, the SmartHub will not update manual variables.
+
+                  Note that these variables are manual, defined on <button:0>line 13</button> and <button:1>line 22</button>. In this version, <emphasize>you</emphasize> manage the values directly, while the SmartHub applies them to the live pipeline.
                 actions:
                   - kind: "scroll_to"
                     waitForComplete: false
@@ -101,11 +103,11 @@ steps:
               speed: 300
               duration: 4200
       - id: 0-b
-        title: Spin up a collector
+        title: Scaling observability without the overhead.
         content:
           - items:
               - text: |
-                  This collector config has a transform processor declared on <button:0>line 42</button> that makes use of the SmartHub <button:1>manual variables</button> that were declared in the previous step.
+                  The SmartHub manages the OpenTelemetry collector for you, which removes much of the setup and operational work normally required to run OTEL at scale.
                 actions:
                   - kind: "scroll_to"
                     waitForComplete: false
@@ -157,11 +159,11 @@ steps:
               speed: 100
               duration: 2400
       - id: 0-c
-        title: Send some data
+        title: Send test data through the pipeline
         content:
           - items:
               - text: |
-                  Now that we have a SmartHub and collector up, let's send some data.
+                  Now that the SmartHub and collector are running, let’s send some sample data through the pipeline and watch the collector process it.
         animation:
           - kind: "enter_command"
             simulator: "terminal"
@@ -186,24 +188,29 @@ steps:
               speed: 150
               duration: 3000
   - id: "1"
-    title: "Step 2: Perform redaction"
+    title: "Step 2: Test Redaction in Real-Time"
     subSteps:
       - id: 1-a
         title: Update manual variables
         content:
           - items:
               - text: |
-                  The <emphasize>mdai-gateway</emphasize> service is the entry point to the SmartHub for just about any operation you want to execute against the running cluster.
-
-                  As such, one method to update manual variables is via curl request.
+                  The <emphasize>mdai-gateway</emphasize> service is the entry point to the SmartHub for live operations against the running cluster, including updates to manual variables.
           - items:
               - text: |
-                  In order to send a curl to the <emphasize>mdai-gateway</emphasize>, we first need to forward its port.
+                  We first forward the gateway port so local requests can reach the SmartHub API.
               - text: <code>kubectl port-forward -n mdai svc/mdai-gateway 8081:8081</code>
           - items:
               - text: |
-                  After that, we can send our OTTL compatible regex and get our variables updated!
+                  After that, we can send an OTTL-compatible regex and template update. The collector picks up the new redaction logic immediately, and the logs show credit card data redacted on the wire.
         animation:
+          - kind: "enter_command"
+            simulator: "terminal"
+            updates:
+              - input: "kubectl port-forward -n mdai svc/mdai-gateway 8081:8081"
+                outputs:
+                  - "Forwarding from 127.0.0.1:8081 -> 8081"
+                  - "Forwarding from [::1]:8081 -> 8081"
           - kind: "enter_command"
             simulator: "terminal"
             updates:

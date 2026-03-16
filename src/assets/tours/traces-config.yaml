@@ -1,21 +1,17 @@
-id: traces
+id: trace-sampling
 version: 0.9.0
-title: Dynamic Trace Filtering
+title: Intelligent Trace Sampling with MyDecisive
 buttonText: Show me
 steps:
   - id: "0"
-    title: "Step 1: Finish setup"
+    title: "Step 1: Initialize the SmartHub"
     subSteps:
       - id: 0-a
-        title: Standard install to trace sampling support
+        title: Solving the distributed trace puzzle
         content:
           - items:
               - text: |
-                  First thing in this demo is to set up some Kubernetes load balancing resources.
-                  The first command: <code>kubectl apply -f ./0.9.0/use_cases/tail_sampling/k8s_rbac.yaml</code>adds role binding for the load balancer.
-                  The second command: <code>kubectl create rolebinding loadbalancer-endpointslices-reader -n mdai --role=loadbalancer-endpointslices-reader --serviceaccount=mdai:loadbalancer</code>creates the load-balancing resources.
-                  And the third command: <code>mdai apply ./0.9.0/use_cases/tail_sampling/scrape_trace_count_metrics.yaml</code>creates a scrape job that will get telemetry data to the metrics store.
-                  The scrape job creates a custom metric called <code>trace_span_service_count_total</code>it will come into play later in the demo.
+                  To perform effective tail sampling, every span of a distributed trace must arrive at the same gateway. This demo begins by setting up the Kubernetes load-balancing resources that make that possible.
         initialState:
           status:
             - name: alertmanager-kube-prometheus-stack-alertmanager-0
@@ -84,7 +80,8 @@ steps:
         title: Start the flow
         content:
           - items:
-              - text: Using the <emphasize>mdai CLI</emphasize>, a bare bones OTel config is used to spin up an OTel collector. The workflow we're using here also spins up some cronjobs to simulate traces.
+              - text: |
+                  Using the <emphasize>mdai CLI</emphasize>, we spin up a base OTEL collector, a trace balancer, and several cronjobs that simulate live traffic.
         animation:
           - kind: enter_command
             simulator: terminal
@@ -126,19 +123,18 @@ steps:
           - title: Look at those traces go
             items:
               - text: |
-                  TODO: get video of grafana otel dashboard for this step
-
-                  This setup simulates a production system that receives and forwards span data to various destinations, including a vendor. There’s no sampling, so the service owner is subjected to the full cost of exporting large volumes of trace data from a cloud provider to vendor storage.
-                src: filter-example.mp4
+                  This setup simulates a production system that forwards span data at full volume. There's no sampling yet, so the service owner absorbs the full cost of exporting large volumes of traces to downstream storage.
+                src: basic-traces.mp4
                 alt: Traces Visualization
   - id: "1"
-    title: "Step 2: Set static sampling rules"
+    title: "Step 2: Implement Static Sampling"
     subSteps:
       - id: 1-a
         title: Static sampling processor
         content:
           - items:
-              - text: You can see on <button:0>lines 117 through 136</button> that this configuration samples 10 percent of services where their operation attribute labels them as "high-volume-op". But it will only ever sample traces of services that have that attribute set.
+              - text: |
+                  On <button:0>lines 117 through 136</button>, this configuration samples 10 percent of services whose operation attribute is labeled <code>high-volume-op</code>. It only ever samples traces for services with that attribute set.
                 actions:
                   - kind: scroll_to
                     simulator: config
@@ -159,7 +155,10 @@ steps:
         title: Filter some traces
         content:
           - items:
-              - text: By applying this processor with the command <code>mdai use_case tail_sampling --version 0.9.0 --workflow static</code>it gets applied to the gateway collector service.
+              - text: |
+                  We now apply this ruleset with <code>mdai use_case tail_sampling --version 0.9.0 --workflow static</code>. As the configuration lands, the gateway collector is reconfigured to ingest the new probabilistic sampling policy.
+              - text: |
+                  This is an improvement over exporting everything, but static sampling still can’t adapt to the changing traffic profile of a real production environment.
         animation:
           - kind: enter_command
             simulator: terminal
@@ -190,19 +189,18 @@ steps:
           - title: Look at those traces go
             items:
               - text: |
-                  TODO: get video of grafana otel dashboard for this step
-
-                  While this is an improvement over having no sampling, this static configuration can't adapt to the dynamic nature of production environments.
-                src: filter-example.mp4
+                  This is an improvement over exporting everything, but static sampling still can’t adapt to the changing traffic profile of a real production environment.
+                src: static-traces.mp4
                 alt: Traces Visualization
   - id: "2"
-    title: "Step 3: Going dynamic"
+    title: "Step 3: Shift to Intelligent Dynamic Sampling"
     subSteps:
       - id: 2-a
-        title: Make some SmartHub updates
+        title: Define SmartHub thresholds
         content:
           - items:
-              - text: On <button:0>lines 19 through 25</button>, a variable is declared to keep track of the loudest services. And on <button:1>lines 45 through 49</button> an alert is configured to identify the loudest services.
+              - text: |
+                  On <button:0>lines 19 through 25</button>, a variable is declared to track the loudest services. On <button:1>lines 45 through 49</button>, an alert identifies which services have crossed the configured threshold.
                 actions:
                   - kind: scroll_to
                     simulator: config
@@ -257,7 +255,7 @@ steps:
                     end: 203
                     changeLines: []
       - id: 2-b
-        title: Use them in the OTel config
+        title: Protect the Infrastructure / Activate the Intelligent Processor
         content:
           - items:
               - text: <button:0>Lines 130 through 133</button> declare a memory limiter processor.
@@ -268,7 +266,7 @@ steps:
                       fileName: otel.yaml
                       line: 130
                       scrollOnly: true
-              - text: <button:0>Lines 135 through 177</button> show a vastly updated tail_sampling processor, using our SmartHub variable on <button:1>line 154</button>.
+              - text: <button:0>Lines 135 through 177</button> show the updated tail_sampling processor, using the SmartHub variable on <button:1>line 154</button>.
                 actions:
                   - kind: scroll_to
                     simulator: config
@@ -282,7 +280,7 @@ steps:
                       fileName: otel.yaml
                       line: 154
                       scrollOnly: true
-              - text: And both of these processors are used on <button:0>line 203</button>
+              - text: Both of these processors are used together on <button:0>line 203</button> to make sampling context-aware.
                 actions:
                   - kind: scroll_to
                     simulator: config
@@ -314,10 +312,11 @@ steps:
               line: 203
               scrollOnly: true
       - id: 2-c
-        title: Make some SmartHub updates
+        title: Apply the dynamic configuration
         content:
           - items:
-              - text: Using the mdai CLI, the changes just reviewed are applied to the current cluster. The result is intelligent filtering of traces!
+              - text: |
+                  Using the mdai CLI, the changes just reviewed are applied to the current cluster. The result is intelligent trace sampling that protects the backend from noise while preserving more valuable traces.
         animation:
           - kind: enter_command
             simulator: terminal
@@ -358,6 +357,7 @@ steps:
         content:
           - title: Look at those traces go
             items:
-              - text: "TODO: get video of grafana otel dashboard for this step"
-                src: filter-example.mp4
+              - text: |
+                  You are now running intelligent trace sampling. The SmartHub can react to live traffic patterns, reduce noisy trace volume, and keep more of the spans that matter.
+                src: dynamic-traces.mp4
                 alt: Traces Visualization

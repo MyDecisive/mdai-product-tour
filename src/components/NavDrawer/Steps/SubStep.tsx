@@ -13,6 +13,9 @@ const NavTreeSubStepStyles = css({
   [`& .${treeItemClasses.iconContainer} > svg`]: {
     padding: "4px",
   },
+  // [`& :not(:first-child)`]: {
+  //   marginTop: "16px",
+  // }
 });
 
 export function SubStep({ itemId, title, content }: SubStep) {

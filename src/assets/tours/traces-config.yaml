@@ -1,5 +1,363 @@
-id: traces
-version: 0.0.1
-coming_soon: true
-title: Dynamic Trace Filtering
-subtitle: Coming soon
+id: trace-sampling
+version: 0.9.0
+title: Intelligent Trace Sampling with MyDecisive
+buttonText: Show me
+steps:
+  - id: "0"
+    title: "Step 1: Initialize the SmartHub"
+    subSteps:
+      - id: 0-a
+        title: Solving the distributed trace puzzle
+        content:
+          - items:
+              - text: |
+                  To perform effective tail sampling, every span of a distributed trace must arrive at the same gateway. This demo begins by setting up the Kubernetes load-balancing resources that make that possible.
+        initialState:
+          status:
+            - name: alertmanager-kube-prometheus-stack-alertmanager-0
+              namespace: mdai
+              noSuffix: true
+            - name: kube-prometheus-stack-operator-6b9bcb8467
+              namespace: mdai
+            - name: mdai-event-hub-55cc8bcb67
+              namespace: mdai
+            - name: mdai-gateway-7cf67b66f7
+              namespace: mdai
+            - name: mdai-grafana-7b445f858c
+              namespace: mdai
+            - name: mdai-kube-state-metrics-f6c7956f7
+              namespace: mdai
+            - name: mdai-nats-0
+              namespace: mdai
+              noSuffix: true
+            - name: mdai-nats-1
+              namespace: mdai
+              noSuffix: true
+            - name: mdai-nats-2
+              namespace: mdai
+              noSuffix: true
+            - name: mdai-nats-box-d7fd99784
+              namespace: mdai
+            - name: mdai-operator-controller-manager-6c8d6d665d
+              namespace: mdai
+            - name: mdai-prometheus-node-exporter
+              namespace: mdai
+            - name: opentelemetry-operator-5f56b69cc7
+              namespace: mdai
+            - name: mdai-valkey-primary-0
+              namespace: mdai
+              noSuffix: true
+            - name: prometheus-kube-prometheus-stack-prometheus-0
+              namespace: mdai
+              noSuffix: true
+        animation:
+          - kind: enter_command
+            simulator: terminal
+            updates:
+              - input: kubectl apply -f ./0.9.0/use_cases/tail_sampling/k8s_rbac.yaml
+                outputs:
+                  - role.rbac.authorization.k8s.io/loadbalancer-endpointslices-reader created
+                  - rolebinding.rbac.authorization.k8s.io/loadbalancer-rolebinding created
+                  - role.rbac.authorization.k8s.io/loadbalancer-role created
+                  - serviceaccount/loadbalancer created
+          - kind: enter_command
+            simulator: terminal
+            updates:
+              - input: |
+                  kubectl create rolebinding loadbalancer-endpointslices-reader \
+                    -n mdai \
+                    --role=loadbalancer-endpointslices-reader \
+                    --serviceaccount=mdai:loadbalancer
+                outputs:
+                  - rolebinding.rbac.authorization.k8s.io/loadbalancer-endpointslices-reader created
+          - kind: enter_command
+            simulator: terminal
+            updates:
+              - input: kubectl apply -f ./0.9.0/use_cases/tail_sampling/scrape_trace_count_metrics.yaml
+                outputs:
+                  - scrapeconfig.monitoring.coreos.com/scrape-trace-count-metrics created
+      - id: 0-b
+        title: Start the flow
+        content:
+          - items:
+              - text: |
+                  Using the <emphasize>mdai CLI</emphasize>, we spin up a base OTEL collector, a trace balancer, and several cronjobs that simulate live traffic.
+        animation:
+          - kind: enter_command
+            simulator: terminal
+            updates:
+              - input: mdai use_case tail_sampling --version 0.9.0 --workflow basic
+                outputs:
+                  - "✅ Prerequisites OK"
+                  - "👉 use-case 'tail_sampling': resolved data file: ./mock-data/tail_sampling.yaml"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/tail_sampling/basic/otel.yaml -n mdai"
+                  - "opentelemetrycollector.opentelemetry.io/trace-balancer created"
+                  - "opentelemetrycollector.opentelemetry.io/gateway created"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/tail_sampling/basic/hub.yaml -n mdai"
+                  - "Warning: variables are not specified"
+                  - "Warning: no `PrometheusAlerts` provided; MdaiHub will not setup alerts"
+                  - "Warning: no `Rules` provided; MdaiHub will perform no actions"
+                  - "mdaihub.hub.mydecisive.ai/mdaihub-ts created"
+                  - "+ kubectl  apply -f ./mock-data/tail_sampling.yaml -n synthetics"
+                  - "cronjob.batch/job-1 created"
+                  - "cronjob.batch/job-2 created"
+                  - "cronjob.batch/job-3 created"
+                  - "✅ use-case 'tail_sampling': applied"
+          - kind: add_services
+            simulator: status
+            updates:
+              - name: trace-balancer-collector-67c9994454
+                namespace: mdai
+              - name: gateway-collector-8ddc9bcfd
+                namespace: mdai
+                replicas: 3
+              - name: job-1-29493774
+                namespace: synthetics
+              - name: job-2-29493774
+                namespace: synthetics
+              - name: job-3-29493774
+                namespace: synthetics
+      - id: 0-c
+        visualizationModal: true
+        content:
+          - title: Look at those traces go
+            items:
+              - text: |
+                  This setup simulates a production system that forwards span data at full volume. There's no sampling yet, so the service owner absorbs the full cost of exporting large volumes of traces to downstream storage.
+                src: basic-traces.mp4
+                alt: Traces Visualization
+  - id: "1"
+    title: "Step 2: Implement Static Sampling"
+    subSteps:
+      - id: 1-a
+        title: Static sampling processor
+        content:
+          - items:
+              - text: |
+                  On <button:0>lines 117 through 136</button>, this configuration samples 10 percent of services whose operation attribute is labeled <code>high-volume-op</code>. It only ever samples traces for services with that attribute set.
+                actions:
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 117
+                      scrollOnly: true
+        initialState:
+          config:
+            files:
+              - url: https://github.com/DecisiveAI/mdai-labs/blob/1c1d765f796db64a8f8bbac10cbb00c1fc8992b7/0.9.0/use_cases/tail_sampling/static/otel.yaml
+                fileName: otel.yaml
+                changes:
+                  - start: 109
+                    end: 144
+                    changeLines: []
+      - id: 1-b
+        title: Filter some traces
+        content:
+          - items:
+              - text: |
+                  We now apply this ruleset with <code>mdai use_case tail_sampling --version 0.9.0 --workflow static</code>. As the configuration lands, the gateway collector is reconfigured to ingest the new probabilistic sampling policy.
+              - text: |
+                  This is an improvement over exporting everything, but static sampling still can’t adapt to the changing traffic profile of a real production environment.
+        animation:
+          - kind: enter_command
+            simulator: terminal
+            updates:
+              - input: mdai use_case tail_sampling --version 0.9.0 --workflow static
+                outputs:
+                  - "✅ Prerequisites OK"
+                  - "👉 use-case 'tail_sampling': resolved data file: ./mock-data/tail_sampling.yaml"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/tail_sampling/static/otel.yaml -n mdai"
+                  - "opentelemetrycollector.opentelemetry.io/trace-balancer configured"
+                  - "opentelemetrycollector.opentelemetry.io/gateway configured"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/tail_sampling/static/hub.yaml -n mdai"
+                  - "mdaihub.hub.mydecisive.ai/mdaihub-ts unchanged"
+                  - "+ kubectl  apply -f ./mock-data/tail_sampling.yaml -n synthetics"
+                  - "cronjob.batch/job-1 unchanged"
+                  - "cronjob.batch/job-2 unchanged"
+                  - "cronjob.batch/job-3 unchanged"
+                  - "✅ use-case 'tail_sampling': applied"
+          - kind: add_services
+            simulator: status
+            updates:
+              - name: gateway-collector-8ddc9bcfd
+                namespace: mdai
+                replicas: 1
+      - id: 1-c
+        visualizationModal: true
+        content:
+          - title: Look at those traces go
+            items:
+              - text: |
+                  This is an improvement over exporting everything, but static sampling still can’t adapt to the changing traffic profile of a real production environment.
+                src: static-traces.mp4
+                alt: Traces Visualization
+  - id: "2"
+    title: "Step 3: Shift to Intelligent Dynamic Sampling"
+    subSteps:
+      - id: 2-a
+        title: Define SmartHub thresholds
+        content:
+          - items:
+              - text: |
+                  On <button:0>lines 19 through 25</button>, a variable is declared to track the loudest services. On <button:1>lines 45 through 49</button>, an alert identifies which services have crossed the configured threshold.
+                actions:
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: hub.yaml
+                      line: 19
+                      scrollOnly: true
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: hub.yaml
+                      line: 45
+                      scrollOnly: true
+        animation:
+          - kind: scroll_to
+            simulator: config
+            updates:
+              fileName: hub.yaml
+              line: 19
+              scrollOnly: true
+          - kind: delay
+            duration: 1500
+          - kind: scroll_to
+            simulator: config
+            updates:
+              fileName: hub.yaml
+              line: 45
+              scrollOnly: true
+        initialState:
+          config:
+            activeTab: hub.yaml
+            files:
+              - url: https://github.com/DecisiveAI/mdai-labs/blob/1c1d765f796db64a8f8bbac10cbb00c1fc8992b7/0.9.0/use_cases/tail_sampling/dynamic/hub.yaml
+                fileName: hub.yaml
+                changes:
+                  - start: 19
+                    end: 25
+                    changeLines: []
+                  - start: 45
+                    end: 49
+                    changeLines: []
+              - url: https://github.com/DecisiveAI/mdai-labs/blob/1c1d765f796db64a8f8bbac10cbb00c1fc8992b7/0.9.0/use_cases/tail_sampling/dynamic/otel.yaml
+                fileName: otel.yaml
+                changes:
+                  - start: 130
+                    end: 133
+                    changeLines: []
+                  - start: 135
+                    end: 177
+                    changeLines: []
+                  - start: 203
+                    end: 203
+                    changeLines: []
+      - id: 2-b
+        title: Protect the Infrastructure / Activate the Intelligent Processor
+        content:
+          - items:
+              - text: <button:0>Lines 130 through 133</button> declare a memory limiter processor.
+                actions:
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 130
+                      scrollOnly: true
+              - text: <button:0>Lines 135 through 177</button> show the updated tail_sampling processor, using the SmartHub variable on <button:1>line 154</button>.
+                actions:
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 135
+                      scrollOnly: true
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 154
+                      scrollOnly: true
+              - text: Both of these processors are used together on <button:0>line 203</button> to make sampling context-aware.
+                actions:
+                  - kind: scroll_to
+                    simulator: config
+                    updates:
+                      fileName: otel.yaml
+                      line: 203
+                      scrollOnly: true
+        animation:
+          - kind: scroll_to
+            simulator: config
+            updates:
+              fileName: otel.yaml
+              line: 130
+              scrollOnly: true
+          - kind: delay
+            duration: 1500
+          - kind: scroll_to
+            simulator: config
+            updates:
+              fileName: otel.yaml
+              line: 135
+              scrollOnly: true
+          - kind: delay
+            duration: 1500
+          - kind: scroll_to
+            simulator: config
+            updates:
+              fileName: otel.yaml
+              line: 203
+              scrollOnly: true
+      - id: 2-c
+        title: Apply the dynamic configuration
+        content:
+          - items:
+              - text: |
+                  Using the mdai CLI, the changes just reviewed are applied to the current cluster. The result is intelligent trace sampling that protects the backend from noise while preserving more valuable traces.
+        animation:
+          - kind: enter_command
+            simulator: terminal
+            updates:
+              - input: mdai use_case tail_sampling --version 0.9.0 --workflow dynamic
+                outputs:
+                  - "✅ Prerequisites OK"
+                  - "👉 use-case 'tail_sampling': resolved data file: ./mock-data tail_sampling_dynamic.yaml"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/tail_sampling/dynamic/otel.yaml -n mdai"
+                  - "opentelemetrycollector.opentelemetry.io/trace-balancer configured"
+                  - "opentelemetrycollector.opentelemetry.io/gateway configured"
+                  - "+ kubectl  apply -f ./0.9.0/use_cases/tail_sampling/dynamic/hub.yaml -n mdai"
+                  - "mdaihub.hub.mydecisive.ai/mdaihub-ts configured"
+                  - "+ kubectl  apply -f ./mock-data/tail_sampling_dynamic.yaml -n synthetics"
+                  - "cronjob.batch/service-a-low-volume created"
+                  - "cronjob.batch/service-b-low-volume created"
+                  - "cronjob.batch/service-c-high-volume created"
+                  - "cronjob.batch/service-d-high-volume created"
+                  - "✅ use-case 'tail_sampling': applied"
+          - kind: add_services
+            simulator: status
+            updates:
+              - name: gateway-collector-8ddc9bcfd
+                namespace: mdai
+                replicas: 1
+              - name: trace-balancer-collector-7d5dc5985b
+                namespace: mdai
+              - name: service-a-low-volume-29493797
+                namespace: synthetics
+              - name: service-b-low-volume-29493797
+                namespace: synthetics
+              - name: service-c-high-volume-29493797
+                namespace: synthetics
+              - name: service-d-high-volume-29493797
+                namespace: synthetics
+      - id: 2-d
+        visualizationModal: true
+        content:
+          - title: Look at those traces go
+            items:
+              - text: |
+                  You are now running intelligent trace sampling. The SmartHub can react to live traffic patterns, reduce noisy trace volume, and keep more of the spans that matter.
+                src: dynamic-traces.mp4
+                alt: Traces Visualization

@@ -1,25 +1,27 @@
 id: intro
 version: 0.9.0
 title: How to use this tour
-subtitle: See the anatomy of this app
+subtitle: How To Navigate this Demo
 buttonText: Show me
 steps:
   - id: "0"
     title: Let's set the stage
     subSteps:
       - id: 0-a
-        title: This is a consolidated experience
+        title: Step through our interactive demos in a familiar workspace.
         content:
           - items:
               - text: |
-                  This area of the app will describe the overall concepts of a given solution. Navigate between the steps using the buttons below.
+                   This panel explains the core concepts of each solution.
           - items:
-              - text: You can also navigate through the steps with your left and right arrow keys.
+              - text: |
+                  Use the buttons below or your <bold>arrow keys</bold> to navigate.
           - items:
-              - text: Clicking on one of the step headings will allow you to jump around the tour if you want, but we recommend going from start to finish.
+              - text: |
+                  You can also click any <bold>heading</bold> to jump to a specific step, though we recommend following the tour in sequence for the full experience.
 
       - id: 0-b
-        title: Consolidated tools
+        title: A Unified View
         animation:
           - kind: activate
             simulator: config
@@ -36,20 +38,30 @@ steps:
         content:
           - items:
               - text: |
-                  Multiple tools in one unified view--making it easy to see how MyDecisive works. 
-                  The boxes on the right will show you an approximation of your various tools as if you were performing the work yourself.
+                  Welcome to your unified workspace. To show you the power of <bold>MyDecisive</bold>, we've consolidated your entire workflow into a single view.
+
+          - items:
+              - text: |
+                  The control panel on the right simulates your real-world environment. Use these four windows to manage your telemetry:
+
           - variant: list
             items:
               - bullet: "1."
-                text: <highlight:config>IDE Simulator:</highlight> Tweak and control SmartHub through its config files
+                text: <highlight:config>IDE:</highlight> Fine-tune and control the SmartHub via configuration files.
+
               - bullet: "2."
-                text: <highlight:terminal>Terminal Simulator:</highlight> Deploy changes to SmartHub like a pro
+                text: <highlight:terminal>Terminal:</highlight> Deploy your changes instantly with pro-level commands.
+
               - bullet: "3."
-                text: <highlight:status>Status Simulator:</highlight> Keep an eye on running SmartHub processes and components
+                text: <highlight:status>Process Monitor:</highlight> Track running SmartHub components and system health in real time.
+
               - bullet: "4."
-                text: <highlight:logs>Tail logs Simulator:</highlight> Watch SmartHub's logs stream by in real time
-          - items:
-              - text: If you want to see an animation sequence again, click the "Reset" button and then the "Play" button again.
+                text: <highlight:logs>Live Tail:</highlight> Watch your logs stream by to verify your filters and redactions.
 
           - items:
-              - text: That's it! Advancing from here will take you back to the home page where you can select whichever solution tour you like.
+              - text: |
+                  <bold>Pro Tip</bold>: Want to see an animation again? Just hit <bold>Reset</bold>, then <bold>Play</bold>.
+
+          - items:
+              - text: |
+                  <bold>Ready to move on?</bold> Advancing will return you to the home page, where you can explore our other solution tours

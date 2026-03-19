@@ -21,7 +21,7 @@ export function useGetDrawerHeaderProps() {
   const drawerHeaderText = useMemo(() => {
     const currentTour = tourConfigs?.find((t) => t.id === tour);
     if (!currentTour) {
-      return "MyDecisive.ai Demo";
+      return "MyDecisive Demo";
     }
     return currentTour.title;
   }, [tourConfigs, tour]);

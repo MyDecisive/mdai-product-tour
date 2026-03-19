@@ -1,7 +1,7 @@
 id: pii
 version: 0.9.0
 title: PII Redaction with MyDecisive
-subtitle: Keep your data secure
+subtitle: Discover and redact sensitive data at scale
 buttonText: Let's go
 steps:
   - id: "0"
@@ -12,7 +12,8 @@ steps:
         content:
           - items:
               - text: |
-                  We've already spun up a <bold>MyDecisive SmartHub</bold> instance for you. In the Status window, you can see the containers that make up the Hub's architecture. The SmartHub acts as the brain of your data privacy strategy, running securely inside your infrastructure.
+                  Your <bold>MyDecisive SmartHub</bold> instance is live. In the Status Monitor, you can see the secure containers that form your Hub's architecture - the "brain" of your data privacy strategy, running entirely within your infrastructure.”
+
               - text: |
 
                   To begin redacting PII, we define a pair of manual SmartHub variables in <code>hub-single-var.yaml</code>These variables control how sensitive data is detected and transformed before it leaves your cloud.
@@ -163,7 +164,7 @@ steps:
         content:
           - items:
               - text: |
-                  Now that the SmartHub and collector are running, let’s send some sample data through the pipeline and watch the collector process it.
+                  Now that the SmartHub and collector are running, let's send some sample data through the pipeline and watch the collector process it.
         animation:
           - kind: "enter_command"
             simulator: "terminal"
@@ -241,3 +242,15 @@ steps:
               logFormat: multiline
               speed: 100
               duration: 2400
+
+  - id: "2"
+    title: "What's next?"
+    subSteps:
+      - id: 2-a
+        title: Secure. Compliant. Cost-Effective.
+        content:
+          - items:
+              - text: |
+                  That's the MyDecisive difference: Catching PII at the source so it never becomes a bill or a breach. You've reclaimed your data privacy; now let's reclaim the rest of your observability stack.
+
+

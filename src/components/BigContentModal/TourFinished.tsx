@@ -39,10 +39,10 @@ export function TourFinished({ handleClose }: { handleClose: () => void }) {
           You're all set!
         </Typography>
         <Typography sx={{ mb: "32px" }}>
-          That’s a wrap on the MyDecisive.ai demo--thanks for taking the tour!
+          That's a wrap on the MyDecisive demo--thanks for taking the tour!
         </Typography>
         <Typography sx={{ fontWeight: 700, fontSize: "24px", mb: "8px" }}>
-          And remember: we call ourselves MDAI, and we’re open source, forever!
+          And remember: we call ourselves MDAI, and we're open source, forever!
         </Typography>
         <List
           sx={{

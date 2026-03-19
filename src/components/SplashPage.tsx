@@ -4,30 +4,43 @@ import { useDemoContext } from "../hooks/useDemoContext";
 
 const splashData = {
   header: {
-    // title: `Welcome to the interactive preview of th <a href="https://www.mydecisive.ai/platform">MyDecisive SmartHub</a>`,
     title: {
-      text: "Welcome to the interactive preview of the ",
-      link: {
-        text: "MyDecisive SmartHub",
-        href: "https://www.mydecisive.ai/platform",
-      },
+      text: "Welcome! Step through our interactive demos in a familiar workspace.",
     },
-    body: `In an era where "more data" often means "more noise" and skyrocketing costs, MyDecisive provides a different path. We believe platform teams should be innovating, not fighting fires.`,
+    body: `Stop paying the "Observability Tax." Welcome to a smarter, OTel-native way to manage your telemetry without vendor lock-in.”`,
   },
   card: {
     title: "The MyDecisive Difference",
     sections: [
       {
-        title: "Braided Context (Logs + Traces + Metrics)",
-        body: `MyDecisive understands the relationships between your telemetry. We keep all related logs and metrics from the specific containers and instances that serve your trace spans, ensuring you never lose the "why" behind an event.`,
+        title: "Unify Your Context",
+        body: `Stop toggling between silos. We "braid" Logs, Metrics, and Traces into a single, unbreakable relationship so you always have the "why" behind every alert. We don't just link data; we maintain the stateful relationship between containers, instances, and trace spans. No more orphaned logs.`,
       },
       {
-        title: "Bring Your Own Cloud (BYOC)",
-        body: `MyDecisive runs in your environment on Kubernetes. This keeps your data secure, ensures compliance, and allows for sophisticated in-memory processing that SaaS-based vendors simply cannot provide.`,
+        title: "Your Environment, Your Rules",
+        body: `By running in your K8s cluster (BYOC), we execute complex transformations and PII redaction in real-time, reducing latency and egress costs. Keep your data behind your perimeter while unlocking in-memory processing power that SaaS vendors can't match.`,
       },
       {
-        title: "Zero Vendor Lock-in",
-        body: `We are 100% Open Source and built on OpenTelemetry (OTel) standards. Use our hub to filter and proxy data to Splunk, Datadog, or Databricks without being tethered to proprietary agents or APIs.`,
+        title: "OpenTelemetry in minutes. Zero Lock-in",
+        body: `No proprietary hooks. Our hub acts as a high-performance proxy and filter, giving you the freedom to swap backends with a single config change. Filter and route data to any backend - Datadog, Splunk - without being held hostage by proprietary agents.`,
+      },
+    ],
+  },
+  card2: {
+    title: "What You'll Experience",
+    body: "In this demo, you will step into the role of a Platform Engineer using MyDecisive to reclaim their budget and sanity:",
+    sections: [
+      {
+        title: "Intercept Data on the Wire",
+        body: `Experience real-time "on-the-wire" inspection. See how the stream understands log structures at the source.`,
+      },
+      {
+        title: "Cut Costs Instantly",
+        body: `Watch us filter out 90% of redundant noise while keeping the signals your SREs need. See your projected SaaS spend drop as signal-to-noise ratio climbs.`,
+      },
+      {
+        title: "Take Control of your Data",
+        body: `Identify, anonymize, or delete sensitive user data in-flight before it ever leaves your network to ensure total GDPR and HIPAA compliance by redacting PII while the data is still in your control.`,
       },
     ],
   },
@@ -49,10 +62,11 @@ const splashData = {
       `Watch it identify noisy, redundant services and apply filters that reduce volume by 90% or more while keeping the signals that matter.`,
     ],
     footer: {
-      text: "For info on navigating the preloaded interactive demo, ",
+      title: "Navigating the Demo",
+      body: "For a quick guide on how to move through the interactive SmartHub",
       link: {
         href: "",
-        text: "go here.",
+        text: " go here.",
       },
     },
   },
@@ -89,14 +103,6 @@ export function SplashPage() {
         {/* Header */}
         <Typography variant="h3" fontSize="32px">
           {splashData.header.title.text}
-          <Link
-            href={splashData.header.title.link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {splashData.header.title.link.text}
-          </Link>
-          {"."}
         </Typography>
         <Typography variant="body1" maxWidth={700}>
           {splashData.header.body}
@@ -145,10 +151,12 @@ export function SplashPage() {
             {splashData.bottomSection.body}
           </Typography>
           <ul>
-            {splashData.bottomSection.bullets.map((bullet, idx) => {
+            {splashData.card2.sections.map((sect, idx) => {
               return (
-                <li key={`bottomSection-bullet-${idx}`}>
-                  <Typography variant="body2">{bullet}</Typography>
+                <li key={`bottomSection-sect-${idx}`}>
+                  <Typography variant="body2">
+                    <b>{sect.title}: </b>{sect.body}
+                  </Typography>
                 </li>
               );
             })}
@@ -156,7 +164,7 @@ export function SplashPage() {
 
           {/* FOOTER */}
           <Typography variant="body1" mt={2}>
-            {splashData.bottomSection.footer.text}
+            <b>{splashData.bottomSection.footer.title}: </b>{splashData.bottomSection.footer.body}
             <Link
               onClick={() => startTour("intro")}
               sx={{

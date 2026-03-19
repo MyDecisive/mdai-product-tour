@@ -1,6 +1,6 @@
 id: pii
 version: 0.9.0
-title: PII Redaction with MyDecisive
+title: PII Redaction
 subtitle: Discover and redact sensitive data at scale
 buttonText: Let's go
 steps:

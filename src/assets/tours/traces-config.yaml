@@ -1,7 +1,7 @@
 id: trace-sampling
 version: 0.9.0
-title: Intelligent Trace Sampling with MyDecisive
-subtitle: ​​Detect, Diagnose, And Resolve Issues On the Wire
+title: Intelligent Trace Sampling
+subtitle: Detect, Diagnose, And Resolve Issues On the Wire
 buttonText: Show me
 steps:
   - id: "0"

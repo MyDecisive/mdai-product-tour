@@ -1,7 +1,7 @@
 id: logs
 version: 0.9.0
 title: Intelligent LogStream
-subtitle: Ready to see how it works?
+subtitle: Cut costs by managing noise in real-time.
 buttonText: Fire it up
 default_open: true
 steps:
@@ -139,7 +139,7 @@ steps:
         content:
           - title: See the results!
             items:
-              - text: "Data’s flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let’s save you some serious money."
+              - text: "Data's flowing. Note that everything coming in from FluentD goes out to your observability vendor. There is no filtering going on. Next stop: Let's save you some serious money."
                 src: basic-logs.mp4
                 alt: Logs Visualization
 
@@ -246,7 +246,7 @@ steps:
         title: Static Filtration is online!
         content:
           - items:
-              - text: You’re now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let’s do better
+              - text: You're now running OTEL and K8S like a devops boss. Service4321 is being filtered out but let's do better
       - id: 1-c
         title: The big deal?
         content:
@@ -258,7 +258,7 @@ steps:
         content:
           - title: Nice work on the filters!
             items:
-              - text: You are cutting down the noise big-time. One hitch--Service4321 is missing from Datadog. Don’t worry, we’ll get it right together.
+              - text: You are cutting down the noise big-time. One hitch--Service4321 is missing from Datadog. Don't worry, we'll get it right together.
                 src: static-logs.mp4
                 alt: Prefilter Visualization
 
@@ -452,3 +452,13 @@ steps:
               - text: ""
                 src: dynamic-logs.mp4
                 alt: Postfilter Visualization
+
+  - id: "3"
+    title: "What's next?"
+    subSteps:
+      - id: 3-a
+        title: Your Data. Your Tools. Better Outcomes.
+        content:
+          - items:
+              - text: |
+                  Combine the <bold>Intelligent LogStream</bold> with our full suite of solutions to put data control back in your hands. By choosing the tools that fit your workflow, you unlock faster troubleshooting, optimized costs, and a seamless experience for your SRE and FinOps teams.

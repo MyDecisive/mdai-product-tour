@@ -1,17 +1,18 @@
 id: trace-sampling
 version: 0.9.0
-title: Intelligent Trace Sampling with MyDecisive
+title: Intelligent Trace Sampling
+subtitle: Detect, Diagnose, And Resolve Issues On the Wire
 buttonText: Show me
 steps:
   - id: "0"
     title: "Step 1: Initialize the SmartHub"
     subSteps:
       - id: 0-a
-        title: Solving the distributed trace puzzle
+        title:  From Fragmented Spans to Full-Context Insights
         content:
           - items:
               - text: |
-                  To perform effective tail sampling, every span of a distributed trace must arrive at the same gateway. This demo begins by setting up the Kubernetes load-balancing resources that make that possible.
+                  To unlock intelligent tail sampling, the SmartHub must see the complete picture of every trace. We'll start the demo by deploying the Kubernetes load-balancing layer required to route all related spans to a unified gateway, ensuring no signal is lost and every sampling decision is data-driven.
         initialState:
           status:
             - name: alertmanager-kube-prometheus-stack-alertmanager-0
@@ -134,7 +135,9 @@ steps:
         content:
           - items:
               - text: |
-                  On <button:0>lines 117 through 136</button>, this configuration samples 10 percent of services whose operation attribute is labeled <code>high-volume-op</code>. It only ever samples traces for services with that attribute set.
+                  On <button:0>lines 117 through 136</button>, this configuration samples 10 percent of services whose operation attribute is labeled <code>high-volume-op</code>
+              - text: |
+                   It only ever samples traces for services with that attribute set.
                 actions:
                   - kind: scroll_to
                     simulator: config
@@ -156,9 +159,11 @@ steps:
         content:
           - items:
               - text: |
-                  We now apply this ruleset with <code>mdai use_case tail_sampling --version 0.9.0 --workflow static</code>. As the configuration lands, the gateway collector is reconfigured to ingest the new probabilistic sampling policy.
+                  We now apply this ruleset with <code>mdai use_case tail_sampling --version 0.9.0 --workflow static</code>
               - text: |
-                  This is an improvement over exporting everything, but static sampling still can’t adapt to the changing traffic profile of a real production environment.
+                  As the configuration lands, the gateway collector is reconfigured to ingest the new probabilistic sampling policy.
+              - text: |
+                  This is an improvement over exporting everything, but static sampling still can't adapt volatile traffic profiles of a real production environment.
         animation:
           - kind: enter_command
             simulator: terminal
@@ -189,18 +194,18 @@ steps:
           - title: Look at those traces go
             items:
               - text: |
-                  This is an improvement over exporting everything, but static sampling still can’t adapt to the changing traffic profile of a real production environment.
+                  This is an improvement over exporting everything, but static sampling still can't adapt volatile traffic profiles of a real production environment.
                 src: static-traces.mp4
                 alt: Traces Visualization
   - id: "2"
-    title: "Step 3: Shift to Intelligent Dynamic Sampling"
+    title: "Step 3: Start Dynamic Sampling"
     subSteps:
       - id: 2-a
         title: Define SmartHub thresholds
         content:
           - items:
               - text: |
-                  On <button:0>lines 19 through 25</button>, a variable is declared to track the loudest services. On <button:1>lines 45 through 49</button>, an alert identifies which services have crossed the configured threshold.
+                  On <button:0>lines 19 through 25</button>, a variable is declared to monitor the high-volume services. On <button:1>lines 45 through 49</button>, an alert identifies which services have crossed the configured threshold.
                 actions:
                   - kind: scroll_to
                     simulator: config
@@ -316,7 +321,7 @@ steps:
         content:
           - items:
               - text: |
-                  Using the mdai CLI, the changes just reviewed are applied to the current cluster. The result is intelligent trace sampling that protects the backend from noise while preserving more valuable traces.
+                  Executing the <emphasize>mdai CLI</emphasize> applies these configurations to your cluster instantly. The result is an intelligent tail-sampling architecture that shields your backend from telemetry noise while ensuring every high-value trace is captured and preserved.
         animation:
           - kind: enter_command
             simulator: terminal
@@ -361,3 +366,14 @@ steps:
                   You are now running intelligent trace sampling. The SmartHub can react to live traffic patterns, reduce noisy trace volume, and keep more of the spans that matter.
                 src: dynamic-traces.mp4
                 alt: Traces Visualization
+
+  - id: "3"
+    title: "What's next?"
+    subSteps:
+      - id: 3-a
+        title: Total Visibility. Zero Noise. Better Outcomes
+        content:
+          - items:
+              - text: |
+                  Deploy <bold>Intelligent Trace Sampling</bold> to transform how you capture distributed narratives. By moving sampling decisions to the edge of your infrastructure, you ensure every high-value span is preserved while shielding your backend from the costs of redundant data. Give your SRE and FinOps teams the precision they need to troubleshoot faster without the 'observability tax.'
+

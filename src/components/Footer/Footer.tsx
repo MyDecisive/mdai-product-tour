@@ -13,6 +13,8 @@ const linkStyles = {
   cursor: "pointer",
 };
 
+const copyrightYear = new Date().getFullYear();
+
 export const Footer = () => {
   const { setContactModalOpen } = useDemoContext();
 
@@ -157,9 +159,9 @@ export const Footer = () => {
             </Link>
           </Stack>
           <Typography
-            sx={{ fontSize: "12px", position: "absolute", bottom: "-1em" }}
+            sx={{ fontSize: "12px", position: "absolute", bottom: "-1em", px: "1em" }}
           >
-            &copy; 2025 DecisiveAI, Inc.
+            &copy; {copyrightYear} DecisiveAI, Inc.
           </Typography>
         </Stack>
       </Stack>

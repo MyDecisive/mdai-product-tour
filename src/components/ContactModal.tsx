@@ -13,7 +13,7 @@ import {
 import React, { useCallback, useMemo } from "react";
 import { useDemoContext } from "../hooks/useDemoContext";
 import { contactAPIEndpoint, contactUrl, emailRegex } from "../utils/constants";
-import formContent from "../utils/contactForm.yml";
+import formContent from "../utils/callForm.yml";
 import { Transition } from "./Transition";
 
 interface ContactFormContent {

@@ -93,7 +93,7 @@ export const Footer = () => {
           mb="4px"
         >
           <Link sx={linkStyles} onClick={openContactModal}>
-            Need Help?
+            Schedule a Demo
           </Link>
           <Link
             href="https://docs.mydecisive.ai/"
